@@ -122,6 +122,15 @@ func (c *crypto) Encrypt(spec *modelV1.SecretSpec) error {
 		oauth.ClientSecret = encryptedClientSecret
 	}
 
+	sigv4 := spec.SigV4
+	if sigv4 != nil {
+		encryptedSecretKey, err := c.encrypt(sigv4.SecretKey)
+		if err != nil {
+			return err
+		}
+		sigv4.SecretKey = encryptedSecretKey
+	}
+
 	tlsConfig := spec.TLSConfig
 	if tlsConfig != nil {
 		encryptedKey, err := c.encrypt(tlsConfig.Key)
@@ -167,6 +176,15 @@ func (c *crypto) Decrypt(spec *modelV1.SecretSpec) (bool, error) {
 			return false, err
 		}
 		spec.OAuth.ClientSecret = decrypted
+		needsReEncryption = needsReEncryption || legacy
+	}
+
+	if spec.SigV4 != nil {
+		decrypted, legacy, err := c.decrypt(spec.SigV4.SecretKey)
+		if err != nil {
+			return false, err
+		}
+		spec.SigV4.SecretKey = decrypted
 		needsReEncryption = needsReEncryption || legacy
 	}
 

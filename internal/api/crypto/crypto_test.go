@@ -130,7 +130,15 @@ func TestEncryptDecryptSpec(t *testing.T) {
 			originalClientID := spec.OAuth.ClientID
 			originalClientSecret := spec.OAuth.ClientSecret
 
-			err := c.Encrypt(spec)
+			sigv4Spec := &modelV1.SecretSpec{SigV4: &secret.SigV4{Region: "us-east-1", ServiceName: "monitoring", AccessKey: "AKID", SecretKey: "aws-secret"}}
+			require.NoError(t, c.Encrypt(sigv4Spec))
+			assert.NotEqual(t, "aws-secret", sigv4Spec.SigV4.SecretKey)
+			assert.Equal(t, "AKID", sigv4Spec.SigV4.AccessKey)
+			_, err := c.Decrypt(sigv4Spec)
+			require.NoError(t, err)
+			assert.Equal(t, "aws-secret", sigv4Spec.SigV4.SecretKey)
+
+			err = c.Encrypt(spec)
 			require.NoError(t, err)
 			assert.NotEqual(t, originalPassword, spec.BasicAuth.Password)
 			assert.NotEqual(t, originalCredentials, spec.Authorization.Credentials)
