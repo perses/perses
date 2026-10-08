@@ -50,6 +50,21 @@ func cacheDir() (string, error) {
 	return filepath.Join(dir, "cue"), nil
 }
 
+// missingDependencies returns the dependencies that are not present in the given CUE cache directory.
+func missingDependencies(cueCacheDir string, deps []cueDep) ([]cueDep, error) {
+	var missing []cueDep
+	for _, dep := range deps {
+		exist, err := file.Exists(filepath.Join(cueCacheDir, dep.modulePathInCueCaching))
+		if err != nil {
+			return nil, fmt.Errorf("failed to check if %s exists: %w", dep.modulePathInCueCaching, err)
+		}
+		if !exist {
+			missing = append(missing, dep)
+		}
+	}
+	return missing, nil
+}
+
 type cueDep struct {
 	// moduleName is the name of the module (e.g github.com/perses/perses/cue@v0)
 	moduleName               string
@@ -94,13 +109,13 @@ type cueVendor struct {
 // custom code.
 //
 // More precisely, the steps are:
-// - Parse the module.cue file containing the dependencies
-// - if no `deps` are present, skip vendoring
-// - if there is already a vendor directory, skip vendoring
-// - Loop over the dependencies and for each:
-//   - Look if the dependency is already present in the CUE cache
-//   - If not, download the dependency
-//   - Copy the dependency from the CUE cache to the vendor directory. During this process, we remove the version in the name of the last directory generated from the module path (= rename `cue@vX.Y.Z` to `cue`)
+//   - Parse the module.cue file containing the dependencies
+//   - if no `deps` are present, skip vendoring
+//   - if there is already a vendor directory, skip vendoring
+//   - Look if every dependency is already present in the CUE cache. If at least one is missing, download them all (via `cue mod tidy`).
+//     This MUST happen before anything is written in the vendor directory: otherwise `cue mod tidy` would find the
+//     already vendored packages both locally and in the registry, and fail with an "ambiguous import" error.
+//   - Loop over the dependencies and copy each of them from the CUE cache to the vendor directory. During this process, we remove the version in the name of the last directory generated from the module path (= rename `cue@vX.Y.Z` to `cue`)
 //
 // - Once all dependencies have been copied, we are modifying the module file to remove the `deps` section, so that schema evaluation will resolve dependencies from the local vendor dir instead of from an OCI registry.
 func (c *cueVendor) vendorCueDependencies() (func(), error) {
@@ -131,24 +146,33 @@ func (c *cueVendor) vendorCueDependencies() (func(), error) {
 		}
 	}
 
+	// First, make sure every dependency is available in the CUE cache, before writing anything in the vendor directory.
+	missing, err := missingDependencies(cueCacheDir, deps)
+	if err != nil {
+		return nil, err
+	}
+	if len(missing) > 0 {
+		if downloadErr := c.downloadCueDeps(); downloadErr != nil {
+			return nil, downloadErr
+		}
+		// Double-check that the download actually provided the missing dependencies.
+		if missing, err = missingDependencies(cueCacheDir, missing); err != nil {
+			return nil, err
+		}
+		if len(missing) > 0 {
+			return nil, fmt.Errorf("dependency %q not found in the CUE cache %s after download", missing[0].moduleName, cueCacheDir)
+		}
+	}
+
+	// At this point, all dependencies are in the CUE cache. So we can copy the content of the CUE cache to the vendor directory.
 	for _, dep := range deps {
-		depExist, depErr := file.Exists(filepath.Join(cueCacheDir, dep.modulePathInCueCaching))
-		if depErr != nil {
-			return cleanUpFunc, fmt.Errorf("failed to check if %s exists: %w", dep.modulePathInCueCaching, depErr)
-		}
-		if !depExist {
-			if downloadErr := c.downloadCueDeps(); downloadErr != nil {
-				return cleanUpFunc, downloadErr
-			}
-		}
-		// At this point, all dependencies have been downloaded. So we can copy the content of the CUE cache to the vendor directory.
 		// First, we need to create the dependency folder in the vendor directory.
 		if mkdirErr := os.MkdirAll(filepath.Join(c.vendorDirPath, dep.modulePathWithoutVersion), 0750); mkdirErr != nil {
 			return cleanUpFunc, fmt.Errorf("failed to create directory %s: %w", dep.modulePathWithoutVersion, mkdirErr)
 		}
 		// Then, we copy the content of the CUE cache to the target directory created above.
 		if copyErr := file.CopyDir(filepath.Join(cueCacheDir, dep.modulePathInCueCaching), filepath.Join(c.vendorDirPath, dep.modulePathWithoutVersion)); copyErr != nil {
-			return cleanUpFunc, fmt.Errorf("failed to copy the dependency %q", dep.modulePathWithoutVersion)
+			return cleanUpFunc, fmt.Errorf("failed to copy the dependency %q: %w", dep.modulePathWithoutVersion, copyErr)
 		}
 	}
 	// At this point, all dependencies have been copied. We can now remove the `deps` section from the module file.
