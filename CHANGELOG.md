@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.55.0-rc.0 / 2026-10-08
+
+### Core & UI
+
+- [FEATURE] Add annotation support to Go SDK (#4448)
+- [ENHANCEMENT] Add NewSelector convenience constructor to go-sdk/datasource (#4557)
+- [ENHANCEMENT] Grafana migration: keep the default time range, refresh interval and timezone (#4555)
+- [ENHANCEMENT] Allow duplicating a dashboard into another project (#4536)
+- [ENHANCEMENT] Native authorization: build the permission cache in linear time and deduplicate role binding subjects (#4540)
+- [ENHANCEMENT] Support grouped important dashboards (#4506)
+- [ENHANCEMENT] Cache content-hashed fonts and images as immutable static assets (#4533)
+- [ENHANCEMENT] SQL proxy: reject INTO OUTFILE/DUMPFILE, document PostgreSQL file-reading functions (#4535)
+- [ENHANCEMENT] Skip the extraction of plugin archives already extracted (#4534)
+- [BUGFIX] Harden the headers of the datasource proxy responses (#4558)
+- [BUGFIX] Emit datasource variable references as plain JSON/YAML strings (#4545)
+- [BUGFIX] OAuth passthrough: use the refreshed token in the current proxy request (#4554)
+- [BUGFIX] Proxy: do not forward the caller credentials to the datasource (#4553)
+- [BUGFIX] Native authorization: fix deadlock between permissions retrieval and cache refresh (#4537)
+- [BUGFIX] Include dashboard tags in project view search (#4446)
+- [BREAKINGCHANGE] Validate datasource proxy targets to prevent SSRF (#4518)
+- [BREAKINGCHANGE] Config: when auth is enabled, encryption_key must be provided (#4550)
+- [DOC] Split upgrade guide per version (#4566)
+- [DOC] Complete the upgrade guide for v0.55.0 (#4561)
+
+### Plugins improvements
+
+- [FEATURE] TimeSeriesChart: Add color palette selection (perse/plugins#845)
+- [ENHANCEMENT] Allow plugins to use fetch provided by a fetch provider (perse/plugins#854)
+- [ENHANCEMENT] Prometheus: explain why $__rate_interval cannot be used as Min Step (perse/plugins#861)
+- [ENHANCEMENT] Upgrade Oxlint and fix React Compiler errors (perse/plugins#826)
+- [BUGFIX] Update plugin Selector functions for new datasource.Selector union type (perse/plugins#857)
+- [BUGFIX] Keep annotation markers visible when y-axis excludes zero (perse/plugins#855)
+- [BUGFIX] pyroscope: include time range in lookup query keys (perse/plugins#849)
+- [BUGFIX] AlertTable: only link runbook annotations that are http(s) URLs (perse/plugins#829)
+- [BUGFIX] StatChart: size auto tiles from the panel height (perse/plugins#850)
+- [BUGFIX] pyroscope: scope label lookups to the selected service (perse/plugins#835)
+- [BUGFIX] Prometheus: ignore empty series selectors in label variables (perse/plugins#862)
+
 ## 0.55.0-beta.4 / 2026-09-30
 
 ### Core & UI
