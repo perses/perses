@@ -17,6 +17,9 @@ import "github.com/perses/perses/cue/model/api/v1/secret"
 
 	// TLSConfig to use to connect to the targets.
 	tlsConfig?: null | secret.#PublicTLSConfig @go(TLSConfig,*secret.PublicTLSConfig)
+
+	// SigV4 signs the requests with the AWS Signature Version 4, to query an AWS service.
+	sigv4?: null | secret.#PublicSigV4 @go(SigV4,*secret.PublicSigV4)
 }
 
 #PublicGlobalSecret: {

@@ -75,6 +75,9 @@ type transportEntry struct {
 	failedSince time.Time
 	// retryAt is the earliest time a new rebuild is attempted after a failure.
 	retryAt time.Time
+	// signer is the SigV4 round tripper wrapping the transport, when the secret of the datasource defines one.
+	// It is dropped with the transport, so it is rebuilt (and the credentials retrieved again) when the transport is rebuilt.
+	signer *signer
 }
 
 // TransportCache keeps one *http.Transport per saved datasource, so connections (TCP + TLS) to the datasource
@@ -252,4 +255,29 @@ func (c *TransportCache) sweepLocked(now time.Time) {
 			delete(c.entries, key)
 		}
 	}
+}
+
+// getSigner returns the SigV4 round tripper cached for the given key, if it has been built from the same config and wraps
+// the given transport (the current transport of the datasource, see get). Otherwise, it builds a new one with the given
+// function and caches it with the transport.
+func (c *TransportCache) getSigner(key string, configHash [sha256.Size]byte, base *http.Transport, build func() (http.RoundTripper, error)) (http.RoundTripper, error) {
+	c.mutex.Lock()
+	if e, ok := c.entries[key]; ok && e.signer != nil && e.signer.configHash == configHash && e.signer.base == base {
+		c.mutex.Unlock()
+		return e.signer.roundTripper, nil
+	}
+	c.mutex.Unlock()
+	// Build outside the lock: retrieving the AWS credentials (and assuming the role) requires network calls,
+	// and it must not block the requests targeting the other datasources.
+	roundTripper, err := build()
+	if err != nil {
+		return nil, err
+	}
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	// The signer is only cached if the transport it wraps is still the cached one.
+	if e, ok := c.entries[key]; ok && e.transport == base {
+		e.signer = &signer{configHash: configHash, base: base, roundTripper: roundTripper}
+	}
+	return roundTripper, nil
 }
