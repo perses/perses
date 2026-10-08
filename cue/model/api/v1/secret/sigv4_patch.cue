@@ -23,7 +23,7 @@ package secret
 
 #SigV4: {
 	// Region is the AWS region of the service, for example us-east-1.
-	region: string & !="" @go(Region)
+	region: string & =~"^[a-z]{2}(-[a-z]+)+-[0-9]{1,2}$" @go(Region)
 
 	// AccessKey is the AWS access key ID. It must be set together with SecretKey or SecretKeyFile.
 	accessKey?: string @go(AccessKey)

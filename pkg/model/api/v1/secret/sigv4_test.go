@@ -47,6 +47,7 @@ func TestUnmarshalSigV4(t *testing.T) {
 			result: SigV4{Region: "us-east-1", ServiceName: "aps", AccessKey: "AKID", SecretKeyFile: "/etc/perses/aws"}, //nolint:gosec // test credentials
 		},
 		{title: "missing region", jason: `{"serviceName": "monitoring"}`, expectErr: "region cannot be empty"},
+		{title: "invalid region", jason: `{"region": "evil.example.com/", "serviceName": "monitoring"}`, expectErr: "not a valid AWS region"},
 		{title: "missing service", jason: `{"region": "us-east-1"}`, expectErr: "serviceName cannot be empty"},
 		{title: "access key without secret key", jason: `{"region": "us-east-1", "serviceName": "monitoring", "accessKey": "AKID"}`, expectErr: "configured together"},
 		{title: "secret key without access key", jason: `{"region": "us-east-1", "serviceName": "monitoring", "secretKey": "secret"}`, expectErr: "configured together"},

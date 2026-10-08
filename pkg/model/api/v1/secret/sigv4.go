@@ -17,7 +17,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"regexp"
 )
+
+// sigV4RegionRegexp matches the AWS regions, for example us-east-1 or us-gov-west-1.
+// The region determines the AWS endpoints (like STS) the server reaches to get the credentials, so it must not be
+// able to change their host.
+var sigV4RegionRegexp = regexp.MustCompile(`^[a-z]{2}(-[a-z]+)+-[0-9]{1,2}$`)
 
 type PublicSigV4 struct {
 	Region        string `json:"region" yaml:"region"`
@@ -111,6 +117,9 @@ func (s *SigV4) GetSecretKey() (string, error) {
 func (s *SigV4) validate() error {
 	if len(s.Region) == 0 {
 		return fmt.Errorf("when using sigv4, region cannot be empty")
+	}
+	if !sigV4RegionRegexp.MatchString(s.Region) {
+		return fmt.Errorf("sigv4 region %q is not a valid AWS region", s.Region)
 	}
 	if len(s.ServiceName) == 0 {
 		return fmt.Errorf("when using sigv4, serviceName cannot be empty")
