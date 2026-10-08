@@ -88,7 +88,9 @@ test.describe('Keyboard Shortcuts', () => {
     await expect(page.getByRole('heading', { name: /Edit Panel/i })).toBeVisible({ timeout: 5000 });
 
     await page.keyboard.press('v');
-    await page.waitForURL((url) => !url.toString().includes('viewPanelRef='), { timeout: 5000 });
+    await page.waitForURL((url) => !url.toString().includes('viewPanelRef='), {
+      timeout: 5000,
+    });
   });
 
   test('e closes panel editor when it is open', async ({ dashboardPage, page }) => {
@@ -112,7 +114,7 @@ test.describe('Keyboard Shortcuts', () => {
     // Look for the search input or dialog
     const searchInput = page
       .getByRole('combobox', { name: /search/i })
-      .or(page.getByPlaceholder(/What are you looking for\?/i));
+      .or(page.getByPlaceholder(/Search dashboards, projects, datasources\.\.\./i));
     await expect(searchInput).toBeVisible({ timeout: 5000 });
   });
 

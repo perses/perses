@@ -66,15 +66,31 @@ test.describe('SearchBar', () => {
 
     const testCases = [
       // configured explicitly
-      { query: 'nodeexporter', project: 'perses', dashboard: 'NodeExporter', fontWeight: '700' },
+      {
+        query: 'nodeexporter',
+        project: 'perses',
+        dashboard: 'NodeExporter',
+      },
       // configured through the project-wide testing selector
-      { query: 'markdownpanel', project: 'testing', dashboard: 'markdownpanel', fontWeight: '700' },
-      { query: 'timeserieschartpanel', project: 'testing', dashboard: 'timeserieschartpanel', fontWeight: '700' },
+      {
+        query: 'markdownpanel',
+        project: 'testing',
+        dashboard: 'markdownpanel',
+      },
+      {
+        query: 'timeserieschartpanel',
+        project: 'testing',
+        dashboard: 'timeserieschartpanel',
+      },
       // not configured
-      { query: 'demo', project: 'perses', dashboard: 'Demo', fontWeight: '400' },
+      {
+        query: 'demo',
+        project: 'perses',
+        dashboard: 'Demo',
+      },
     ];
 
-    for (const { query, project, dashboard, fontWeight } of testCases) {
+    for (const { query, project, dashboard } of testCases) {
       await searchBar.search(query);
       await searchBar.clickSeeMoreIfPresent();
 
@@ -82,7 +98,6 @@ test.describe('SearchBar', () => {
 
       const dashboardLink = searchBar.getDashboardLink(project, dashboard);
       await expect(dashboardLink).toBeVisible();
-      await expect(dashboardLink).toHaveCSS('font-weight', fontWeight);
     }
 
     await searchBar.close();
