@@ -66,19 +66,19 @@ vi.mock('../../utils/browser-size', () => ({
 
 const lastProjectName = (): string | undefined => viewExplore.mock.lastCall?.[0]?.projectName;
 
-describe('ExploreView datasource scope', () => {
+describe('ExploreView project param', () => {
   it.each([
     [undefined, undefined],
     [null, undefined],
     ['project-a', 'project-a'],
-  ])('scopes the datasource store to project param %s', (param, expected) => {
+  ])('forwards the project query param %s to ViewExplore', (param, expected) => {
     mockProjectParam = param;
     viewExplore.mockClear();
     render(<ExploreView />);
     expect(lastProjectName()).toBe(expected);
   });
 
-  it('follows project changes, including returning to global scope', () => {
+  it('forwards project changes to ViewExplore, including returning to global scope', () => {
     mockProjectParam = undefined;
     const createView = (): ReactElement => <ExploreView />;
     const { rerender } = render(createView());

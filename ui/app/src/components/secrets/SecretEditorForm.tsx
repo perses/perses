@@ -178,7 +178,7 @@ export function SecretEditorForm({
           action={action}
           submitText={submitText}
           isReadonly={isReadonly}
-          isValid={form.formState.isValid}
+          isValid={isValid}
           onActionChange={onActionChange}
           onSubmit={form.handleSubmit(processForm)}
           onDelete={onDelete}
