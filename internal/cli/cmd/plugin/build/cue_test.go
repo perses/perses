@@ -47,9 +47,13 @@ func fakeCacheDep(t *testing.T, cueCacheDir string, modulePathInCueCaching strin
 }
 
 // setupPlugin creates a fake plugin with a module file declaring two dependencies, and returns the associated cueVendor.
+// Like `percli plugin build --plugin.path <relative path>`, the plugin paths are relative to the working directory.
+// The temporary directory can be on another volume than the repository on Windows (e.g. C: vs D: on GitHub runners),
+// and CUE cannot load a module file located on another volume than the working directory.
 func setupPlugin(t *testing.T) *cueVendor {
 	t.Helper()
-	pluginPath := t.TempDir()
+	t.Chdir(t.TempDir())
+	pluginPath := "."
 	require.NoError(t, os.MkdirAll(filepath.Join(pluginPath, "cue.mod"), 0750))
 	moduleFilePath := filepath.Join(pluginPath, "cue.mod", moduleFile)
 	require.NoError(t, os.WriteFile(moduleFilePath, []byte(testModuleFile), 0600))
@@ -168,8 +172,21 @@ func TestGetDependency(t *testing.T) {
 			c := &cueVendor{
 				moduleFilePath: test.modulePath,
 			}
-			deps, _ := c.getDependency()
+			deps, _, err := c.getDependency()
+			require.NoError(t, err)
 			assert.Equal(t, test.expected, deps)
 		})
 	}
+}
+
+func TestGetDependencyInvalidModule(t *testing.T) {
+	t.Chdir(t.TempDir())
+	require.NoError(t, os.MkdirAll("cue.mod", 0750))
+	moduleFilePath := filepath.Join("cue.mod", moduleFile)
+	require.NoError(t, os.WriteFile(moduleFilePath, []byte(`module: "github.com/perses/test@v0"`+"\ndeps: {\n"), 0600))
+	c := &cueVendor{moduleFilePath: moduleFilePath}
+
+	deps, _, err := c.getDependency()
+	assert.Error(t, err)
+	assert.Empty(t, deps)
 }

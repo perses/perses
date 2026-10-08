@@ -129,7 +129,10 @@ func (c *cueVendor) vendorCueDependencies() (func(), error) {
 		// we are considering that the current vendor directory already contains all required deps.
 		return nil, nil
 	}
-	deps, moduleInstance := c.getDependency()
+	deps, moduleInstance, err := c.getDependency()
+	if err != nil {
+		return nil, err
+	}
 	if len(deps) == 0 {
 		// There is no dependency to vendor, we can skip this step
 		return nil, nil
@@ -197,18 +200,33 @@ func (c *cueVendor) downloadCueDeps() error {
 	return nil
 }
 
-func (c *cueVendor) getDependency() ([]cueDep, *build.Instance) {
+// getDependency returns the dependencies declared in the module file.
+// An error is returned if the module file cannot be loaded or evaluated: silently ignoring it would skip the vendoring.
+func (c *cueVendor) getDependency() ([]cueDep, *build.Instance, error) {
 	ctx := cuecontext.New()
-	instance := load.Instances([]string{c.moduleFilePath}, nil)
-	module := ctx.BuildInstance(instance[0])
+	instances := load.Instances([]string{c.moduleFilePath}, nil)
+	if len(instances) == 0 {
+		return nil, nil, fmt.Errorf("failed to load %s: no CUE instance found", c.moduleFilePath)
+	}
+	instance := instances[0]
+	if instance.Err != nil {
+		return nil, nil, fmt.Errorf("failed to load %s: %w", c.moduleFilePath, instance.Err)
+	}
+	module := ctx.BuildInstance(instance)
+	if module.Err() != nil {
+		return nil, nil, fmt.Errorf("failed to evaluate %s: %w", c.moduleFilePath, module.Err())
+	}
 	deps := module.LookupPath(cue.ParsePath("deps"))
+	if !deps.Exists() {
+		logrus.Debugf("`deps` not found, no CUE dependencies to vendor")
+		return nil, instance, nil
+	}
 	if deps.Err() != nil {
-		logrus.WithError(deps.Err()).Debugf("`deps` not found, no CUE dependencies to vendor")
-		return nil, nil
+		return nil, nil, fmt.Errorf("failed to evaluate `deps` in %s: %w", c.moduleFilePath, deps.Err())
 	}
 	if deps.Kind() != cue.StructKind {
 		logrus.Debugf("`deps` is not a CUE dependency")
-		return nil, nil
+		return nil, instance, nil
 	}
 	var depList []cueDep
 	it, _ := deps.Fields()
@@ -239,7 +257,7 @@ func (c *cueVendor) getDependency() ([]cueDep, *build.Instance) {
 		}
 		depList = append(depList, d)
 	}
-	return depList, instance[0]
+	return depList, instance, nil
 }
 
 // alterCueModule alters the module file to remove the `deps` section, so that schema evaluation will resolve
