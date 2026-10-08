@@ -7,7 +7,7 @@ replace github.com/perses/perses => ../../../../../../../ // Use current version
 require (
 	github.com/perses/perses v0.54.0
 	github.com/perses/plugins/timeserieschart v0.13.0
-	github.com/perses/spec v0.3.0-beta.10
+	github.com/perses/spec v0.3.0-rc.0
 )
 
 require (

@@ -193,8 +193,8 @@ function DashboardTreeList({
         align: 'left',
         enableSorting: true,
         width: 150,
-        cellDescription: ({ getValue }): string => formatAbsoluteTime(getValue()),
-        cell: ({ getValue }): string | null => formatRelativeTime(getValue()),
+        cellDescription: ({ getValue }): string => formatAbsoluteTime(getValue<Date | undefined>()),
+        cell: ({ getValue }): string | null => formatRelativeTime(getValue<Date | undefined>()),
       },
       {
         id: 'updatedAt',
@@ -203,8 +203,8 @@ function DashboardTreeList({
         align: 'left',
         enableSorting: true,
         width: 150,
-        cellDescription: ({ getValue }): string => formatAbsoluteTime(getValue()),
-        cell: ({ getValue }): string | null => formatRelativeTime(getValue()),
+        cellDescription: ({ getValue }): string => formatAbsoluteTime(getValue<Date | undefined>()),
+        cell: ({ getValue }): string | null => formatRelativeTime(getValue<Date | undefined>()),
       },
       {
         id: 'viewedAt',
@@ -213,9 +213,10 @@ function DashboardTreeList({
         align: 'left',
         enableSorting: true,
         width: 150,
-        cellDescription: ({ getValue }): string => formatAbsoluteTime(getValue()),
+        cellDescription: ({ getValue }): string => formatAbsoluteTime(getValue<Date | undefined>()),
         cell: ({ getValue, row }): ReactNode =>
-          formatRelativeTime(getValue()) ?? (row.original.kind === 'Dashboard' ? <span>—</span> : null),
+          formatRelativeTime(getValue<Date | undefined>()) ??
+          (row.original.kind === 'Dashboard' ? <span>—</span> : null),
       },
       {
         id: 'actions',
