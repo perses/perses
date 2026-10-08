@@ -28,7 +28,7 @@ function DelegatedAuthnErrorView(): ReactElement {
   const authnCheck = useCurrentUser();
   const navigate = useNavigate();
   const { isDarkModeEnabled } = useDarkMode();
-  const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const { successSnackbar } = useSnackbar();
   const redirectPath = useRedirectQueryParam();
 
   const isLaptopSize = useIsLaptopSize();
@@ -38,7 +38,7 @@ function DelegatedAuthnErrorView(): ReactElement {
       successSnackbar(`Successfully login`);
       navigate(redirectPath);
     }
-  }, [authnCheck?.data?.metadata?.name, successSnackbar, navigate, exceptionSnackbar, redirectPath]);
+  }, [authnCheck?.data?.metadata?.name, successSnackbar, navigate, redirectPath]);
 
   return (
     <Stack
