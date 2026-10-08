@@ -164,7 +164,7 @@ func newSQLDatasource(t *testing.T, projectName string, name string) *v1.Datasou
 func newGlobalHTTPDatasource(t *testing.T, name string) *v1.GlobalDatasource {
 	entity := &v1.GlobalDatasource{
 		Kind:     v1.KindGlobalDatasource,
-		Metadata: v1.Metadata{Name: name},
+		Metadata: v1.DatasourceMetadata{Metadata: v1.Metadata{Name: name}},
 		Spec:     newHTTPDatasourceSpec(t),
 	}
 	entity.Metadata.CreateNow()
@@ -174,7 +174,7 @@ func newGlobalHTTPDatasource(t *testing.T, name string) *v1.GlobalDatasource {
 func newGlobalSQLDatasource(t *testing.T, name string) *v1.GlobalDatasource {
 	entity := &v1.GlobalDatasource{
 		Kind:     v1.KindGlobalDatasource,
-		Metadata: v1.Metadata{Name: name},
+		Metadata: v1.DatasourceMetadata{Metadata: v1.Metadata{Name: name}},
 		Spec:     newSQLDatasourceSpec(t),
 	}
 	entity.Metadata.CreateNow()

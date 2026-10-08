@@ -20,12 +20,19 @@ import (
 	kubesd "github.com/perses/perses/internal/api/discovery/kubernetes"
 	"github.com/perses/perses/internal/api/discovery/service"
 	"github.com/perses/perses/pkg/model/api/config"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 func New(cfg config.Config, serviceManager dependency.ServiceManager, caseSensitive bool) ([]taskhelper.Helper, error) {
 	var helpers []taskhelper.Helper
-	svc := service.New(caseSensitive, serviceManager.GetGlobalDatasource())
 	for _, c := range cfg.Datasource.Global.Discovery {
+		var discoveryType v1.DiscoveryType
+		if c.HTTPDiscovery != nil {
+			discoveryType = v1.HTTPType
+		} else if c.KubernetesDiscovery != nil {
+			discoveryType = v1.KubernetesType
+		}
+		svc := service.New(caseSensitive, serviceManager.GetGlobalDatasource(), c.Name, discoveryType)
 		var helper taskhelper.Helper
 		var err error
 		if c.HTTPDiscovery != nil {

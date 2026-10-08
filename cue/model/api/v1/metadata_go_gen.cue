@@ -4,6 +4,27 @@
 
 package v1
 
+#MetadataSource: string // #enumMetadataSource
+
+#enumMetadataSource:
+	#ManualSource |
+	#ProvisioningSource |
+	#DiscoverySource
+
+#DiscoveryType: string // #enumDiscoveryType
+
+#enumDiscoveryType:
+	#KubernetesType |
+	#HTTPType
+
+#ManualSource:       #MetadataSource & "manual"
+#ProvisioningSource: #MetadataSource & "provisioning"
+#DiscoverySource:    #MetadataSource & "discovery"
+#KubernetesType:     #DiscoveryType & "kubernetes"
+#HTTPType:           #DiscoveryType & "http"
+
+#DatasourceMetadata: _
+
 #Metadata: _
 
 // PublicMetadata is a copy of classic metadata but that doesn't make any validation.
