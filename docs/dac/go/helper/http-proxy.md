@@ -27,6 +27,18 @@ http.URL("http://mysuperurl.com")
 
 Define the url of the http proxy.
 
+### Timeout
+
+```golang
+import "github.com/perses/perses/go-sdk/http"
+
+http.Timeout("10s")
+```
+
+Define the maximum amount of time allowed to establish a connection to the datasource. It must be greater than zero.
+When not set, the default timeout of the Perses server is used.
+Note that the Perses server rejects a timeout greater than the maximum it allows (`datasource.proxy.http.max_timeout`).
+
 ### AllowedEndpoints
 
 ```golang

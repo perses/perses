@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Stack } from '@mui/material';
-import {
+import type {
   DatasourceResource,
   RoleBindingResource,
   RoleResource,
@@ -20,23 +20,26 @@ import {
   VariableResource,
 } from '@perses-dev/client';
 import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { DashboardSelector } from '@perses-dev/spec';
+import type { DashboardSelector } from '@perses-dev/spec';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
 import KeyIcon from 'mdi-material-ui/Key';
 import ShieldIcon from 'mdi-material-ui/Shield';
 import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
-import { ReactElement, SyntheticEvent, useCallback, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { CRUDButton, CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
+import type { CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
+import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
-import { CreateDashboardDialog, CreateFolderDialog } from '../../components/dialogs';
+import { CreateDashboardDialog } from '../../components/dialogs/CreateDashboardDialog';
+import { CreateFolderDialog } from '../../components/dialogs/CreateFolderDialog';
 import { RoleBindingDrawer } from '../../components/rolebindings/RoleBindingDrawer';
 import { RoleDrawer } from '../../components/roles/RoleDrawer';
 import { SecretDrawer } from '../../components/secrets/SecretDrawer';
-import { MenuTab, MenuTabs, TabLabel, TabPanel } from '../../components/tabs';
+import { MenuLinkTab, MenuTabs, TabLabel, TabPanel } from '../../components/tabs';
 import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { useHasPermission } from '../../context/Authorization';
 import {
@@ -46,11 +49,11 @@ import {
   useIsProjectVariableEnabled,
   useIsReadonly,
 } from '../../context/Config';
-import { useDashboardList } from '../../model/dashboard-client';
 import { useCreateDatasourceMutation, useDatasourceList } from '../../model/datasource-client';
 import { useEphemeralDashboardList } from '../../model/ephemeral-dashboard-client';
 import { useCreateRoleMutation, useRoleList } from '../../model/role-client';
 import { useCreateRoleBindingMutation, useRoleBindingList } from '../../model/rolebinding-client';
+import { useSearchDashboards } from '../../model/search-client';
 import { useCreateSecretMutation, useSecretList } from '../../model/secret-client';
 import { useCreateVariableMutation, useVariableList } from '../../model/variable-client';
 import { useIsMobileSize } from '../../utils/browser-size';
@@ -421,21 +424,20 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
   const isProjectDatasourceEnabled = useIsProjectDatasourceEnabled();
   const isProjectVariableEnabled = useIsProjectVariableEnabled();
 
-  const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
   const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
   const { data } = useEphemeralDashboardList(projectName);
   const hasEphemeralDashboards = (data ?? []).length > 0;
 
+  const value = (tab ?? initialTab ?? dashboardsTabIndex).toLowerCase();
+
   // Fetch counts for tab badges
-  const { data: dashboards } = useDashboardList({ project: projectName, metadataOnly: true });
+  const { data: dashboards } = useSearchDashboards(projectName);
   const { data: variables } = useVariableList(projectName);
   const { data: datasources } = useDatasourceList({ project: projectName });
   const { data: secrets } = useSecretList(projectName);
   const { data: roles } = useRoleList(projectName);
   const { data: roleBindings } = useRoleBindingList(projectName);
-
-  const [value, setValue] = useState((initialTab ?? dashboardsTabIndex).toLowerCase());
 
   const hasDashboardReadPermission = useHasPermission('read', projectName, 'Dashboard');
   const hasDatasourceReadPermission = useHasPermission('read', projectName, 'Datasource');
@@ -444,11 +446,6 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
   const hasRoleBindingReadPermission = useHasPermission('read', projectName, 'RoleBinding');
   const hasSecretReadPermission = useHasPermission('read', projectName, 'Secret');
   const hasVariableReadPermission = useHasPermission('read', projectName, 'Variable');
-
-  const handleChange = (event: SyntheticEvent, newTabIndex: string): void => {
-    setValue(newTabIndex);
-    navigate(`/projects/${projectName}/${newTabIndex}`);
-  };
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -467,75 +464,81 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
       >
         <MenuTabs
           value={value}
-          onChange={handleChange}
           variant="scrollable"
           scrollButtons="auto"
           allowScrollButtonsMobile
           aria-label="Project tabs"
         >
-          <MenuTab
+          <MenuLinkTab
             label={<TabLabel label="Dashboards" count={dashboards?.length} />}
             icon={<ViewDashboardIcon />}
             iconPosition="start"
             {...a11yProps(dashboardsTabIndex)}
             value={dashboardsTabIndex}
+            to={`/projects/${projectName}/${dashboardsTabIndex}`}
             disabled={!hasDashboardReadPermission}
           />
           {(hasEphemeralDashboards || tab === ephemeralDashboardsTabIndex) && (
-            <MenuTab
+            <MenuLinkTab
               label="Ephemeral Dashboards"
               icon={<ViewDashboardIcon />}
               iconPosition="start"
               {...a11yProps(ephemeralDashboardsTabIndex)}
               value={ephemeralDashboardsTabIndex}
+              to={`/projects/${projectName}/${ephemeralDashboardsTabIndex}`}
               disabled={!hasEphemeralDashboardReadPermission}
             />
           )}
           {isProjectVariableEnabled && (
-            <MenuTab
+            <MenuLinkTab
               label={<TabLabel label="Variables" count={variables?.length} />}
               icon={<CodeJsonIcon />}
               iconPosition="start"
               {...a11yProps(variablesTabIndex)}
               value={variablesTabIndex}
+              to={`/projects/${projectName}/${variablesTabIndex}`}
               disabled={!hasVariableReadPermission}
             />
           )}
           {isProjectDatasourceEnabled && (
-            <MenuTab
+            <MenuLinkTab
               label={<TabLabel label="Datasources" count={datasources?.length} />}
               icon={<DatabaseIcon />}
               iconPosition="start"
               {...a11yProps(datasourcesTabIndex)}
               value={datasourcesTabIndex}
+              to={`/projects/${projectName}/${datasourcesTabIndex}`}
               disabled={!hasDatasourceReadPermission}
             />
           )}
-          <MenuTab
+          <MenuLinkTab
             label={<TabLabel label="Secrets" count={secrets?.length} />}
             icon={<KeyIcon />}
             iconPosition="start"
             {...a11yProps(secretsTabIndex)}
             value={secretsTabIndex}
+            to={`/projects/${projectName}/${secretsTabIndex}`}
             disabled={!hasSecretReadPermission}
           />
           {isAuthEnabled && (
-            <MenuTab
+            <MenuLinkTab
               label={<TabLabel label="Roles" count={roles?.length} />}
               icon={<ShieldIcon />}
               iconPosition="start"
               {...a11yProps(rolesTabIndex)}
               value={rolesTabIndex}
+              to={`/projects/${projectName}/${rolesTabIndex}`}
               disabled={!hasRoleReadPermission}
             />
           )}
           {isAuthEnabled && (
-            <MenuTab
+            <MenuLinkTab
               label={<TabLabel label="Role Bindings" count={roleBindings?.length} />}
               icon={<ShieldAccountIcon />}
               iconPosition="start"
               {...a11yProps(roleBindingsTabIndex)}
               value={roleBindingsTabIndex}
+              to={`/projects/${projectName}/${roleBindingsTabIndex}`}
               disabled={!hasRoleBindingReadPermission}
             />
           )}

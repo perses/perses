@@ -46,6 +46,8 @@ type oidcUserInfo struct {
 	Subject string `json:"sub,omitempty"`
 	// issuer is not supposed to be taken from json, but instead it must be set right before the db sync.
 	issuer string
+	// loginProperty is not supposed to be taken from json, but instead it must be set right before the db sync.
+	loginProperty config.LoginProperty
 }
 
 // GetSubject implements [rp.SubjectGetter]
@@ -53,10 +55,36 @@ func (u *oidcUserInfo) GetSubject() string {
 	return u.Subject
 }
 
+// getProfileProperty returns the value of the given userinfo property already extracted into
+// externalUserInfoProfile. If the property is unknown or empty, it falls back to the first part
+// of the email.
+func (u *oidcUserInfo) getProfileProperty(name config.LoginProperty) string {
+	switch name {
+	case config.LoginPropertyName:
+		return u.Name
+	case config.LoginPropertyGivenName:
+		return u.GivenName
+	case config.LoginPropertyFamilyName:
+		return u.FamilyName
+	case config.LoginPropertyMiddleName:
+		return u.MiddleName
+	case config.LoginPropertyNickname:
+		return u.Nickname
+	case config.LoginPropertyPreferredUsername:
+		return u.PreferredUsername
+	case config.LoginPropertyEmail:
+		return buildLoginFromEmail(u.Email)
+	default:
+		return buildLoginFromEmail(u.Email)
+	}
+}
+
 // GetLogin implements [externalUserInfo]
-// It uses the first part of the email to create the username.
+// If no custom login property is configured, or it is set to "email", the first part of the email
+// is used. If a custom login property is configured and present in the userinfo response, it is
+// used as-is. In any case, it falls back to the subject if the resulting value is empty.
 func (u *oidcUserInfo) GetLogin() string {
-	login := buildLoginFromEmail(u.Email)
+	login := u.getProfileProperty(u.loginProperty)
 	if len(login) > 0 {
 		return login
 	}
@@ -151,6 +179,7 @@ type oIDCEndpoint struct {
 	slugID                 string
 	urlParams              map[string]string
 	issuer                 string
+	customLoginProperty    config.LoginProperty
 	svc                    service
 	claimConfigs           []config.ProviderClaimConfig
 	extraLogoutHandler     echo.HandlerFunc
@@ -219,6 +248,7 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 		slugID:                 provider.SlugID,
 		urlParams:              provider.URLParams,
 		issuer:                 provider.Issuer.String(),
+		customLoginProperty:    provider.CustomLoginProperty,
 		svc:                    service{dao: dao, authz: authz},
 		claimConfigs:           provider.Claims,
 		extraLogoutHandler:     extraLogoutHandler,
@@ -293,7 +323,12 @@ func (e *oIDCEndpoint) codeExchange(ctx echo.Context) error {
 		}
 		persistedClaims := extractPersistedClaims(rawClaims, e.claimConfigs)
 
-		if _, err := e.performUserSync(info, persistedClaims, setCookie); err != nil {
+		var oidcToken *oauth2.Token
+		if tokens != nil && tokens.Token != nil {
+			oidcToken = tokens.Token
+		}
+
+		if _, err := e.performUserSync(info, persistedClaims, setCookie, oidcToken); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			writeResponse(w, []byte(apiinterface.InternalError.Error()))
 			return
@@ -348,6 +383,7 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 
 	var uInfo *oidcUserInfo
 	var persistedClaims map[string][]string
+	var oidcToken *oauth2.Token
 	switch api.GrantType(grantType) {
 	case api.GrantTypeDeviceCode:
 		deviceCode := ctx.FormValue("device_code")
@@ -356,6 +392,12 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 			// (We log a warning as the failure means most of the time that the user didn't authorize the app yet)
 			e.logWithError(err).Warn("Failed to exchange device code for token")
 			return err
+		}
+		oidcToken = &oauth2.Token{
+			AccessToken:  resp.AccessToken,
+			RefreshToken: resp.RefreshToken,
+			TokenType:    resp.TokenType,
+			Expiry:       time.Now().Add(time.Duration(int64(resp.ExpiresIn)) * time.Second), //nolint:gosec // G115: OAuth expires_in values never overflow int64
 		}
 		idClaims, err := rp.VerifyTokens[*oidc.IDTokenClaims](ctx.Request().Context(), resp.AccessToken, resp.IDToken, e.deviceCodeRelyingParty.IDTokenVerifier())
 		if err != nil {
@@ -385,6 +427,7 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 			e.logWithError(err).Error("Failed to exchange client credentials for token")
 			return err
 		}
+		oidcToken = token
 		var accessClaims oidc.AccessTokenClaims
 		if _, parseErr := oidc.ParseToken(token.AccessToken, &accessClaims); parseErr != nil {
 			e.logWithError(parseErr).Warn("Failed to parse client credentials access token; proceeding without claims")
@@ -397,7 +440,7 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 		return oidc.ErrUnsupportedGrantType()
 	}
 
-	resp, err := e.performUserSync(uInfo, persistedClaims, ctx.SetCookie)
+	resp, err := e.performUserSync(uInfo, persistedClaims, ctx.SetCookie, oidcToken)
 	if err != nil {
 		return err
 	}
@@ -405,9 +448,10 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 }
 
 // performUserSync performs user synchronization and generates access and refresh tokens.
-func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, persistedClaims map[string][]string, setCookie func(cookie *http.Cookie)) (*oauth2.Token, error) {
-	// We don´t forget to set the issuer before making any sync in the database.
+func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, persistedClaims map[string][]string, setCookie func(cookie *http.Cookie), oidcToken *oauth2.Token) (*oauth2.Token, error) {
+	// We don´t forget to set the issuer and the login property before making any sync in the database.
 	userInfo.issuer = e.issuer
+	userInfo.loginProperty = e.customLoginProperty
 
 	usr, err := e.svc.syncUser(userInfo)
 	if err != nil {
@@ -430,6 +474,16 @@ func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, persistedClaims m
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save refresh token.")
 		return nil, err
+	}
+
+	// Store the upstream OIDC token and refresh token for oauthPassThrough datasource proxy support
+	if oidcToken != nil && oidcToken.AccessToken != "" {
+		oidcCookie := e.tokenManagement.jwt.CreateOIDCTokenCookie(oidcToken)
+		setCookie(oidcCookie)
+		if oidcToken.RefreshToken != "" {
+			oidcRefreshCookie := e.tokenManagement.jwt.CreateOIDCRefreshTokenCookie(oidcToken.RefreshToken)
+			setCookie(oidcRefreshCookie)
+		}
 	}
 
 	return &oauth2.Token{
@@ -484,6 +538,42 @@ func (e *oIDCEndpoint) retrieveClientCredentialsToken(ctx context.Context, clien
 
 	// Call the token endpoint
 	return client.CallTokenEndpoint(ctx, req, e.clientCredRelyingParty)
+}
+
+// RefreshOIDCToken refreshes the OIDC token using the stored refresh token and updates the cookies.
+// It returns the new access token, or an empty string if no refresh token is available or if the refresh fails (token may have expired).
+func (e *oIDCEndpoint) RefreshOIDCToken(ctx echo.Context) string {
+	refreshTokenCookie, err := ctx.Cookie(crypto.CookieKeyOIDCRefreshToken)
+	if err != nil {
+		// No OIDC refresh token stored, nothing to refresh
+		return ""
+	}
+	refreshToken := refreshTokenCookie.Value
+	if refreshToken == "" {
+		return ""
+	}
+
+	newTokens, err := rp.RefreshTokens[*oidc.IDTokenClaims](ctx.Request().Context(), e.relyingParty, refreshToken, "", "")
+	if err != nil {
+		e.logWithError(err).Warn("Failed to refresh OIDC token; clearing OIDC cookies")
+		ctx.SetCookie(e.tokenManagement.jwt.DeleteOIDCTokenCookie())
+		ctx.SetCookie(e.tokenManagement.jwt.DeleteOIDCRefreshTokenCookie())
+		return ""
+	}
+
+	oidcToken := &oauth2.Token{
+		AccessToken:  newTokens.AccessToken,
+		RefreshToken: newTokens.RefreshToken,
+		TokenType:    newTokens.TokenType,
+		Expiry:       newTokens.Expiry,
+	}
+	ctx.SetCookie(e.tokenManagement.jwt.CreateOIDCTokenCookie(oidcToken))
+
+	// Update refresh token cookie if a new refresh token was issued
+	if newTokens.RefreshToken != "" && newTokens.RefreshToken != refreshToken {
+		ctx.SetCookie(e.tokenManagement.jwt.CreateOIDCRefreshTokenCookie(newTokens.RefreshToken))
+	}
+	return newTokens.AccessToken
 }
 
 // logWithError is a little logrus helper to log with the provider slugID.

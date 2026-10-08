@@ -348,6 +348,9 @@ security:
 				Frontend: Frontend{
 					ImportantDashboards: nil,
 					Information:         "",
+					AutoRefresh: AutoRefresh{
+						Options: defaultAutoRefreshOptions,
+					},
 				},
 				Plugin: Plugin{
 					Path:         "plugins",
@@ -355,6 +358,16 @@ security:
 				},
 				Provisioning: ProvisioningConfig{
 					Interval: common.Duration(defaultInterval),
+				},
+				Datasource: DatasourceConfig{
+					Proxy: DatasourceProxyConfig{
+						HTTP: HTTPProxyConfig{
+							MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
+							MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
+							DefaultTimeout:      DefaultHTTPProxyTimeout,
+							MaxTimeout:          DefaultHTTPProxyTimeout,
+						},
+					},
 				},
 				Search: Search{
 					CheckLatestUpdateInterval: common.Duration(defaultCacheInterval),

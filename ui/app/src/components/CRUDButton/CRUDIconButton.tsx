@@ -11,17 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconButton, IconButtonProps, Tooltip } from '@mui/material';
-import { ReactElement } from 'react';
+import type { IconButtonProps } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
+import type { ReactElement } from 'react';
 
-import { CRUDAction, CRUDActionProps } from './CRUDAction';
+import type { CRUDActionProps } from './CRUDAction';
+import { CRUDAction } from './CRUDAction';
 
 export interface CRUDIconButtonProps extends Omit<IconButtonProps, 'action'>, Omit<CRUDActionProps, 'render'> {
   label: string;
+  disabledReason?: string;
 }
 
 /**
- * Wraps MUI IconButton with optional permission checks. Shows a Tooltip (from `label`) when enabled;
+ * Wraps MUI IconButton with optional permission checks. Shows a Tooltip (from `label`) when enabled,
+ * or from `disabledReason` when disabled through the `disabled` prop;
  * omits it when disabled due to insufficient permissions.
  */
 export function CRUDIconButton({
@@ -33,6 +37,7 @@ export function CRUDIconButton({
   onClick,
   disabled,
   label,
+  disabledReason,
   ...props
 }: CRUDIconButtonProps): ReactElement {
   return (
@@ -46,7 +51,7 @@ export function CRUDIconButton({
             {children}
           </IconButton>
         ) : (
-          <Tooltip title={label} placement="top">
+          <Tooltip title={disabled && disabledReason ? disabledReason : label} placement="top">
             <span>
               <IconButton
                 color={color}

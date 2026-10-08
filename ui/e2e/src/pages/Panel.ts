@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Locator, Page, expect } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 type resizePanelOptions = {
   width: number;
@@ -47,10 +48,11 @@ export class Panel {
     });
     this.actionsMenu = this.page.locator('[id=actions-menu]');
 
-    // Need to look up to panel draggable parent first to get the resize handle.
-    // The classname selector here is not ideal, but it's all that is available
-    // because this lives deeper in another library.
-    this.resizeHandle = this.container.locator('..').locator('..').locator('.react-resizable-handle');
+    // Snapgrid's resize handle is a sibling of the panel content without an accessible label.
+    // Find the nearest ancestor with data-grid-id (the owning grid item), regardless of wrapper depth.
+    this.resizeHandle = this.container
+      .locator('xpath=ancestor::*[@data-grid-id][1]')
+      .locator('.snapgrid-resize-handle--se');
 
     this.figure = this.container.getByRole('figure');
     this.canvas = this.container.locator('canvas');
@@ -136,7 +138,8 @@ export class Panel {
 
     await this.resizeHandle.hover();
     await this.container.page().mouse.down();
-    await this.container.page().mouse.move(x, y);
+    // Multiple pointer moves let Snapgrid activate resizing before reaching the target.
+    await this.container.page().mouse.move(x, y, { steps: 20 });
     await this.container.page().mouse.up();
   }
 }

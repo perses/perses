@@ -22,6 +22,14 @@ func HashAndSalt(pwd []byte) ([]byte, error) {
 	return bcrypt.GenerateFromPassword(pwd, bcrypt.DefaultCost)
 }
 
+// IsValidBcryptHash reports whether hash looks like a valid bcrypt hash.
+// It does NOT verify the hash against any password — it only checks the
+// format (prefix, cost, length).
+func IsValidBcryptHash(hash string) bool {
+	_, err := bcrypt.Cost([]byte(hash))
+	return err == nil
+}
+
 func ComparePasswords(hashedPwd string, plainPwd string) bool {
 	hash := []byte(hashedPwd)
 	plainPwdByte := []byte(plainPwd)

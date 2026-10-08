@@ -14,12 +14,14 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"slices"
 	"time"
 	_ "time/tzdata"
 
 	"github.com/perses/spec/go/common"
+	"github.com/sirupsen/logrus"
 )
 
 var defaultTimeRangeOptions = []common.DurationString{
@@ -32,6 +34,15 @@ var defaultTimeRangeOptions = []common.DurationString{
 	"24h",
 	"7d",
 	"14d",
+}
+
+var defaultAutoRefreshOptions = []common.DurationString{
+	"0s",
+	"5s",
+	"10s",
+	"15s",
+	"30s",
+	"60s",
 }
 
 type FrontendTheme string
@@ -72,6 +83,18 @@ type TimeRange struct {
 	DisableCustomTimeRange bool                    `json:"disable_custom,omitempty" yaml:"disable_custom,omitempty"`
 	DisableZoomTimeRange   bool                    `json:"disable_zoom,omitempty" yaml:"disable_zoom,omitempty"`
 	Options                []common.DurationString `json:"options,omitempty" yaml:"options,omitempty"`
+}
+
+type AutoRefresh struct {
+	Disable bool                    `json:"disable,omitempty" yaml:"disable,omitempty"`
+	Options []common.DurationString `json:"options,omitempty" yaml:"options,omitempty"`
+}
+
+func (p *AutoRefresh) Verify() error {
+	if len(p.Options) == 0 {
+		p.Options = defaultAutoRefreshOptions
+	}
+	return nil
 }
 
 // DefaultUserPreferences contains the preferences used when the user has not
@@ -147,20 +170,121 @@ func sortTimeRangeOptions(options []common.DurationString) ([]common.DurationStr
 	return sorted, nil
 }
 
+type DashboardSelector struct {
+	// Project is the name of the project (dashboard.metadata.project)
+	Project string `json:"project" yaml:"project"`
+	// Dashboard is the name of the dashboard (dashboard.metadata.name).
+	// When omitted, all dashboards from the project are considered important.
+	Dashboard string `json:"dashboard,omitempty" yaml:"dashboard,omitempty"`
+}
+
+type ImportantDashboardGroup struct {
+	Title       string              `json:"title,omitempty" yaml:"title,omitempty"`
+	Description string              `json:"description,omitempty" yaml:"description,omitempty"`
+	Dashboards  []DashboardSelector `json:"dashboards,omitempty" yaml:"dashboards,omitempty"`
+}
+
+// ImportantDashboards also accepts the deprecated flat list of DashboardSelector, converted into a single untitled group.
+type ImportantDashboards []ImportantDashboardGroup
+
+func (d *ImportantDashboards) UnmarshalJSON(data []byte) error {
+	var raw []map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	isLegacy, err := isLegacyImportantDashboardsFormat(raw)
+	if err != nil {
+		return err
+	}
+	if !isLegacy {
+		return json.Unmarshal(data, (*[]ImportantDashboardGroup)(d))
+	}
+	var selectors []DashboardSelector
+	if err := json.Unmarshal(data, &selectors); err != nil {
+		return err
+	}
+	*d = ImportantDashboards{{Dashboards: selectors}}
+	return nil
+}
+
+func (d *ImportantDashboards) UnmarshalYAML(unmarshal func(any) error) error {
+	var raw []map[string]any
+	if err := unmarshal(&raw); err != nil {
+		return err
+	}
+	isLegacy, err := isLegacyImportantDashboardsFormat(raw)
+	if err != nil {
+		return err
+	}
+	if !isLegacy {
+		return unmarshal((*[]ImportantDashboardGroup)(d))
+	}
+	var selectors []DashboardSelector
+	if err := unmarshal(&selectors); err != nil {
+		return err
+	}
+	*d = ImportantDashboards{{Dashboards: selectors}}
+	warnLegacyImportantDashboardsFormat()
+	return nil
+}
+
+func (d *ImportantDashboards) Verify() error {
+	for i, group := range *d {
+		if len(group.Dashboards) == 0 {
+			return fmt.Errorf("frontend.important_dashboards[%d]: at least one entry is required in 'dashboards'", i)
+		}
+		for j, selector := range group.Dashboards {
+			if len(selector.Project) == 0 {
+				return fmt.Errorf("frontend.important_dashboards[%d].dashboards[%d]: 'project' is required", i, j)
+			}
+		}
+	}
+	return nil
+}
+
+func isLegacyImportantDashboardsFormat[T any](items []map[string]T) (bool, error) {
+	hasLegacyItem := false
+	hasGroupedItem := false
+	for _, item := range items {
+		for key := range item {
+			switch key {
+			case "project", "dashboard":
+				hasLegacyItem = true
+			case "title", "description", "dashboards":
+				hasGroupedItem = true
+			}
+		}
+	}
+	if hasLegacyItem && hasGroupedItem {
+		return false, fmt.Errorf("frontend.important_dashboards: cannot mix the legacy selector format and the grouped format")
+	}
+	return hasLegacyItem, nil
+}
+
+func warnLegacyImportantDashboardsFormat() {
+	logrus.Warn("'frontend.important_dashboards' flat selector format is deprecated and will be removed in v0.57.0. Please group entries under 'frontend.important_dashboards[].dashboards' instead")
+}
+
 type Frontend struct {
 	// When it is true, Perses won't serve the frontend anymore, and any other config set here will be ignored
 	Disable bool `json:"disable" yaml:"disable"`
 	// EnableKeyboardShortcuts enables keyboard shortcuts in the UI. Defaults to true when omitted.
 	EnableKeyboardShortcuts *bool `json:"enable_keyboard_shortcuts,omitempty" yaml:"enable_keyboard_shortcuts,omitempty"`
+	// EnablePluginVersioning enables the dashboard "lock" button that pins every plugin to its latest available
+	// version. Defaults to false (feature hidden) when omitted.
+	EnableLockMode bool `json:"enable_lock_mode,omitempty" yaml:"enable_lock_mode,omitempty"`
 	// Explorer is activating the different kind of explorer supported.
 	// Be sure you have installed an associated plugin for each explorer type.
 	Explorer Explorer `json:"explorer" yaml:"explorer"`
 	// Information contains Markdown content to be display on the home page
 	Information string `json:"information,omitempty" yaml:"information,omitempty"`
-	// ImportantDashboards contains important dashboard selectors
-	ImportantDashboards []dashboardSelector `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
+	// ImportantDashboards contains grouped important dashboard selectors.
+	// Each selector can target one dashboard or an entire project when dashboard is omitted.
+	ImportantDashboards ImportantDashboards `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
 	// TimeRange contains the time range configuration for the dropdown
 	TimeRange *TimeRange `json:"time_range,omitempty" yaml:"time_range,omitempty"`
+	// AutoRefresh contains the auto-refresh configuration for dashboards
+	AutoRefresh AutoRefresh `json:"auto_refresh,omitempty" yaml:"auto_refresh,omitempty"`
 	// BannerInfo contains the content to be display in a banner at the top of each page along with the severity of the information
 	Banner *Banner `json:"banner,omitempty" yaml:"banner,omitempty"`
 	// DefaultUserPreferences contains server-wide defaults for user preferences.

@@ -11,17 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  Breadcrumbs as MUIBreadcrumbs,
-  BreadcrumbsProps as MUIBreadcrumbsProps,
-  Link,
-  styled,
-  Stack,
-  Typography,
-} from '@mui/material';
-import { SxProps, SystemStyleObject, Theme } from '@mui/system';
+import type { BreadcrumbsProps as MUIBreadcrumbsProps } from '@mui/material';
+import { Breadcrumbs as MUIBreadcrumbs, Link, styled, Stack, Typography } from '@mui/material';
+import type { SxProps, SystemStyleObject, Theme } from '@mui/system';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 export type BreadcrumbVariant = 'default' | 'workspace';

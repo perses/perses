@@ -16,12 +16,20 @@ package validate
 import (
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/perses/perses/internal/api/plugin"
 	testUtils "github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/dashboard"
+	datasourceSpec "github.com/perses/spec/go/datasource"
+	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
+	datasourceSQL "github.com/perses/spec/go/datasource/proxy/sql"
+	specPlugin "github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const testDataFolder = "testdata"
@@ -58,7 +66,7 @@ func TestDashboardSpec(t *testing.T) {
 			var persesDashboard modelV1.Dashboard
 			testUtils.JSONUnmarshalFromFile(filepath.Join(testDataFolder, test.dashboardFile), &persesDashboard)
 
-			err := DashboardSpec(persesDashboard.Spec, pl.Schema())
+			err := DashboardSpec(persesDashboard.Spec, pl.Schema(), &config.HTTPProxyConfig{})
 
 			actualErrorStr := ""
 			if err != nil {
@@ -86,6 +94,17 @@ func TestDatasource(t *testing.T) {
 			datasourceFiles:  []string{"datasource_direct_2_invalid.json"},
 			expectedErrorStr: "invalid value \"www.datasource.com\" (out of bound",
 		},
+		{
+			title:            "error case with a proxy timeout beyond the maximum allowed by the server",
+			datasourceFiles:  []string{"datasource_proxy_timeout_too_high.json"},
+			expectedErrorStr: `invalid proxy of the datasource "PrometheusWithTooHighTimeout": timeout "5m" exceeds the maximum allowed by the server (1m)`,
+		},
+	}
+
+	// The config is verified when Perses loads it, which also sets the default values.
+	proxyCfg := &config.HTTPProxyConfig{MaxTimeout: common.Duration(time.Minute)}
+	if err := proxyCfg.Verify(); err != nil {
+		t.Fatalf("failed to verify the proxy config: %s", err)
 	}
 
 	projectPath := testUtils.GetRepositoryPath()
@@ -117,7 +136,7 @@ func TestDatasource(t *testing.T) {
 			}
 
 			for _, datasource := range datasources {
-				err := Datasource(datasource, datasources, pl.Schema())
+				err := Datasource(datasource, datasources, pl.Schema(), proxyCfg)
 				if test.expectedErrorStr == "" {
 					assert.NoError(t, err)
 				} else {
@@ -126,4 +145,114 @@ func TestDatasource(t *testing.T) {
 			}
 		})
 	}
+}
+
+func newPrometheusPlugin(proxySpec map[string]any) specPlugin.Plugin {
+	return specPlugin.Plugin{
+		Kind: "PrometheusDatasource",
+		Spec: map[string]any{
+			"proxy": map[string]any{
+				"kind": "HTTPProxy",
+				"spec": proxySpec,
+			},
+		},
+	}
+}
+
+func TestValidateHTTPProxyTimeout(t *testing.T) {
+	// The config is verified when Perses loads it, which also sets the default values.
+	verified := func(cfg config.HTTPProxyConfig) *config.HTTPProxyConfig {
+		require.NoError(t, cfg.Verify())
+		return &cfg
+	}
+	serverCfg := verified(config.HTTPProxyConfig{DefaultTimeout: common.Duration(10 * time.Second), MaxTimeout: common.Duration(time.Minute)})
+	testSuite := []struct {
+		title       string
+		proxyConfig any
+		proxyCfg    *config.HTTPProxyConfig
+		expectedErr string
+	}{
+		{
+			title:       "no timeout: the default one is used",
+			proxyConfig: &datasourceHTTP.Config{},
+			proxyCfg:    serverCfg,
+		},
+		{
+			title:       "zero timeout: the default one is used",
+			proxyConfig: &datasourceHTTP.Config{Timeout: "0s"},
+			proxyCfg:    serverCfg,
+		},
+		{
+			title:       "timeout lower than the maximum",
+			proxyConfig: &datasourceHTTP.Config{Timeout: "5s"},
+			proxyCfg:    serverCfg,
+		},
+		{
+			title:       "timeout higher than the default but not than the maximum",
+			proxyConfig: &datasourceHTTP.Config{Timeout: "45s"},
+			proxyCfg:    serverCfg,
+		},
+		{
+			title:       "timeout equal to the maximum",
+			proxyConfig: &datasourceHTTP.Config{Timeout: "1m"},
+			proxyCfg:    serverCfg,
+		},
+		{
+			title:       "timeout higher than the maximum",
+			proxyConfig: &datasourceHTTP.Config{Timeout: "1m1s"},
+			proxyCfg:    serverCfg,
+			expectedErr: `invalid proxy of the datasource "dts": timeout "1m1s" exceeds the maximum allowed by the server (1m)`,
+		},
+		{
+			title:       "the maximum is the default timeout when it is not set",
+			proxyConfig: &datasourceHTTP.Config{Timeout: "31s"},
+			proxyCfg:    verified(config.HTTPProxyConfig{}),
+			expectedErr: `invalid proxy of the datasource "dts": timeout "31s" exceeds the maximum allowed by the server (30s)`,
+		},
+		{
+			title:       "the maximum falls back on the default timeout when the config is not verified",
+			proxyConfig: &datasourceHTTP.Config{Timeout: "31s"},
+			proxyCfg:    &config.HTTPProxyConfig{},
+			expectedErr: `invalid proxy of the datasource "dts": timeout "31s" exceeds the maximum allowed by the server (30s)`,
+		},
+		{
+			title:       "the server config is unknown: the verification is skipped",
+			proxyConfig: &datasourceHTTP.Config{Timeout: "1h"},
+			proxyCfg:    nil,
+		},
+		{
+			title:       "not an HTTP proxy",
+			proxyConfig: &datasourceSQL.Config{},
+			proxyCfg:    serverCfg,
+		},
+		{
+			title:       "no proxy",
+			proxyConfig: nil,
+			proxyCfg:    serverCfg,
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			err := validateHTTPProxyTimeout(test.proxyConfig, "dts", test.proxyCfg)
+			if len(test.expectedErr) == 0 {
+				assert.NoError(t, err)
+			} else {
+				assert.EqualError(t, err, test.expectedErr)
+			}
+		})
+	}
+}
+
+// TestDashboardSpec_localDatasourceTimeout ensures the timeout of the local datasources is validated as well.
+func TestDashboardSpec_localDatasourceTimeout(t *testing.T) {
+	spec := dashboard.Spec{
+		Datasources: map[string]*datasourceSpec.Spec{
+			"prometheus": {
+				Plugin: newPrometheusPlugin(map[string]any{"url": "http://localhost:9090", "timeout": "10m"}),
+			},
+		},
+	}
+	// The timeout is verified before the schema, so no schema is needed to reach the error.
+	err := DashboardSpec(spec, nil, &config.HTTPProxyConfig{})
+	assert.EqualError(t, err, `invalid proxy of the datasource "prometheus": timeout "10m" exceeds the maximum allowed by the server (30s)`)
 }

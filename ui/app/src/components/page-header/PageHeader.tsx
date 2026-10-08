@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Stack, SxProps, Theme, Typography } from '@mui/material';
-import { ReactElement, ReactNode } from 'react';
+import type { SxProps, Theme } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
+import type { ReactElement, ReactNode } from 'react';
 
 export interface PageHeaderProps {
   breadcrumb: ReactNode;

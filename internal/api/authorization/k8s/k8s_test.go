@@ -88,6 +88,16 @@ type mockAuthorizer struct {
 	client authorizationclient.AuthorizationV1Interface
 }
 
+func (m *mockAuthorizer) ConditionsAwareAuthorize(ctx context.Context, a authorizer.Attributes) authorizer.ConditionsAwareDecision {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *mockAuthorizer) EvaluateConditions(ctx context.Context, decision authorizer.ConditionsAwareDecision, data authorizer.ConditionsData) (authorized authorizer.Decision, reason string, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m *mockAuthorizer) Authorize(ctx context.Context, attr authorizer.Attributes) (authorizer.Decision, string, error) {
 	sar := &authv1.SubjectAccessReview{
 		Spec: authv1.SubjectAccessReviewSpec{

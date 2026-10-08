@@ -1,51 +1,54 @@
-import { DatasourceSelect, DatasourceSelectProps, isVariableDatasource, OptionsEditorProps } from '@perses-dev/plugin-system';
-import { ReactElement, useEffect, useState } from 'react';
-import { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
+import type { DatasourceSelectProps, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect, isVariableDatasource } from '@perses-dev/plugin-system';
+import type { ChangeEvent, ReactElement } from 'react';
+import { useCallback } from 'react';
+
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from './constants';
+import type { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
 
 type {{ .PluginPascalName }}EditorProps = OptionsEditorProps<{{ .PluginPascalName }}Spec>;
 
 export function {{ .PluginPascalName }}Editor(props: {{ .PluginPascalName }}EditorProps): ReactElement {
-  const { onChange, value } = props;
-  const {datasource} = value;
+  const { onChange, value, isReadonly } = props;
+  const { datasource } = value;
   const selectedDatasource = datasource ?? DEFAULT_DATASOURCE;
-  const [localQuery, setLocalQuery] = useState(value.query);
 
-  const handleDatasourceChange: DatasourceSelectProps['onChange'] = (newDatasourceSelection) => {
-    if(!isVariableDatasource(newDatasourceSelection) && newDatasourceSelection.kind === DATASOURCE_KIND) {
-      onChange({ ...value, datasource: newDatasourceSelection });
-      return;
-    }
+  const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
+    (newDatasourceSelection) => {
+      if (!isVariableDatasource(newDatasourceSelection) && newDatasourceSelection.kind === DATASOURCE_KIND) {
+        onChange({ ...value, datasource: newDatasourceSelection });
+        return;
+      }
 
-    throw new Error('Got unexpected non {{ .PluginPascalName }} datasource selection');
-  };
+      throw new Error('Got unexpected non {{ .PluginPascalName }} datasource selection');
+    },
+    [onChange, value],
+  );
 
-  const handleQueryBlur = (event: React.FocusEvent<HTMLInputElement>) => {
-    const newQuery = event.target.value;
-    if (newQuery !== value.query) {
-      onChange({ ...value, query: newQuery });
-    }
-  };
-
-  useEffect(() => {
-    setLocalQuery(value.query);
-  }, [value.query]);
+  const handleQueryChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>): void => {
+      onChange({ ...value, query: event.target.value });
+    },
+    [onChange, value],
+  );
 
   return (
     <div>
-      <label>{{ .PluginPascalName }} Datasource</label>
       <DatasourceSelect
-          datasourcePluginKind={DATASOURCE_KIND}
-          value={selectedDatasource}
-          onChange={handleDatasourceChange}
-          label="{{ .PluginPascalName }} Datasource"
-          notched
-        />
-      <input 
-        onBlur={handleQueryBlur} 
-        onChange={(e) => setLocalQuery(e.target.value)} 
-        placeholder='query' 
-        value={localQuery} />
+        datasourcePluginKind={DATASOURCE_KIND}
+        value={selectedDatasource}
+        onChange={handleDatasourceChange}
+        label="{{ .PluginPascalName }} Datasource"
+        readOnly={isReadonly}
+        notched
+      />
+      <input
+        aria-label="Query"
+        onChange={handleQueryChange}
+        placeholder="query"
+        readOnly={isReadonly}
+        value={value.query}
+      />
     </div>
   );
 }

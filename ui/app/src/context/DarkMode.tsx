@@ -12,15 +12,11 @@
 // limitations under the License.
 
 import { CssBaseline, ThemeProvider, useMediaQuery } from '@mui/material';
-import {
-  ChartsProvider,
-  generateChartsTheme,
-  PersesChartsTheme,
-  getTheme,
-  useLocalStorage,
-} from '@perses-dev/components';
+import type { PersesChartsTheme } from '@perses-dev/components';
+import { ChartsProvider, generateChartsTheme, getTheme, useLocalStorage } from '@perses-dev/components';
 import { TOGGLE_THEME_EVENT } from '@perses-dev/dashboards';
-import React, { createContext, ReactElement, useContext, useEffect, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
 
 import { useConfig } from '../model/config-client';
 

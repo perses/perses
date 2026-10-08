@@ -28,17 +28,18 @@ export const createProjectDialogValidationSchema = z.object({
 export type CreateProjectValidationType = z.infer<typeof createProjectDialogValidationSchema>;
 
 // Validate project name and check if it doesn't already exist
-export function useProjectValidationSchema(): z.Schema {
+export function useProjectValidationSchema(): typeof createProjectDialogValidationSchema {
   const projects = useProjectList();
 
   return useMemo(() => {
-    return createProjectDialogValidationSchema.refine(
-      (schema) => {
-        return !(projects.data ?? []).some(
-          (project) => project.metadata.name === generateMetadataName(schema.projectName),
-        );
-      },
-      (schema) => ({ message: `Project name '${schema.projectName}' already exists!`, path: ['projectName'] }),
-    );
+    return createProjectDialogValidationSchema.superRefine((schema, ctx) => {
+      if ((projects.data ?? []).some((project) => project.metadata.name === generateMetadataName(schema.projectName))) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `Project name '${schema.projectName}' already exists!`,
+          path: ['projectName'],
+        });
+      }
+    });
   }, [projects.data]);
 }

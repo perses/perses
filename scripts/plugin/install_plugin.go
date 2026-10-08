@@ -40,12 +40,12 @@ type plugin struct {
 	Version    string `yaml:"version"`
 }
 
-func downloadPlugin(plugin plugin) {
+func downloadPlugin(plugin plugin) error {
 	pluginName := fmt.Sprintf("%s-%s", plugin.PluginName, plugin.Version)
 	resp, err := http.Get(fmt.Sprintf("%s/%s/%s.tar.gz", githubURL, pluginName, pluginName))
 	if err != nil {
 		logrus.WithError(err).Errorf("unable to download plugin %s", pluginName)
-		return
+		return err
 	}
 	if resp.StatusCode == http.StatusNotFound {
 		// First, let's close the previous body.
@@ -54,25 +54,27 @@ func downloadPlugin(plugin plugin) {
 		resp, err = http.Get(fmt.Sprintf("%s/%s/v%s/%s.tar.gz", githubURL, strings.ToLower(plugin.PluginName), plugin.Version, pluginName))
 		if err != nil {
 			logrus.WithError(err).Errorf("unable to download plugin %s", pluginName)
-			return
+			return err
 		}
 	}
 	defer resp.Body.Close() //nolint:errcheck
 	if resp.StatusCode != http.StatusOK {
 		logrus.Errorf("unable to download plugin %s, status code %d", pluginName, resp.StatusCode)
-		return
+		return fmt.Errorf("unable to download plugin %s, status code %d", pluginName, resp.StatusCode)
 	}
 
 	out, err := os.Create(filepath.Join(pluginArchiveFolder, fmt.Sprintf("%s.tar.gz", pluginName)))
 	if err != nil {
 		logrus.WithError(err).Errorf("unable to create file for plugin %s", pluginName)
-		return
+		return err
 	}
 	defer out.Close() //nolint:errcheck
 
 	if _, copyErr := io.Copy(out, resp.Body); copyErr != nil {
 		logrus.WithError(copyErr).Errorf("unable to copy plugin %s", pluginName)
+		return copyErr
 	}
+	return nil
 }
 
 func main() {
@@ -93,12 +95,14 @@ func main() {
 		}
 		downloadToBeDone = append(downloadToBeDone, async.Async(func() (string, error) {
 			fmt.Printf("Downloading plugin %s\n", pl.PluginName)
-			downloadPlugin(pl)
-			return "", nil
+			return "", downloadPlugin(pl)
 		}))
 	}
 	for _, download := range downloadToBeDone {
-		_, _ = download.Await()
+		_, err := download.Await()
+		if err != nil {
+			logrus.WithError(err).Fatalf("unable to download plugin %s", pluginListData)
+		}
 	}
 	fmt.Println("All plugins successfully installed.")
 }

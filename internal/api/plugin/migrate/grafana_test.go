@@ -59,6 +59,49 @@ func TestSimplifiedDashboardUnmarshal(t *testing.T) {
 				},
 			},
 		},
+		{
+			title: "Time settings",
+			data: `{
+    "title": "Test Dashboard",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "refresh": "1m",
+    "timezone": "utc"
+  }`,
+			expected: &SimplifiedDashboard{
+				Title:    "Test Dashboard",
+				Time:     &GrafanaTimeRange{From: "now-6h", To: "now"},
+				Refresh:  "1m",
+				Timezone: "utc",
+			},
+		},
+		{
+			title:    "Auto-refresh off, as written by older Grafana versions",
+			data:     `{"title": "Test Dashboard", "refresh": false}`,
+			expected: &SimplifiedDashboard{Title: "Test Dashboard"},
+		},
+		{
+			title:    "Null time settings",
+			data:     `{"title": "Test Dashboard", "time": null, "refresh": null, "timezone": null}`,
+			expected: &SimplifiedDashboard{Title: "Test Dashboard"},
+		},
+		{
+			title:    "Time settings with the wrong type are ignored",
+			data:     `{"title": "Test Dashboard", "time": "now-6h", "refresh": 30, "timezone": 0}`,
+			expected: &SimplifiedDashboard{Title: "Test Dashboard", Time: &GrafanaTimeRange{}},
+		},
+		{
+			title:    "Time range with a number is ignored",
+			data:     `{"title": "Test Dashboard", "time": {"from": 1698228000000, "to": "now"}, "refresh": true, "timezone": false}`,
+			expected: &SimplifiedDashboard{Title: "Test Dashboard", Time: &GrafanaTimeRange{}},
+		},
+		{
+			title:    "Time settings with the wrong type don't stop the decoding of the next fields",
+			data:     `{"refresh": {"a": 1}, "timezone": [], "time": [], "uid": "after", "title": "After", "tags": ["x"]}`,
+			expected: &SimplifiedDashboard{UID: "after", Title: "After", Tags: []string{"x"}, Time: &GrafanaTimeRange{}},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.title, func(t *testing.T) {

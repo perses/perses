@@ -1,7 +1,13 @@
-import { TimeSeriesData, TimeSeries } from '@perses-dev/spec';
-import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
-import { {{ .PluginPascalName }}Spec, DatasourceQueryResponse } from './{{ .PluginName }}-types';
+import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+import { replaceVariables } from '@perses-dev/plugin-system';
+import type { TimeSeriesData, TimeSeries } from '@perses-dev/spec';
+
 import { DEFAULT_DATASOURCE } from './constants';
+import type {
+  {{ .PluginPascalName }}Spec,
+  DatasourceQueryResponse,
+  QueryDatasourceClient,
+} from './{{ .PluginName }}-types';
 
 function buildTimeSeries(response?: DatasourceQueryResponse): TimeSeries[] {
   if (!response) {
@@ -21,7 +27,7 @@ function buildTimeSeries(response?: DatasourceQueryResponse): TimeSeries[] {
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<{{ .PluginPascalName }}Spec>['getTimeSeriesData'] = async (
   spec,
-  context
+  context,
 ) => {
   // return empty data if the query is empty
   if (spec.query === undefined || spec.query === null || spec.query === '') {
@@ -30,14 +36,14 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<{{ .PluginPascalName }}Spe
 
   const query = replaceVariables(spec.query, context.variableState);
 
-  const client = await context.datasourceStore.getDatasourceClient(
+  const client = await context.datasourceStore.getDatasourceClient<QueryDatasourceClient>(
     // A default datasource will be selected by matching the kind of datasource if not provided
-    spec.datasource ?? DEFAULT_DATASOURCE
+    spec.datasource ?? DEFAULT_DATASOURCE,
   );
 
   const { start, end } = context.timeRange;
 
-  const response = await client.query({ 
+  const response = await client.query({
     start: start.getTime().toString(),
     end: end.getTime().toString(),
     query,
@@ -53,4 +59,4 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<{{ .PluginPascalName }}Spe
   };
 
   return chartData;
-}
+};

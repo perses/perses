@@ -1,25 +1,30 @@
-import {
-  OptionsEditorGrid,
-  OptionsEditorColumn,
-  ThresholdsEditor,
-  ThresholdsEditorProps,
-} from '@perses-dev/components';
-import { LegendOptionsEditor, LegendOptionsEditorProps, OptionsEditorProps } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
-import { {{.PluginPascalName }}Options } from './{{ .PluginName }}-types';
+import { OptionsEditorGrid, OptionsEditorColumn, ThresholdsEditor } from '@perses-dev/components';
+import type { ThresholdsEditorProps } from '@perses-dev/components';
+import type { LegendOptionsEditorProps, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { LegendOptionsEditor } from '@perses-dev/plugin-system';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
-type {{ .PluginPascalName }}SettingsEditorProps = OptionsEditorProps<{{ .PluginPascalName}}Options>;
+import type { {{ .PluginPascalName }}Options } from './{{ .PluginName }}-types';
+
+type {{ .PluginPascalName }}SettingsEditorProps = OptionsEditorProps<{{ .PluginPascalName }}Options>;
 
 export function {{ .PluginPascalName }}SettingsEditor(props: {{ .PluginPascalName }}SettingsEditorProps): ReactElement {
   const { onChange, value } = props;
 
-  const handleLegendChange: LegendOptionsEditorProps['onChange'] = (newLegend) => {
-    onChange({...value, legend: newLegend });
-  };
+  const handleLegendChange: LegendOptionsEditorProps['onChange'] = useCallback(
+    (newLegend) => {
+      onChange({ ...value, legend: newLegend });
+    },
+    [onChange, value],
+  );
 
-  const handleThresholdsChange: ThresholdsEditorProps['onChange'] = (thresholds) => {
-    onChange({...value, thresholds });
-  };
+  const handleThresholdsChange: ThresholdsEditorProps['onChange'] = useCallback(
+    (thresholds) => {
+      onChange({ ...value, thresholds });
+    },
+    [onChange, value],
+  );
 
   return (
     <OptionsEditorGrid>

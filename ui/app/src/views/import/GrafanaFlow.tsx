@@ -25,7 +25,8 @@ import {
 import { JSONEditor, useSnackbar } from '@perses-dev/components';
 import AutoFix from 'mdi-material-ui/AutoFix';
 import Import from 'mdi-material-ui/Import';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useIsReadonly } from '../../context/Config';

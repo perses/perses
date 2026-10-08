@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { VariableResource, VariableType } from '@perses-dev/client';
+import type { VariableResource, VariableType } from '@perses-dev/client';
 import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { ReactElement, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
 import { VariableList } from '../../../components/variable/VariableList';
 import {

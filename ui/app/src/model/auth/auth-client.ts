@@ -14,6 +14,7 @@
 import { fetch } from '@perses-dev/client';
 import { useQueryParam } from 'use-query-params';
 
+import { PERSES_APP_CONFIG } from '../../config';
 import { HTTPHeader, HTTPMethodPOST } from '../http';
 import buildURL from '../url-builder';
 import { useCurrentUser } from '../user-client';
@@ -24,10 +25,19 @@ const redirectQueryParam = 'rd';
 /**
  * Get the redirect path from URL's query params.
  * This is used to retrieve the original path that a user desired before being redirected to the login page.
+ *
+ * By default, the fallback path (used when there is no `rd` query param) is relative to the app's `api_prefix`,
+ * which is what React Router's `navigate()`/`<Navigate>` expect since the router is created with `api_prefix` as
+ * its basename. Pass `true` when the path is instead going to be used outside of React Router (e.g. a raw
+ * `window.location.href` redirect to the backend), where the fallback must include `api_prefix` itself.
+ * @param absolute whether the fallback path must be absolute (include `api_prefix`) rather than router-relative.
  */
-export function useRedirectQueryParam(): string {
+export function useRedirectQueryParam(absolute?: boolean): string {
   const [path] = useQueryParam<string | undefined>(redirectQueryParam);
-  return path ?? '/';
+  if (path !== undefined) {
+    return path;
+  }
+  return absolute ? PERSES_APP_CONFIG.api_prefix || '/' : '/';
 }
 
 /**

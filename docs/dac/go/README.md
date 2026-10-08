@@ -13,5 +13,6 @@ See the dedicated pages for each builder:
     - [HTTP Proxy](./helper/http-proxy.md)
 - [Panel](./panel.md)
 - [Query](./query.md)
+- [Annotation](./annotation.md)
 - [Variable](./variable.md)
 - [Variable Group](./variable-group.md)

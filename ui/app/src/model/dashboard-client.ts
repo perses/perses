@@ -11,23 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, fetchJson, StatusError } from '@perses-dev/client';
-import {
-  useMutation,
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-  UseQueryOptions,
-  UseQueryResult,
-} from '@tanstack/react-query';
+import type { DashboardResource, StatusError } from '@perses-dev/client';
+import { fetchJson } from '@perses-dev/client';
+import type { DashboardSpec } from '@perses-dev/spec';
+import type { UseMutationResult, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
-import { useImportantDashboardSelectors } from '../context/Config';
+import { useImportantDashboardGroups, useShouldNormalizeResourceNames } from '../context/Config';
 import { useNavHistory } from '../context/DashboardNavHistory';
+import type { ImportantDashboardGroupConfig } from './config-client';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import buildURL from './url-builder';
 
 export const resource = 'dashboards';
+
+type DashboardOptions = Omit<UseQueryOptions<DashboardResource, StatusError>, 'queryKey' | 'queryFn'>;
 
 type DashboardListOptions = Omit<UseQueryOptions<DashboardResource[], StatusError>, 'queryKey' | 'queryFn'> & {
   project?: string;
@@ -59,12 +58,17 @@ export function useCreateDashboardMutation(
  * Used to get a dashboard in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDashboard(project: string, name: string): UseQueryResult<DashboardResource, StatusError> {
+export function useDashboard(
+  project: string,
+  name: string,
+  options?: DashboardOptions,
+): UseQueryResult<DashboardResource, StatusError> {
   return useQuery<DashboardResource, StatusError>({
     queryKey: [resource, project, name],
     queryFn: () => {
       return getDashboard(project, name);
     },
+    ...options,
   });
 }
 
@@ -87,6 +91,113 @@ export interface DatedDashboards {
   date: string;
 }
 
+export interface ImportantDashboardGroupData {
+  title?: string;
+  description?: string;
+  entries: ImportantDashboardEntryData[];
+}
+
+export type ImportantDashboardEntryData =
+  | {
+      kind: 'dashboard';
+      dashboard: DashboardResource;
+    }
+  | {
+      kind: 'project';
+      project: string;
+      dashboards: DashboardResource[];
+    };
+
+function normalizeImportantDashboardName(name: string, shouldNormalizeResourceNames: boolean): string {
+  return shouldNormalizeResourceNames ? name.toLowerCase() : name;
+}
+
+function buildDashboardKey(project: string, dashboard: string, shouldNormalizeResourceNames: boolean): string {
+  return `${normalizeImportantDashboardName(project, shouldNormalizeResourceNames)}/${normalizeImportantDashboardName(dashboard, shouldNormalizeResourceNames)}`;
+}
+
+/**
+ * Resolves configured important dashboard selectors into a flat dashboard list, without duplicates.
+ */
+export function resolveImportantDashboardList(
+  dashboards: DashboardResource[],
+  importantDashboardGroups: ImportantDashboardGroupConfig[],
+  shouldNormalizeResourceNames: boolean,
+): DashboardResource[] {
+  const seen = new Set<string>();
+  return resolveImportantDashboardGroups(dashboards, importantDashboardGroups, shouldNormalizeResourceNames)
+    .flatMap((group) =>
+      group.entries.flatMap((entry) => (entry.kind === 'project' ? entry.dashboards : [entry.dashboard])),
+    )
+    .filter((dashboard) => {
+      const key = `${dashboard.metadata.project}/${dashboard.metadata.name}`;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+}
+
+/**
+ * Resolves configured important dashboard selectors while preserving their group and project structure.
+ */
+export function resolveImportantDashboardGroups(
+  dashboards: DashboardResource[],
+  importantDashboardGroups: ImportantDashboardGroupConfig[],
+  shouldNormalizeResourceNames: boolean,
+): ImportantDashboardGroupData[] {
+  const dashboardsByKey = new Map<string, DashboardResource>();
+  const dashboardsByProject = new Map<string, DashboardResource[]>();
+
+  dashboards.forEach((dashboard) => {
+    dashboardsByKey.set(
+      buildDashboardKey(dashboard.metadata.project, dashboard.metadata.name, shouldNormalizeResourceNames),
+      dashboard,
+    );
+    const projectKey = normalizeImportantDashboardName(dashboard.metadata.project, shouldNormalizeResourceNames);
+    const projectDashboards = dashboardsByProject.get(projectKey);
+    if (projectDashboards) {
+      projectDashboards.push(dashboard);
+    } else {
+      dashboardsByProject.set(projectKey, [dashboard]);
+    }
+  });
+
+  return importantDashboardGroups.map((group) => {
+    const entries: ImportantDashboardEntryData[] = [];
+
+    (group.dashboards ?? []).forEach((selector) => {
+      if (selector.dashboard === undefined) {
+        const projectDashboards =
+          dashboardsByProject.get(normalizeImportantDashboardName(selector.project, shouldNormalizeResourceNames)) ??
+          [];
+        const [firstDashboard] = projectDashboards;
+        if (firstDashboard) {
+          entries.push({ kind: 'project', project: firstDashboard.metadata.project, dashboards: projectDashboards });
+        }
+        return;
+      }
+
+      const dashboard = dashboardsByKey.get(
+        buildDashboardKey(selector.project, selector.dashboard, shouldNormalizeResourceNames),
+      );
+      if (dashboard) {
+        entries.push({
+          kind: 'dashboard',
+          dashboard,
+        });
+      }
+    });
+
+    return {
+      title: group.title,
+      description: group.description,
+      entries,
+    };
+  });
+}
+
 /**
  * Used to get dashboards seen recently by the user.
  * Will automatically be refreshed when cache is invalidated or history modified
@@ -101,9 +212,9 @@ export function useRecentDashboardList(
   const { data, isLoading } = useDashboardList({ project: project, metadataOnly: true });
   const history = useNavHistory();
 
-  const result = useMemo(() => {
+  const recentDashboards = useMemo(() => {
     // Wrapping dashboard with their last seen date from nav history context
-    const result: DatedDashboards[] = [];
+    const datedDashboards: DatedDashboards[] = [];
     const dashboardsByKey = new Map(
       (data ?? []).map((dashboard) => [`${dashboard.metadata.project}/${dashboard.metadata.name}`, dashboard]),
     );
@@ -112,22 +223,22 @@ export function useRecentDashboardList(
     (history ?? []).forEach((historyItem) => {
       const dashboard = dashboardsByKey.get(`${historyItem.project}/${historyItem.name}`);
       if (dashboard) {
-        result.push({ dashboard: dashboard, date: historyItem.date });
+        datedDashboards.push({ dashboard: dashboard, date: historyItem.date });
       }
     });
 
     if (maxSize) {
-      return result.slice(0, maxSize);
+      return datedDashboards.slice(0, maxSize);
     }
 
-    return result;
+    return datedDashboards;
   }, [data, history, maxSize]);
 
-  return { data: result, isLoading: isLoading };
+  return { data: recentDashboards, isLoading: isLoading };
 }
 
 /**
- * Used to get important dashboards.
+ * Used to get important dashboards for the global search bar.
  * Will automatically be refreshed when cache is invalidated or history modified
  */
 export function useImportantDashboardList(project?: string): {
@@ -136,22 +247,32 @@ export function useImportantDashboardList(project?: string): {
   error: StatusError | null;
 } {
   const { data: dashboards, isLoading, error } = useDashboardList({ project: project, metadataOnly: true });
-  const importantDashboardSelectors = useImportantDashboardSelectors();
+  const importantDashboardGroups = useImportantDashboardGroups();
+  const shouldNormalizeResourceNames = useShouldNormalizeResourceNames();
 
   const importantDashboards = useMemo(() => {
-    const result: DashboardResource[] = [];
-    const dashboardsByKey = new Map(
-      (dashboards ?? []).map((dashboard) => [`${dashboard.metadata.project}/${dashboard.metadata.name}`, dashboard]),
-    );
-    importantDashboardSelectors.forEach((selector) => {
-      const dashboard = dashboardsByKey.get(`${selector.project}/${selector.dashboard}`);
-      if (dashboard) {
-        result.push(dashboard);
-      }
-    });
-    return result;
-  }, [dashboards, importantDashboardSelectors]);
+    return resolveImportantDashboardList(dashboards ?? [], importantDashboardGroups, shouldNormalizeResourceNames);
+  }, [dashboards, importantDashboardGroups, shouldNormalizeResourceNames]);
   return { data: importantDashboards, isLoading: isLoading, error };
+}
+
+/**
+ * Used to get configured important dashboard groups with their matching dashboards for the home page.
+ */
+export function useImportantDashboardGroupsData(): {
+  isLoading: false | true;
+  data: ImportantDashboardGroupData[];
+  error: StatusError | null;
+} {
+  const { data: dashboards, isLoading, error } = useDashboardList({ metadataOnly: true });
+  const importantDashboardGroups = useImportantDashboardGroups();
+  const shouldNormalizeResourceNames = useShouldNormalizeResourceNames();
+
+  const importantDashboardGroupData = useMemo(() => {
+    return resolveImportantDashboardGroups(dashboards ?? [], importantDashboardGroups, shouldNormalizeResourceNames);
+  }, [dashboards, importantDashboardGroups, shouldNormalizeResourceNames]);
+
+  return { data: importantDashboardGroupData, isLoading, error };
 }
 
 /**
@@ -173,14 +294,24 @@ export function useUpdateDashboardMutation(): UseMutationResult<DashboardResourc
 }
 
 /**
+ * A dashboard resource with an optional / partial spec.
+ * Useful for actions like the deletion that only require the metadata.
+ */
+export type PartialDashboardResource = Omit<DashboardResource, 'spec'> & { spec?: Partial<DashboardSpec> };
+
+/**
  * Used to delete a dashboard in the API.
  * Will automatically invalidate dashboards and force the get query to be executed again.
  */
-export function useDeleteDashboardMutation(): UseMutationResult<DashboardResource, Error, DashboardResource> {
+export function useDeleteDashboardMutation(): UseMutationResult<
+  PartialDashboardResource,
+  Error,
+  PartialDashboardResource
+> {
   const queryClient = useQueryClient();
-  return useMutation<DashboardResource, Error, DashboardResource>({
+  return useMutation<PartialDashboardResource, Error, PartialDashboardResource>({
     mutationKey: [resource],
-    mutationFn: (entity: DashboardResource) => {
+    mutationFn: (entity: PartialDashboardResource) => {
       return deleteDashboard(entity).then(() => {
         return entity;
       });
@@ -230,7 +361,7 @@ export function updateDashboard(entity: DashboardResource): Promise<DashboardRes
   });
 }
 
-export function deleteDashboard(entity: DashboardResource): Promise<Response> {
+export function deleteDashboard(entity: PartialDashboardResource): Promise<Response> {
   const url = buildURL({ resource: resource, project: entity.metadata.project, name: entity.metadata.name });
   return fetch(url, {
     method: HTTPMethodDELETE,

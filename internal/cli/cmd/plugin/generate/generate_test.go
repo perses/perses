@@ -77,7 +77,6 @@ func TestPluginGenerateCMD(t *testing.T) {
 			IsErrorExpected: false,
 			ExpectedMessage: `module MyPluginModule created successfully, plugin MyTestDatasource generated successfully
 ` + getFileList([]string{
-				".cjs.swcrc",
 				".gitignore",
 				".oxfmtrc.json",
 				".oxlintrc.json",
@@ -87,7 +86,6 @@ func TestPluginGenerateCMD(t *testing.T) {
 				"cue.mod/module.cue",
 				"go.mod",
 				"go.sum",
-				"jest.config.ts",
 				"package.json",
 				"rsbuild.config.ts",
 				"src/bootstrap.tsx",
@@ -98,6 +96,7 @@ func TestPluginGenerateCMD(t *testing.T) {
 				"src/setup-tests.ts",
 				"tsconfig.build.json",
 				"tsconfig.json",
+				"vitest.config.ts",
 				"schemas/datasources/my-test-datasource/my-test-datasource.cue",
 				"schemas/datasources/my-test-datasource/my-test-datasource.json",
 				"src/datasources/index.ts",
@@ -117,7 +116,6 @@ func TestPluginGenerateCMD(t *testing.T) {
 			IsErrorExpected: false,
 			ExpectedMessage: `plugin MyTestPanel generated successfully
 ` + getFileList([]string{
-				".cjs.swcrc",
 				".gitignore",
 				".oxfmtrc.json",
 				".oxlintrc.json",
@@ -127,7 +125,6 @@ func TestPluginGenerateCMD(t *testing.T) {
 				"cue.mod/module.cue",
 				"go.mod",
 				"go.sum",
-				"jest.config.ts",
 				"package.json",
 				"rsbuild.config.ts",
 				"src/bootstrap.tsx",
@@ -138,6 +135,7 @@ func TestPluginGenerateCMD(t *testing.T) {
 				"src/setup-tests.ts",
 				"tsconfig.build.json",
 				"tsconfig.json",
+				"vitest.config.ts",
 				"schemas/panels/my-test-panel/my-test-panel.cue",
 				"schemas/panels/my-test-panel/my-test-panel.json",
 				"src/panels/index.ts",

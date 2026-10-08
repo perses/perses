@@ -28,11 +28,13 @@ import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/c
 import Archive from 'mdi-material-ui/Archive';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import Magnify from 'mdi-material-ui/Magnify';
-import { ChangeEvent, ReactElement, useCallback, useMemo, useState } from 'react';
+import type { ChangeEvent, ReactElement } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { EmptyState } from '../../components/EmptyState/EmptyState';
-import { ProjectWithDashboards, useProjectsWithDashboards } from '../../model/project-client';
+import type { ProjectWithDashboards } from '../../model/project-client';
+import { useProjectsWithDashboards } from '../../model/project-client';
 
 const PROJECT_COLORS: string[] = [
   '#3B82F6',

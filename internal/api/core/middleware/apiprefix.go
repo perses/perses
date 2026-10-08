@@ -14,6 +14,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -24,7 +25,11 @@ func HandleAPIPrefix(apiPrefix string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			if !strings.HasPrefix(c.Request().URL.Path, apiPrefix) {
-				return c.Redirect(http.StatusFound, apiPrefix+c.Request().URL.Path)
+				target := apiPrefix + c.Request().URL.Path
+				if c.Request().URL.RawQuery != "" {
+					target = fmt.Sprintf("%s?%s", target, c.Request().URL.RawQuery)
+				}
+				return c.Redirect(http.StatusFound, target)
 			}
 			return next(c)
 		}

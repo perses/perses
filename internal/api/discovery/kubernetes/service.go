@@ -37,12 +37,12 @@ type serviceDiscovery struct {
 	kubeClient    *kubernetes.Clientset
 }
 
-func (d *serviceDiscovery) discover(decodedSchema []*cuetils.Node) ([]*v1.GlobalDatasource, error) {
+func (d *serviceDiscovery) discover(decodedSchema []*cuetils.Node) ([]*discoveredDatasource, error) {
 	response, err := d.kubeClient.CoreV1().Services(d.namespace).List(context.Background(), metav1.ListOptions{LabelSelector: d.labelSelector})
 	if err != nil {
 		return nil, err
 	}
-	var result []*v1.GlobalDatasource
+	var result []*discoveredDatasource
 	for _, item := range response.Items {
 		if len(d.cfg.ServiceType) != 0 && d.cfg.ServiceType != string(item.Spec.Type) {
 			logrus.Tracef("service type %q doesn't match the configured service type %q", item.Spec.Type, d.cfg.ServiceType)
@@ -53,7 +53,11 @@ func (d *serviceDiscovery) discover(decodedSchema []*cuetils.Node) ([]*v1.Global
 			return nil, convertErr
 		}
 		if dts != nil {
-			result = append(result, dts)
+			result = append(result, &discoveredDatasource{
+				datasource:  dts,
+				labels:      item.Labels,
+				annotations: item.Annotations,
+			})
 		}
 	}
 	return result, nil

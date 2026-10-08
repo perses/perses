@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Locator } from '@playwright/test';
+import type { Locator } from '@playwright/test';
 
 export class DatasourceEditor {
   readonly container: Locator;

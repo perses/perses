@@ -14,12 +14,10 @@
 package apply
 
 import (
-	"errors"
 	"fmt"
 	"io"
 
 	"github.com/efficientgo/core/merrors"
-	apiInterface "github.com/perses/perses/internal/api/interface"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/file"
@@ -27,7 +25,6 @@ import (
 	"github.com/perses/perses/internal/cli/resource"
 	"github.com/perses/perses/internal/cli/service"
 	"github.com/perses/perses/pkg/client/api"
-	"github.com/perses/perses/pkg/client/perseshttp"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/spf13/cobra"
@@ -112,16 +109,8 @@ func (o *option) applyEntity() error {
 		kind := modelV1.Kind(entity.GetKind())
 		name := entity.GetMetadata().GetName()
 		project := resource.GetProject(entity.GetMetadata(), o.Project)
-		if upsertError := o.upsertEntity(kind, project, entity); upsertError != nil {
-			// If the apply failed because the project doesn't exist, and the user has asked to auto-create the project
-			// then we will try to create the project and re-apply the resource.
-			if isProjectDoesNotExistError(upsertError) && o.createProject && !modelV1.IsGlobal(kind) {
-				if upsertError = o.applyEntityWithProjectCreation(kind, project, entity); upsertError != nil {
-					return upsertError
-				}
-			} else {
-				return upsertError
-			}
+		if upsertError := service.UpsertWithProjectCreation(o.apiClient, kind, project, entity, o.createProject); upsertError != nil {
+			return upsertError
 		}
 
 		if outputError := resource.HandleSuccessMessage(o.writer, kind, project, fmt.Sprintf("object %q %q has been applied", kind, name)); outputError != nil {
@@ -129,48 +118,6 @@ func (o *option) applyEntity() error {
 		}
 	}
 	return nil
-}
-
-func (o *option) applyEntityWithProjectCreation(kind modelV1.Kind, project string, entity modelAPI.Entity) error {
-	if len(project) == 0 {
-		return fmt.Errorf("unable to create missing project: project is not set")
-	}
-
-	projectService, projectServiceErr := service.New(modelV1.KindProject, "", o.apiClient)
-	if projectServiceErr != nil {
-		return projectServiceErr
-	}
-
-	projectEntity := &modelV1.Project{
-		Kind: modelV1.KindProject,
-		Metadata: modelV1.Metadata{
-			Name: project,
-		},
-	}
-	if _, projectCreationErr := projectService.CreateResource(projectEntity); projectCreationErr != nil && !errors.Is(projectCreationErr, perseshttp.ConflictError) {
-		return projectCreationErr
-	}
-
-	// Retry once the original request against the newly created project.
-	return o.upsertEntity(kind, project, entity)
-}
-
-func (o *option) upsertEntity(kind modelV1.Kind, project string, entity modelAPI.Entity) error {
-	svc, svcErr := service.New(kind, project, o.apiClient)
-	if svcErr != nil {
-		return svcErr
-	}
-
-	return service.Upsert(svc, entity)
-}
-
-func isProjectDoesNotExistError(err error) bool {
-	var requestErr *perseshttp.RequestError
-	if !errors.As(err, &requestErr) {
-		return false
-	}
-
-	return apiInterface.IsProjectDoesNotExistErrorMessage(requestErr.Message)
 }
 
 func (o *option) SetWriter(writer io.Writer) {

@@ -122,6 +122,9 @@ func (o *option) validate(objects []modelAPI.Entity) error {
 	if o.sch == nil && !o.online {
 		return nil
 	}
+	// When linting offline, the configuration of the server is unknown.
+	// So the server-dependent checks (like the maximum timeout of the datasource proxy) are skipped by passing a nil proxy config.
+	// They are done by the server when using the online mode.
 	for _, object := range objects {
 		switch entity := object.(type) {
 		case *modelV1.Dashboard:
@@ -133,7 +136,7 @@ func (o *option) validate(objects []modelAPI.Entity) error {
 					return err
 				}
 			} else {
-				if err := validate.DashboardSpec(entity.Spec, o.sch); err != nil {
+				if err := validate.DashboardSpec(entity.Spec, o.sch, nil); err != nil {
 					return fmt.Errorf("unexpected error in dashboard %q: %w", entity.Metadata.Name, err)
 				}
 			}
@@ -142,7 +145,7 @@ func (o *option) validate(objects []modelAPI.Entity) error {
 				if err := o.apiClient.Validate().GlobalDatasource(entity); err != nil {
 					return err
 				}
-			} else if err := validate.Datasource(entity, nil, o.sch); err != nil {
+			} else if err := validate.Datasource(entity, nil, o.sch, nil); err != nil {
 				return err
 			}
 		case *modelV1.Datasource:
@@ -150,7 +153,7 @@ func (o *option) validate(objects []modelAPI.Entity) error {
 				if err := o.apiClient.Validate().Datasource(entity); err != nil {
 					return err
 				}
-			} else if err := validate.Datasource(entity, nil, o.sch); err != nil {
+			} else if err := validate.Datasource(entity, nil, o.sch, nil); err != nil {
 				return err
 			}
 		case *modelV1.GlobalVariable:

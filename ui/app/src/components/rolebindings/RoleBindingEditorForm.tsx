@@ -13,19 +13,27 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Autocomplete, Box, Divider, IconButton, Stack, TextField, Typography } from '@mui/material';
-import { RoleBinding, roleBindingsEditorSchema } from '@perses-dev/client';
+import type { RoleBinding } from '@perses-dev/client';
+import { roleBindingsEditorSchema } from '@perses-dev/client';
 import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
-import React, { ReactElement, useMemo, useState } from 'react';
-import { Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
+import type { ReactElement } from 'react';
+import React, { useMemo, useState } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useFieldArray, useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 import { useUserList } from '../../model/user-client';
-import { FormEditorProps } from '../form-drawers';
+import type { FormEditorProps } from '../form-drawers';
 
 interface RoleBindingEditorFormProps extends FormEditorProps<RoleBinding> {
   roleSuggestions: string[];
 }
+
+// The client schema exposes unknown input; keep form values typed and validate through the full schema.
+// TODO: Remove in the next shared beta release.
+const formSchema = z.transform((value: RoleBinding): unknown => value).pipe(roleBindingsEditorSchema);
 
 export function RoleBindingEditorForm({
   initialValue,
@@ -44,7 +52,7 @@ export function RoleBindingEditorForm({
   const submitText = getSubmitText(action, isDraft);
 
   const form = useForm<RoleBinding>({
-    resolver: zodResolver(roleBindingsEditorSchema),
+    resolver: zodResolver(formSchema),
     mode: 'onBlur',
     defaultValues: initialValue,
   });

@@ -11,28 +11,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Stack, Tooltip } from '@mui/material';
-import { GridColDef, GridRowParams } from '@mui/x-data-grid';
-import { EphemeralDashboardResource } from '@perses-dev/client';
+import { Box, Link, Stack, Tooltip } from '@mui/material';
+import type { GridColDef, GridRowParams } from '@mui/x-data-grid';
+import type { EphemeralDashboardResource } from '@perses-dev/client';
 import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import { parseDurationString } from '@perses-dev/spec';
 import { intlFormatDistance, add } from 'date-fns';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import { ReactElement, useCallback, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 
 import { useDeleteEphemeralDashboardMutation } from '../../model/ephemeral-dashboard-client';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { DeleteResourceDialog, UpdateEphemeralDashboardDialog } from '../dialogs';
+import type { ListProperties } from '../list';
 import {
   CREATED_AT_COL_DEF,
   DISPLAY_NAME_COL_DEF,
-  ListProperties,
   PROJECT_COL_DEF,
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
 } from '../list';
-import { EphemeralDashboardDataGrid, Row } from './EphemeralDashboardDataGrid';
+import type { Row } from './EphemeralDashboardDataGrid';
+import { EphemeralDashboardDataGrid } from './EphemeralDashboardDataGrid';
 
 export interface EphemeralDashboardListProperties extends ListProperties {
   ephemeralDashboardList: EphemeralDashboardResource[];
@@ -125,7 +128,20 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
       PROJECT_COL_DEF,
-      DISPLAY_NAME_COL_DEF,
+      {
+        ...DISPLAY_NAME_COL_DEF,
+        renderCell: (params): ReactElement => (
+          <Link
+            component={RouterLink}
+            to={`/projects/${params.row.project}/ephemeraldashboards/${params.row.name}`}
+            tabIndex={params.hasFocus ? 0 : -1}
+            color="inherit"
+            underline="hover"
+          >
+            {params.row.displayName}
+          </Link>
+        ),
+      },
       VERSION_COL_DEF,
       {
         field: 'expireAt',

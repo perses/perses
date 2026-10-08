@@ -21,7 +21,8 @@ import TableRow from '@mui/material/TableRow';
 import Archive from 'mdi-material-ui/Archive';
 import ChevronDownIcon from 'mdi-material-ui/ChevronDown';
 import ShieldAccount from 'mdi-material-ui/ShieldAccount';
-import { ReactElement, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useAuthorizationContext } from '../../context/Authorization';
 import { useUserPermissions } from '../../model/user-client';

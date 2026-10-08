@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { Secret, SecretResource } from '@perses-dev/client';
+import type { Secret, SecretResource } from '@perses-dev/client';
 import { useSnackbar } from '@perses-dev/components';
-import { ReactElement, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
 import { SecretList } from '../../../components/secrets/SecretList';
 import {

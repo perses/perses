@@ -12,11 +12,11 @@
 // limitations under the License.
 
 import { Button, Stack, Typography } from '@mui/material';
-import { DashboardResource } from '@perses-dev/client';
+import type { DashboardResource } from '@perses-dev/client';
 import { getResourceDisplayName } from '@perses-dev/components';
 import Archive from 'mdi-material-ui/Archive';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 interface DashboardCardProps {

@@ -37,12 +37,12 @@ func New(serviceManager dependency.ServiceManager, folders []string, caseSensiti
 		caseSensitive:  caseSensitive,
 	}
 	return &provisioningTask{
-			folders: folders,
-			svc:     svc,
-		}, &provisioningWatcher{
-			folders: folders,
-			svc:     svc,
-		}
+		folders: folders,
+		svc:     svc,
+	}, &provisioningWatcher{
+		folders: folders,
+		svc:     svc,
+	}
 }
 
 type provisioningTask struct {

@@ -26,13 +26,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (e *endpoint) proxyProjectDatasource(ctx echo.Context, projectName, dtsName string, spec datasource.Spec, retrieveSecret func(name string) (*v1.SecretSpec, error)) error {
+// proxyProjectDatasource forwards the request to the datasource.
+// transportKey must be empty for an unsaved datasource, so its transport is not cached.
+func (e *endpoint) proxyProjectDatasource(ctx echo.Context, projectName, dtsName, transportKey string, spec datasource.Spec, retrieveSecret func(name string) (*v1.SecretSpec, error)) error {
 	path := ctx.Param("*")
-	pr, err := newProxy(dtsName, projectName, spec, path, e.crypto, retrieveSecret)
+	pr, err := e.newProxy(dtsName, projectName, transportKey, spec, path, retrieveSecret)
 	if err != nil {
 		return err
 	}
-	return pr.serve(ctx)
+	return pr.Serve(ctx)
 }
 
 func (e *endpoint) proxyUnsavedProjectDatasource(ctx echo.Context) error {
@@ -53,7 +55,7 @@ func (e *endpoint) proxyUnsavedProjectDatasource(ctx echo.Context) error {
 		dtsName = body.Spec.Display.Name
 	}
 
-	return e.proxyProjectDatasource(ctx, projectName, dtsName, body.Spec, func(name string) (*v1.SecretSpec, error) {
+	return e.proxyProjectDatasource(ctx, projectName, dtsName, "", body.Spec, func(name string) (*v1.SecretSpec, error) {
 		if err := e.checkPermission(ctx, projectName, role.SecretScope, role.ReadAction); err != nil {
 			return nil, err
 		}
@@ -73,7 +75,7 @@ func (e *endpoint) proxySavedProjectDatasource(ctx echo.Context) error {
 		return err
 	}
 
-	return e.proxyProjectDatasource(ctx, projectName, dtsName, dts, func(name string) (*v1.SecretSpec, error) {
+	return e.proxyProjectDatasource(ctx, projectName, dtsName, projectTransportKey(projectName, dtsName), dts, func(name string) (*v1.SecretSpec, error) {
 		return e.getProjectSecret(projectName, dtsName, name)
 	})
 }

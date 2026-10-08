@@ -14,7 +14,8 @@
 import { SnackbarProvider } from '@perses-dev/components';
 import { HotkeysProvider } from '@perses-dev/dashboards';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { lazy, ReactElement, Suspense } from 'react';
+import type { ReactElement } from 'react';
+import { lazy, Suspense } from 'react';
 import { CookiesProvider } from 'react-cookie';
 import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router-dom';
 import { QueryParamProvider } from 'use-query-params';
@@ -22,6 +23,8 @@ import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 
 // Default route is eagerly loaded
 import App from './App';
+import type { PageTitleHandle } from './components/PageTitle';
+import { PageTitle } from './components/PageTitle';
 import { PersesLoader } from './components/PersesLoader';
 import { PERSES_APP_CONFIG } from './config';
 import { AuthorizationProvider } from './context/Authorization';
@@ -80,6 +83,7 @@ const queryClient = new QueryClient({
 function AppProviders(): ReactElement {
   return (
     <CookiesProvider>
+      <PageTitle />
       <QueryClientProvider client={queryClient}>
         <HotkeysProvider
           defaultOptions={{
@@ -116,20 +120,22 @@ const router = createBrowserRouter(
           path: '',
           element: <RequireAuth />,
           children: [
-            { index: true, Component: HomeView },
-            { path: ProfileRoute, Component: ProfileView },
+            { index: true, Component: HomeView, handle: { title: 'Home' } satisfies PageTitleHandle },
+            { path: ProfileRoute, Component: ProfileView, handle: { title: 'Profile' } satisfies PageTitleHandle },
             {
               path: AdminRoute,
+              handle: { title: 'Administration' } satisfies PageTitleHandle,
               children: [
                 { index: true, Component: AdminView },
                 { path: ':tab', Component: AdminView },
               ],
             },
-            { path: ConfigRoute, Component: ConfigView },
-            { path: ImportRoute, Component: ImportView },
-            { path: ProjectRoute, Component: ProjectView },
+            { path: ConfigRoute, Component: ConfigView, handle: { title: 'Configuration' } satisfies PageTitleHandle },
+            { path: ImportRoute, Component: ImportView, handle: { title: 'Import' } satisfies PageTitleHandle },
+            { path: ProjectRoute, Component: ProjectView, handle: { title: 'Projects' } satisfies PageTitleHandle },
             {
               path: ExploreRoute,
+              handle: { title: 'Explore' } satisfies PageTitleHandle,
               element: <RequireExplorerEnabled />,
               children: [{ index: true, Component: ExploreView }],
             },
@@ -140,17 +146,32 @@ const router = createBrowserRouter(
                 { index: true, element: <Navigate to="/" replace /> },
                 {
                   path: `:projectName`,
+                  handle: { title: ({ projectName }): string | undefined => projectName } satisfies PageTitleHandle,
                   children: [
                     { index: true, Component: ProjectView },
-                    { path: 'dashboard/new', Component: CreateDashboardView },
-                    { path: 'dashboards/:dashboardName', Component: DashboardView },
+                    {
+                      path: 'dashboard/new',
+                      Component: CreateDashboardView,
+                      handle: { title: 'New Dashboard' } satisfies PageTitleHandle,
+                    },
+                    {
+                      path: 'dashboards/:dashboardName',
+                      Component: DashboardView,
+                      handle: {
+                        title: ({ dashboardName }): string | undefined => dashboardName,
+                      } satisfies PageTitleHandle,
+                    },
                     {
                       path: 'ephemeraldashboard/new',
+                      handle: { title: 'New Ephemeral Dashboard' } satisfies PageTitleHandle,
                       element: <RequireEphemeralDashboardEnabled />,
                       children: [{ index: true, Component: CreateEphemeralDashboardView }],
                     },
                     {
                       path: 'ephemeraldashboards/:ephemeralDashboardName',
+                      handle: {
+                        title: ({ ephemeralDashboardName }): string | undefined => ephemeralDashboardName,
+                      } satisfies PageTitleHandle,
                       element: <RequireEphemeralDashboardEnabled />,
                       children: [{ index: true, Component: EphemeralDashboardView }],
                     },
@@ -167,16 +188,19 @@ const router = createBrowserRouter(
           children: [
             {
               path: SignInRoute,
+              handle: { title: 'Sign In' } satisfies PageTitleHandle,
               element: <RequireAuthEnabled />,
               children: [{ index: true, Component: SignInView }],
             },
             {
               path: SignUpRoute,
+              handle: { title: 'Sign Up' } satisfies PageTitleHandle,
               element: <RequireAuthEnabled />,
               children: [{ index: true, Component: SignUpView }],
             },
             {
               path: DelegatedAuthnErrorRoute,
+              handle: { title: 'Authentication Error' } satisfies PageTitleHandle,
               element: <RequireAuthEnabled />,
               children: [{ index: true, Component: DelegatedAuthnErrorView }],
             },

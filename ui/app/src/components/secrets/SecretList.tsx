@@ -12,28 +12,25 @@
 // limitations under the License.
 
 import { IconButton, Stack, Tooltip } from '@mui/material';
-import { GridColDef, GridRowParams } from '@mui/x-data-grid';
-import { Action, getMetadataProject, Secret } from '@perses-dev/client';
+import type { GridColDef, GridRowParams } from '@mui/x-data-grid';
+import type { Action, Secret } from '@perses-dev/client';
+import { getMetadataProject } from '@perses-dev/client';
 import { useSnackbar } from '@perses-dev/components';
 import ClipboardIcon from 'mdi-material-ui/ClipboardOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import { ReactElement, useCallback, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { GlobalProject } from '../../context/Authorization';
 import { useIsReadonly } from '../../context/Config';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { DeleteResourceDialog } from '../dialogs';
-import {
-  CREATED_AT_COL_DEF,
-  ListPropertiesWithCallbacks,
-  NAME_COL_DEF,
-  PROJECT_COL_DEF,
-  UPDATED_AT_COL_DEF,
-  VERSION_COL_DEF,
-} from '../list';
-import { SecretDataGrid, Row } from './SecretDataGrid';
+import type { ListPropertiesWithCallbacks } from '../list';
+import { CREATED_AT_COL_DEF, NAME_COL_DEF, PROJECT_COL_DEF, UPDATED_AT_COL_DEF, VERSION_COL_DEF } from '../list';
+import type { Row } from './SecretDataGrid';
+import { SecretDataGrid } from './SecretDataGrid';
 import { SecretDrawer } from './SecretDrawer';
 
 /**

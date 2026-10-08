@@ -13,7 +13,8 @@
 
 import { Box, Alert } from '@mui/material';
 import { useLocalStorage } from '@perses-dev/components';
-import { ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
 import { useBanner } from '../context/Config';
 

@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ProjectResource } from '@perses-dev/client';
+import type { ProjectResource } from '@perses-dev/client';
 import { getResourceDisplayName } from '@perses-dev/components';
 import Archive from 'mdi-material-ui/Archive';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { BreadcrumbVariant, HomeLinkCrumb, Breadcrumbs, LinkCrumb, StackCrumb, TitleCrumb } from './breadcrumbs';
+import type { BreadcrumbVariant } from './breadcrumbs';
+import { HomeLinkCrumb, Breadcrumbs, LinkCrumb, StackCrumb, TitleCrumb } from './breadcrumbs';
 
 interface ProjectBreadcrumbsProps {
   project: ProjectResource;

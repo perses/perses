@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RoleBinding } from '@perses-dev/client';
+import type { RoleBinding } from '@perses-dev/client';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { Dispatch, ReactElement, useState } from 'react';
+import type { Dispatch, ReactElement } from 'react';
+import { useState } from 'react';
 
 import { DeleteResourceDialog } from '../dialogs';
-import { DrawerProps } from '../form-drawers';
+import type { DrawerProps } from '../form-drawers';
 import { RoleBindingEditorForm } from './RoleBindingEditorForm';
 
 interface RoleBindingDrawerProps<T extends RoleBinding> extends DrawerProps<T> {

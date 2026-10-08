@@ -242,7 +242,9 @@ percli dac build -d my_dashboards
 
 ## Development workflow with auto-reload
 
-For an improved development experience, instead of building the files each time manually with `dac build`, you can use the `dac watch` command that automatically rebuilds your dashboards whenever you save changes to your DaC files. This provides a workflow similar to frontend hot-reload development.
+For an improved development experience, instead of building the files each time manually with `dac build`, 
+you can use the `dac watch` command that automatically rebuilds your dashboards whenever you save changes to your DaC files. 
+This provides a workflow similar to frontend hot-reload development.
 
 ### Basic watch mode
 
@@ -267,7 +269,8 @@ The watcher will:
 
 ### Integrated development workflow
 
-To get a direct visual feedback of your changes when coding dashboards, you can run Perses with provisioning configured to watch your build directory:
+To get a direct visual feedback of your changes when coding dashboards, you can run Perses with provisioning configured 
+to watch your build directory:
 
 **Step 1: Create a Perses config file** (`perses-dev.yaml`):
 
@@ -278,7 +281,7 @@ database:
     extension: yaml
 
 provisioning:
-  interval: 5s  # Check for changes every 5 seconds
+  enable_watch: true  # Automatically reload dashboards on change
   folders:
     - /absolute/path/to/your/built  # Your build output folder
 
@@ -289,8 +292,8 @@ security:
 **Step 2: Start both processes**:
 
 ```bash
-# Terminal 1: Start Perses server with provisioning
-perses --config perses-dev.yaml
+# Terminal 1: Start Perses server with provisioning (Tip: using DEBUG log level will allow you to see provisioning reaction to your updates)
+perses --config perses-dev.yaml --log.level DEBUG
 
 # Terminal 2: At the root of your DaC repo, start the DaC watcher
 percli dac watch
@@ -302,10 +305,7 @@ percli dac watch
 2. Navigate to your dashboards
 3. Edit your DaC files (`.go` or `.cue`)
 4. Watch the terminal show automatic rebuild
-5. Refresh your browser to see changes (provisioning picks them up within 5 seconds)
-
-!!! tip
-    The provisioning interval of `5s` provides a good balance between responsiveness and system load. You can adjust it based on your needs.
+5. Refresh your browser to see changes
 
 !!! tip
     The watch command uses a 500ms debounce delay by default to avoid excessive rebuilds while you're actively editing. You can customize this with the `--debounce` flag.

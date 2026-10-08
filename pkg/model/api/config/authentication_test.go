@@ -88,6 +88,36 @@ client_secret: "secretthing"
 	assert.Equal(t, "http://localhost:8181", c.Issuer.String())
 }
 
+func TestOIDCProvider_CustomLoginProperty(t *testing.T) {
+	validYamlInput := `
+slug_id: "github"
+name: "Github"
+client_id: "secretthing"
+issuer: "http://localhost:4200"
+custom_login_property: "preferred_username"
+`
+	p := &OIDCProvider{}
+	err := config.NewResolver[OIDCProvider]().
+		SetConfigData([]byte(validYamlInput)).
+		Resolve(p).
+		Verify()
+	assert.NoError(t, err)
+	assert.Equal(t, LoginPropertyPreferredUsername, p.CustomLoginProperty)
+
+	invalidYamlInput := `
+slug_id: "github"
+name: "Github"
+client_id: "secretthing"
+issuer: "http://localhost:4200"
+custom_login_property: "not_a_real_property"
+`
+	err = config.NewResolver[OIDCProvider]().
+		SetConfigData([]byte(invalidYamlInput)).
+		Resolve(&OIDCProvider{}).
+		Verify()
+	assert.ErrorContains(t, err, "invalid custom_login_property")
+}
+
 func TestAppendIfMissing(t *testing.T) {
 	slice := []string{"test1", "test2"}
 	slice, ok1 := appendIfMissing(slice, "test1")

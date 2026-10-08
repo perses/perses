@@ -22,12 +22,11 @@ package panelgroup
 
 import (
 	"math"
-	"github.com/perses/perses/cue/model/api/v1"
 	"github.com/perses/spec/cue/dashboard"
 )
 
 // expected user inputs
-#panels: [...v1.#Panel]
+#panels: [...dashboard.#Panel]
 #title:           string
 #isCollapsed?:    bool
 #repeatVariable?: string
@@ -47,6 +46,9 @@ import (
 
 // output: the final layout & panels as map.
 layout: dashboard.#Layout & {
+	// TODO This builder is currently opinionated towards grid layouts.
+	// This could be extended to support other layout kinds in the future.
+	kind: dashboard.#KindGridLayout
 	spec: dashboard.#GridLayoutSpec & {
 		display: {
 			title: #title

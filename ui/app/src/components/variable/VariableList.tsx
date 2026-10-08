@@ -12,30 +12,33 @@
 // limitations under the License.
 
 import { IconButton, Stack, Tooltip } from '@mui/material';
-import { GridColDef, GridRowParams } from '@mui/x-data-grid';
-import { Action, getVariableProject, VariableType } from '@perses-dev/client';
+import type { GridColDef, GridRowParams } from '@mui/x-data-grid';
+import type { Action, VariableType } from '@perses-dev/client';
+import { getVariableProject } from '@perses-dev/client';
 import { getResourceDisplayName, useSnackbar } from '@perses-dev/components';
 import Clipboard from 'mdi-material-ui/ClipboardOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import { ReactElement, useCallback, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { GlobalProject } from '../../context/Authorization';
 import { useIsReadonly } from '../../context/Config';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { DeleteResourceDialog } from '../dialogs';
+import type { ListPropertiesWithCallbacks } from '../list';
 import {
   CREATED_AT_COL_DEF,
   DESCRIPTION_COL_DEF,
   DISPLAY_NAME_COL_DEF,
-  ListPropertiesWithCallbacks,
   NAME_COL_DEF,
   PROJECT_COL_DEF,
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
 } from '../list';
-import { VariableDataGrid, Row } from './VariableDataGrid';
+import type { Row } from './VariableDataGrid';
+import { VariableDataGrid } from './VariableDataGrid';
 import { VariableDrawer } from './VariableDrawer';
 
 /**

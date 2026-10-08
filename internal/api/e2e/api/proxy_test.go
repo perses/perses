@@ -29,6 +29,7 @@ import (
 	"github.com/perses/perses/internal/api/utils"
 	testUtils "github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api"
+	apiConfig "github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/spec/go/common"
@@ -322,5 +323,58 @@ func TestHTTPProxyLocalDatasourceWithRealDashboard(t *testing.T) {
 			Expect().
 			Status(http.StatusOK)
 		return []api.Entity{project, &dash}
+	})
+}
+
+// TestProxyDeniedDestination reproduces the reported SSRF: with the default configuration, the datasource proxy must
+// refuse to reach the Perses server itself through the loopback interface, whatever the way the target is provided.
+func TestProxyDeniedDestination(t *testing.T) {
+	conf := e2eframework.DefaultConfig()
+	conf.Datasource.Proxy = apiConfig.DatasourceProxyConfig{}
+	e2eframework.WithServerConfig(t, conf, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
+		projectName := "p1"
+		dtsName := "ssrfds"
+		project := e2eframework.NewProject(projectName)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
+
+		var spec datasourceSpec.Spec
+		rawSpec := fmt.Sprintf(`{"plugin":{"kind":"PrometheusDatasource","spec":{"proxy":{"kind":"HTTPProxy","spec":{"url":%q}}}}}`, server.URL)
+		if err := json.Unmarshal([]byte(rawSpec), &spec); err != nil {
+			t.Fatal(err)
+		}
+		unsavedBody := map[string]any{"method": http.MethodGet, "spec": spec}
+
+		// Unsaved proxy endpoints: the spec comes from the request body.
+		expect.POST(fmt.Sprintf("/proxy/%s/%s/%s/%s/api/v1/projects", utils.PathUnsaved, utils.PathProject, projectName, utils.PathDatasource)).
+			WithJSON(unsavedBody).
+			Expect().
+			Status(http.StatusForbidden)
+		expect.POST(fmt.Sprintf("/proxy/%s/%s/api/v1/projects", utils.PathUnsaved, utils.PathGlobalDatasource)).
+			WithJSON(unsavedBody).
+			Expect().
+			Status(http.StatusForbidden)
+
+		// Saving a datasource pointing to a denied destination is refused.
+		dts := &v1.Datasource{
+			Kind: v1.KindDatasource,
+			Metadata: v1.ProjectMetadata{
+				Metadata:               v1.Metadata{Name: dtsName},
+				ProjectMetadataWrapper: v1.ProjectMetadataWrapper{Project: projectName},
+			},
+			Spec: spec,
+		}
+		expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, projectName, utils.PathDatasource)).
+			WithJSON(dts).
+			Expect().
+			Status(http.StatusBadRequest)
+
+		// A datasource stored before the policy was enforced cannot be used either.
+		dts.Metadata.CreateNow()
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), dts)
+		expect.GET(fmt.Sprintf("/proxy/%s/%s/%s/%s/api/v1/projects", utils.PathProject, projectName, utils.PathDatasource, dtsName)).
+			Expect().
+			Status(http.StatusForbidden)
+
+		return []api.Entity{dts, project}
 	})
 }

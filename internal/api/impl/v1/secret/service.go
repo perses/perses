@@ -22,6 +22,8 @@ import (
 	"github.com/perses/perses/internal/api/crypto"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
+	"github.com/perses/perses/internal/api/netguard"
+	"github.com/perses/perses/internal/api/secretfile"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -29,15 +31,30 @@ import (
 
 type service struct {
 	secret.Service
-	dao    secret.DAO
-	crypto crypto.Crypto
+	dao           secret.DAO
+	crypto        crypto.Crypto
+	fileValidator *secretfile.Validator
+	// guard verifies the destinations defined in the secret (e.g. the OAuth token URL) are allowed.
+	guard *netguard.Guard
 }
 
-func NewService(dao secret.DAO, crypto crypto.Crypto) secret.Service {
+func NewService(dao secret.DAO, crypto crypto.Crypto, fileValidator *secretfile.Validator, guard *netguard.Guard) secret.Service {
 	return &service{
-		dao:    dao,
-		crypto: crypto,
+		dao:           dao,
+		crypto:        crypto,
+		fileValidator: fileValidator,
+		guard:         guard,
 	}
+}
+
+func (s *service) validate(entity *v1.Secret) error {
+	if err := s.fileValidator.ValidateSpec(&entity.Spec); err != nil {
+		return apiInterface.HandleBadRequestError(err.Error())
+	}
+	if err := s.guard.ValidateOAuth(entity.Spec.OAuth); err != nil {
+		return apiInterface.HandleBadRequestError(err.Error())
+	}
+	return nil
 }
 
 func (s *service) Create(_ echo.Context, entity *v1.Secret) (*v1.PublicSecret, error) {
@@ -49,6 +66,9 @@ func (s *service) Create(_ echo.Context, entity *v1.Secret) (*v1.PublicSecret, e
 }
 
 func (s *service) create(entity *v1.Secret) (*v1.PublicSecret, error) {
+	if err := s.validate(entity); err != nil {
+		return nil, err
+	}
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.crypto.Encrypt(&entity.Spec); err != nil {
@@ -79,6 +99,9 @@ func (s *service) update(entity *v1.Secret, parameters apiInterface.Parameters) 
 	} else if entity.Metadata.Project != parameters.Project {
 		logrus.Debugf("project in Secret %q and project from the http request %q don't match", entity.Metadata.Project, parameters.Project)
 		return nil, apiInterface.HandleBadRequestError("metadata.project and the project name in the http path request don't match")
+	}
+	if err := s.validate(entity); err != nil {
+		return nil, err
 	}
 	// find the previous version of the Secret
 	oldEntity, err := s.dao.Get(parameters.Project, parameters.Name)

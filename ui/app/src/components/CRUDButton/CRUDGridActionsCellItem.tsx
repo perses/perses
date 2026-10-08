@@ -13,8 +13,8 @@
 
 import { Tooltip } from '@mui/material';
 import { GridActionsCellItem } from '@mui/x-data-grid';
-import { Action, Scope } from '@perses-dev/client';
-import { ReactElement } from 'react';
+import type { Action, Scope } from '@perses-dev/client';
+import type { ReactElement } from 'react';
 
 import { CRUDAction } from './CRUDAction';
 

@@ -4,6 +4,8 @@
 
 package v1
 
+_#maxSubjectsForLinearDeduplication: 16
+
 #RoleBindingInterface: _
 
 #Subject: _

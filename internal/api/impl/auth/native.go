@@ -47,6 +47,11 @@ func (e *nativeEndpoint) GetSlugID() string {
 	return "" // no slug ID needed for native auth
 }
 
+func (e *nativeEndpoint) RefreshOIDCToken(_ echo.Context) string {
+	// No OIDC token to refresh for native auth
+	return ""
+}
+
 func newNativeEndpoint(dao user.DAO, jwt crypto.JWT) authEndpoint {
 	return &nativeEndpoint{
 		dao:             dao,

@@ -26,7 +26,7 @@ import {
   SHOW_SHORTCUTS_SHORTCUT,
   TOGGLE_THEME_SHORTCUT,
 } from '@perses-dev/dashboards';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ExploreRoute, ProfileRoute } from '../model/route';

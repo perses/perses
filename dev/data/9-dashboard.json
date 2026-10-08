@@ -12378,5 +12378,281 @@
       ],
       "duration": "1h"
     }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "ThreeSignals",
+      "project": "perses",
+      "createdAt": "2021-11-09T00:00:00Z",
+      "updatedAt": "2021-11-09T00:00:00Z",
+      "version": 0
+    },
+    "spec": {
+      "display": {
+        "name": "Three Signals: Metrics + Logs + Traces",
+        "description": "A single Perses dashboard showing all three observability signals side by side: metrics (Prometheus), traces (Tempo) and logs (Loki). Uses the local dev datasources (PrometheusLocal, TempoLocal, LokiLocal) and the generators from dev/docker-compose.yaml (profiles: prometheus, tempo, loki)."
+      },
+      "duration": "1h",
+      "refreshInterval": "15s",
+      "panels": {
+        "RequestRate": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "METRICS \u2014 HTTP requests by handler",
+              "description": "Per-handler HTTP request rate over the last 5 minutes (Prometheus)."
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "mode": "list",
+                  "position": "bottom"
+                },
+                "visual": {
+                  "areaOpacity": 0.15,
+                  "lineWidth": 1.5
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "PrometheusLocal"
+                      },
+                      "query": "sum by (handler) (rate(prometheus_http_requests_total[5m]))",
+                      "seriesNameFormat": "{{handler}}"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "TotalRequests": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "METRICS \u2014 Total request rate",
+              "description": "Overall HTTP request rate (Prometheus)."
+            },
+            "plugin": {
+              "kind": "StatChart",
+              "spec": {
+                "calculation": "last-number",
+                "format": {
+                  "unit": "requests/sec",
+                  "decimalPlaces": 1
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "PrometheusLocal"
+                      },
+                      "query": "sum(rate(prometheus_http_requests_total[5m]))"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "RecentTraces": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "TRACES \u2014 Recent traces by duration",
+              "description": "Scatter plot of recently ingested traces (Tempo). Click a point to open the trace."
+            },
+            "plugin": {
+              "kind": "ScatterChart",
+              "spec": {}
+            },
+            "queries": [
+              {
+                "kind": "TraceQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "TempoTraceQuery",
+                    "spec": {
+                      "datasource": {
+                        "kind": "TempoDatasource",
+                        "name": "TempoLocal"
+                      },
+                      "query": "{}"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "TracesTable": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "TRACES \u2014 Trace list",
+              "description": "List of recent traces returned by Tempo."
+            },
+            "plugin": {
+              "kind": "TraceTable",
+              "spec": {}
+            },
+            "queries": [
+              {
+                "kind": "TraceQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "TempoTraceQuery",
+                    "spec": {
+                      "datasource": {
+                        "kind": "TempoDatasource",
+                        "name": "TempoLocal"
+                      },
+                      "query": "{}"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "GeneratedLogs": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "LOGS \u2014 Application logs",
+              "description": "Streaming application logs from the log generator (Loki)."
+            },
+            "plugin": {
+              "kind": "LogsTable",
+              "spec": {
+                "allowWrap": true,
+                "enableDetails": true,
+                "showTime": true
+              }
+            },
+            "queries": [
+              {
+                "kind": "LogQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "LokiLogQuery",
+                    "spec": {
+                      "datasource": {
+                        "kind": "LokiDatasource",
+                        "name": "LokiLocal"
+                      },
+                      "query": "{app=\"log-generator\"}"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Metrics",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 8,
+                "content": {
+                  "$ref": "#/spec/panels/TotalRequests"
+                }
+              },
+              {
+                "x": 6,
+                "y": 0,
+                "width": 18,
+                "height": 8,
+                "content": {
+                  "$ref": "#/spec/panels/RequestRate"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Traces",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 9,
+                "content": {
+                  "$ref": "#/spec/panels/RecentTraces"
+                }
+              },
+              {
+                "x": 12,
+                "y": 0,
+                "width": 12,
+                "height": 9,
+                "content": {
+                  "$ref": "#/spec/panels/TracesTable"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Logs",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 24,
+                "height": 10,
+                "content": {
+                  "$ref": "#/spec/panels/GeneratedLogs"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
   }
 ]

@@ -13,15 +13,18 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Autocomplete, Button, Chip, Stack, TextField } from '@mui/material';
-import { FolderItem, FolderResource } from '@perses-dev/client';
+import type { FolderItem, FolderResource } from '@perses-dev/client';
 import { Dialog, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { Dispatch, DispatchWithoutAction, ReactElement, useMemo } from 'react';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import type { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
+import { useMemo } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 
 import { useUpdateFolderMutation } from '../../model/folder-client';
 import { collectDashboards, insertSubFolder } from '../../utils/folderUtils';
-import { EditFolderValidationType, useAddFolderValidationSchema } from '../../validation';
-import { DashboardListRow } from '../DashboardList/DashboardList';
+import type { EditFolderValidationType } from '../../validation';
+import { useAddFolderValidationSchema } from '../../validation';
+import type { DashboardListRow } from '../DashboardList/DashboardList';
 
 export interface AddFolderDialogProps {
   folder: FolderResource;

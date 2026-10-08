@@ -12,12 +12,14 @@
 // limitations under the License.
 
 import { Box, CircularProgress, Stack } from '@mui/material';
-import { DashboardResource } from '@perses-dev/client';
+import type { DashboardResource } from '@perses-dev/client';
 import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/components';
-import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
+import type { ExternalVariableDefinition, OnSaveDashboard } from '@perses-dev/dashboards';
+import { ViewDashboard } from '@perses-dev/dashboards';
 import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
-import { DashboardSpec } from '@perses-dev/spec';
-import { ReactElement, useMemo } from 'react';
+import type { DashboardSpec } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
 import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
 import { PERSES_APP_CONFIG } from '../../../config';
@@ -25,6 +27,7 @@ import {
   useIsKeyboardShortcutsEnabled,
   useIsLocalDatasourceEnabled,
   useIsLocalVariableEnabled,
+  useIsLockModeAvailable,
 } from '../../../context/Config';
 import { useUserPreferences } from '../../../context/UserPreferences';
 import { useDatasourceApi } from '../../../model/datasource-api';
@@ -62,6 +65,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
   const isKeyboardShortcutsEnabled = useIsKeyboardShortcutsEnabled();
+  const isLockModeAvailable = useIsLockModeAvailable();
   const datasourceApi = useDatasourceApi();
   const pluginLoader = useRemotePluginLoader();
 
@@ -132,6 +136,8 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                   isVariableEnabled={isLocalVariableEnabled}
                   isDatasourceEnabled={isLocalDatasourceEnabled}
                   disableShortcuts={!isKeyboardShortcutsEnabled}
+                  isLockModeAvailable={isLockModeAvailable}
+                  isUpdateButtonAvailable={isLockModeAvailable}
                   isEditing={isEditing}
                   isCreating={isCreating}
                   isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}

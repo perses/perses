@@ -23,9 +23,11 @@ import (
 	"github.com/perses/perses/internal/api/authorization"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	"github.com/perses/perses/internal/api/netguard"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
 	"github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceV1 "github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/role"
@@ -37,13 +39,18 @@ type service struct {
 	dao   globaldatasource.DAO
 	sch   schema.Schema
 	authz authorization.Authorization
+	// proxyCfg is used to validate the proxy of the datasource (e.g. its timeout) against the server configuration.
+	proxyCfg config.HTTPProxyConfig
+	guard    *netguard.Guard
 }
 
-func NewService(dao globaldatasource.DAO, sch schema.Schema, authz authorization.Authorization) globaldatasource.Service {
+func NewService(cfg config.DatasourceConfig, dao globaldatasource.DAO, sch schema.Schema, authz authorization.Authorization, guard *netguard.Guard) globaldatasource.Service {
 	return &service{
-		dao:   dao,
-		sch:   sch,
-		authz: authz,
+		dao:      dao,
+		sch:      sch,
+		authz:    authz,
+		proxyCfg: cfg.Proxy.HTTP,
+		guard:    guard,
 	}
 }
 
@@ -131,7 +138,7 @@ func (s *service) checkSecretPermission(ctx echo.Context, datasource *v1.GlobalD
 
 	hasSecret, proxyErr := datasourceV1.HasSecret(datasource.Spec.Plugin.Spec)
 	if proxyErr != nil {
-		logrus.WithError(proxyErr).WithFields(map[string]interface{}{
+		logrus.WithError(proxyErr).WithFields(map[string]any{
 			"datasource": datasource.Metadata.Name,
 		}).Error("unable to build or find the config in the datasource spec")
 		return echo.NewHTTPError(http.StatusBadGateway, "unable to build or find the config")
@@ -169,5 +176,8 @@ func (s *service) validate(entity *v1.GlobalDatasource) error {
 			return err
 		}
 	}
-	return validate.Datasource(entity, list, s.sch)
+	if err := validate.Datasource(entity, list, s.sch, &s.proxyCfg); err != nil {
+		return err
+	}
+	return s.guard.ValidateDatasourceSpec(entity.Spec)
 }

@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginLoader, remotePluginLoader } from '@perses-dev/plugin-system';
+import type { PluginLoader } from '@perses-dev/plugin-system';
+import { remotePluginLoader } from '@perses-dev/plugin-system';
 import { useMemo } from 'react';
 
 import { PERSES_APP_CONFIG } from '../config';

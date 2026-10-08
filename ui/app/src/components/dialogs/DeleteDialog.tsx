@@ -13,7 +13,7 @@
 
 import { Button } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
-import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
+import type { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
 
 interface DeleteDialogProps<T> {
   itemKind: string;

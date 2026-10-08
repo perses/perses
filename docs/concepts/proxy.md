@@ -45,6 +45,41 @@ Then, if a secret is associated with the datasource, Perses will retrieve the se
 inject the secret in the request.
 Finally, Perses will forward the request to the datasource and return the response to the client.
 
+Before forwarding the request, Perses removes the credentials the client used to authenticate against Perses:
+
+* the `Cookie` header sent by the client is always removed, as it contains the Perses session (and possibly the tokens
+  of the OIDC/OAuth provider). A `Cookie` header explicitly defined in the datasource configuration is sent instead,
+  unless it is removed by the header policy (`allowHeaders` / `dropHeaders`), as the policy is applied after the
+  configured headers are set.
+* when the Perses native authorization is enabled, the `Authorization` header sent by the client (which contains the
+  Perses token) is always removed. To authenticate against the datasource, use a Secret or the `oauthPassthrough` option.
+
+The client's `Cookie` header (and, with the native authorization, the client's `Authorization` header) cannot be
+forwarded using `allowHeaders`.
+
+There are exceptions for the `Authorization` header sent by the client:
+
+* when the authorization is delegated (i.e. Kubernetes), it is **forwarded to the datasource**, even though it is the
+  bearer token used to authenticate the request against Perses. Deployments relying on it to query the datasource
+  keep working. To prevent this, add `Authorization` to `dropHeaders`, or don't add it to `allowHeaders`.
+* when the authentication is disabled, it is not a Perses credential and is forwarded as is.
+
+In every case, the `Authorization` header is overwritten when the datasource uses the `oauthPassthrough` option, or a
+Secret defining `basicAuth`, `authorization` or `oauth`.
+
+An `Authorization` header defined in the `headers` of the datasource configuration is always ignored, whatever its case
+(e.g. `authorization`). Use a Secret to store the credentials of the datasource.
+
+The HTTP proxy spec supports two optional request header policies:
+
+* `allowHeaders`: forward only the listed headers.
+* `dropHeaders`: remove the listed headers and forward the others.
+
+Header names are matched case-insensitively, and all values of retained headers are preserved.
+An empty list leaves headers unchanged. Only one list can be configured.
+Filtering happens after configured headers, but before secret authentication. No need to allow `Authorization`, as it will be injected after filtering.
+Excluding `X-Forwarded-For` also prevents the reverse proxy from adding it.
+
 ```mermaid
 sequenceDiagram
     actor client as Client
@@ -103,7 +138,31 @@ When contacting one of these URLs, Perses will first get the datasource from the
 information in the URI.
 Then, if a secret is associated with the datasource, Perses will retrieve the secret from the database and use it to
 inject the secret in the request.
-Finally, Perses will execute the query to the SQL datasource and return the response in CSV format to the client.
+Finally, Perses will execute the query to the SQL datasource and return the response in JSON format to the client.
+
+## Read-only queries
+
+The SQL proxy only executes read-only queries:
+
+- The query must start with one of the following keywords: `SELECT`, `WITH`, `SHOW`, `DESCRIBE`, `DESC`, `EXPLAIN`, `VALUES`, `TABLE`.
+  Any other query is rejected.
+- The query must not contain `INTO OUTFILE` or `INTO DUMPFILE`, which would write a file on the database server (MySQL / MariaDB, with the `FILE` privilege).
+- The query is executed in a read-only transaction, so the database rejects any statement modifying the data or the schema of the database,
+  even when the query starts with one of the keywords above (e.g. `WITH d AS (DELETE FROM ...) SELECT ...`).
+  The database must support read-only transactions (`START TRANSACTION READ ONLY` for MySQL / MariaDB, `BEGIN READ ONLY` for PostgreSQL).
+  It may not be the case of a database that is only compatible with the MySQL or PostgreSQL protocol: every query then fails.
+- A single statement is executed per query.
+
+These checks are a safety net, not a security boundary. A read-only transaction doesn't prevent the side effects happening
+outside the tables of the database, for example:
+
+- writing a file on the database server (`SELECT ... INTO OUTFILE` in MySQL / MariaDB, with the `FILE` privilege). Such queries are rejected by the SQL proxy,
+- the file-reading functions in PostgreSQL (`pg_read_file`, `pg_ls_dir`, `pg_read_binary_file`, with the `pg_read_server_files` role), which read files on the database server,
+- the administration functions (e.g. `pg_terminate_backend` or `pg_reload_conf` in PostgreSQL),
+- the functions acting through another connection (e.g. `dblink_exec` in PostgreSQL).
+
+It is still strongly recommended to configure the datasource with a database user having only the permissions it needs
+(e.g. read-only access to the relevant tables, without the `FILE` privilege or any administration role).
 
 
 ```mermaid
@@ -117,7 +176,7 @@ sequenceDiagram
     backend ->> db: Get datasource
     backend ->> db: Get secret
     backend ->> backend: Build the SQL database connection 
-    backend ->> datasource: Execute the SQL query against the database
-    datasource ->> backend: Return the response in CSV format 
-    backend ->> client: Forward the response
+    backend ->> datasource: Execute the SQL query in a read-only transaction
+    datasource ->> backend: Return the rows
+    backend ->> client: Forward the rows in JSON format
 ```

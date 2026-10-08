@@ -90,12 +90,15 @@ func (c *auth) DeviceCode(authKind, slugID string, opts ...oauth2.AuthCodeOption
 
 	// Strangely enough, the oauth2.DeviceAuth function does not parse the error body, so we have to it ourselves
 	oauthErr := &oauth2.RetrieveError{}
-	if err != nil && errors.As(err, &oauthErr) {
-		unmErr := json.Unmarshal(oauthErr.Body, &oauthErr)
-		if unmErr != nil {
-			return nil, &perseshttp.RequestError{Err: unmErr}
+	if err != nil {
+		if errors.As(err, &oauthErr) {
+			unmErr := json.Unmarshal(oauthErr.Body, &oauthErr)
+			if unmErr != nil {
+				return nil, &perseshttp.RequestError{Err: unmErr}
+			}
+			return nil, &perseshttp.RequestError{Err: oauthErr}
 		}
-		return nil, &perseshttp.RequestError{Err: oauthErr}
+		return nil, err
 	}
 
 	return resp, nil

@@ -22,6 +22,8 @@ import (
 	"github.com/perses/perses/internal/api/crypto"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
+	"github.com/perses/perses/internal/api/netguard"
+	"github.com/perses/perses/internal/api/secretfile"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -29,15 +31,30 @@ import (
 
 type service struct {
 	globalsecret.Service
-	dao    globalsecret.DAO
-	crypto crypto.Crypto
+	dao           globalsecret.DAO
+	crypto        crypto.Crypto
+	fileValidator *secretfile.Validator
+	// guard verifies the destinations defined in the secret (e.g. the OAuth token URL) are allowed.
+	guard *netguard.Guard
 }
 
-func NewService(dao globalsecret.DAO, crypto crypto.Crypto) globalsecret.Service {
+func NewService(dao globalsecret.DAO, crypto crypto.Crypto, fileValidator *secretfile.Validator, guard *netguard.Guard) globalsecret.Service {
 	return &service{
-		dao:    dao,
-		crypto: crypto,
+		dao:           dao,
+		crypto:        crypto,
+		fileValidator: fileValidator,
+		guard:         guard,
 	}
+}
+
+func (s *service) validate(entity *v1.GlobalSecret) error {
+	if err := s.fileValidator.ValidateSpec(&entity.Spec); err != nil {
+		return apiInterface.HandleBadRequestError(err.Error())
+	}
+	if err := s.guard.ValidateOAuth(entity.Spec.OAuth); err != nil {
+		return apiInterface.HandleBadRequestError(err.Error())
+	}
+	return nil
 }
 
 func (s *service) Create(_ echo.Context, entity *v1.GlobalSecret) (*v1.PublicGlobalSecret, error) {
@@ -49,6 +66,9 @@ func (s *service) Create(_ echo.Context, entity *v1.GlobalSecret) (*v1.PublicGlo
 }
 
 func (s *service) create(entity *v1.GlobalSecret) (*v1.PublicGlobalSecret, error) {
+	if err := s.validate(entity); err != nil {
+		return nil, err
+	}
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.crypto.Encrypt(&entity.Spec); err != nil {
@@ -73,6 +93,9 @@ func (s *service) update(entity *v1.GlobalSecret, parameters apiInterface.Parame
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in GlobalSecret %q and name from the http request: %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, apiInterface.HandleBadRequestError("metadata.name and the name in the http path request don't match")
+	}
+	if err := s.validate(entity); err != nil {
+		return nil, err
 	}
 	// find the previous version of the GlobalSecret
 	oldEntity, err := s.dao.Get(parameters.Name)

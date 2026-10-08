@@ -31,6 +31,7 @@ package index
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"sync"
 
 	"github.com/labstack/echo/v4"
@@ -214,9 +215,9 @@ func (c *projectIndexer) collect(ctx echo.Context, project string, collector fun
 	var results []*SearchResult
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
-	// In case, there is one result; it can mean the user has global access to the resource across the project.
-	// Or it can mean he has access to only one project. If he has global access, then we should search through the whole list.
-	if len(projectList) == 1 && projectList[0] == v1.WildcardProject {
+	// If the wildcard is included, it means the user has global access to the resource across the project.
+	// Then we should search through the whole list.
+	if slices.Contains(projectList, v1.WildcardProject) {
 		for _, projectIdx := range c.idx {
 			for _, idx := range projectIdx {
 				if result := collector(idx); result != nil {

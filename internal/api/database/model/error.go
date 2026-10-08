@@ -16,6 +16,7 @@ package model
 import "fmt"
 
 const (
+	ErrorBadRequest   = 400
 	ErrorCodeConflict = 409
 	ErrorCodeNotFound = 404
 )
@@ -32,6 +33,13 @@ func IsKeyNotFound(err error) bool {
 func IsKeyConflict(err error) bool {
 	if cErr, ok := err.(*Error); ok {
 		return cErr.Code == ErrorCodeConflict
+	}
+	return false
+}
+
+func IsKeyBadRequest(err error) bool {
+	if cErr, ok := err.(*Error); ok {
+		return cErr.Code == ErrorBadRequest
 	}
 	return false
 }

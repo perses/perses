@@ -314,8 +314,8 @@ func (r *Response) Error() error {
 			response := &errorResponse{}
 			err := json.Unmarshal(r.body, &response)
 			if err != nil {
-				// in this case something horrible append on client side
-				e.Err = fmt.Errorf("something horrible occured when the client tried to decode the error message: %w", err)
+				// in this case something horrible happened on client side
+				e.Err = fmt.Errorf("something horrible occurred when the client tried to decode the error message: %w", err)
 			} else {
 				e.Message = response.Message
 			}

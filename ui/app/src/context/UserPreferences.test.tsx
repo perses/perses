@@ -12,10 +12,12 @@
 // limitations under the License.
 
 import { fireEvent, render, screen } from '@testing-library/react';
-import { ReactElement, useCallback } from 'react';
-import { Mock, vi } from 'vitest';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 
-import { UserPreferences } from '../model/userPreferences';
+import type { UserPreferences } from '../model/userPreferences';
 import { UserPreferencesContextProvider, useUserPreferences } from './UserPreferences';
 
 const mockSetLocalStorage = vi.fn();

@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { Box, Stack } from '@mui/material';
-import { ProjectResource } from '@perses-dev/client';
-import { DashboardSelector } from '@perses-dev/spec';
-import { ReactElement, useState } from 'react';
+import type { ProjectResource } from '@perses-dev/client';
+import type { DashboardSelector } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { CreateProjectDialog, CreateDashboardDialog } from '../../components/dialogs';
@@ -30,7 +31,7 @@ function HomeView(): ReactElement {
   // Navigate to the project page if the project has been successfully added
   const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
-  const userProjects = useDashboardCreateAllowedProjects();
+  const { data: userProjects } = useDashboardCreateAllowedProjects();
   const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
   const hasImportantDashboards = useHasImportantDashboards();
 

@@ -160,11 +160,12 @@ authorization: <Authorization config> # Optional
 enable_auth: <boolean> | default = false # Optional
 
 # The secret key used to encrypt and decrypt sensitive data stored in the database such as the password of the basic auth for a datasource.
-# Note that if it is not provided, it will use a default value.
-# On a production instance, you should set this key.
+# In case authentication is enabled, it is also used to encrypt the access and refresh token used for authentication.
+# Therefore, if auth is enabled, and you did not set this key, Perses will not start and will return an error.
 # Also note the key size must be exactly 32 bytes long as we are using AES-256 to encrypt the data.
-# One way to generate a valid key could be the following command (using only visible characters):
+# One way to generate a valid key could be one of the following command (using only visible characters):
 # LC_ALL=C tr -dc '[:graph:]' < /dev/urandom | head -c 32
+# openssl rand -base64 24 | head -c 32
 encryption_key: <secret> # Optional
 
 # The path to the file containing the secret key.
@@ -172,6 +173,14 @@ encryption_key_file: <filename> # Optional
 
 # Configuration for CORS (cross-origin resource sharing).
 cors: <CORS config> # Optional
+
+# List of absolute directories from which Secrets and GlobalSecrets are allowed to read files
+# (basicAuth.passwordFile, authorization.credentialsFile, oauth.clientSecretFile, tlsConfig.caFile/certFile/keyFile).
+# Symlinks are resolved, and the file must remain inside one of these directories.
+# When empty (default), any file reference in a Secret or GlobalSecret is rejected.
+# This prevents users allowed to create secrets from exfiltrating arbitrary files from the Perses server.
+secret_file_allowed_directories: # Optional
+  - <string>
 ```
 
 #### Cookie config
@@ -292,6 +301,10 @@ logout:
   enabled: <boolean> | default = false # Optional
   # A config option to use a different query parameter for the redirect uri on logout. Some providers (e.g. Cognito) require this.
   logout_redirect_param_name: <string> | default = post_logout_redirect_uri # Optional
+
+  # Name of the userinfo property to use as the "login" of the user.
+  # If not set, or not present in the userinfo response, it falls back to the email, then to the subject.
+  custom_login_property: < enum | possibleValue = 'name' | 'given_name' | 'family_name' | 'middle_name' | 'nickname' | 'preferred_username' | 'email' > # Optional
 ```
 
 ##### OAuth provider
@@ -675,7 +688,8 @@ global:
   # It will also remove the associated proxy.
   # Also, since the global variable depends on the global datasource, it will also disable the global variable feature.
   disable: <boolean> | default = false # Optional
-  discovery: <GlobalDatasourceDiscovery config> # Optional
+  discovery: 
+  - <GlobalDatasourceDiscovery config> # Optional
 
 project:
   # It is used to disable the project datasource feature.
@@ -685,6 +699,232 @@ project:
 # When used is preventing the possibility to add a datasource directly in the dashboard spec.
 # It will also disable the associated proxy.
 disable_local: <boolean> | default = false # Optional
+
+# Configuration of the datasource proxy: the destinations it is allowed to reach, and the configuration specific to each kind of proxy.
+proxy: <DatasourceProxy config> # Optional
+```
+
+
+#### DatasourceProxy config
+
+The datasource proxy forwards the requests to the URL (or connects to the SQL host) defined in the datasource spec, which
+is provided by the users. Without restriction, anyone allowed to create a datasource, or to use the unsaved proxy
+endpoints, could use Perses to reach any service accessible from the Perses server and read its response
+(Server-Side Request Forgery): the Perses API itself, the cloud metadata endpoints, the Kubernetes API, etc.
+
+The destination is verified when a datasource (or a secret defining an OAuth token URL) is saved and before a request is
+proxied. More importantly, it is verified at connection time on every IP address the destination resolves to (including
+the redirections followed to get an OAuth token), so it cannot be bypassed with a DNS name pointing to a forbidden IP
+address. A URL containing credentials (`http://user:password@host`) is refused: use a secret instead.
+
+The following networks are **denied by default**:
+
+- loopback: `127.0.0.0/8`, `::1`
+- "this" network (`0.0.0.0/8`) and unspecified addresses (`::`)
+- link-local: `169.254.0.0/16`, `fe80::/10`
+- cloud metadata and credentials endpoints: `169.254.169.254` (AWS, GCP, Azure, OpenStack, Oracle, DigitalOcean...),
+  `169.254.170.2` (AWS ECS), `169.254.170.23` and `fd00:ec2::23` (AWS EKS Pod Identity), `fd00:ec2::254` (AWS IPv6),
+  `100.100.100.200` (Alibaba Cloud), `168.63.129.16` (Azure WireServer), `192.0.0.192` (Oracle Cloud, legacy)
+- multicast, reserved and broadcast addresses: `224.0.0.0/4`, `240.0.0.0/4`, `ff00::/8`
+- deprecated IPv4-compatible addresses (`::/96`), Teredo (`2001::/32`) and local-use NAT64 (`64:ff9b:1::/48`)
+- when Perses is running in a Kubernetes cluster, the IP of the Kubernetes API service (`KUBERNETES_SERVICE_HOST`)
+
+When an IP address is part of both an allowed network (`allowed_networks`) and a denied network (the built-in ones,
+`denied_networks` and `deny_private_networks`), **the most specific network wins** (the longest prefix). On equal
+prefix lengths, the allowed network wins. For example:
+
+- allowing `127.0.0.0/8` allows the loopback interface (same prefix as the built-in denied network);
+- allowing `10.0.0.0/8` doesn't allow the Kubernetes API service IP (denied as a single IP address), you have to allow
+  this IP address explicitly;
+- allowing `169.254.0.0/16` doesn't allow `169.254.169.254` (denied as a single IP address);
+- denying `10.1.0.0/16` while allowing `10.0.0.0/8` denies `10.1.0.0/16`.
+
+IPv4-mapped IPv6 addresses (`::ffff:127.0.0.1`), NAT64 (`64:ff9b::/96`) and 6to4 (`2002::/16`) addresses are verified
+against the IPv4 address they embed.
+
+Unix sockets are never allowed for the SQL datasources.
+
+IPv4 addresses must be written in the dotted-decimal notation (e.g. `10.0.0.1`). The other notations (e.g. `2130706433`,
+`0x7f000001`, `127.1` or `0177.0.0.1`) are refused, as they are not interpreted the same way by every resolver.
+
+Private networks are allowed by default, as this is where the datasources usually are. Use `deny_private_networks`,
+`denied_networks` or `allowed_hosts` to restrict them.
+
+The fields at the root of this section apply to every kind of proxy (HTTP and SQL). The configuration specific to a kind
+of proxy lives in a dedicated section (e.g. `http`).
+
+```yaml
+# When not empty, it is the exhaustive list of hosts the proxy can reach.
+# An entry is an exact hostname (e.g. "prometheus.example.com"), a wildcard matching any subdomain (e.g. "*.monitoring.svc")
+# or an IP address. The port must not be provided.
+# Note: the denied networks still apply to the IP addresses these hosts resolve to.
+# Note: the host of the OAuth token URL defined in the secrets must be part of this list as well.
+allowed_hosts: # Optional
+  - <string>
+
+# A list of IP addresses or CIDRs that are allowed.
+# When an IP address is part of both an allowed and a denied network, the most specific network wins (see above).
+# For example, use ["127.0.0.0/8", "::1/128"] if your datasources are running on the same host as Perses.
+allowed_networks: # Optional
+  - <string>
+
+# A list of IP addresses or CIDRs that are denied, in addition to the built-in ones.
+denied_networks: # Optional
+  - <string>
+
+# When true, the private networks are denied as well:
+# 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, fc00::/7 and fec0::/10.
+deny_private_networks: <boolean> | default = false # Optional
+
+# Configuration specific to the proxy of the datasources of kind HTTPProxy.
+http: <HTTPProxy config> # Optional
+```
+
+When Perses is using an HTTP proxy configured through the environment (`HTTP_PROXY`, `HTTPS_PROXY`), the connection is
+made to this proxy, which is trusted. The final destination is then verified upfront by resolving its name from the
+Perses server. If the name can only be resolved by the proxy, only the static verification applies: use `allowed_hosts`
+(or the proxy's own access control) to strictly restrict the destinations in this situation.
+A datasource cannot target the address of this proxy, neither directly (i.e. when the proxy is bypassed with `NO_PROXY`)
+nor through the proxy itself.
+
+Example of a strict configuration, only allowing the datasources running in the `monitoring` namespace of a Kubernetes
+cluster:
+
+```yaml
+datasource:
+  proxy:
+    allowed_hosts:
+      - "*.monitoring.svc"
+      - "*.monitoring.svc.cluster.local"
+    http:
+      allowed_schemes:
+        - https
+```
+
+Example of a strict configuration when the datasources are authenticated with OAuth (client credentials) through a
+secret. The host of the OAuth token URL defined in the secrets (here `auth.example.com`) must be allowed as well,
+otherwise saving the secret is refused, and the requests to the datasources using it are refused:
+
+```yaml
+datasource:
+  proxy:
+    allowed_hosts:
+      # The datasources
+      - "prometheus.example.com"
+      - "*.thanos.example.com"
+      # The OAuth token URL of the secrets, e.g. https://auth.example.com/oauth2/token
+      - "auth.example.com"
+    http:
+      allowed_schemes:
+        - https
+```
+
+Example denying the private networks, while still allowing the network where the datasources are running.
+As the most specific network wins, the Kubernetes API service IP and the cloud metadata endpoints remain denied even if
+they are part of the allowed network:
+
+```yaml
+datasource:
+  proxy:
+    deny_private_networks: true
+    allowed_networks:
+      - "10.20.0.0/16"
+```
+
+Example allowing the datasources running on the same host as Perses (e.g. `http://localhost:9090`):
+
+```yaml
+datasource:
+  proxy:
+    allowed_networks:
+      - "127.0.0.0/8"
+      - "::1/128"
+```
+
+Example keeping the proxy opened, i.e. allowing every destination like before the verification was introduced.
+As the most specific network wins, allowing `0.0.0.0/0` and `::/0` is not enough: every built-in denied network has to
+be allowed explicitly, with the same (or a more specific) prefix.
+
+!!! warning
+    This configuration lets anyone allowed to create a datasource (or to use the unsaved proxy endpoints) reach any
+    service accessible from the Perses server, including the cloud metadata endpoints (and so the credentials of the
+    machine) and the Kubernetes API. Only use it if every user able to create a datasource is fully trusted, and never
+    with `security.enable_auth` set to `false`.
+
+```yaml
+datasource:
+  proxy:
+    allowed_networks:
+      # loopback and "this" network
+      - "127.0.0.0/8"
+      - "0.0.0.0/8"
+      # link-local
+      - "169.254.0.0/16"
+      - "fe80::/10"
+      # cloud metadata and credentials endpoints
+      - "169.254.169.254/32"
+      - "169.254.170.2/32"
+      - "169.254.170.23/32"
+      - "100.100.100.200/32"
+      - "168.63.129.16/32"
+      - "192.0.0.192/32"
+      - "fd00:ec2::254/128"
+      - "fd00:ec2::23/128"
+      # multicast, reserved and broadcast
+      - "224.0.0.0/4"
+      - "240.0.0.0/4"
+      - "ff00::/8"
+      # unspecified, IPv6 loopback, deprecated IPv4-compatible addresses, Teredo and local-use NAT64
+      - "::/96"
+      - "2001::/32"
+      - "64:ff9b:1::/48"
+      # when Perses is running in a Kubernetes cluster: the IP of the Kubernetes API service (KUBERNETES_SERVICE_HOST)
+      - "10.96.0.1/32"
+```
+
+Even with this configuration, the URLs containing credentials, the schemes other than `http` and `https`, the Unix
+sockets of the SQL datasources, and the direct requests to the HTTP proxy configured through the environment remain
+refused.
+
+#### HTTPProxy config
+
+Each datasource has its own pool of connections, so every limit below applies per datasource.
+Keeping connections open saves the TCP and TLS handshakes of the next requests, but each idle connection holds a socket and some memory.
+When running Perses with a large number of datasources, you may want to lower the idle connection limits.
+
+```yaml
+# The list of URL schemes an HTTP datasource is allowed to use. Only "http" and "https" are supported.
+allowed_schemes: # Optional. Default: ["http", "https"]
+  - <string>
+
+# Limits the total number of connections (in use and idle) that Perses opens, for a given datasource, to a given host.
+# Once the limit is reached, the new requests wait until a connection is available, or until they are canceled.
+# It can be used to protect Perses (file descriptors) and the datasources from a burst of queries.
+# Zero means no limit.
+max_conns_per_host: <int> | default = 0 # Optional
+
+# Limits the number of idle connections kept open, for a given datasource, across all hosts.
+max_idle_conns: <int> | default = 100 # Optional
+
+# Limits the number of idle connections kept open, for a given datasource, to a given host.
+# A datasource usually talks to a single host, so it is in practice the number of idle connections kept per datasource.
+max_idle_conns_per_host: <int> | default = 10 # Optional
+
+# The maximum amount of time allowed to establish a connection to a datasource,
+# when the datasource doesn't define its own timeout (or sets it to 0).
+# When not set, it is 30s, or max_timeout if max_timeout is set to a lower value.
+default_timeout: <duration> | default = 30s # Optional
+
+# The highest timeout a datasource can define in its spec (see the `timeout` field of the HTTPProxy spec).
+# A datasource can only lower the timeout: the effective timeout is min(datasource timeout, max_timeout).
+# A datasource defining a timeout greater than max_timeout is rejected when it is saved,
+# and its timeout is clamped to max_timeout when it is used (for example, if max_timeout has been lowered since then).
+# Note: after lowering max_timeout, the datasources that define a greater timeout keep working (with the clamped timeout),
+# but any update of these datasources is rejected until their timeout is lowered or removed.
+# Be careful when increasing it: a long timeout keeps goroutines and sockets busy against unreachable hosts,
+# which can be abused to exhaust the resources of the Perses server.
+# It must be greater than or equal to default_timeout.
+max_timeout: <duration> | default = default_timeout # Optional
 ```
 
 #### GlobalDatasourceDiscovery config
@@ -765,6 +1005,27 @@ pod_configuration: <KubePodDiscovery Config> # Optional
 # The labels used to filter the list of resource when contacting the Kubernetes API.
 labels:
   <string>: <string> # Optional
+
+# Configuration to automatically mark one of the discovered datasources as the default.
+default: <DiscoveryDefault Config> # Optional
+```
+
+##### DiscoveryDefault Config
+
+```yaml
+# When true, the first discovered datasource whose labels and annotations match the filters below
+# will be marked as the default datasource.
+enable: <boolean> | default = false # Optional
+
+# Label key/value pairs that the discovered resource must have to be selected as the default.
+# All specified labels must be present on the resource.
+labels:
+  <string>: <string> # Optional
+
+# Annotation key/value pairs that the discovered resource must have to be selected as the default.
+# All specified annotations must be present on the resource.
+annotations:
+  <string>: <string> # Optional
 ```
 
 ##### KubeServiceDiscovery Config
@@ -815,9 +1076,22 @@ cleanup_interval: <duration> | default = 1d # Optional
 # When it is true, Perses won't serve the frontend anymore.
 disable: <bool> | default = false # Optional
 
-# A list of dashboards you would like to display in the UI home page
+# Contains the content to be display in a banner at the top of each page along with the severity of the information
+banner: <Banner config> # Optional
+
+# Enables keyboard shortcuts in the UI
+enable_keyboard_shortcuts: <bool> | default = true # Optional
+
+# Enables the dashboard "lock" button that pins every plugin to its latest available version.
+enable_lock_mode: <bool> | default = false # Optional
+
+# Activating the different kind of explorer supported.
+explorer: <Explorer config>
+
+# Lists of dashboards you would like to display in the UI home page
+# The legacy flat list of dashboard selectors is still supported but deprecated.
 important_dashboards:
-  - <Dashboard Selector config> # Optional
+  - <Important Dashboard Group config> # Optional
 
 # The markdown content to be displayed on the UI home page
 information: <string> # Optional
@@ -825,11 +1099,30 @@ information: <string> # Optional
 # TimeRange configuration
 time_range: <TimeRange config> # Optional
 
+# AutoRefresh configuration
+auto_refresh: <AutoRefresh config> # Optional
+
 # Defaults used when a user has not selected their own preference
 default_user_preferences:
   timezone: <IANA timezone or "local"> # Optional, default = local
   rows_per_page: <10 | 25 | 50 | 100> # Optional, default = 25
   theme: <"light" | "dark"> # Optional, default = light
+```
+
+#### Banner config
+
+```yaml
+# The severity of the information to be displayed in the banner. It will change the color of the banner.
+severity: <enum | possibleValue = 'info' | 'warning' | 'error'>
+# The content of the information to be displayed in the banner. It can be html content.
+message: <string>
+```
+
+#### Explorer config
+
+```yaml
+# When true, the explorer feature will be enabled in the UI.
+enable: <bool> | default = false
 ```
 
 #### TimeRange config
@@ -844,6 +1137,37 @@ disable_custom:  <bool> | default = false # Optional
 disable_zoom:  <bool> | default = false # Optional
 ```
 
+#### AutoRefresh config
+
+```yaml
+# Allow you to disable dashboard auto-refresh (refresh interval picker hidden; refreshInterval and ?refresh= ignored)
+disable:  <bool> | default = false # Optional
+# Use duration format. The display will be computed automatically. Eg: "5s: will be display "5 seconds" 0s value means Off
+options: <duration[]> | default = [ "0s", "5s", "10s", "15s", "30s", "60s" ]
+```
+
+#### Important Dashboard Group config
+
+```yaml
+# Optional title displayed above the configured entries
+title: <string> # Optional
+
+# Optional description displayed below the title
+description: <string> # Optional
+
+# Dashboards or projects displayed in this group. At least one entry is required.
+dashboards:
+  - <Dashboard Selector config>
+```
+
+Important dashboard groups can also be set through environment variables, e.g.:
+
+```bash
+PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_TITLE="Quick links"
+PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARDS_0_PROJECT="perses"
+PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARDS_0_DASHBOARD="Demo"
+```
+
 #### Dashboard Selector config
 
 ```yaml
@@ -851,7 +1175,8 @@ disable_zoom:  <bool> | default = false # Optional
 project: <string>
 
 # The dashboard name (dashboard.metadata.name)
-dashboard: <string>
+# When omitted, all dashboards from the project are considered important
+dashboard: <string> # Optional
 ```
 
 ### Plugin config

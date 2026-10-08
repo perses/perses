@@ -69,7 +69,10 @@ func TestJSONMarshalConfig(t *testing.T) {
     "project": {
       "disable": false
     },
-    "disable_local": false
+    "disable_local": false,
+    "proxy": {
+      "deny_private_networks": false
+    }
   },
   "variable": {
     "global": {
@@ -88,7 +91,8 @@ func TestJSONMarshalConfig(t *testing.T) {
     "disable": false,
     "explorer": {
       "enable": false
-    }
+    },
+    "auto_refresh": {}
   },
   "plugin": {
     "enable_dev": false
@@ -141,7 +145,16 @@ func TestJSONMarshalConfig(t *testing.T) {
     "project": {
       "disable": false
     },
-    "disable_local": false
+    "disable_local": false,
+    "proxy": {
+      "deny_private_networks": false,
+      "http": {
+        "max_idle_conns": 100,
+        "max_idle_conns_per_host": 10,
+        "default_timeout": "30s",
+        "max_timeout": "30s"
+      }
+    }
   },
   "variable": {
     "global": {
@@ -160,6 +173,16 @@ func TestJSONMarshalConfig(t *testing.T) {
     "disable": false,
     "explorer": {
       "enable": false
+    },
+    "auto_refresh": {
+      "options": [
+        "0s",
+        "5s",
+        "10s",
+        "15s",
+        "30s",
+        "60s"
+      ]
     }
   },
   "plugin": {
@@ -256,6 +279,12 @@ func TestUnmarshalJSONConfig(t *testing.T) {
       "rows_per_page": 25,
       "theme": "dark"
     },
+    "auto_refresh": {
+      "options": [
+      "2s",
+      "8s"
+    ]
+      },
     "important_dashboards": [
       {
         "project": "perses",
@@ -338,18 +367,22 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 					},
 				},
 				Frontend: Frontend{
-					ImportantDashboards: []dashboardSelector{
+					ImportantDashboards: ImportantDashboards{
 						{
-							Project:   "perses",
-							Dashboard: "Demo",
-						},
-						{
-							Project:   "testing",
-							Dashboard: "DuplicatePanels",
-						},
-						{
-							Project:   "Unknown",
-							Dashboard: "Dashboard",
+							Dashboards: []DashboardSelector{
+								{
+									Project:   "perses",
+									Dashboard: "Demo",
+								},
+								{
+									Project:   "testing",
+									Dashboard: "DuplicatePanels",
+								},
+								{
+									Project:   "Unknown",
+									Dashboard: "Dashboard",
+								},
+							},
 						},
 					},
 					Information: "# Hello World\n## File Database setup",
@@ -357,6 +390,9 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 						Timezone:    "UTC",
 						RowsPerPage: 25,
 						Theme:       "dark",
+					},
+					AutoRefresh: AutoRefresh{
+						Options: []common.DurationString{"2s", "8s"},
 					},
 				},
 				Plugin: Plugin{
@@ -521,18 +557,22 @@ plugin:
 					},
 				},
 				Frontend: Frontend{
-					ImportantDashboards: []dashboardSelector{
+					ImportantDashboards: ImportantDashboards{
 						{
-							Project:   "perses",
-							Dashboard: "Demo",
-						},
-						{
-							Project:   "testing",
-							Dashboard: "DuplicatePanels",
-						},
-						{
-							Project:   "Unknown",
-							Dashboard: "Dashboard",
+							Dashboards: []DashboardSelector{
+								{
+									Project:   "perses",
+									Dashboard: "Demo",
+								},
+								{
+									Project:   "testing",
+									Dashboard: "DuplicatePanels",
+								},
+								{
+									Project:   "Unknown",
+									Dashboard: "Dashboard",
+								},
+							},
 						},
 					},
 					Information: "# Hello World\n## File Database setup",
@@ -540,6 +580,10 @@ plugin:
 						Timezone:    "UTC",
 						RowsPerPage: 25,
 						Theme:       "dark",
+					},
+					AutoRefresh: AutoRefresh{
+						Disable: false,
+						Options: defaultAutoRefreshOptions,
 					},
 				},
 				Plugin: Plugin{
@@ -551,6 +595,16 @@ plugin:
 						"dev/data",
 					},
 					Interval: common.Duration(defaultInterval),
+				},
+				Datasource: DatasourceConfig{
+					Proxy: DatasourceProxyConfig{
+						HTTP: HTTPProxyConfig{
+							MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
+							MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
+							DefaultTimeout:      DefaultHTTPProxyTimeout,
+							MaxTimeout:          DefaultHTTPProxyTimeout,
+						},
+					},
 				},
 				EphemeralDashboard: EphemeralDashboard{
 					Enable:          false,
@@ -576,6 +630,170 @@ plugin:
 			assert.Equal(t, test.result, c)
 		})
 	}
+}
+
+func TestUnmarshalJSONImportantDashboardGroups(t *testing.T) {
+	c := Config{}
+
+	assert.NoError(t, json.Unmarshal([]byte(`{
+  "frontend": {
+    "important_dashboards": [
+      {
+        "title": "Awesome First List",
+        "description": "a long and useful description about my first list of dashboard",
+        "dashboards": [
+          {
+            "project": "perses",
+            "dashboard": "Demo"
+          },
+          {
+            "project": "perses"
+          }
+        ]
+      }
+    ]
+  }
+}`), &c))
+
+	assert.Equal(t, ImportantDashboards{
+		{
+			Title:       "Awesome First List",
+			Description: "a long and useful description about my first list of dashboard",
+			Dashboards: []DashboardSelector{
+				{
+					Project:   "perses",
+					Dashboard: "Demo",
+				},
+				{
+					Project: "perses",
+				},
+			},
+		},
+	}, c.Frontend.ImportantDashboards)
+}
+
+func TestResolveYAMLImportantDashboardGroups(t *testing.T) {
+	c := Config{}
+
+	assert.NoError(t, config.NewResolver[Config]().
+		SetConfigData([]byte(`
+frontend:
+  important_dashboards:
+    - title: "Awesome First List"
+      description: "a long and useful description about my first list of dashboard"
+      dashboards:
+        - project: "perses"
+          dashboard: "Demo"
+        - project: "perses"
+`)).
+		SetEnvPrefix("PERSES").
+		Resolve(&c).
+		Verify())
+
+	assert.Equal(t, ImportantDashboards{
+		{
+			Title:       "Awesome First List",
+			Description: "a long and useful description about my first list of dashboard",
+			Dashboards: []DashboardSelector{
+				{
+					Project:   "perses",
+					Dashboard: "Demo",
+				},
+				{
+					Project: "perses",
+				},
+			},
+		},
+	}, c.Frontend.ImportantDashboards)
+}
+
+func TestResolveEnvImportantDashboardGroups(t *testing.T) {
+	t.Setenv("PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_TITLE", "Quick links")
+	t.Setenv("PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARDS_0_PROJECT", "perses")
+	t.Setenv("PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARDS_0_DASHBOARD", "Demo")
+	t.Setenv("PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARDS_1_PROJECT", "testing")
+
+	c := Config{}
+	assert.NoError(t, config.NewResolver[Config]().
+		SetEnvPrefix("PERSES").
+		Resolve(&c).
+		Verify())
+
+	assert.Equal(t, ImportantDashboards{
+		{
+			Title: "Quick links",
+			Dashboards: []DashboardSelector{
+				{
+					Project:   "perses",
+					Dashboard: "Demo",
+				},
+				{
+					Project: "testing",
+				},
+			},
+		},
+	}, c.Frontend.ImportantDashboards)
+}
+
+func TestImportantDashboardsErrors(t *testing.T) {
+	testSuite := []struct {
+		title      string
+		yamele     string
+		errMessage string
+	}{
+		{
+			title: "mixed legacy and grouped formats",
+			yamele: `
+frontend:
+  important_dashboards:
+    - title: "A"
+      dashboards:
+        - project: "perses"
+    - project: "perses"
+      dashboard: "Demo"
+`,
+			errMessage: "frontend.important_dashboards: cannot mix the legacy selector format and the grouped format",
+		},
+		{
+			title: "group without dashboards",
+			yamele: `
+frontend:
+  important_dashboards:
+    - title: "A"
+`,
+			errMessage: "frontend.important_dashboards[0]: at least one entry is required in 'dashboards'",
+		},
+		{
+			title: "selector without project",
+			yamele: `
+frontend:
+  important_dashboards:
+    - dashboards:
+        - project: "perses"
+        - dashboard: "Demo"
+`,
+			errMessage: "frontend.important_dashboards[0].dashboards[1]: 'project' is required",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			c := Config{}
+			err := config.NewResolver[Config]().
+				SetConfigData([]byte(test.yamele)).
+				Resolve(&c).
+				Verify()
+			assert.ErrorContains(t, err, test.errMessage)
+		})
+	}
+}
+
+func TestUnmarshalJSONImportantDashboardsMixedFormats(t *testing.T) {
+	c := Config{}
+	err := json.Unmarshal([]byte(`{"frontend": {"important_dashboards": [
+  {"title": "A", "dashboards": [{"project": "perses"}]},
+  {"project": "perses", "dashboard": "Demo"}
+]}}`), &c)
+	assert.ErrorContains(t, err, "cannot mix the legacy selector format and the grouped format")
 }
 
 func TestDefaultUserPreferencesVerify(t *testing.T) {
@@ -684,6 +902,189 @@ frontend:
 			}
 			assert.NoError(t, err)
 			assert.Equal(t, test.expected, resolvedConfig.Frontend.DefaultUserPreferences)
+		})
+	}
+}
+
+func TestResolveDatasourceHTTPProxy(t *testing.T) {
+	testSuite := []struct {
+		name       string
+		configData string
+		expected   HTTPProxyConfig
+		errMessage string
+	}{
+		{
+			name:       "defaults",
+			configData: ``,
+			expected: HTTPProxyConfig{
+				MaxConnsPerHost:     0,
+				MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
+				MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
+				DefaultTimeout:      DefaultHTTPProxyTimeout,
+				MaxTimeout:          DefaultHTTPProxyTimeout,
+			},
+		},
+		{
+			name: "resolves max_conns_per_host",
+			configData: `
+datasource:
+  proxy:
+    http:
+      max_conns_per_host: 50
+`,
+			expected: HTTPProxyConfig{
+				MaxConnsPerHost:     50,
+				MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
+				MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
+				DefaultTimeout:      DefaultHTTPProxyTimeout,
+				MaxTimeout:          DefaultHTTPProxyTimeout,
+			},
+		},
+		{
+			name: "resolves idle connection limits",
+			configData: `
+datasource:
+  proxy:
+    http:
+      max_idle_conns: 20
+      max_idle_conns_per_host: 2
+`,
+			expected: HTTPProxyConfig{
+				MaxIdleConns:        20,
+				MaxIdleConnsPerHost: 2,
+				DefaultTimeout:      DefaultHTTPProxyTimeout,
+				MaxTimeout:          DefaultHTTPProxyTimeout,
+			},
+		},
+		{
+			name: "resolves timeouts",
+			configData: `
+datasource:
+  proxy:
+    http:
+      default_timeout: 10s
+      max_timeout: 1m
+`,
+			expected: HTTPProxyConfig{
+				MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
+				MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
+				DefaultTimeout:      common.Duration(10 * time.Second),
+				MaxTimeout:          common.Duration(time.Minute),
+			},
+		},
+		{
+			name: "max_timeout defaults to default_timeout",
+			configData: `
+datasource:
+  proxy:
+    http:
+      default_timeout: 1m
+`,
+			expected: HTTPProxyConfig{
+				MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
+				MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
+				DefaultTimeout:      common.Duration(time.Minute),
+				MaxTimeout:          common.Duration(time.Minute),
+			},
+		},
+		{
+			name: "only max_timeout is set",
+			configData: `
+datasource:
+  proxy:
+    http:
+      max_timeout: 2m
+`,
+			expected: HTTPProxyConfig{
+				MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
+				MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
+				DefaultTimeout:      DefaultHTTPProxyTimeout,
+				MaxTimeout:          common.Duration(2 * time.Minute),
+			},
+		},
+		{
+			name: "rejects default_timeout greater than max_timeout",
+			configData: `
+datasource:
+  proxy:
+    http:
+      default_timeout: 1m
+      max_timeout: 10s
+`,
+			errMessage: "datasource.proxy.http.default_timeout (1m) cannot be greater than datasource.proxy.http.max_timeout (10s)",
+		},
+		{
+			name: "default_timeout follows max_timeout when only max_timeout is set lower than the default value",
+			configData: `
+datasource:
+  proxy:
+    http:
+      max_timeout: 10s
+`,
+			expected: HTTPProxyConfig{
+				MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
+				MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
+				DefaultTimeout:      common.Duration(10 * time.Second),
+				MaxTimeout:          common.Duration(10 * time.Second),
+			},
+		},
+		{
+			name: "rejects default_timeout explicitly set greater than max_timeout",
+			configData: `
+datasource:
+  proxy:
+    http:
+      default_timeout: 30s
+      max_timeout: 10s
+`,
+			errMessage: "datasource.proxy.http.default_timeout (30s) cannot be greater than datasource.proxy.http.max_timeout (10s)",
+		},
+		{
+			name: "rejects negative max_conns_per_host",
+			configData: `
+datasource:
+  proxy:
+    http:
+      max_conns_per_host: -1
+`,
+			errMessage: "datasource.proxy.http.max_conns_per_host cannot be negative",
+		},
+		{
+			name: "rejects negative max_idle_conns",
+			configData: `
+datasource:
+  proxy:
+    http:
+      max_idle_conns: -1
+`,
+			errMessage: "datasource.proxy.http.max_idle_conns cannot be negative",
+		},
+		{
+			name: "rejects negative max_idle_conns_per_host",
+			configData: `
+datasource:
+  proxy:
+    http:
+      max_idle_conns_per_host: -1
+`,
+			errMessage: "datasource.proxy.http.max_idle_conns_per_host cannot be negative",
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.name, func(t *testing.T) {
+			resolvedConfig := Config{}
+			err := config.NewResolver[Config]().
+				SetConfigData([]byte(test.configData)).
+				SetEnvPrefix("PERSES").
+				Resolve(&resolvedConfig).
+				Verify()
+			if len(test.errMessage) > 0 {
+				assert.ErrorContains(t, err, test.errMessage)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, test.expected, resolvedConfig.Datasource.Proxy.HTTP)
 		})
 	}
 }

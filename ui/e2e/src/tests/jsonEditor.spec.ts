@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import updatedDefaultsDashboard from '../data/updatedDefaultsDashboard.json';
+import updatedDefaultsDashboard from '../data/updatedDefaultsDashboard.json' with { type: 'json' };
 import { test, expect } from '../fixtures/dashboardTest';
 
 test.use({

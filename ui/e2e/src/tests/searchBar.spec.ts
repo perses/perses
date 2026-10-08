@@ -16,19 +16,16 @@ import { expect, test } from '@playwright/test';
 import { AppHomePage, SearchBar } from '../pages';
 
 test.describe('SearchBar', () => {
-  test('shows important dashboards when opened without a query', async ({ page }) => {
+  test('shows no results when opened without a query', async ({ page }) => {
     const homePage = new AppHomePage(page);
     await homePage.goto();
 
     const searchBar = new SearchBar(page);
     await searchBar.open();
 
-    await expect(searchBar.getDashboardsHeading()).toBeVisible();
-
-    const demoLink = searchBar.getDashboardLink('perses', 'demo');
-
-    // Verify the dashboard is highlighted (important dashboards have bold text)
-    await expect(demoLink).toHaveCSS('font-weight', '700');
+    await expect(searchBar.searchInput).toBeVisible();
+    await expect(searchBar.getDashboardsHeading()).toBeHidden();
+    await expect(searchBar.getProjectsHeading()).toBeHidden();
 
     await searchBar.close();
     await expect(searchBar.modal).toBeHidden();
@@ -49,9 +46,10 @@ test.describe('SearchBar', () => {
     await expect(searchBar.getDashboardsHeading()).toBeHidden();
     await expect(searchBar.getProjectsHeading()).toBeHidden();
 
-    // Clear the search and verify important dashboards reappear
+    // Clear the search and verify neither results nor the no results message are shown
     await searchBar.clearSearch();
-    await expect(searchBar.getDashboardsHeading()).toBeVisible();
+    await expect(searchBar.getNoResultsMessage('xyznonexistentresource123')).toBeHidden();
+    await expect(searchBar.getDashboardsHeading()).toBeHidden();
 
     await searchBar.close();
     await expect(searchBar.modal).toBeHidden();
@@ -66,22 +64,26 @@ test.describe('SearchBar', () => {
     const searchBar = new SearchBar(page);
     await searchBar.open();
 
-    // Search for "panel" which matches both important (markdownpanel) and non-important (timeserieschartpanel) dashboards
-    await searchBar.search('panel');
+    const testCases = [
+      // configured explicitly
+      { query: 'nodeexporter', project: 'perses', dashboard: 'NodeExporter', fontWeight: '700' },
+      // configured through the project-wide testing selector
+      { query: 'markdownpanel', project: 'testing', dashboard: 'markdownpanel', fontWeight: '700' },
+      { query: 'timeserieschartpanel', project: 'testing', dashboard: 'timeserieschartpanel', fontWeight: '700' },
+      // not configured
+      { query: 'demo', project: 'perses', dashboard: 'Demo', fontWeight: '400' },
+    ];
 
-    // Click "see more..." if present to load additional results
-    await searchBar.clickSeeMoreIfPresent();
+    for (const { query, project, dashboard, fontWeight } of testCases) {
+      await searchBar.search(query);
+      await searchBar.clickSeeMoreIfPresent();
 
-    await expect(searchBar.getDashboardsHeading()).toBeVisible();
+      await expect(searchBar.getDashboardsHeading()).toBeVisible();
 
-    const importantDashboard = searchBar.getDashboardLink('testing', 'markdownpanel');
-    await expect(importantDashboard).toBeVisible();
-    await expect(importantDashboard).toHaveCSS('font-weight', '700');
-
-    // timeserieschartpanel is NOT in the important_dashboards list
-    const nonImportantDashboard = searchBar.getDashboardLink('testing', 'timeserieschartpanel');
-    await expect(nonImportantDashboard).toBeVisible();
-    await expect(nonImportantDashboard).toHaveCSS('font-weight', '400');
+      const dashboardLink = searchBar.getDashboardLink(project, dashboard);
+      await expect(dashboardLink).toBeVisible();
+      await expect(dashboardLink).toHaveCSS('font-weight', fontWeight);
+    }
 
     await searchBar.close();
     await expect(searchBar.modal).toBeHidden();

@@ -13,7 +13,8 @@
 
 import { Box } from '@mui/material';
 import { ReactRouterProvider } from '@perses-dev/plugin-system';
-import { ReactElement, Suspense } from 'react';
+import type { ReactElement } from 'react';
+import { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
 import Footer from './components/Footer';

@@ -36,20 +36,19 @@ frontend:
   enable_keyboard_shortcuts: true
   explorer:
     enable: true
+  enable_lock_mode: true
 
   important_dashboards:
-    - project: "perses"
-      dashboard: "Demo"
-    - project: "perses"
-      dashboard: "NodeExporter"
-    - project: "perses"
-      dashboard: "Benchmark"
-    - project: "testing"
-      dashboard: "Defaults"
-    - project: "testing"
-      dashboard: "StatChartPanel"
-    - project: "testing"
-      dashboard: "MarkdownPanel"
+    - title: "Perses demos"
+      dashboards:
+        - project: "testing"
+    - title: "Quick links"
+      description: "Highlighted dashboards"
+      dashboards:
+        - project: "perses"
+          dashboard: "NodeExporter"
+        - project: "perses"
+          dashboard: "ThreeSignals"
 
   information: |-
     # Hello World
@@ -57,3 +56,11 @@ frontend:
 
 plugin:
   enable_dev: true
+
+datasource:
+  proxy:
+    # The datasources of the dev environment (Prometheus, Tempo, Loki, Pyroscope, ...) are running on localhost.
+    # The loopback interface is denied by default, so it must be explicitly allowed.
+    allowed_networks:
+      - "127.0.0.0/8"
+      - "::1/128"

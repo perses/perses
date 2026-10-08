@@ -12,17 +12,17 @@
 // limitations under the License.
 
 import { Box, Dialog, DialogContent, DialogTitle, Divider, IconButton, Typography } from '@mui/material';
+import type { ShortcutCategory, HotkeyMeta } from '@perses-dev/dashboards';
 import {
   useHotkeyRegistrations,
   formatForDisplay,
   SHORTCUT_CATEGORY_LABELS,
   SHORTCUT_CATEGORY_ORDER,
-  ShortcutCategory,
   SHOW_SHORTCUTS_EVENT,
-  HotkeyMeta,
 } from '@perses-dev/dashboards';
 import Close from 'mdi-material-ui/Close';
-import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 /** Modal displaying all registered keyboard shortcuts, grouped by category. */
 export function ShortcutHelpModal(): ReactElement {

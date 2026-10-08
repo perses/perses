@@ -12,25 +12,27 @@
 // limitations under the License.
 
 import { Box, Chip, CircularProgress, Stack } from '@mui/material';
-import { FolderResource } from '@perses-dev/client';
-import { Table, TableColumnConfig } from '@perses-dev/components';
+import type { FolderResource } from '@perses-dev/client';
+import type { TableColumnConfig } from '@perses-dev/components';
+import { Table } from '@perses-dev/components';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddFolderOutlineIcon from 'mdi-material-ui/FolderPlusOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import { ReactElement, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useDefaultRowsPerPage } from '../../context/Config';
 import { useIsMobileSize } from '../../utils/browser-size';
+import type { RowWithOriginal } from '../../utils/dashboardTableUtils';
 import {
   buildTableRows,
   formatAbsoluteTime,
   formatRelativeTime,
-  RowWithOriginal,
   sortDashboardTableStringColumn,
 } from '../../utils/dashboardTableUtils';
 import { CRUDIconButton } from '../CRUDButton/CRUDIconButton';
-import { DashboardListRow } from './DashboardList';
+import type { DashboardListRow } from './DashboardList';
 import { NameCell } from './NameCell';
 
 export interface DashboardTreeTableRow {
@@ -42,10 +44,45 @@ export interface DashboardTreeTableRow {
   createdAt?: Date;
   updatedAt?: Date;
   tags?: string[];
+  // Space-joined copy of `tags`. The table's global search only considers a column
+  // searchable when its value is a string or number, so this always resolves to a
+  // string (possibly empty) rather than reusing `tags` directly.
+  tagsSearchValue: string;
   version?: number;
   viewedAt?: Date;
   children?: DashboardTreeTableRow[];
 }
+
+// Exported so tests can build a real TanStack table with this exact column config and
+// verify the Tags column stays eligible for (and correctly matches) the table's global
+// search — see dashboardTableUtils.test.ts.
+export const TAGS_COLUMN: TableColumnConfig<DashboardTreeTableRow> = {
+  id: 'tags',
+  accessorKey: 'tagsSearchValue',
+  header: 'Tags',
+  align: 'left',
+  enableSorting: true,
+  cellDescription: (): string => '',
+  cell: ({ row }): ReactNode => {
+    const tags = row.original.tags;
+    return tags ? (
+      <Box
+        sx={{
+          pt: 0.75,
+          mt: -1,
+          overflow: 'inherit',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        {tags.map((tag, index) => (
+          <Chip key={`${tag}-${index}`} label={tag} size="small" sx={{ mr: index < tags.length - 1 ? 0.5 : 0 }} />
+        ))}
+      </Box>
+    ) : (
+      ''
+    );
+  },
+};
 
 export interface DashboardTreeTableProps {
   folderList: FolderResource[];
@@ -56,6 +93,8 @@ export interface DashboardTreeTableProps {
   handleEditFolderButtonClick: (project: string, name: string, path: string[]) => () => void;
   handleAddFolderButtonClick: (project: string, name: string, path: string[]) => () => void;
   handleDeleteFolderButtonClick: (project: string, name: string, path: string[]) => () => void;
+  /** Disables the duplicate button when defined, and explains why in its tooltip. */
+  duplicationDisabledReason?: string;
   isLoading?: boolean;
 }
 
@@ -68,6 +107,7 @@ function DashboardTreeList({
   handleEditFolderButtonClick,
   handleAddFolderButtonClick,
   handleDeleteFolderButtonClick,
+  duplicationDisabledReason,
   isLoading,
 }: DashboardTreeTableProps): ReactElement {
   const defaultRowsPerPage = useDefaultRowsPerPage();
@@ -137,33 +177,7 @@ function DashboardTreeList({
           />
         ),
       },
-      {
-        id: 'tags',
-        accessorKey: 'tags',
-        header: 'Tags',
-        align: 'left',
-        enableSorting: true,
-        cellDescription: (): string => '',
-        cell: ({ getValue }): ReactNode => {
-          const tags: string[] | undefined = getValue();
-          return tags ? (
-            <Box
-              sx={{
-                pt: 0.75,
-                mt: -1,
-                overflow: 'inherit',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {tags.map((tag, index) => (
-                <Chip key={`${tag}-${index}`} label={tag} size="small" sx={{ mr: index < tags.length - 1 ? 0.5 : 0 }} />
-              ))}
-            </Box>
-          ) : (
-            ''
-          );
-        },
-      },
+      TAGS_COLUMN,
       {
         id: 'version',
         accessorKey: 'version',
@@ -179,8 +193,8 @@ function DashboardTreeList({
         align: 'left',
         enableSorting: true,
         width: 150,
-        cellDescription: ({ getValue }): string => formatAbsoluteTime(getValue()),
-        cell: ({ getValue }): string | null => formatRelativeTime(getValue()),
+        cellDescription: ({ getValue }): string => formatAbsoluteTime(getValue<Date | undefined>()),
+        cell: ({ getValue }): string | null => formatRelativeTime(getValue<Date | undefined>()),
       },
       {
         id: 'updatedAt',
@@ -189,8 +203,8 @@ function DashboardTreeList({
         align: 'left',
         enableSorting: true,
         width: 150,
-        cellDescription: ({ getValue }): string => formatAbsoluteTime(getValue()),
-        cell: ({ getValue }): string | null => formatRelativeTime(getValue()),
+        cellDescription: ({ getValue }): string => formatAbsoluteTime(getValue<Date | undefined>()),
+        cell: ({ getValue }): string | null => formatRelativeTime(getValue<Date | undefined>()),
       },
       {
         id: 'viewedAt',
@@ -199,9 +213,10 @@ function DashboardTreeList({
         align: 'left',
         enableSorting: true,
         width: 150,
-        cellDescription: ({ getValue }): string => formatAbsoluteTime(getValue()),
+        cellDescription: ({ getValue }): string => formatAbsoluteTime(getValue<Date | undefined>()),
         cell: ({ getValue, row }): ReactNode =>
-          formatRelativeTime(getValue()) ?? (row.original.kind === 'Dashboard' ? <span>—</span> : null),
+          formatRelativeTime(getValue<Date | undefined>()) ??
+          (row.original.kind === 'Dashboard' ? <span>—</span> : null),
       },
       {
         id: 'actions',
@@ -228,12 +243,12 @@ function DashboardTreeList({
                 >
                   <PencilIcon />
                 </CRUDIconButton>
+                {/* Not bound to the dashboard's project, as the copy can be created in another one */}
                 <CRUDIconButton
                   key={row.original.name + '-duplicate'}
                   label="Duplicate"
-                  action="create"
-                  scope="Dashboard"
-                  project={row.original.project}
+                  disabled={duplicationDisabledReason !== undefined}
+                  disabledReason={duplicationDisabledReason}
                   onClick={handleDuplicateButtonClick(row.original.project, row.original.name)}
                 >
                   <ContentCopyIcon />
@@ -297,6 +312,7 @@ function DashboardTreeList({
       handleDuplicateButtonClick,
       handleEditFolderButtonClick,
       handleRenameButtonClick,
+      duplicationDisabledReason,
       sortStringColumn,
     ],
   );

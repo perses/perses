@@ -1,0 +1,13 @@
+[
+  {
+    "kind": "User",
+    "metadata": {
+      "name": "prehashed-admin"
+    },
+    "spec": {
+      "nativeProvider": {
+        "passwordHash": "$2y$10$9wE2VdDn/yimJ1rwBroa3OagN1Dm9AAYaX8OYbbTfYu7n7HUvPCvW"
+      }
+    }
+  }
+]

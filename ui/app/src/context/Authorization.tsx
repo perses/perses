@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, Permission, ProjectResource, Scope } from '@perses-dev/client';
-import { createContext, ReactElement, ReactNode, useContext, useMemo } from 'react';
+import type { Action, Permission, ProjectResource, Scope } from '@perses-dev/client';
+import type { ReactElement, ReactNode } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 
 import { useUsername } from '../model/auth/auth-client';
 import { enableRefreshFetch } from '../model/fetch';
@@ -62,18 +63,21 @@ export function useAuthorizationContext(): AuthorizationContext {
   return ctx;
 }
 
-export function useDashboardCreateAllowedProjects(): ProjectResource[] {
+export function useDashboardCreateAllowedProjects(): { data: ProjectResource[]; isLoading: boolean } {
   const { enabled, userPermissions } = useAuthorizationContext();
-  const { data } = useProjectList();
+  const { data, isLoading } = useProjectList();
   if (!enabled) {
-    return data ?? [];
+    return { data: data ?? [], isLoading };
   }
 
-  return (data ?? []).filter(
-    (project) =>
-      permissionListHasPermission(userPermissions[GlobalProject] ?? [], 'create', 'Dashboard') ||
-      permissionListHasPermission(userPermissions[project.metadata.name] ?? [], 'create', 'Dashboard'),
-  );
+  return {
+    data: (data ?? []).filter(
+      (project) =>
+        permissionListHasPermission(userPermissions[GlobalProject] ?? [], 'create', 'Dashboard') ||
+        permissionListHasPermission(userPermissions[project.metadata.name] ?? [], 'create', 'Dashboard'),
+    ),
+    isLoading,
+  };
 }
 
 /*

@@ -14,9 +14,7 @@
     "perf": "warn"
   },
   "env": {
-    "commonjs": true,
     "es6": true,
-    "jest": true,
     "node": true,
     "browser": true
   },

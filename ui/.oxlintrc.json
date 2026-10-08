@@ -8,9 +8,8 @@
     "perf": "warn"
   },
   "env": {
-    "commonjs": true,
     "es6": true,
-    "jest": true,
+    "vitest": true,
     "node": true,
     "browser": true
   },
@@ -18,6 +17,15 @@
     "typescript/explicit-function-return-type": "error",
     "typescript/explicit-module-boundary-types": "error",
     "typescript/array-type": ["error", { "default": "array-simple" }],
+    "typescript/consistent-type-imports": [
+      "error",
+      {
+        "prefer": "type-imports",
+        "fixStyle": "separate-type-imports",
+        "disallowTypeAnnotations": true
+      }
+    ],
+    "typescript/no-import-type-side-effects": "error",
     "eqeqeq": ["error", "always"],
     "no-unused-vars": [
       "error",
@@ -43,6 +51,7 @@
       "error",
       { "props": "never", "children": "never", "propElementValues": "always" }
     ],
+    "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
     "import/no-duplicates": "error",
     "no-restricted-imports": [
       "error",

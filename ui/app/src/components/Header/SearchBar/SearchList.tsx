@@ -11,12 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Button, Chip, Theme, Typography } from '@mui/material';
-import { KVSearch, KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsearch';
-import { isProjectMetadata, Resource } from '@perses-dev/client';
+import type { Theme } from '@mui/material';
+import { Box, Button, Chip, Typography } from '@mui/material';
+import type { KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsearch';
+import { KVSearch } from '@nexucis/kvsearch';
+import type { Resource } from '@perses-dev/client';
+import { isProjectMetadata } from '@perses-dev/client';
 import Archive from 'mdi-material-ui/Archive';
 import MiddleAlertIcon from 'mdi-material-ui/StarFourPointsOutline';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { ProjectRoute } from '../../../model/route';
@@ -91,11 +95,7 @@ function isTagMatch(match: SearchMatch): match is SearchMatch & { value: string 
   );
 }
 
-function getMatchingTagValues(matched: KVSearchResult<SearchItem>['matched'], enabled: boolean): string[] {
-  if (!enabled) {
-    return [];
-  }
-
+function getMatchingTagValues(matched: KVSearchResult<SearchItem>['matched']): string[] {
   return Array.from(new Set((matched ?? []).filter(isTagMatch).map((match) => match.value)));
 }
 
@@ -140,16 +140,7 @@ export function SearchList(props: SearchListProps): ReactElement | null {
   const kvSearch = useMemo(() => new KVSearch<Resource>(kvSearchConfig), []);
 
   const filteredList: Array<KVSearchResult<SearchItem>> = useMemo(() => {
-    if (!query && list?.[0]?.kind === 'Dashboard') {
-      return list.map((item, idx) => ({
-        original: item,
-        rendered: item,
-        score: 0,
-        index: idx,
-        matched: [],
-      }));
-    }
-    return kvSearch.filter(query, list);
+    return query ? kvSearch.filter(query, list) : [];
   }, [kvSearch, list, query]);
 
   useEffect(() => {
@@ -177,7 +168,7 @@ export function SearchList(props: SearchListProps): ReactElement | null {
       {filteredList.slice(0, currentSizeList).map((search) => {
         const isHighlighted = Boolean(search.original.highlight);
         const isDashboard = search.original.kind === 'Dashboard';
-        const matchingTagValues = getMatchingTagValues(search.matched, Boolean(query));
+        const matchingTagValues = getMatchingTagValues(search.matched);
         const { normalizedMatchingTags, visibleTags, hiddenTagsCount, hasAnyTags } = getTagDisplayValues(
           search.original.metadata.tags,
           matchingTagValues,

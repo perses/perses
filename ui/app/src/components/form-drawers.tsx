@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action } from '@perses-dev/client';
-import { DispatchWithPromise } from '@perses-dev/components';
-import { Dispatch, DispatchWithoutAction } from 'react';
+import type { Action } from '@perses-dev/client';
+import type { DispatchWithPromise } from '@perses-dev/components';
+import type { Dispatch, DispatchWithoutAction } from 'react';
 
 export interface DrawerProps<T> {
   action: Action;

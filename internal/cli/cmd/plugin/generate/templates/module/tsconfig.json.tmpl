@@ -1,23 +1,21 @@
 {
   "compilerOptions": {
-    "outDir": "./dist/lib",
-    "rootDir": "./src",
-    "target": "es2022",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "target": "es2023",
+    "lib": ["dom", "dom.iterable", "es2023"],
     "module": "esnext",
     "jsx": "react-jsx",
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
+    "types": ["node", "vitest/globals"],
     "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": true,
     "isolatedModules": true,
+    "strict": true,
     "noUncheckedIndexedAccess": true,
-    "declaration": true,
-    "declarationMap": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "noEmit": true,
     "pretty": true
   },
-  "include": ["src"]
+  "include": ["src", "rsbuild.config.ts", "vitest.config.ts"]
 }

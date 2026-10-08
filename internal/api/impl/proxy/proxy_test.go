@@ -14,289 +14,149 @@
 package proxy
 
 import (
-	"context"
-	"crypto/tls"
-	"encoding/pem"
-	"net/http"
-	"net/http/httptest"
 	"testing"
+	"time"
 
-	v1 "github.com/perses/perses/pkg/model/api/v1"
-	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
-	datasourceSQL "github.com/perses/spec/go/datasource/proxy/sql"
+	"github.com/perses/perses/internal/api/authorization"
+	"github.com/perses/perses/internal/api/impl/proxy/http"
+	"github.com/perses/perses/internal/api/impl/proxy/proxytest"
+	"github.com/perses/perses/pkg/model/api/config"
+	"github.com/perses/spec/go/common"
+	datasourceSpec "github.com/perses/spec/go/datasource"
+	"github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-var (
-	mySQLAddress    = "localhost:3306"
-	mariaDBAddress  = "localhost:3307"
-	postgresAddress = "localhost:5432"
-)
+type fakeAuthorization struct {
+	authorization.Authorization
+	enabled bool
+	native  bool
+}
 
-func TestSQLProxy_sqlOpen(t *testing.T) {
-	testSuite := []struct {
-		name          string
-		proxy         *sqlProxy
-		tlsConfig     *tls.Config
-		expectError   bool
-		errorContains string
+func (f *fakeAuthorization) IsEnabled() bool     { return f.enabled }
+func (f *fakeAuthorization) IsNativeAuthz() bool { return f.native }
+
+func TestEndpoint_forwardCallerAuthorization(t *testing.T) {
+	for _, test := range []struct {
+		name     string
+		authz    authorization.Authorization
+		expected bool
 	}{
-		{
-			name: "unsupported driver",
-			proxy: &sqlProxy{
-				config: &datasourceSQL.Config{
-					Driver: "unsupported",
-					Host:   mySQLAddress,
-				},
-			},
-			expectError:   true,
-			errorContains: "unsupported database driver",
-		},
-		{
-			name: "postgres with tls and sslmode disable",
-			proxy: &sqlProxy{
-				config: &datasourceSQL.Config{
-					Driver:   datasourceSQL.DriverPostgreSQL,
-					Host:     postgresAddress,
-					Database: "perses",
-					Postgres: &datasourceSQL.PostgresConfig{
-						SSLMode: "disable",
-					},
-				},
-			},
-			tlsConfig:     &tls.Config{MinVersion: tls.VersionTLS12},
-			expectError:   true,
-			errorContains: "cannot use custom TLSConfig with sslmode=disable",
-		},
-		{
-			name: "mysql success",
-			proxy: &sqlProxy{
-				config: &datasourceSQL.Config{
-					Driver:   datasourceSQL.DriverMySQL,
-					Host:     mySQLAddress,
-					Database: "testdb",
-				},
-				password: "password",
-			},
-			expectError: false,
-		},
-		{
-			name: "mysql with username",
-			proxy: &sqlProxy{
-				config: &datasourceSQL.Config{
-					Driver:   datasourceSQL.DriverMySQL,
-					Host:     mySQLAddress,
-					Database: "testdb",
-				},
-				username: "testuser",
-				password: "password",
-			},
-			expectError: false,
-		},
-		{
-			name: "mysql with custom config",
-			proxy: &sqlProxy{
-				config: &datasourceSQL.Config{
-					Driver:   datasourceSQL.DriverMySQL,
-					Host:     mySQLAddress,
-					Database: "testdb",
-					MySQL: &datasourceSQL.MySQLConfig{
-						Params: map[string]string{
-							"charset":   "utf8mb4",
-							"parseTime": "true",
-						},
-						MaxAllowedPacket: 67108864,
-					},
-				},
-				password: "password",
-			},
-			expectError: false,
-		},
-		{
-			name: "mariadb success",
-			proxy: &sqlProxy{
-				config: &datasourceSQL.Config{
-					Driver:   datasourceSQL.DriverMariaDB,
-					Host:     mariaDBAddress,
-					Database: "testdb",
-				},
-				password: "password",
-			},
-			expectError: false,
-		},
-		{
-			name: "mariadb with username and password",
-			proxy: &sqlProxy{
-				config: &datasourceSQL.Config{
-					Driver:   datasourceSQL.DriverMariaDB,
-					Host:     mariaDBAddress,
-					Database: "testdb",
-				},
-				username: "mariauser",
-				password: "mariapass",
-			},
-			expectError: false,
-		},
-		{
-			name: "mariadb with custom config",
-			proxy: &sqlProxy{
-				config: &datasourceSQL.Config{
-					Driver:   datasourceSQL.DriverMariaDB,
-					Host:     mariaDBAddress,
-					Database: "testdb",
-					MariaDB: &datasourceSQL.MySQLConfig{
-						Params: map[string]string{
-							"charset":   "utf8mb4",
-							"collation": "utf8mb4_unicode_ci",
-						},
-						MaxAllowedPacket: 33554432,
-					},
-				},
-				username: "mariauser",
-				password: "mariapass",
-			},
-			expectError: false,
-		},
-		{
-			name: "mariadb with tls",
-			proxy: &sqlProxy{
-				config: &datasourceSQL.Config{
-					Driver:   datasourceSQL.DriverMariaDB,
-					Host:     mariaDBAddress,
-					Database: "testdb",
-					MariaDB: &datasourceSQL.MySQLConfig{
-						Params: map[string]string{
-							"charset": "utf8mb4",
-						},
-					},
-				},
-				name:     "mariadb-ds",
-				project:  "testproject",
-				username: "mariauser",
-				password: "mariapass",
-			},
-			tlsConfig:   &tls.Config{MinVersion: tls.VersionTLS12},
-			expectError: false,
-		},
-		{
-			name: "postgres success",
-			proxy: &sqlProxy{
-				config: &datasourceSQL.Config{
-					Driver:   datasourceSQL.DriverPostgreSQL,
-					Host:     postgresAddress,
-					Database: "testdb",
-				},
-				password: "password",
-			},
-			expectError: false,
-		},
-		{
-			name: "postgres with username",
-			proxy: &sqlProxy{
-				config: &datasourceSQL.Config{
-					Driver:   datasourceSQL.DriverPostgreSQL,
-					Host:     postgresAddress,
-					Database: "testdb",
-					Postgres: &datasourceSQL.PostgresConfig{
-						SSLMode: datasourceSQL.SSLModeDisable,
-					},
-				},
-				username: "pguser",
-				password: "pgpass",
-			},
-			expectError: false,
-		},
-		{
-			name: "postgres no password",
-			proxy: &sqlProxy{
-				config: &datasourceSQL.Config{
-					Driver: datasourceSQL.DriverPostgreSQL,
-					Host:   postgresAddress,
-				},
-			},
-			expectError: false,
-		},
-		{
-			name: "postgres with all ssl modes - prefer",
-			proxy: &sqlProxy{
-				config: &datasourceSQL.Config{
-					Driver:   datasourceSQL.DriverPostgreSQL,
-					Host:     postgresAddress,
-					Database: "testdb",
-					Postgres: &datasourceSQL.PostgresConfig{
-						SSLMode: datasourceSQL.SSLModePreferable,
-					},
-				},
-			},
-			expectError: false,
-		},
-		{
-			name: "postgres with ssl mode require and tls",
-			proxy: &sqlProxy{
-				config: &datasourceSQL.Config{
-					Driver:   datasourceSQL.DriverPostgreSQL,
-					Host:     postgresAddress,
-					Database: "testdb",
-					Postgres: &datasourceSQL.PostgresConfig{
-						SSLMode: datasourceSQL.SSLModeRequire,
-					},
-				},
-			},
-			tlsConfig:   &tls.Config{MinVersion: tls.VersionTLS12},
-			expectError: false,
-		},
-	}
-
-	for _, test := range testSuite {
+		{name: "no authorization: safe default", authz: nil, expected: false},
+		{name: "native authorization: the header contains the Perses token", authz: &fakeAuthorization{enabled: true, native: true}, expected: false},
+		{name: "delegated authorization", authz: &fakeAuthorization{enabled: true, native: false}, expected: true},
+		{name: "authorization disabled", authz: &fakeAuthorization{enabled: false, native: true}, expected: true},
+	} {
 		t.Run(test.name, func(t *testing.T) {
-			db, err := test.proxy.sqlOpen(test.tlsConfig)
-			if test.expectError {
-				assert.Error(t, err)
-				assert.Contains(t, err.Error(), test.errorContains)
-			} else {
-				assert.NoError(t, err)
-				require.NotNil(t, db)
-				_ = db.Close()
-			}
+			e := &endpoint{authz: test.authz}
+			assert.Equal(t, test.expected, e.forwardCallerAuthorization())
 		})
 	}
 }
 
-// TestHTTPProxy_getToken_honorsTLSConfig ensures the OAuth token request is
-// performed with the transport built from the datasource secret's TLS config.
-// The token endpoint is served over TLS with a self-signed certificate, so the
-// request only succeeds when the configured transport (trusting that certificate
-// through the secret's CA) is used. If getToken stored a plain http.Client value
-// instead of a *http.Client under the oauth2.HTTPClient context key, oauth2 would
-// silently fall back to http.DefaultClient and the handshake would fail.
-func TestHTTPProxy_getToken_honorsTLSConfig(t *testing.T) {
-	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"access_token":"secret-token","token_type":"Bearer","expires_in":3600}`))
-	}))
-	defer server.Close()
-
-	caPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: server.Certificate().Raw})
-
-	h := &httpProxy{
-		secret: &v1.SecretSpec{
-			TLSConfig: &secretModel.TLSConfig{
-				CA:         string(caPEM),
-				MinVersion: "TLS12",
-				MaxVersion: "TLS13",
+// TestEndpoint_newProxy_connectionLimits ensures the limits set in the config (datasource.proxy.http)
+// are given to the HTTP proxy, and that the unset ones fall back to their defaults.
+// Applying them to the transport is covered by TestHTTPProxy_getTransport_connectionLimits (http package).
+func TestEndpoint_newProxy_connectionLimits(t *testing.T) {
+	spec := datasourceSpec.Spec{
+		Plugin: plugin.Plugin{
+			Kind: "PrometheusDatasource",
+			Spec: map[string]any{
+				"proxy": map[string]any{
+					"kind": "HTTPProxy",
+					"spec": map[string]any{"url": "http://localhost:9090"},
+				},
 			},
 		},
 	}
-
-	oauth := &secretModel.OAuth{
-		ClientID:     "client-id",
-		ClientSecret: "client-secret",
-		TokenURL:     server.URL,
+	custom := config.HTTPProxyConfig{MaxConnsPerHost: 3, MaxIdleConns: 20, MaxIdleConnsPerHost: 2}
+	for _, test := range []struct {
+		name         string
+		proxyConfig  config.HTTPProxyConfig
+		transportKey string
+		expected     config.HTTPProxyConfig
+	}{
+		{
+			name:         "defaults",
+			transportKey: globalTransportKey("prometheus"),
+			expected: config.HTTPProxyConfig{
+				MaxConnsPerHost:     0,
+				MaxIdleConns:        config.DefaultHTTPProxyMaxIdleConns,
+				MaxIdleConnsPerHost: config.DefaultHTTPProxyMaxIdleConnsPerHost,
+			},
+		},
+		{name: "limits applied to a saved datasource", proxyConfig: custom, transportKey: globalTransportKey("prometheus"), expected: custom},
+		{name: "limits applied to an unsaved datasource", proxyConfig: custom, transportKey: "", expected: custom},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			// The config is verified when Perses loads it, which also sets the default values.
+			proxyConfig := test.proxyConfig
+			require.NoError(t, proxyConfig.Verify())
+			e := &endpoint{
+				cfg:        config.DatasourceConfig{Proxy: config.DatasourceProxyConfig{HTTP: proxyConfig}},
+				transports: httpproxy.NewTransportCache(),
+				guard:      proxytest.NewLoopbackGuard(t),
+			}
+			pr, err := e.newProxy("prometheus", "", test.transportKey, spec, "/api/v1/query", nil)
+			require.NoError(t, err)
+			h, ok := pr.(*httpproxy.Proxy)
+			require.True(t, ok)
+			assert.Same(t, e.transports, h.Transports)
+			assert.Equal(t, test.transportKey, h.TransportKey)
+			assert.Equal(t, test.expected.MaxConnsPerHost, h.ProxyConfig.MaxConnsPerHost)
+			assert.Equal(t, test.expected.MaxIdleConns, h.ProxyConfig.MaxIdleConns)
+			assert.Equal(t, test.expected.MaxIdleConnsPerHost, h.ProxyConfig.MaxIdleConnsPerHost)
+		})
 	}
+}
 
-	token, err := h.getToken(context.Background(), oauth)
-	require.NoError(t, err)
-	require.NotNil(t, token)
-	assert.Equal(t, "secret-token", token.AccessToken)
+// TestEndpoint_newProxy_timeout ensures the connection timeout of the HTTP proxy is the one defined by the datasource,
+// bounded by the server configuration (datasource.proxy.http.default_timeout and max_timeout).
+func TestEndpoint_newProxy_timeout(t *testing.T) {
+	newSpec := func(timeout string) datasourceSpec.Spec {
+		proxySpec := map[string]any{"url": "http://localhost:9090"}
+		if len(timeout) > 0 {
+			proxySpec["timeout"] = timeout
+		}
+		return datasourceSpec.Spec{
+			Plugin: plugin.Plugin{
+				Kind: "PrometheusDatasource",
+				Spec: map[string]any{
+					"proxy": map[string]any{"kind": "HTTPProxy", "spec": proxySpec},
+				},
+			},
+		}
+	}
+	serverCfg := config.HTTPProxyConfig{DefaultTimeout: common.Duration(10 * time.Second), MaxTimeout: common.Duration(time.Minute)}
+	for _, test := range []struct {
+		name        string
+		proxyConfig config.HTTPProxyConfig
+		timeout     string
+		expected    time.Duration
+	}{
+		{name: "server defaults", expected: time.Duration(config.DefaultHTTPProxyTimeout)},
+		{name: "server defaults: the datasource cannot increase the timeout", timeout: "5m", expected: time.Duration(config.DefaultHTTPProxyTimeout)},
+		{name: "server defaults: the datasource can lower the timeout", timeout: "5s", expected: 5 * time.Second},
+		{name: "no timeout in the datasource: default timeout of the server", proxyConfig: serverCfg, expected: 10 * time.Second},
+		{name: "zero timeout in the datasource: default timeout of the server", proxyConfig: serverCfg, timeout: "0s", expected: 10 * time.Second},
+		{name: "timeout of the datasource", proxyConfig: serverCfg, timeout: "45s", expected: 45 * time.Second},
+		{name: "timeout of the datasource clamped to the maximum of the server", proxyConfig: serverCfg, timeout: "10m", expected: time.Minute},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			// The config is verified when Perses loads it, which also sets the default values.
+			proxyConfig := test.proxyConfig
+			require.NoError(t, proxyConfig.Verify())
+			e := &endpoint{
+				cfg:        config.DatasourceConfig{Proxy: config.DatasourceProxyConfig{HTTP: proxyConfig}},
+				transports: httpproxy.NewTransportCache(),
+				guard:      proxytest.NewLoopbackGuard(t),
+			}
+			pr, err := e.newProxy("prometheus", "", globalTransportKey("prometheus"), newSpec(test.timeout), "/api/v1/query", nil)
+			require.NoError(t, err)
+			h, ok := pr.(*httpproxy.Proxy)
+			require.True(t, ok)
+			assert.Equal(t, test.expected, h.ProxyConfig.EffectiveTimeout(h.Config.Timeout))
+		})
+	}
 }
