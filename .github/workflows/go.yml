@@ -80,11 +80,11 @@ jobs:
       prometheus:
         image: prom/prometheus
         ports:
-          - '9090:9090'
+          - "9090:9090"
       postgres:
         image: postgres:17
         ports:
-          - '5432:5432'
+          - "5432:5432"
         env:
           POSTGRES_DB: perses
           POSTGRES_USER: user
@@ -148,11 +148,11 @@ jobs:
       prometheus:
         image: prom/prometheus
         ports:
-          - '9090:9090'
+          - "9090:9090"
       mariadb:
         image: mariadb
         ports:
-          - '3306:3306'
+          - "3306:3306"
         env:
           MARIADB_ROOT_PASSWORD: root
           MARIADB_DATABASE: perses
@@ -161,7 +161,7 @@ jobs:
       postgres:
         image: postgres:17
         ports:
-          - '5432:5432'
+          - "5432:5432"
         env:
           POSTGRES_DB: perses
           POSTGRES_USER: user
@@ -200,7 +200,7 @@ jobs:
         uses: golangci/golangci-lint-action@v9.3.0
         with:
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-          version: v2.13.2
+          version: v2.14.0
           args: --timeout 5m
   validate-dev-data:
     name: validate CUE schemas
