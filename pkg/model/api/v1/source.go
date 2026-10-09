@@ -35,11 +35,32 @@ type DiscoverySource struct {
 	Type DiscoveryType `json:"type" yaml:"type"`
 }
 
+// SCMSource identifies the source control repository that owns a resource.
+type SCMSource struct {
+	URL string `json:"url" yaml:"url"`
+}
+
+// OperatorSource identifies the Kubernetes operator CR that created or last
+// updated a resource.
+type OperatorSource struct {
+	// Cluster is the name of the Kubernetes cluster. Optional: omitted when
+	// the operator manages resources within a single known cluster.
+	Cluster   string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
+	Namespace string `json:"namespace" yaml:"namespace"`
+	Kind      string `json:"kind" yaml:"kind"`
+	Name      string `json:"name" yaml:"name"`
+	// UID is the Kubernetes UID of the CR. Optional: used to detect
+	// re-creation of a CR with the same name.
+	UID string `json:"uid,omitempty" yaml:"uid,omitempty"`
+}
+
 // Source records where a resource originated. At most one field is non-nil.
 // When Source itself is nil the resource was created manually via the API.
 type Source struct {
 	Provisioning *ProvisioningSource `json:"provisioning,omitempty" yaml:"provisioning,omitempty"`
 	Discovery    *DiscoverySource    `json:"discovery,omitempty" yaml:"discovery,omitempty"`
+	SCM          *SCMSource          `json:"scm,omitempty"          yaml:"scm,omitempty"`
+	Operator     *OperatorSource     `json:"operator,omitempty"     yaml:"operator,omitempty"`
 }
 
 // Sourceable is implemented by every resource type that carries a Source field.
