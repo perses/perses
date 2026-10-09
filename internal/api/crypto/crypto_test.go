@@ -209,7 +209,7 @@ func encryptCFB(c *crypto, plaintext string) string {
 	iv := cipherText[:aes.BlockSize]
 	_, _ = rand.Reader.Read(iv)
 
-	stream := cipher.NewCFBEncrypter(c.block, iv) //nolint: staticcheck
+	stream := cipher.NewCFBEncrypter(c.block, iv) //nolint:staticcheck,gosec // iv is filled with crypto/rand above; G407 false positive
 	stream.XORKeyStream(cipherText[aes.BlockSize:], plainTextBytes)
 
 	return base64.URLEncoding.EncodeToString(cipherText)

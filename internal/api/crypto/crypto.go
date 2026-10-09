@@ -205,7 +205,7 @@ func (c *crypto) encryptCFB(stringToEncrypt string) (string, error) {
 		return "", err
 	}
 
-	stream := cipher.NewCFBEncrypter(c.block, iv) //nolint: staticcheck
+	stream := cipher.NewCFBEncrypter(c.block, iv) //nolint:staticcheck,gosec // iv is filled with crypto/rand above; G407 false positive
 	stream.XORKeyStream(cipherText[aes.BlockSize:], plainText)
 
 	return base64.URLEncoding.EncodeToString(cipherText), nil
@@ -247,7 +247,7 @@ func (c *crypto) decryptCFB(cipherText []byte) (string, error) {
 	iv := cipherText[:aes.BlockSize]
 	cipherText = cipherText[aes.BlockSize:]
 
-	stream := cipher.NewCFBDecrypter(c.block, iv) //nolint: staticcheck
+	stream := cipher.NewCFBDecrypter(c.block, iv) //nolint:staticcheck
 
 	// XORKeyStream can work in-place if the two arguments are the same.
 	stream.XORKeyStream(cipherText, cipherText)
