@@ -27,6 +27,7 @@ type Dashboard struct {
 	Kind     Kind               `json:"kind" yaml:"kind"`
 	Metadata ProjectMetadata    `json:"metadata" yaml:"metadata"`
 	Spec     dashboardSpec.Spec `json:"spec" yaml:"spec"`
+	Source   *Source            `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 func (d *Dashboard) GetMetadata() modelAPI.Metadata {
@@ -39,6 +40,14 @@ func (d *Dashboard) GetKind() string {
 
 func (d *Dashboard) GetSpec() any {
 	return d.Spec
+}
+
+func (d *Dashboard) GetSource() *Source {
+	return d.Source
+}
+
+func (d *Dashboard) SetSource(s *Source) {
+	d.Source = s
 }
 
 func (d *Dashboard) UnmarshalJSON(data []byte) error {
