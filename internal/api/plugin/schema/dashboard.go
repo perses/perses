@@ -64,6 +64,11 @@ var dashboardCueValidationOptions = []cue.Option{
 	cue.Hidden(false),
 }
 
+var (
+	serverManagedMetadataStructs = []string{"_Metadata_0", "_ProjectMetadata_0"}
+	serverManagedMetadataFields  = []string{"createdAt", "updatedAt", "version"}
+)
+
 func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 	// load dashboard
 	encoded := ctx.EncodeType(v1.Dashboard{})
@@ -90,6 +95,12 @@ func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 	final, err = apiCue.RemoveEmptyStringField(ctx, final)
 	if err != nil {
 		return cue.Value{}, fmt.Errorf("failed to remove empty fields from dashboard schema: %w", err)
+	}
+
+	// createdAt, updatedAt and version are set by the server: user-provided dashboards don't need them
+	final, err = apiCue.MakeFieldsOptional(ctx, final, serverManagedMetadataStructs, serverManagedMetadataFields)
+	if err != nil {
+		return cue.Value{}, fmt.Errorf("failed to make server-managed metadata fields optional in dashboard schema: %w", err)
 	}
 
 	// grab _Metadata_0 and _ProjectMetadataWrapper_0 from #Dashboard
