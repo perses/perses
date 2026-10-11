@@ -22,11 +22,11 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
 	github.com/perses/common v0.31.2 // indirect
-	github.com/prometheus/client_golang v1.24.1 // indirect
+	github.com/prometheus/client_golang v1.25.0 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
 	github.com/prometheus/common v0.72.0 // indirect
-	github.com/prometheus/procfs v0.21.1 // indirect
-	github.com/zitadel/oidc/v3 v3.51.10 // indirect
+	github.com/prometheus/procfs v0.22.0 // indirect
+	github.com/zitadel/oidc/v3 v3.51.13 // indirect
 	github.com/zitadel/schema v1.3.2 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	golang.org/x/net v0.59.0 // indirect
