@@ -1,13 +1,13 @@
 module dac
 
-go 1.27.1
+go 1.27.2
 
 replace github.com/perses/perses => ../../../../../../../ // Use current version
 
 require (
 	github.com/perses/perses v0.54.0
 	github.com/perses/plugins/timeserieschart v0.13.0
-	github.com/perses/spec v0.3.0-rc.0
+	github.com/perses/spec v0.3.0-rc.0.0.20261010080156-202edf51fe9c
 )
 
 require (
