@@ -28,7 +28,8 @@
         "kind": "ListVariable",
         "spec": {
           "display": {
-            "name": "PaaS"
+            "name": "PaaS",
+            "hidden": false
           },
           "allowAllValue": false,
           "allowMultiple": false,
@@ -61,7 +62,8 @@
         "kind": "ListVariable",
         "spec": {
           "display": {
-            "description": "to reduce the query scope thus improve performances"
+            "description": "to reduce the query scope thus improve performances",
+            "hidden": false
           },
           "allowAllValue": false,
           "allowMultiple": false,
