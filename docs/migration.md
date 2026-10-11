@@ -21,6 +21,10 @@ Specially the latest versions of Grafana where the data model has changed a lot.
 
 The migration script is working for Grafana versions 9.0.0 until the version 11.x. Above or below this range, we cannot guarantee the migration will work.
 
+Only the classic JSON model of the Grafana dashboards is supported. The dashboard resources of Grafana 12 (identified by an
+`apiVersion` starting with `dashboard.grafana.app/`, like the v2 schema) are rejected. If you are using Grafana 12, export
+your dashboard using the classic JSON model.
+
 We aim to support the latest version of Grafana and we will try to support the Datadog format as well.
 If you are interesting in this, you can track the associated issue: https://github.com/perses/perses/issues/4307
 
