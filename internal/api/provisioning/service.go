@@ -16,11 +16,26 @@ package provisioning
 import (
 	"fmt"
 	"path/filepath"
+	"slices"
 	"sort"
 
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/dependency"
 	apiInterface "github.com/perses/perses/internal/api/interface"
+	dashboardInterface "github.com/perses/perses/internal/api/interface/v1/dashboard"
+	datasourceInterface "github.com/perses/perses/internal/api/interface/v1/datasource"
+	folderInterface "github.com/perses/perses/internal/api/interface/v1/folder"
+	globalDatasourceInterface "github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	globalRoleInterface "github.com/perses/perses/internal/api/interface/v1/globalrole"
+	globalRoleBindingInterface "github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
+	globalSecretInterface "github.com/perses/perses/internal/api/interface/v1/globalsecret"
+	globalVariableInterface "github.com/perses/perses/internal/api/interface/v1/globalvariable"
+	projectInterface "github.com/perses/perses/internal/api/interface/v1/project"
+	roleInterface "github.com/perses/perses/internal/api/interface/v1/role"
+	roleBindingInterface "github.com/perses/perses/internal/api/interface/v1/rolebinding"
+	secretInterface "github.com/perses/perses/internal/api/interface/v1/secret"
+	userInterface "github.com/perses/perses/internal/api/interface/v1/user"
+	variableInterface "github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/cli/resource"
 	modelAPI "github.com/perses/perses/pkg/model/api"
@@ -38,6 +53,7 @@ type provisioningServiceInterface interface {
 type provisioningService struct {
 	serviceManager dependency.ServiceManager
 	caseSensitive  bool
+	enablePrune    bool
 }
 
 // reload reads all entities from the given folders and applies them.
@@ -51,6 +67,9 @@ func (p *provisioningService) reloadAllEntities(folders []string) {
 		items = append(items, objects...)
 	}
 	p.applyEntity(items)
+	if p.enablePrune {
+		p.pruneEntities(folders, items)
+	}
 }
 
 func (p *provisioningService) applyEntity(items []file.EntityWithFile) {
@@ -114,6 +133,162 @@ func (p *provisioningService) applyEntity(items []file.EntityWithFile) {
 			logrus.WithError(updateError).Errorf("unable to update the %q %q", kind, name)
 		}
 	}
+}
+
+// entityKey uniquely identifies a provisioned resource across all kinds.
+type entityKey struct {
+	kind    string
+	project string
+	name    string
+}
+
+// pruneEntities removes resources from the DB that were previously provisioned
+// from one of the given folders but whose source file no longer exists.
+func (p *provisioningService) pruneEntities(folders []string, live []file.EntityWithFile) {
+	// Build the list of keys that are present in the current provisioning files.
+	var liveKeys []entityKey
+	for _, item := range live {
+		meta := item.Entity.GetMetadata()
+		liveKeys = append(liveKeys, entityKey{
+			kind:    item.Entity.GetKind(),
+			project: resource.GetProject(meta, ""),
+			name:    meta.GetName(),
+		})
+	}
+
+	for _, folder := range folders {
+		p.pruneFolder(folder, liveKeys)
+	}
+}
+
+// pruneFolder deletes all DB resources whose source folder matches dir but
+// whose key is absent from the liveKeys slice.
+func (p *provisioningService) pruneFolder(dir string, liveKeys []entityKey) {
+	p.pruneKind(dir, string(modelV1.KindDashboard), liveKeys, func(folder string) ([]modelAPI.Entity, error) {
+		list, err := p.serviceManager.GetDashboard().List(&dashboardInterface.Query{SourceFolder: folder})
+		return toEntities(list, err)
+	}, func(project, name string) error {
+		return p.serviceManager.GetDashboard().Delete(nil, apiInterface.Parameters{Project: project, Name: name})
+	})
+	p.pruneKind(dir, string(modelV1.KindDatasource), liveKeys, func(folder string) ([]modelAPI.Entity, error) {
+		list, err := p.serviceManager.GetDatasource().List(&datasourceInterface.Query{SourceFolder: folder})
+		return toEntities(list, err)
+	}, func(project, name string) error {
+		return p.serviceManager.GetDatasource().Delete(nil, apiInterface.Parameters{Project: project, Name: name})
+	})
+	p.pruneKind(dir, string(modelV1.KindFolder), liveKeys, func(folder string) ([]modelAPI.Entity, error) {
+		list, err := p.serviceManager.GetFolder().List(&folderInterface.Query{SourceFolder: folder})
+		return toEntities(list, err)
+	}, func(project, name string) error {
+		return p.serviceManager.GetFolder().Delete(nil, apiInterface.Parameters{Project: project, Name: name})
+	})
+	p.pruneKind(dir, string(modelV1.KindGlobalDatasource), liveKeys, func(folder string) ([]modelAPI.Entity, error) {
+		list, err := p.serviceManager.GetGlobalDatasource().List(&globalDatasourceInterface.Query{SourceFolder: folder})
+		return toEntities(list, err)
+	}, func(_, name string) error {
+		return p.serviceManager.GetGlobalDatasource().Delete(nil, apiInterface.Parameters{Name: name})
+	})
+	p.pruneKind(dir, string(modelV1.KindGlobalRole), liveKeys, func(folder string) ([]modelAPI.Entity, error) {
+		list, err := p.serviceManager.GetGlobalRole().List(&globalRoleInterface.Query{SourceFolder: folder})
+		return toEntities(list, err)
+	}, func(_, name string) error {
+		return p.serviceManager.GetGlobalRole().Delete(nil, apiInterface.Parameters{Name: name})
+	})
+	p.pruneKind(dir, string(modelV1.KindGlobalRoleBinding), liveKeys, func(folder string) ([]modelAPI.Entity, error) {
+		list, err := p.serviceManager.GetGlobalRoleBinding().List(&globalRoleBindingInterface.Query{SourceFolder: folder})
+		return toEntities(list, err)
+	}, func(_, name string) error {
+		return p.serviceManager.GetGlobalRoleBinding().Delete(nil, apiInterface.Parameters{Name: name})
+	})
+	p.pruneKind(dir, string(modelV1.KindGlobalSecret), liveKeys, func(folder string) ([]modelAPI.Entity, error) {
+		list, err := p.serviceManager.GetGlobalSecret().List(&globalSecretInterface.Query{SourceFolder: folder})
+		return toEntities(list, err)
+	}, func(_, name string) error {
+		return p.serviceManager.GetGlobalSecret().Delete(nil, apiInterface.Parameters{Name: name})
+	})
+	p.pruneKind(dir, string(modelV1.KindGlobalVariable), liveKeys, func(folder string) ([]modelAPI.Entity, error) {
+		list, err := p.serviceManager.GetGlobalVariable().List(&globalVariableInterface.Query{SourceFolder: folder})
+		return toEntities(list, err)
+	}, func(_, name string) error {
+		return p.serviceManager.GetGlobalVariable().Delete(nil, apiInterface.Parameters{Name: name})
+	})
+	p.pruneKind(dir, string(modelV1.KindProject), liveKeys, func(folder string) ([]modelAPI.Entity, error) {
+		list, err := p.serviceManager.GetProject().List(&projectInterface.Query{SourceFolder: folder})
+		return toEntities(list, err)
+	}, func(_, name string) error {
+		return p.serviceManager.GetProject().Delete(nil, apiInterface.Parameters{Name: name})
+	})
+	p.pruneKind(dir, string(modelV1.KindRole), liveKeys, func(folder string) ([]modelAPI.Entity, error) {
+		list, err := p.serviceManager.GetRole().List(&roleInterface.Query{SourceFolder: folder})
+		return toEntities(list, err)
+	}, func(project, name string) error {
+		return p.serviceManager.GetRole().Delete(nil, apiInterface.Parameters{Project: project, Name: name})
+	})
+	p.pruneKind(dir, string(modelV1.KindRoleBinding), liveKeys, func(folder string) ([]modelAPI.Entity, error) {
+		list, err := p.serviceManager.GetRoleBinding().List(&roleBindingInterface.Query{SourceFolder: folder})
+		return toEntities(list, err)
+	}, func(project, name string) error {
+		return p.serviceManager.GetRoleBinding().Delete(nil, apiInterface.Parameters{Project: project, Name: name})
+	})
+	p.pruneKind(dir, string(modelV1.KindSecret), liveKeys, func(folder string) ([]modelAPI.Entity, error) {
+		list, err := p.serviceManager.GetSecret().List(&secretInterface.Query{SourceFolder: folder})
+		return toEntities(list, err)
+	}, func(project, name string) error {
+		return p.serviceManager.GetSecret().Delete(nil, apiInterface.Parameters{Project: project, Name: name})
+	})
+	p.pruneKind(dir, string(modelV1.KindUser), liveKeys, func(folder string) ([]modelAPI.Entity, error) {
+		list, err := p.serviceManager.GetUser().List(&userInterface.Query{SourceFolder: folder})
+		return toEntities(list, err)
+	}, func(_, name string) error {
+		return p.serviceManager.GetUser().Delete(nil, apiInterface.Parameters{Name: name})
+	})
+	p.pruneKind(dir, string(modelV1.KindVariable), liveKeys, func(folder string) ([]modelAPI.Entity, error) {
+		list, err := p.serviceManager.GetVariable().List(&variableInterface.Query{SourceFolder: folder})
+		return toEntities(list, err)
+	}, func(project, name string) error {
+		return p.serviceManager.GetVariable().Delete(nil, apiInterface.Parameters{Project: project, Name: name})
+	})
+}
+
+func (p *provisioningService) pruneKind(
+	folder string,
+	kind string,
+	liveKeys []entityKey,
+	listFn func(string) ([]modelAPI.Entity, error),
+	delFn func(project, name string) error,
+) {
+	entities, err := listFn(folder)
+	if err != nil {
+		logrus.WithError(err).Errorf("unable to list %q resources for pruning in folder %q", kind, folder)
+		return
+	}
+	for _, e := range entities {
+		meta := e.GetMetadata()
+		key := entityKey{
+			kind:    kind,
+			project: resource.GetProject(meta, ""),
+			name:    meta.GetName(),
+		}
+		if !slices.Contains(liveKeys, key) {
+			if delErr := delFn(key.project, key.name); delErr != nil {
+				logrus.WithError(delErr).Errorf("unable to prune %q %q/%q", kind, key.project, key.name)
+			} else {
+				logrus.Infof("pruned %q %q/%q (source folder %q no longer contains it)", kind, key.project, key.name, folder)
+			}
+		}
+	}
+}
+
+// toEntities converts a typed slice + error into []modelAPI.Entity + error.
+func toEntities[T modelAPI.Entity](list []T, err error) ([]modelAPI.Entity, error) {
+	if err != nil {
+		return nil, err
+	}
+	result := make([]modelAPI.Entity, len(list))
+	for i, e := range list {
+		result[i] = e
+	}
+	return result, nil
 }
 
 // projectExists returns true if a project with the given name exists in the database.
