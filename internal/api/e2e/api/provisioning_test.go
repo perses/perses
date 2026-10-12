@@ -47,7 +47,7 @@ func TestProvisioningSkipsResourcesInUnknownProject(t *testing.T) {
 		writeEntityToFile(t, filepath.Join(provisioningDir, "valid.json"), roleInExistingProject)
 		writeEntityToFile(t, filepath.Join(provisioningDir, "orphan.json"), roleInUnknownProject)
 
-		task, _ := provisioning.New(manager.Service(), []string{provisioningDir}, true)
+		task, _ := provisioning.New(manager.Service(), []string{provisioningDir}, true, false)
 		if err := task.Execute(context.Background(), func() {}); err != nil {
 			t.Fatal(err)
 		}
@@ -77,7 +77,7 @@ func TestProvisioningCreatesProjectBeforeItsResources(t *testing.T) {
 		writeEntityToFile(t, filepath.Join(provisioningDir, "a_role.json"), roleInProject)
 		writeEntityToFile(t, filepath.Join(provisioningDir, "z_project.json"), project)
 
-		task, _ := provisioning.New(manager.Service(), []string{provisioningDir}, true)
+		task, _ := provisioning.New(manager.Service(), []string{provisioningDir}, true, false)
 		if err := task.Execute(context.Background(), func() {}); err != nil {
 			t.Fatal(err)
 		}
@@ -95,7 +95,7 @@ func TestProvisioningCreatesProjectBeforeItsResources(t *testing.T) {
 func TestProvisioningWatcher(t *testing.T) {
 	e2eframework.WithServer(t, func(_ *httptest.Server, _ *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		provisioningDir := t.TempDir()
-		task, watcher := provisioning.New(manager.Service(), []string{provisioningDir}, true)
+		task, watcher := provisioning.New(manager.Service(), []string{provisioningDir}, true, false)
 
 		// Initial load like core.go does at startup.
 		if err := task.Execute(context.Background(), func() {}); err != nil {
@@ -124,6 +124,65 @@ func TestProvisioningWatcher(t *testing.T) {
 		assert.NoError(t, err, "project should be provisioned by the watcher")
 
 		return []modelAPI.Entity{project}
+	})
+}
+
+func TestProvisioningPrunesDeletedResources(t *testing.T) {
+	e2eframework.WithServer(t, func(_ *httptest.Server, _ *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
+		project := e2eframework.NewProject("pruneproject")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
+
+		provisioningDir := t.TempDir()
+		role := e2eframework.NewRole("pruneproject", "tobedeleted")
+		rolePath := filepath.Join(provisioningDir, "role.json")
+		writeEntityToFile(t, rolePath, role)
+
+		// First reload: role is provisioned.
+		task, _ := provisioning.New(manager.Service(), []string{provisioningDir}, true, true)
+		if err := task.Execute(context.Background(), func() {}); err != nil {
+			t.Fatal(err)
+		}
+		_, err := manager.Persistence().GetRole().Get("pruneproject", "tobedeleted")
+		assert.NoError(t, err, "role must exist after first provisioning")
+
+		// Remove the file and reload: role must be pruned.
+		if err = os.Remove(rolePath); err != nil {
+			t.Fatal(err)
+		}
+		if err = task.Execute(context.Background(), func() {}); err != nil {
+			t.Fatal(err)
+		}
+		_, err = manager.Persistence().GetRole().Get("pruneproject", "tobedeleted")
+		assert.True(t, databaseModel.IsKeyNotFound(err), "role must be pruned after its file is deleted, got err: %v", err)
+
+		return []modelAPI.Entity{project}
+	})
+}
+
+func TestProvisioningPruneDoesNotTouchManualResources(t *testing.T) {
+	e2eframework.WithServer(t, func(_ *httptest.Server, _ *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
+		project := e2eframework.NewProject("manualproject")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
+
+		// Create a role manually (no Source stamped) via the persistence layer directly.
+		manualRole := e2eframework.NewRole("manualproject", "manual")
+		if err := manager.Persistence().GetRole().Create(manualRole); err != nil {
+			t.Fatal(err)
+		}
+
+		// Run prune with an empty provisioning folder — no provisioned resources exist.
+		provisioningDir := t.TempDir()
+		task, _ := provisioning.New(manager.Service(), []string{provisioningDir}, true, true)
+		if err := task.Execute(context.Background(), func() {}); err != nil {
+			t.Fatal(err)
+		}
+
+		// The manually created role must be untouched — prune only targets resources
+		// whose source.provisioning.folder matches the folder, which this one lacks.
+		_, err := manager.Persistence().GetRole().Get("manualproject", "manual")
+		assert.NoError(t, err, "manually created role must not be pruned")
+
+		return []modelAPI.Entity{project, manualRole}
 	})
 }
 
