@@ -31,6 +31,9 @@ type Query struct {
 	// The value can come from the path of the URL or from the query parameter
 	Project      string `param:"project" query:"project"`
 	MetadataOnly bool   `query:"metadata_only"`
+	// SourceFolder filters the list to only resources whose source.provisioning.folder matches this value.
+	// It is not exposed as a query parameter and is only used internally by the provisioning subsystem.
+	SourceFolder string `query:"-"`
 }
 
 func (q *Query) GetMetadataOnlyQueryParam() bool {

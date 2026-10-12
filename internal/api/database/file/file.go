@@ -154,7 +154,7 @@ func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 
 func (d *DAO) StreamRaw(query databaseModel.Query, ch chan<- json.RawMessage) error {
 	defer close(ch)
-	folder, prefix, isExist, err := d.buildQuery(query)
+	folder, prefix, sourceFolder, isExist, err := d.buildQuery(query)
 	if err != nil {
 		return fmt.Errorf("unable to build the query: %s", err)
 	}
@@ -175,6 +175,10 @@ func (d *DAO) StreamRaw(query databaseModel.Query, ch chan<- json.RawMessage) er
 		data, readErr := readFile(file)
 		if readErr != nil {
 			return fmt.Errorf("unable to read file %s: %s", file, readErr)
+		}
+
+		if len(sourceFolder) > 0 && !matchesSourceFolder(data, sourceFolder) {
+			continue
 		}
 
 		jsonData, jsonErr := d.yamlToJSON(file, data)
@@ -216,7 +220,7 @@ func (d *DAO) Query(query databaseModel.Query, slice any) error {
 	if typeParameter.Kind() != reflect.Slice {
 		return fmt.Errorf("slice in parameter is not actually a slice but a %q", typeParameter.Kind())
 	}
-	folder, prefix, isExist, err := d.buildQuery(query)
+	folder, prefix, sourceFolder, isExist, err := d.buildQuery(query)
 	if err != nil {
 		return fmt.Errorf("unable to build the query: %s", err)
 	}
@@ -241,6 +245,9 @@ func (d *DAO) Query(query databaseModel.Query, slice any) error {
 		data, readErr := readFile(file)
 		if readErr != nil {
 			return readErr
+		}
+		if len(sourceFolder) > 0 && !matchesSourceFolder(data, sourceFolder) {
+			continue
 		}
 		// first create a pointer with the accurate type
 		var value reflect.Value
@@ -285,17 +292,17 @@ func (d *DAO) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
 }
 
 func (d *DAO) DeleteByQuery(query databaseModel.Query) error {
-	folder, prefix, isExist, err := d.buildQuery(query)
+	folder, prefix, sourceFolder, isExist, err := d.buildQuery(query)
 	if err != nil {
 		return fmt.Errorf("unable to build the query: %s", err)
 	}
 	if !isExist {
 		return nil
 	}
-	if len(prefix) == 0 {
+	if len(prefix) == 0 && len(sourceFolder) == 0 {
 		return os.RemoveAll(folder)
 	}
-	// in case there is a prefix file name we need to delete only the files that is matching the prefix and not the folder entirely
+	// in case there is a prefix or a source filter, we need to delete only the matching files
 	var files []string
 	if files, err = d.visit(folder, prefix); err != nil {
 		return err
@@ -304,6 +311,15 @@ func (d *DAO) DeleteByQuery(query databaseModel.Query) error {
 		return nil
 	}
 	for _, file := range files {
+		if len(sourceFolder) > 0 {
+			data, readErr := readFile(file)
+			if readErr != nil {
+				return readErr
+			}
+			if !matchesSourceFolder(data, sourceFolder) {
+				continue
+			}
+		}
 		if removeErr := os.Remove(file); removeErr != nil {
 			return removeErr
 		}
@@ -367,6 +383,27 @@ func (d *DAO) yamlToJSON(file string, data []byte) ([]byte, error) {
 	}
 	// For JSON files, we can append directly
 	return data, nil
+}
+
+// matchesSourceFolder reports whether the raw document bytes contain a
+// source.provisioning.folder value equal to folder. It uses a lightweight
+// JSON-only check (YAML is converted at read time elsewhere) so it never
+// requires a full unmarshal of the document.
+func matchesSourceFolder(data []byte, folder string) bool {
+	var envelope struct {
+		Source *struct {
+			Provisioning *struct {
+				Folder string `json:"folder" yaml:"folder"`
+			} `json:"provisioning" yaml:"provisioning"`
+		} `json:"source" yaml:"source"`
+	}
+	// Best-effort: if unmarshal fails the document doesn't match.
+	if err := yaml.Unmarshal(data, &envelope); err != nil {
+		return false
+	}
+	return envelope.Source != nil &&
+		envelope.Source.Provisioning != nil &&
+		envelope.Source.Provisioning.Folder == folder
 }
 
 func (d *DAO) visit(rootPath string, prefix string) ([]string, error) {
