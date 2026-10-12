@@ -99,6 +99,35 @@ func UnmarshalEntitiesFromFile(file string) ([]modelAPI.Entity, error) {
 	return u.unmarshal()
 }
 
+// EntityWithFile pairs a deserialized entity with the absolute path of the
+// file it came from. Used by the provisioning service to stamp the Source field.
+type EntityWithFile struct {
+	Entity   modelAPI.Entity
+	FilePath string
+}
+
+// UnmarshalEntitiesFromDirectoryWithFiles is like UnmarshalEntitiesFromDirectory
+// but also returns the originating file path alongside each entity.
+func UnmarshalEntitiesFromDirectoryWithFiles(dir string) ([]EntityWithFile, []error) {
+	files, err := visit(dir)
+	if err != nil {
+		return nil, []error{err}
+	}
+	var result []EntityWithFile
+	var errs []error
+	for _, f := range files {
+		entities, unmarshalErr := UnmarshalEntitiesFromFile(f)
+		if unmarshalErr != nil {
+			errs = append(errs, unmarshalErr)
+			continue
+		}
+		for _, e := range entities {
+			result = append(result, EntityWithFile{Entity: e, FilePath: f})
+		}
+	}
+	return result, errs
+}
+
 func visit(dir string) ([]string, error) {
 	var files []string
 	err := filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {

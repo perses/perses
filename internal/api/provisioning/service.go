@@ -15,6 +15,7 @@ package provisioning
 
 import (
 	"fmt"
+	"path/filepath"
 	"sort"
 
 	databaseModel "github.com/perses/perses/internal/api/database/model"
@@ -41,30 +42,42 @@ type provisioningService struct {
 
 // reload reads all entities from the given folders and applies them.
 func (p *provisioningService) reloadAllEntities(folders []string) {
-	var entities []modelAPI.Entity
+	var items []file.EntityWithFile
 	for _, dir := range folders {
-		objects, errors := file.UnmarshalEntitiesFromDirectory(dir)
+		objects, errors := file.UnmarshalEntitiesFromDirectoryWithFiles(dir)
 		for _, err := range errors {
 			logrus.WithError(err).Warningf("unable to load entity from folder %q", dir)
 		}
-		entities = append(entities, objects...)
+		items = append(items, objects...)
 	}
-	p.applyEntity(entities)
+	p.applyEntity(items)
 }
 
-func (p *provisioningService) applyEntity(entities []modelAPI.Entity) {
+func (p *provisioningService) applyEntity(items []file.EntityWithFile) {
 	// Provisioning files have no guaranteed order, yet a project-scoped resource
 	// can only be created once its parent project exists. So we apply every
 	// Project first, ensuring projects declared in the same provisioning batch
 	// are created before the resources that belong to them. This keeps the
 	// "refuse resources in a non-existing project" guard from rejecting valid
 	// resources whose project simply happens to be listed later.
-	sort.SliceStable(entities, func(i, j int) bool {
-		return modelV1.Kind(entities[i].GetKind()) == modelV1.KindProject &&
-			modelV1.Kind(entities[j].GetKind()) != modelV1.KindProject
+	sort.SliceStable(items, func(i, j int) bool {
+		return modelV1.Kind(items[i].Entity.GetKind()) == modelV1.KindProject &&
+			modelV1.Kind(items[j].Entity.GetKind()) != modelV1.KindProject
 	})
-	for _, entity := range entities {
+	for _, item := range items {
+		entity := item.Entity
 		entity.GetMetadata().Flatten(p.caseSensitive)
+
+		// Stamp the provisioning source so the DB can later filter/prune by folder.
+		if s, ok := entity.(modelV1.Sourceable); ok {
+			s.SetSource(&modelV1.Source{
+				Provisioning: &modelV1.ProvisioningSource{
+					Folder:   filepath.Dir(item.FilePath),
+					FileName: filepath.Base(item.FilePath),
+				},
+			})
+		}
+
 		kind := modelV1.Kind(entity.GetKind())
 		name := entity.GetMetadata().GetName()
 		project := resource.GetProject(entity.GetMetadata(), "")
