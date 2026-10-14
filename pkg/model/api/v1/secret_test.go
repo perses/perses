@@ -28,7 +28,8 @@ const (
 )
 
 func TestUnmarshalJSONSecretSpecMutuallyExclusiveAuth(t *testing.T) {
-	mutuallyExclusiveErr := fmt.Errorf("basicAuth, authorization and oauth are mutually exclusive, use one of them")
+	mutuallyExclusiveErr := fmt.Errorf("basicAuth, authorization, oauth and sigv4 are mutually exclusive, use one of them")
+	sigv4JSON := `"sigv4": {"region": "us-east-1", "serviceName": "monitoring"}`
 
 	testSuite := []struct {
 		title string
@@ -46,6 +47,15 @@ func TestUnmarshalJSONSecretSpecMutuallyExclusiveAuth(t *testing.T) {
 		{
 			title: "only oauth",
 			jason: fmt.Sprintf(`{%s}`, oauthJSON),
+		},
+		{
+			title: "only sigv4",
+			jason: fmt.Sprintf(`{%s}`, sigv4JSON),
+		},
+		{
+			title: "sigv4 and authorization",
+			jason: fmt.Sprintf(`{%s, %s}`, sigv4JSON, authorizationJSON),
+			err:   mutuallyExclusiveErr,
 		},
 		{
 			title: "basicAuth and authorization",

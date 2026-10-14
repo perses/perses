@@ -32,7 +32,7 @@ See the next section to get details about the `<secret_specification>`
 
 ## Secret specification
 
-NOTE: Basic Auth, Authorization and OAuth are mutually exclusive.
+NOTE: Basic Auth, Authorization, OAuth and SigV4 are mutually exclusive.
 Use one of the authenticators, do not combine multiple authenticators.
 
 ```yaml
@@ -43,6 +43,9 @@ authorization: <Authorization specification> # Optional
 
 # The OAuth credentials used to connect to targets.
 oauth: <OAuth specification> # Optional
+
+# Sign the requests with the AWS Signature Version 4, to query an AWS service.
+sigv4: <SigV4 specification> # Optional
 
 # Config used to connect to the targets.
 tlsConfig: <TLS Config specification> # Optional
@@ -86,6 +89,32 @@ endpointParams: <map[string][]string> # Optional
 # client ID & client secret sent. The zero value means to
 # auto-detect.
 authStyle: <int> # Optional 
+```
+
+### SigV4 specification
+
+The requests are signed with the [AWS Signature Version 4](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv.html),
+to query an AWS service (for example Amazon CloudWatch) through the HTTP proxy.
+
+When no access key is set, the requests are signed with the AWS identity of the Perses server, from its default
+credential chain (environment, web identity, ECS or EC2 instance metadata). It also applies to assuming a role.
+As every user able to create a secret could then act as this identity, it must be explicitly allowed by the server
+configuration with `datasource.proxy.http.sigv4.allow_default_credentials`.
+
+```yaml
+# The AWS region of the service, for example us-east-1.
+region: <string>
+# The name of the AWS service the requests are signed for, for example "monitoring" for Amazon CloudWatch.
+serviceName: <string>
+# The AWS access key ID. It must be set with secretKey or secretKeyFile.
+accessKey: <string> # Optional
+# The AWS secret access key. At most one of secretKey and secretKeyFile is allowed.
+secretKey: <string> # Optional
+secretKeyFile: <filename> # Optional
+# The ARN of an IAM role to assume before signing the requests.
+roleArn: <string> # Optional
+# The external ID used to assume the role. It can only be set with roleArn.
+externalId: <string> # Optional
 ```
 
 ### TLS Config specification

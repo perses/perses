@@ -26,6 +26,8 @@ type PublicSecretSpec struct {
 	OAuth *secret.PublicOAuth `json:"oauth,omitempty" yaml:"oauth,omitempty"`
 	// TLSConfig to use to connect to the targets.
 	TLSConfig *secret.PublicTLSConfig `json:"tlsConfig,omitempty" yaml:"tlsConfig,omitempty"`
+	// SigV4 signs the requests with the AWS Signature Version 4, to query an AWS service.
+	SigV4 *secret.PublicSigV4 `json:"sigv4,omitempty" yaml:"sigv4,omitempty"`
 }
 
 func NewPublicSecretSpec(s SecretSpec) PublicSecretSpec {
@@ -34,6 +36,7 @@ func NewPublicSecretSpec(s SecretSpec) PublicSecretSpec {
 		Authorization: secret.NewPublicAuthorization(s.Authorization),
 		OAuth:         secret.NewPublicOAuth(s.OAuth),
 		TLSConfig:     secret.NewPublicTLSConfig(s.TLSConfig),
+		SigV4:         secret.NewPublicSigV4(s.SigV4),
 	}
 }
 

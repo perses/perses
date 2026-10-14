@@ -29,6 +29,8 @@ type SecretSpec struct {
 	OAuth *secret.OAuth `json:"oauth,omitempty" yaml:"oauth,omitempty"`
 	// TLSConfig to use to connect to the targets.
 	TLSConfig *secret.TLSConfig `json:"tlsConfig,omitempty" yaml:"tlsConfig,omitempty"`
+	// SigV4 signs the requests with the AWS Signature Version 4, to query an AWS service.
+	SigV4 *secret.SigV4 `json:"sigv4,omitempty" yaml:"sigv4,omitempty"`
 }
 
 func (s *SecretSpec) UnmarshalJSON(data []byte) error {
@@ -58,7 +60,7 @@ func (s *SecretSpec) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 // FilePaths returns every file path referenced by the secret spec
-// (basicAuth.passwordFile, authorization.credentialsFile, oauth.clientSecretFile, tlsConfig.caFile/certFile/keyFile).
+// (basicAuth.passwordFile, authorization.credentialsFile, oauth.clientSecretFile, sigv4.secretKeyFile, tlsConfig.caFile/certFile/keyFile).
 func (s *SecretSpec) FilePaths() []string {
 	var paths []string
 	appendIfSet := func(p string) {
@@ -74,6 +76,9 @@ func (s *SecretSpec) FilePaths() []string {
 	}
 	if s.OAuth != nil {
 		appendIfSet(s.OAuth.ClientSecretFile)
+	}
+	if s.SigV4 != nil {
+		appendIfSet(s.SigV4.SecretKeyFile)
 	}
 	if s.TLSConfig != nil {
 		appendIfSet(s.TLSConfig.CAFile)
@@ -94,8 +99,11 @@ func (s *SecretSpec) validate() error {
 	if s.OAuth != nil {
 		nbAuthConfigured++
 	}
+	if s.SigV4 != nil {
+		nbAuthConfigured++
+	}
 	if nbAuthConfigured > 1 {
-		return fmt.Errorf("basicAuth, authorization and oauth are mutually exclusive, use one of them")
+		return fmt.Errorf("basicAuth, authorization, oauth and sigv4 are mutually exclusive, use one of them")
 	}
 	return nil
 }

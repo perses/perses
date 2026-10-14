@@ -925,6 +925,15 @@ default_timeout: <duration> | default = 30s # Optional
 # which can be abused to exhaust the resources of the Perses server.
 # It must be greater than or equal to default_timeout.
 max_timeout: <duration> | default = default_timeout # Optional
+
+# Settings of the datasources whose secret signs the requests with the AWS Signature Version 4 (see the sigv4 field of the secrets).
+sigv4:
+  # Allow the secrets without an access key to sign the requests with the AWS identity of the Perses server,
+  # from its default credential chain (environment, web identity, ECS or EC2 instance metadata).
+  # It also applies to assuming a role, as the role is assumed with the identity of the server.
+  # Every user allowed to create a secret and a datasource could then act as this identity:
+  # only enable it if this identity has no more permissions than what these users are allowed to access.
+  allow_default_credentials: <boolean> | default = false # Optional
 ```
 
 #### GlobalDatasourceDiscovery config

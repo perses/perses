@@ -89,6 +89,19 @@ type HTTPProxyConfig struct {
 	// so letting the users increase it freely would expose Perses to resource exhaustion.
 	// Default: the value of DefaultTimeout
 	MaxTimeout common.Duration `json:"max_timeout,omitempty" yaml:"max_timeout,omitempty"`
+	// SigV4 contains the settings of the datasources whose secret signs the requests with the AWS Signature Version 4.
+	SigV4 SigV4ProxyConfig `json:"sigv4,omitzero" yaml:"sigv4,omitempty"`
+}
+
+// SigV4ProxyConfig contains the settings of the datasources whose secret signs the requests with the AWS Signature Version 4.
+type SigV4ProxyConfig struct {
+	// AllowDefaultCredentials allows the secrets without an access key to sign the requests with the AWS identity of the
+	// Perses server, from its default credential chain (environment, web identity, ECS or EC2 instance metadata).
+	// It also applies to assuming a role, as the role is assumed with the identity of the server.
+	// Every user allowed to create a secret and a datasource could then act as this identity:
+	// only enable it if this identity has no more permissions than what these users are allowed to access.
+	// Default: false
+	AllowDefaultCredentials bool `json:"allow_default_credentials" yaml:"allow_default_credentials"`
 }
 
 func (c *HTTPProxyConfig) Verify() error {

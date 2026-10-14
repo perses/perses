@@ -198,7 +198,7 @@ func (h *Proxy) Serve(c echo.Context) error {
 	reverseProxy.ModifyResponse = secureResponse
 	// use a dedicated HTTP transport to avoid any TLS encryption issues
 	var transportErr error
-	reverseProxy.Transport, transportErr = h.getTransport()
+	reverseProxy.Transport, transportErr = h.getRoundTripper(req.Context())
 	if transportErr != nil {
 		return transportErr
 	}
