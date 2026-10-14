@@ -200,10 +200,11 @@ func (c *crypto) encryptGCM(stringToEncrypt string) (string, error) {
 func (c *crypto) encryptCFB(stringToEncrypt string) (string, error) {
 	plainText := []byte(stringToEncrypt)
 	cipherText := make([]byte, aes.BlockSize+len(plainText))
-	iv := cipherText[:aes.BlockSize]
+	iv := make([]byte, aes.BlockSize)
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		return "", err
 	}
+	copy(cipherText, iv)
 
 	stream := cipher.NewCFBEncrypter(c.block, iv) //nolint: staticcheck
 	stream.XORKeyStream(cipherText[aes.BlockSize:], plainText)
