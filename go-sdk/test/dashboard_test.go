@@ -32,6 +32,7 @@ import (
 	variablegroup "github.com/perses/perses/go-sdk/variable-group"
 	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
 	txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	staticlist "github.com/perses/plugins/staticlistvariable/sdk/go"
 	dashboardSpec "github.com/perses/spec/go/dashboard"
 	"github.com/stretchr/testify/assert"
@@ -132,8 +133,7 @@ func TestDashboardBuilder(t *testing.T) {
 	)
 
 	builderOutput, marshErr := json.Marshal(builder.Dashboard)
-	outputJSONFilePath := filepath.Join("..", "..", "internal", "test", "dac", "expected_output.json")
-	expectedOutput, readErr := os.ReadFile(outputJSONFilePath)
+	expectedOutput, readErr := readExpectedDashboard()
 
 	t.Run("classic dashboard", func(t *testing.T) {
 		assert.NoError(t, buildErr)
@@ -239,9 +239,7 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 	)
 
 	builderOutput, marshErr := json.Marshal(builder.Dashboard)
-
-	outputJSONFilePath := filepath.Join("..", "..", "internal", "test", "dac", "expected_output.json")
-	expectedOutput, readErr := os.ReadFile(outputJSONFilePath)
+	expectedOutput, readErr := readExpectedDashboard()
 
 	t.Run("dashboard with grouped variables", func(t *testing.T) {
 		assert.NoError(t, buildErr)
@@ -389,4 +387,18 @@ func TestVariableDatasourceSelector(t *testing.T) {
 		require.NoError(t, marshErr)
 		assert.Contains(t, string(out), `"datasource":"$myDs"`)
 	})
+}
+
+// readExpectedDashboard returns the expected output shared with the CUE SDK test, as serialized by the Go model,
+// so that values the Go SDK omits (e.g. a variable display with "hidden": false) don't make the comparison fail.
+func readExpectedDashboard() ([]byte, error) {
+	data, err := os.ReadFile(filepath.Join("..", "..", "internal", "test", "dac", "expected_output.json"))
+	if err != nil {
+		return nil, err
+	}
+	var expected v1.Dashboard
+	if err := json.Unmarshal(data, &expected); err != nil {
+		return nil, err
+	}
+	return json.Marshal(expected)
 }

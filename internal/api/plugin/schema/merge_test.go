@@ -17,7 +17,10 @@ import (
 	"testing"
 
 	"cuelang.org/go/cue"
+	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/cuecontext"
+	"cuelang.org/go/cue/format"
+	apiCue "github.com/perses/perses/internal/api/cue"
 	"github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -93,4 +96,47 @@ func TestGenerateSchemaDefinitionsEmptySchemas(t *testing.T) {
 	result, err := GenerateSchemaDefinitions(ctx, []LoadSchema{})
 	require.NoError(t, err)
 	assert.NoError(t, result.Validate())
+}
+
+func TestIsolatePluginDefinitions(t *testing.T) {
+	ctx := cuecontext.New()
+	toExpr := func(src string) ast.Expr {
+		v := ctx.CompileString(src)
+		require.NoError(t, v.Err())
+		expr, err := apiCue.ValueToASTExpr(v)
+		require.NoError(t, err)
+		return expr
+	}
+
+	t.Run("plugin without definitions is kept as-is", func(t *testing.T) {
+		_, _, ok := isolatePluginDefinitions(toExpr(`kind: "A", spec: {a?: string}`), "PLUGIN_0")
+		assert.False(t, ok)
+	})
+
+	t.Run("plugin with definitions is moved into a let clause", func(t *testing.T) {
+		let, branch, ok := isolatePluginDefinitions(toExpr(`kind: "A", spec: close({v?: #v}), #v: {a?: string}`), "PLUGIN_0")
+		require.True(t, ok)
+		assert.Equal(t, "PLUGIN_0", let.Ident.Name)
+		data, err := format.Node(branch)
+		require.NoError(t, err)
+		assert.Equal(t, "{\n\tkind: PLUGIN_0.kind\n\tspec: PLUGIN_0.spec\n}", string(data))
+	})
+}
+
+func TestGenerateSchemaDisjunctionWithDefinitions(t *testing.T) {
+	ctx := cuecontext.New()
+	result, err := GenerateSchemaDisjunction(ctx, []LoadSchema{
+		loadSchemaFromTestdata(t, "testdata/schemas/panels/first"),
+		loadSchemaFromTestdata(t, "testdata/dashboard_schema/panels/palette"),
+	})
+	require.NoError(t, err)
+	assert.NoError(t, result.Validate())
+
+	// definitions of the plugins are not part of the disjunction branches anymore
+	palette := ctx.CompileString(`{kind: "PaletteChart", spec: {visual: palette: {mode: "categorical", name: "tableau10"}}}`)
+	assert.NoError(t, result.Unify(palette).Validate(cue.Concrete(true)))
+	assert.False(t, result.Unify(palette).LookupPath(cue.MakePath(cue.Def("#palette"))).Exists())
+
+	invalid := ctx.CompileString(`{kind: "PaletteChart", spec: {visual: palette: {mode: "categorical", name: "unknown"}}}`)
+	assert.Error(t, result.Unify(invalid).Validate(cue.Concrete(true)))
 }

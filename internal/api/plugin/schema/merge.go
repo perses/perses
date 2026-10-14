@@ -29,13 +29,14 @@ import (
 // and returns it in a single cue.Value
 func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
 	var expr []ast.Expr
+	var lets []ast.Decl
 
 	// sorting the slice so that the plugin order is not random
 	slices.SortFunc(schemas, func(a, b LoadSchema) int {
 		return strings.Compare(a.Name, b.Name)
 	})
 
-	for _, ls := range schemas {
+	for i, ls := range schemas {
 		// build instance for all schemas
 		inst := ctx.BuildInstance(ls.Instance, cue.InferBuiltins(true))
 		if inst.Err() != nil {
@@ -45,6 +46,10 @@ func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (cue.Valu
 		castExpr, err := apiCue.ValueToASTExpr(inst)
 		if err != nil {
 			return cue.Value{}, fmt.Errorf("could not process %s plugin schema: %w", ls.Name, err)
+		}
+		if let, branch, ok := isolatePluginDefinitions(castExpr, fmt.Sprintf("PLUGIN_%d", i)); ok {
+			lets = append(lets, let)
+			castExpr = branch
 		}
 		expr = append(expr, castExpr)
 	}
@@ -65,12 +70,57 @@ func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (cue.Valu
 			}
 		}
 	}
+	if len(lets) > 0 {
+		complete = &ast.StructLit{Elts: append(lets, &ast.EmbedDecl{Expr: complete})}
+	}
 	// build the final expression value
 	value := ctx.BuildExpr(complete)
 	if value.Err() != nil {
 		return cue.Value{}, fmt.Errorf("unable to merge schemas: %w", value.Err())
 	}
 	return value, nil
+}
+
+// isolatePluginDefinitions moves a plugin schema that declares definitions (e.g. #palette) into a let clause
+// and returns a disjunction branch that only references the plugin's regular fields.
+// Definitions embedded in a disjunction branch become part of the evaluated data, and `cue vet` then fails on
+// definitions that cannot be resolved without data, like a comprehension over an undefaulted disjunction
+// (`mode: "auto" | "categorical"` + `if mode == "categorical" {...}`).
+// It returns false when the plugin has no definitions or a top-level declaration that cannot be referenced.
+func isolatePluginDefinitions(expr ast.Expr, letName string) (*ast.LetClause, ast.Expr, bool) {
+	st, ok := expr.(*ast.StructLit)
+	if !ok {
+		return nil, nil, false
+	}
+	hasDefinition := false
+	var fields []ast.Decl
+	for _, decl := range st.Elts {
+		switch d := decl.(type) {
+		case *ast.Field:
+			name, isIdent, err := ast.LabelName(d.Label)
+			if err != nil || !isIdent {
+				return nil, nil, false
+			}
+			if strings.HasPrefix(name, "#") || strings.HasPrefix(name, "_") {
+				hasDefinition = hasDefinition || strings.HasPrefix(name, "#")
+				continue
+			}
+			fields = append(fields, &ast.Field{
+				Label:      ast.NewIdent(name),
+				Constraint: d.Constraint,
+				Value:      ast.NewSel(ast.NewIdent(letName), name),
+			})
+		case *ast.LetClause, *ast.CommentGroup, *ast.Attribute:
+			// only reachable from within the let clause
+		default:
+			// embeddings, comprehensions, ...: keep the plugin as-is
+			return nil, nil, false
+		}
+	}
+	if !hasDefinition {
+		return nil, nil, false
+	}
+	return &ast.LetClause{Ident: ast.NewIdent(letName), Expr: st}, &ast.StructLit{Elts: fields}, true
 }
 
 // Generates a single cue.Value composed of a list of cue definitions (prefixed by #)

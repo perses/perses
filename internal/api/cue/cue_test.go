@@ -113,3 +113,33 @@ func TestRenameDefinition(t *testing.T) {
 	assert.NotContains(t, body, "_OldName_0")
 	assert.Contains(t, body, "_NewName_0")
 }
+
+func TestMakeFieldsOptional(t *testing.T) {
+	ctx := cuecontext.New()
+	v := ctx.CompileString(`
+#A: {
+	_Meta: {
+		name:      string
+		createdAt: string
+		version:   int
+	}
+	other: {
+		createdAt: string
+	}
+}
+`)
+	require.NoError(t, v.Err())
+	result, err := MakeFieldsOptional(ctx, v, []string{"_Meta"}, []string{"createdAt", "version"})
+	require.NoError(t, err)
+	require.NoError(t, result.Err())
+
+	data, err := Marshal(result)
+	require.NoError(t, err)
+	out := string(data)
+	assert.Contains(t, out, "createdAt?: string")
+	assert.Contains(t, out, "version?:   int")
+	assert.Contains(t, out, "name:       string")
+	// fields with the same name outside of the targeted structs are left untouched
+	assert.Equal(t, 1, strings.Count(out, "createdAt?:"))
+	assert.Equal(t, 1, strings.Count(out, "createdAt:"))
+}
