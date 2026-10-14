@@ -14,4 +14,4 @@ jobs:
         with:
           enable_go: true
       - name: cleanup old images
-        run: go run ./scripts/docker-cleanup/docker-cleanup.go --username="${{ secrets.DOCKER_USERNAME }}" --password="${{ secrets.DOCKER_PASSWORD }}" --dry-run=false
+        run: go run ./scripts/docker-cleanup/docker-cleanup.go --username="${{ secrets.DOCKERHUB_USERNAME }}" --password="${{ secrets.DOCKERHUB_TOKEN }}" --dry-run=false
