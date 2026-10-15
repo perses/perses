@@ -145,19 +145,21 @@ type entityKey struct {
 // pruneEntities removes resources from the DB that were previously provisioned
 // from one of the given folders but whose source file no longer exists.
 func (p *provisioningService) pruneEntities(folders []string, live []file.EntityWithFile) {
-	// Build the list of keys that are present in the current provisioning files.
-	var liveKeys []entityKey
-	for _, item := range live {
-		meta := item.Entity.GetMetadata()
-		liveKeys = append(liveKeys, entityKey{
-			kind:    item.Entity.GetKind(),
-			project: resource.GetProject(meta, ""),
-			name:    meta.GetName(),
-		})
-	}
-
 	for _, folder := range folders {
-		p.pruneFolder(folder, liveKeys)
+		// Build the set of live keys scoped per folder.
+		var folderKeys []entityKey
+		for _, item := range live {
+			if filepath.Dir(item.FilePath) != folder {
+				continue
+			}
+			meta := item.Entity.GetMetadata()
+			folderKeys = append(folderKeys, entityKey{
+				kind:    item.Entity.GetKind(),
+				project: resource.GetProject(meta, ""),
+				name:    meta.GetName(),
+			})
+		}
+		p.pruneFolder(folder, folderKeys)
 	}
 }
 
