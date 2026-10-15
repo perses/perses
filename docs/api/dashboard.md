@@ -158,6 +158,14 @@ spec:
 title: <string>
 collapse:
   open: <boolean>
+
+# The grid is only rendered when the selected values of the variable satisfy the operator against the values.
+# Patterns of the `matches` operators are anchored.
+[ visibility:
+  variable: <string>
+  [ operator: <equals | notEquals | matches | notMatches> | default = equals ]
+  value:
+    - <string> ]
 ```
 
 ### Grid Item specification
