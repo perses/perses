@@ -67,58 +67,72 @@ func (d *DAO) generateResourceQuery(kind v1.Kind) string {
 	return filepath.Join(d.Folder, v1.PluralKindMap[kind])
 }
 
-func (d *DAO) buildQuery(query databaseModel.Query) (pathFolder string, prefix string, isExist bool, err error) {
+func (d *DAO) buildQuery(query databaseModel.Query) (pathFolder string, prefix string, sourceFolder string, isExist bool, err error) {
 	switch qt := query.(type) {
 	case *dashboard.Query:
 		pathFolder, err = d.generateProjectResourceQuery(v1.KindDashboard, qt.Project)
 		prefix = qt.NamePrefix
+		sourceFolder = qt.SourceFolder
 	case *datasource.Query:
 		pathFolder, err = d.generateProjectResourceQuery(v1.KindDatasource, qt.Project)
 		prefix = qt.NamePrefix
+		sourceFolder = qt.SourceFolder
 	case *ephemeraldashboard.Query:
 		pathFolder, err = d.generateProjectResourceQuery(v1.KindEphemeralDashboard, qt.Project)
 		prefix = qt.NamePrefix
 	case *folder.Query:
 		pathFolder, err = d.generateProjectResourceQuery(v1.KindFolder, qt.Project)
 		prefix = qt.NamePrefix
+		sourceFolder = qt.SourceFolder
 	case *globaldatasource.Query:
 		pathFolder = d.generateResourceQuery(v1.KindGlobalDatasource)
 		prefix = qt.NamePrefix
+		sourceFolder = qt.SourceFolder
 	case *globalrole.Query:
 		pathFolder = d.generateResourceQuery(v1.KindGlobalRole)
 		prefix = qt.NamePrefix
+		sourceFolder = qt.SourceFolder
 	case *globalrolebinding.Query:
 		pathFolder = d.generateResourceQuery(v1.KindGlobalRoleBinding)
 		prefix = qt.NamePrefix
+		sourceFolder = qt.SourceFolder
 	case *globalsecret.Query:
 		pathFolder = d.generateResourceQuery(v1.KindGlobalSecret)
 		prefix = qt.NamePrefix
+		sourceFolder = qt.SourceFolder
 	case *globalvariable.Query:
 		pathFolder = d.generateResourceQuery(v1.KindGlobalVariable)
 		prefix = qt.NamePrefix
+		sourceFolder = qt.SourceFolder
 	case *project.Query:
 		pathFolder = d.generateResourceQuery(v1.KindProject)
 		prefix = qt.NamePrefix
+		sourceFolder = qt.SourceFolder
 	case *role.Query:
 		pathFolder, err = d.generateProjectResourceQuery(v1.KindRole, qt.Project)
 		prefix = qt.NamePrefix
+		sourceFolder = qt.SourceFolder
 	case *rolebinding.Query:
 		pathFolder, err = d.generateProjectResourceQuery(v1.KindRoleBinding, qt.Project)
 		prefix = qt.NamePrefix
+		sourceFolder = qt.SourceFolder
 	case *secret.Query:
 		pathFolder, err = d.generateProjectResourceQuery(v1.KindSecret, qt.Project)
 		prefix = qt.NamePrefix
+		sourceFolder = qt.SourceFolder
 	case *user.Query:
 		pathFolder = d.generateResourceQuery(v1.KindUser)
 		prefix = qt.NamePrefix
+		sourceFolder = qt.SourceFolder
 	case *variable.Query:
 		pathFolder, err = d.generateProjectResourceQuery(v1.KindVariable, qt.Project)
 		prefix = qt.NamePrefix
+		sourceFolder = qt.SourceFolder
 	default:
-		return "", "", false, fmt.Errorf("this type of query '%T' is not managed", qt)
+		return "", "", "", false, fmt.Errorf("this type of query '%T' is not managed", qt)
 	}
 	if err != nil {
-		return "", "", false, err
+		return "", "", "", false, err
 	}
 	if !d.CaseSensitive {
 		pathFolder = strings.ToLower(pathFolder)

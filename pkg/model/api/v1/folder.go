@@ -83,6 +83,7 @@ type Folder struct {
 	Kind     Kind            `json:"kind" yaml:"kind"`
 	Metadata ProjectMetadata `json:"metadata" yaml:"metadata"`
 	Spec     FolderSpec      `json:"spec" yaml:"spec"`
+	Source   *Source         `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 func (f *Folder) GetMetadata() modelAPI.Metadata {
@@ -95,6 +96,14 @@ func (f *Folder) GetKind() string {
 
 func (f *Folder) GetSpec() any {
 	return f.Spec
+}
+
+func (f *Folder) GetSource() *Source {
+	return f.Source
+}
+
+func (f *Folder) SetSource(s *Source) {
+	f.Source = s
 }
 
 func (f *Folder) UnmarshalJSON(data []byte) error {
