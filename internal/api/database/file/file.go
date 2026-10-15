@@ -386,9 +386,7 @@ func (d *DAO) yamlToJSON(file string, data []byte) ([]byte, error) {
 }
 
 // matchesSourceFolder reports whether the raw document bytes contain a
-// source.provisioning.folder value equal to folder. It uses a lightweight
-// JSON-only check (YAML is converted at read time elsewhere) so it never
-// requires a full unmarshal of the document.
+// source.provisioning.folder value equal to folder
 func matchesSourceFolder(data []byte, folder string) bool {
 	var envelope struct {
 		Source *struct {
