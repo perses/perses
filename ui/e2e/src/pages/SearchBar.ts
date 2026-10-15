@@ -24,11 +24,13 @@ export class SearchBar {
   constructor(page: Page) {
     this.page = page;
     this.modal = page.locator('[role="presentation"]');
-    this.searchInput = this.modal.getByPlaceholder('What are you looking for?');
+    this.searchInput = this.modal.getByPlaceholder('Search dashboards, projects, datasources...');
   }
 
   async open(): Promise<void> {
-    const searchBarButton = this.page.getByRole('button', { name: /Search\.\.\./ });
+    const searchBarButton = this.page.getByRole('button', {
+      name: /Search dashboards, projects, datasources\.\.\./,
+    });
     await searchBarButton.click();
   }
 
