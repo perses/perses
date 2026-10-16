@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.55.0-rc.1 / 2026-10-16
+
+### Core & UI
+
+- [BUGFIX] percli plugin build: download all CUE deps before vendoring them (#4564)
+
+### Spec
+
+- [BUGFIX] Variable display: make hidden optional (omitempty) (perses/spec#113)
+
+### Shared packages
+
+- [BUGFIX] Remove the useEffect for adding default queries, now handled on the plugin side (perses/shared#361)
+
 ## 0.55.0-rc.0 / 2026-10-08
 
 ### Core & UI
