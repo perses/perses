@@ -64,7 +64,7 @@ func TestBuildLabelSelector(t *testing.T) {
 
 func newDiscoveredDatasource(name string, labels, annotations map[string]string) *discoveredDatasource {
 	return &discoveredDatasource{
-		datasource:  &v1.GlobalDatasource{Metadata: v1.Metadata{Name: name}},
+		datasource:  &v1.GlobalDatasource{Metadata: v1.DatasourceMetadata{Metadata: v1.Metadata{Name: name}}},
 		labels:      labels,
 		annotations: annotations,
 	}

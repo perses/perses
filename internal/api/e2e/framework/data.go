@@ -259,7 +259,7 @@ func NewDatasource(t *testing.T, projectName string, name string) *v1.Datasource
 func NewGlobalDatasource(t *testing.T, name string) *v1.GlobalDatasource {
 	entity := &v1.GlobalDatasource{
 		Kind:     v1.KindGlobalDatasource,
-		Metadata: *v1.NewMetadata(name),
+		Metadata: v1.DatasourceMetadata{Metadata: *v1.NewMetadata(name)},
 		Spec:     newDatasourceSpec(t),
 	}
 	entity.Metadata.CreateNow()
