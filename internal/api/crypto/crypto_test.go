@@ -206,8 +206,9 @@ func TestBackwardCompatibility_CFBToGCM(t *testing.T) {
 func encryptCFB(c *crypto, plaintext string) string {
 	plainTextBytes := []byte(plaintext)
 	cipherText := make([]byte, aes.BlockSize+len(plainTextBytes))
-	iv := cipherText[:aes.BlockSize]
-	_, _ = rand.Reader.Read(iv)
+	iv := make([]byte, aes.BlockSize)
+	_, _ = rand.Read(iv)
+	copy(cipherText, iv)
 
 	stream := cipher.NewCFBEncrypter(c.block, iv) //nolint:staticcheck,gosec // iv is filled with crypto/rand above; G407 false positive
 	stream.XORKeyStream(cipherText[aes.BlockSize:], plainTextBytes)
