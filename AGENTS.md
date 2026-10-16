@@ -46,7 +46,7 @@ and official plugin implementations belong in `perses/plugins`. Do not recreate 
 
 ## Validation
 
-Use Go 1.26.x, Node.js from `ui/.nvmrc`, and npm from `ui/package.json`.
+Use Go 1.27.x, Node.js from `ui/.nvmrc`, and npm from `ui/package.json`.
 
 For UI changes, run from `ui/`:
 

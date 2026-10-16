@@ -18,10 +18,8 @@ import (
 	dashboardVariable "github.com/perses/spec/cue/dashboard/variable"
 )
 
-#kind: string
-#name: string
-#display?: dashboardVariable.#Display & {
-	hidden: bool | *false
-}
+#kind:     string
+#name:     string
+#display?: dashboardVariable.#Display
 
 variable: dashboard.#Variable
