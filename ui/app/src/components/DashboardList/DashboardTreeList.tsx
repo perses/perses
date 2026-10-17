@@ -13,8 +13,8 @@
 
 import { Box, Chip, CircularProgress, Stack } from '@mui/material';
 import type { FolderResource } from '@perses-dev/client';
-import type { TableColumnConfig } from '@perses-dev/components';
-import { Table } from '@perses-dev/components';
+import type { TableColumnConfig, TableProps } from '@perses-dev/components';
+import { Table, useLocalStorage } from '@perses-dev/components';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddFolderOutlineIcon from 'mdi-material-ui/FolderPlusOutline';
@@ -84,7 +84,15 @@ export const TAGS_COLUMN: TableColumnConfig<DashboardTreeTableRow> = {
   },
 };
 
+// Expanded folders per project, so the folders a user opened are still open when they come back to the project.
+const EXPANDED_FOLDERS_KEY = 'PERSES_DASHBOARD_LIST_EXPANDED_FOLDERS';
+
+type ExpandedState = NonNullable<TableProps<DashboardTreeTableRow>['expanded']>;
+
+const NO_EXPANDED_FOLDERS: ExpandedState = {};
+
 export interface DashboardTreeTableProps {
+  projectName: string;
   folderList: FolderResource[];
   dashboardsMap: Map<string, Map<string, DashboardListRow>>;
   handleRenameButtonClick: (project: string, name: string) => () => void;
@@ -99,6 +107,7 @@ export interface DashboardTreeTableProps {
 }
 
 function DashboardTreeList({
+  projectName,
   folderList,
   dashboardsMap,
   handleDeleteButtonClick,
@@ -129,6 +138,14 @@ function DashboardTreeList({
 
   const [sorting, setSorting] = useState([{ id: 'name', desc: false }]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultRowsPerPage });
+  const [expandedByProject, setExpandedByProject] = useLocalStorage<Record<string, ExpandedState>>(
+    EXPANDED_FOLDERS_KEY,
+    {},
+  );
+  const handleExpandedChange = useCallback(
+    (expanded: ExpandedState): void => setExpandedByProject({ ...expandedByProject, [projectName]: expanded }),
+    [expandedByProject, projectName, setExpandedByProject],
+  );
 
   const sortStringColumn = useCallback(
     (accessorKey: 'project' | 'displayName') =>
@@ -343,6 +360,8 @@ function DashboardTreeList({
       onSortingChange={setSorting}
       pagination={pagination}
       onPaginationChange={setPagination}
+      expanded={expandedByProject[projectName] ?? NO_EXPANDED_FOLDERS}
+      onExpandedChange={handleExpandedChange}
       getSubRows={(row: DashboardTreeTableRow): DashboardTreeTableRow[] | undefined => row.children}
       hiddenColumns={['project', 'version']}
       tableToolbarConfig={{
