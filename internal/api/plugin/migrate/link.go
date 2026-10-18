@@ -19,10 +19,7 @@ import (
 	"github.com/perses/spec/go/dashboard"
 )
 
-// grafanaTagLink converts a Grafana dashboards-type link. The boolean is false
-// when the link is not a tag menu, so the caller keeps the URL conversion.
-// A tag menu with no usable tag or no title is dropped: Perses rejects a link
-// that has neither a URL nor tags.
+// False when the link is not a tag menu. Empty tag menus are dropped.
 func grafanaTagLink(grafanaLink GrafanaLink) (dashboard.Link, bool) {
 	tags := nonEmptyTags(grafanaLink.Tags)
 	isTagMenu := grafanaLink.Type == "dashboards" || (strings.TrimSpace(grafanaLink.URL) == "" && len(tags) > 0)

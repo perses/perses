@@ -40,8 +40,6 @@ func New(url string, options ...Option) (Builder, error) {
 	return *builder, nil
 }
 
-// NewTagMenu builds a link that lists dashboards in the current project.
-// The menu title is name. A dashboard is listed when it has every tag.
 func NewTagMenu(name string, tags []string, options ...Option) (Builder, error) {
 	if strings.TrimSpace(name) == "" {
 		return Builder{}, fmt.Errorf("tag link name is required")

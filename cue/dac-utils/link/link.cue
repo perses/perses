@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Helpers for a dashboard or panel link.
-// A link is either a URL (#url) or a same-project tag menu (#tags).
 package link
 
 #url: {
