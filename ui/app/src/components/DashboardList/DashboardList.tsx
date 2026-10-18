@@ -251,6 +251,8 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
   return (
     <Stack width="100%">
       <DashboardTreeList
+        // remount per project: the list reads its project's saved folders on mount
+        key={projectName}
         projectName={projectName}
         folderList={folderList}
         dashboardsMap={dashboardsMap}

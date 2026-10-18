@@ -13,6 +13,7 @@
 
 import type { FolderResource } from '@perses-dev/client';
 import type { TableColumnConfig } from '@perses-dev/components';
+import type { RenderResult } from '@testing-library/react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import type { ReactElement, ReactNode } from 'react';
 import { useCallback, useState } from 'react';
@@ -127,8 +128,8 @@ function renderDashboardTreeList(
   map: Map<string, Map<string, DashboardListRow>> = emptyDashboardsMap,
   duplicationDisabledReason?: string,
   projectName = 'myproject',
-): () => void {
-  const { unmount } = render(
+): RenderResult {
+  return render(
     <DashboardTreeList
       projectName={projectName}
       folderList={emptyFolderList}
@@ -142,7 +143,6 @@ function renderDashboardTreeList(
       duplicationDisabledReason={duplicationDisabledReason}
     />,
   );
-  return unmount;
 }
 
 describe('DashboardTreeList', () => {
@@ -179,7 +179,7 @@ describe('DashboardTreeList', () => {
   });
 
   it('keeps the folders a user expanded when the list is shown again', () => {
-    const unmount = renderDashboardTreeList();
+    const { unmount } = renderDashboardTreeList();
     fireEvent.click(screen.getByRole('button', { name: 'Expand team folder' }));
     expect(screen.queryByText('Expanded: team-folder')).not.toBeNull();
 
@@ -190,12 +190,25 @@ describe('DashboardTreeList', () => {
   });
 
   it('remembers expanded folders separately for each project', () => {
-    const unmount = renderDashboardTreeList(emptyDashboardsMap, undefined, 'myproject');
+    const { unmount } = renderDashboardTreeList(emptyDashboardsMap, undefined, 'myproject');
     fireEvent.click(screen.getByRole('button', { name: 'Expand team folder' }));
     unmount();
 
     renderDashboardTreeList(emptyDashboardsMap, undefined, 'otherproject');
 
     expect(screen.queryByText('Expanded: team-folder')).toBeNull();
+  });
+
+  it("does not erase another project's folders when both lists are open at once, e.g. in two tabs", () => {
+    const tabA = renderDashboardTreeList(emptyDashboardsMap, undefined, 'project-a');
+    const tabB = renderDashboardTreeList(emptyDashboardsMap, undefined, 'project-b');
+
+    fireEvent.click(within(tabA.container).getByRole('button', { name: 'Expand team folder' }));
+    fireEvent.click(within(tabB.container).getByRole('button', { name: 'Expand team folder' }));
+    tabA.unmount();
+    tabB.unmount();
+
+    const { container } = renderDashboardTreeList(emptyDashboardsMap, undefined, 'project-a');
+    expect(within(container).queryByText('Expanded: team-folder')).not.toBeNull();
   });
 });

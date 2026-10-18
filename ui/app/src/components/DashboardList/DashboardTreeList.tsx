@@ -84,8 +84,9 @@ export const TAGS_COLUMN: TableColumnConfig<DashboardTreeTableRow> = {
   },
 };
 
-// Expanded folders per project, so the folders a user opened are still open when they come back to the project.
-const EXPANDED_FOLDERS_KEY = 'PERSES_DASHBOARD_LIST_EXPANDED_FOLDERS';
+// Expanded folders, stored per project so the folders a user opened are still open when they come back to it. One
+// key per project, so a list open in another tab (which holds its own copy) cannot overwrite another project's folders.
+const EXPANDED_FOLDERS_KEY_PREFIX = 'PERSES_DASHBOARD_LIST_EXPANDED_FOLDERS';
 
 type ExpandedState = NonNullable<TableProps<DashboardTreeTableRow>['expanded']>;
 
@@ -138,13 +139,10 @@ function DashboardTreeList({
 
   const [sorting, setSorting] = useState([{ id: 'name', desc: false }]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultRowsPerPage });
-  const [expandedByProject, setExpandedByProject] = useLocalStorage<Record<string, ExpandedState>>(
-    EXPANDED_FOLDERS_KEY,
-    {},
-  );
-  const handleExpandedChange = useCallback(
-    (expanded: ExpandedState): void => setExpandedByProject({ ...expandedByProject, [projectName]: expanded }),
-    [expandedByProject, projectName, setExpandedByProject],
+  // The storage key is only read on mount, so the parent remounts this list when the project changes.
+  const [expanded, setExpanded] = useLocalStorage<ExpandedState>(
+    `${EXPANDED_FOLDERS_KEY_PREFIX}:${projectName}`,
+    NO_EXPANDED_FOLDERS,
   );
 
   const sortStringColumn = useCallback(
@@ -360,8 +358,8 @@ function DashboardTreeList({
       onSortingChange={setSorting}
       pagination={pagination}
       onPaginationChange={setPagination}
-      expanded={expandedByProject[projectName] ?? NO_EXPANDED_FOLDERS}
-      onExpandedChange={handleExpandedChange}
+      expanded={expanded}
+      onExpandedChange={setExpanded}
       getSubRows={(row: DashboardTreeTableRow): DashboardTreeTableRow[] | undefined => row.children}
       hiddenColumns={['project', 'version']}
       tableToolbarConfig={{
