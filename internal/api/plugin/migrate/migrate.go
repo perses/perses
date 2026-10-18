@@ -314,6 +314,10 @@ func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard, useDe
 func (m *completeMigration) migrateDashboardLinks(grafanaDashboard *SimplifiedDashboard) []dashboard.Link {
 	links := []dashboard.Link{}
 	for _, l := range grafanaDashboard.Links {
+		if tagLink, ok := grafanaTagLink(l); ok {
+			links = append(links, tagLink)
+			continue
+		}
 		if len(l.URL) == 0 {
 			continue
 		}

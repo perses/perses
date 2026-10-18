@@ -13,11 +13,62 @@
 
 package link
 
+import (
+	"fmt"
+	"strings"
+)
+
 func URL(url string) Option {
 	return func(builder *Builder) error {
+		if len(builder.Tags) > 0 {
+			return fmt.Errorf("link cannot set both a url and tags")
+		}
 		builder.URL = url
 		return nil
 	}
+}
+
+func Tags(tags []string) Option {
+	return func(builder *Builder) error {
+		if builder.URL != "" {
+			return fmt.Errorf("link cannot set both a url and tags")
+		}
+		cleaned, err := cleanTags(tags)
+		if err != nil {
+			return err
+		}
+		builder.Tags = cleaned
+		return nil
+	}
+}
+
+func KeepTime(keepTime bool) Option {
+	return func(builder *Builder) error {
+		builder.KeepTime = keepTime
+		return nil
+	}
+}
+
+func IncludeVariables(includeVariables bool) Option {
+	return func(builder *Builder) error {
+		builder.IncludeVariables = includeVariables
+		return nil
+	}
+}
+
+func cleanTags(tags []string) ([]string, error) {
+	cleaned := make([]string, 0, len(tags))
+	for _, tag := range tags {
+		tag = strings.TrimSpace(tag)
+		if tag == "" {
+			return nil, fmt.Errorf("link tag must not be empty")
+		}
+		cleaned = append(cleaned, tag)
+	}
+	if len(cleaned) == 0 {
+		return nil, fmt.Errorf("link requires at least one tag")
+	}
+	return cleaned, nil
 }
 
 func Name(name string) Option {
