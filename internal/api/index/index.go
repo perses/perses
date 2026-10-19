@@ -355,15 +355,20 @@ func (c *client) List(ctx echo.Context, kind v1.Kind, project string) ([]*Search
 }
 
 func (c *client) Refresh() error {
-	raws, err := c.dao.RawQuery(&dashboard.Query{})
-	if err != nil {
-		return err
-	}
+	ch := make(chan json.RawMessage)
+	// StreamRaw closes ch in a defer, before the goroutine stores the returned error.
+	errc := make(chan error, 1)
+	go func() {
+		errc <- c.dao.StreamRaw(&dashboard.Query{}, ch)
+	}()
 	next := make(map[string]map[string]index[*v1.ProjectMetadata])
-	for _, raw := range raws {
+	for raw := range ch {
 		if addErr := c.addToNext(next, raw); addErr != nil {
 			logrus.WithError(addErr).Error("failed to add document to index")
 		}
+	}
+	if err := <-errc; err != nil {
+		return err
 	}
 	c.dashboards.swap(next)
 	return nil

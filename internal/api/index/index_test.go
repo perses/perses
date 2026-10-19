@@ -431,7 +431,7 @@ func (d *streamDAO) Upsert(modelAPI.Entity) error                          { ret
 func (d *streamDAO) Get(v1.Kind, modelAPI.Metadata, modelAPI.Entity) error { return nil }
 func (d *streamDAO) Query(databaseModel.Query, any) error                  { return nil }
 func (d *streamDAO) RawQuery(databaseModel.Query) ([]json.RawMessage, error) {
-	return d.docs, d.err
+	return nil, nil
 }
 func (d *streamDAO) RawMetadataQuery(databaseModel.Query, v1.Kind) ([]json.RawMessage, error) {
 	return nil, nil
