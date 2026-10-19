@@ -166,3 +166,20 @@ and trust me you want to be able to find back the commit that has been tagged in
 
 Once you have finally reached the final release (congratulation btw!), you will have to find someone to manage the next
 release cycle and set the date of the next release.
+
+## Patch release
+
+As part of the release cycle, we are willing to provide patch releases for at least the next month after the final
+release. This is to address any critical issues, security vulnerabilities, or bugs that might be discovered after the
+release.
+
+After this period, we will not provide any patch release for the previous version. If you are using an older version of
+Perses, we recommend you to upgrade to the latest version.
+
+Note:
+
+1. The patch release will be cut from the release branch of the version you want to patch. So if you want to patch
+   v0.55, you will have to use the branch `release/v0.55` to cut the patch release.
+
+2. You will probably have to cut a patch release for the shared components as well. So if you are cutting a patch
+   release for v0.55, you will have to cut a patch release for the shared components v0.55 as well.
