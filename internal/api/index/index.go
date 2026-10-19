@@ -147,6 +147,9 @@ func (c *projectIndexer) add(raw json.RawMessage) error {
 	return c.addTo(c.idx, raw)
 }
 
+// add is adding a new document to the index.
+// The row will be used to find the various field to be indexed depending on the configuration.
+// We are treating the raw JSON instead of the struct because then we can index anything; and we don't need to deal with the Go struct.
 func (c *projectIndexer) addTo(dst map[string]map[string]index[*v1.ProjectMetadata], raw json.RawMessage) error {
 	customRaw := rawDocument(raw)
 	var fields []string
@@ -352,19 +355,15 @@ func (c *client) List(ctx echo.Context, kind v1.Kind, project string) ([]*Search
 }
 
 func (c *client) Refresh() error {
-	ch := make(chan json.RawMessage)
-	errc := make(chan error, 1)
-	go func() {
-		errc <- c.dao.StreamRaw(&dashboard.Query{}, ch)
-	}()
+	raws, err := c.dao.RawQuery(&dashboard.Query{})
+	if err != nil {
+		return err
+	}
 	next := make(map[string]map[string]index[*v1.ProjectMetadata])
-	for raw := range ch {
+	for _, raw := range raws {
 		if addErr := c.addToNext(next, raw); addErr != nil {
 			logrus.WithError(addErr).Error("failed to add document to index")
 		}
-	}
-	if err := <-errc; err != nil {
-		return err
 	}
 	c.dashboards.swap(next)
 	return nil

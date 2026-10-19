@@ -359,8 +359,8 @@ func TestClientSearch_authorizationDisabled(t *testing.T) {
 
 func TestRefreshDropsDashboardsMissingFromDatabase(t *testing.T) {
 	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name"}}}, newDisabledAuthz(t), nil).(*client)
-	keep := dashboardRaw("keep", "demo")
-	gone := dashboardRaw("gone", "demo")
+	keep := dashboardRaw("keep")
+	gone := dashboardRaw("gone")
 	require.NoError(t, c.add(keep))
 	require.NoError(t, c.add(gone))
 	c.dao = &streamDAO{docs: []json.RawMessage{keep}}
@@ -372,7 +372,7 @@ func TestRefreshDropsDashboardsMissingFromDatabase(t *testing.T) {
 
 func TestRefreshClearsIndexWhenDatabaseIsEmpty(t *testing.T) {
 	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name"}}}, newDisabledAuthz(t), nil).(*client)
-	require.NoError(t, c.add(dashboardRaw("gone", "demo")))
+	require.NoError(t, c.add(dashboardRaw("gone")))
 	c.dao = &streamDAO{}
 
 	require.NoError(t, c.Refresh())
@@ -382,10 +382,10 @@ func TestRefreshClearsIndexWhenDatabaseIsEmpty(t *testing.T) {
 
 func TestRefreshKeepsIndexWhenStreamFails(t *testing.T) {
 	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name"}}}, newDisabledAuthz(t), nil).(*client)
-	require.NoError(t, c.add(dashboardRaw("keep", "demo")))
-	require.NoError(t, c.add(dashboardRaw("also", "demo")))
+	require.NoError(t, c.add(dashboardRaw("keep")))
+	require.NoError(t, c.add(dashboardRaw("also")))
 	c.dao = &streamDAO{
-		docs: []json.RawMessage{dashboardRaw("partial", "demo")},
+		docs: []json.RawMessage{dashboardRaw("partial")},
 		err:  fmt.Errorf("database unavailable"),
 	}
 
@@ -395,8 +395,8 @@ func TestRefreshKeepsIndexWhenStreamFails(t *testing.T) {
 	assert.ElementsMatch(t, []string{"keep", "also"}, dashboardNames(t, c, "demo"))
 }
 
-func dashboardRaw(name, project string) json.RawMessage {
-	return json.RawMessage(fmt.Sprintf(`{"kind":"Dashboard","metadata":{"name":%q,"project":%q},"spec":{}}`, name, project))
+func dashboardRaw(name string) json.RawMessage {
+	return json.RawMessage(fmt.Sprintf(`{"kind":"Dashboard","metadata":{"name":%q,"project":"demo"},"spec":{}}`, name))
 }
 
 func dashboardNames(t *testing.T, c *client, project string) []string {
@@ -423,14 +423,16 @@ func (d *streamDAO) StreamRaw(_ databaseModel.Query, ch chan<- json.RawMessage) 
 	return d.err
 }
 
-func (d *streamDAO) Close() error                                            { return nil }
-func (d *streamDAO) Init() error                                             { return nil }
-func (d *streamDAO) IsCaseSensitive() bool                                   { return false }
-func (d *streamDAO) Create(modelAPI.Entity) error                            { return nil }
-func (d *streamDAO) Upsert(modelAPI.Entity) error                            { return nil }
-func (d *streamDAO) Get(v1.Kind, modelAPI.Metadata, modelAPI.Entity) error   { return nil }
-func (d *streamDAO) Query(databaseModel.Query, any) error                    { return nil }
-func (d *streamDAO) RawQuery(databaseModel.Query) ([]json.RawMessage, error) { return nil, nil }
+func (d *streamDAO) Close() error                                          { return nil }
+func (d *streamDAO) Init() error                                           { return nil }
+func (d *streamDAO) IsCaseSensitive() bool                                 { return false }
+func (d *streamDAO) Create(modelAPI.Entity) error                          { return nil }
+func (d *streamDAO) Upsert(modelAPI.Entity) error                          { return nil }
+func (d *streamDAO) Get(v1.Kind, modelAPI.Metadata, modelAPI.Entity) error { return nil }
+func (d *streamDAO) Query(databaseModel.Query, any) error                  { return nil }
+func (d *streamDAO) RawQuery(databaseModel.Query) ([]json.RawMessage, error) {
+	return d.docs, d.err
+}
 func (d *streamDAO) RawMetadataQuery(databaseModel.Query, v1.Kind) ([]json.RawMessage, error) {
 	return nil, nil
 }
