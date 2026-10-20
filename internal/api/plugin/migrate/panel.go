@@ -55,14 +55,24 @@ func convertGrafanaLinksToPerses(grafanaLinks []GrafanaLink) []dashboard.Link {
 		return nil
 	}
 
-	persesLinks := make([]dashboard.Link, len(grafanaLinks))
-	for i, grafanaLink := range grafanaLinks {
-		persesLinks[i] = dashboard.Link{
+	persesLinks := make([]dashboard.Link, 0, len(grafanaLinks))
+	for _, grafanaLink := range grafanaLinks {
+		if tagLink, ok := grafanaTagLink(grafanaLink); ok {
+			persesLinks = append(persesLinks, tagLink)
+			continue
+		}
+		if len(grafanaLink.URL) == 0 {
+			continue
+		}
+		persesLinks = append(persesLinks, dashboard.Link{
 			Name:            grafanaLink.Title,
 			URL:             grafanaLink.URL,
 			TargetBlank:     grafanaLink.TargetBlank,
 			RenderVariables: hasGrafanaVariables(grafanaLink.URL),
-		}
+		})
+	}
+	if len(persesLinks) == 0 {
+		return nil
 	}
 	return persesLinks
 }

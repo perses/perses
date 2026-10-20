@@ -46,6 +46,10 @@ duration: <duration> # Optional
 
 # `refreshInterval` is the default refresh interval to use on the initial load of the dashboard.
 refreshInterval: <duration> # Optional
+
+# `links` is an optional list of header links. Each link is either a URL or a tag menu.
+links:
+  - <Link specification> # Optional
 ```
 
 A dashboard in its minimal definition only requires a panel and a layout.
@@ -72,6 +76,29 @@ See the [datasource](./datasource.md) documentation.
 ### Variable specification
 
 See the [variable](./variable.md) documentation.
+
+### Link specification
+
+A link is either a URL or a menu of dashboards in the current project. Set one of `url` or `tags`, not both. A tag menu needs a `name`, which is the menu title, and at least one tag. A dashboard is listed when it has every tag. The current dashboard is left out.
+
+`renderVariables` interpolates `$var` inside `url`. `keepTime` and `includeVariables` apply to a tag menu: they forward the current time range, and the variables whose names exist on the destination.
+
+```yaml
+# URL link
+name: <string> # Optional
+url: <string>
+tooltip: <string> # Optional
+renderVariables: <bool> # Optional
+targetBlank: <bool> # Optional
+
+# Tag menu. Mutually exclusive with url.
+name: <string>
+tags:
+  - <string>
+tooltip: <string> # Optional
+keepTime: <bool> # Optional
+includeVariables: <bool> # Optional
+```
 
 ### Panel specification
 

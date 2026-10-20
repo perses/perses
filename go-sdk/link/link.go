@@ -14,6 +14,9 @@
 package link
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/perses/spec/go/dashboard"
 )
 
@@ -34,6 +37,23 @@ func New(url string, options ...Option) (Builder, error) {
 		}
 	}
 
+	return *builder, nil
+}
+
+func NewTagMenu(name string, tags []string, options ...Option) (Builder, error) {
+	if strings.TrimSpace(name) == "" {
+		return Builder{}, fmt.Errorf("tag link name is required")
+	}
+	builder := &Builder{Link: dashboard.Link{}}
+	defaults := []Option{
+		Name(strings.TrimSpace(name)),
+		Tags(tags),
+	}
+	for _, opt := range append(defaults, options...) {
+		if err := opt(builder); err != nil {
+			return Builder{}, err
+		}
+	}
 	return *builder, nil
 }
 

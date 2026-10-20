@@ -84,6 +84,28 @@ dashboard.AddDatasource("MySuperDatasourceName", datasourceOptions...)
 
 Add a local datasource to the dashboard. More info at [Datasource](./datasource.md).
 
+### AddLink
+
+```golang
+import "github.com/perses/perses/go-sdk/dashboard"
+import "github.com/perses/perses/go-sdk/link"
+
+dashboard.AddLink("https://perses.dev", link.Name("Docs"), link.TargetBlank(true))
+```
+
+Add a URL link shown in the dashboard header.
+
+### AddTagLink
+
+```golang
+import "github.com/perses/perses/go-sdk/dashboard"
+import "github.com/perses/perses/go-sdk/link"
+
+dashboard.AddTagLink("Traffic dashboards", []string{"traffic"}, link.KeepTime(true), link.IncludeVariables(true))
+```
+
+Add a menu of dashboards in the same project. A dashboard is listed when its metadata tags contain every tag. The current dashboard is excluded. `KeepTime` forwards the current time range. `IncludeVariables` forwards variables whose names exist on the destination. A tag link cannot also set a URL.
+
 ### AddAnnotation
 
 ```golang
