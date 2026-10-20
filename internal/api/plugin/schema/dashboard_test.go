@@ -154,6 +154,25 @@ func TestGeneratedDashboardSchemaValidatesDashboards(t *testing.T) {
 			]}}`,
 		},
 		{
+			title: "list variable without allowAllValue and allowMultiple",
+			dashboard: `{"kind": "Dashboard", ` + metadata + `, "spec": {"panels": {}, "layouts": [], "duration": "1h", "variables": [
+				{"kind": "ListVariable", "spec": {"name": "list", "plugin": {"kind": "FirstVariable", "spec": {"a": "a", "b": "b"}}}}
+			]}}`,
+		},
+		{
+			title: "list variable with allowAllValue and allowMultiple enabled",
+			dashboard: `{"kind": "Dashboard", ` + metadata + `, "spec": {"panels": {}, "layouts": [], "duration": "1h", "variables": [
+				{"kind": "ListVariable", "spec": {"name": "list", "allowAllValue": true, "allowMultiple": true, "plugin": {"kind": "FirstVariable", "spec": {"a": "a", "b": "b"}}}}
+			]}}`,
+		},
+		{
+			title: "list variable with a non-boolean allowMultiple",
+			dashboard: `{"kind": "Dashboard", ` + metadata + `, "spec": {"panels": {}, "layouts": [], "duration": "1h", "variables": [
+				{"kind": "ListVariable", "spec": {"name": "list", "allowMultiple": "yes", "plugin": {"kind": "FirstVariable", "spec": {"a": "a", "b": "b"}}}}
+			]}}`,
+			wantErr: true,
+		},
+		{
 			title: "panel plugin with a definition-based palette, palette not set",
 			dashboard: `{"kind": "Dashboard", ` + metadata + `, "spec": {"layouts": [], "duration": "1h",
 				"panels": {"p": {"kind": "Panel", "spec": {"display": {"name": "p"}, "plugin": {"kind": "PaletteChart", "spec": {}}}}}}}`,
