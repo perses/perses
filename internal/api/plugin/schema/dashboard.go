@@ -280,6 +280,14 @@ func addFieldToStruct(expr ast.Expr, structLabel string, field string, value ast
 		if !ok {
 			return fmt.Errorf("unexpected AST expr type %T for %s", f.Value, structLabel)
 		}
+		for _, elt := range target.Elts {
+			if existing, ok := elt.(*ast.Field); ok {
+				if name, _, err := ast.LabelName(existing.Label); err == nil && name == field {
+					existing.Value = value
+					return nil
+				}
+			}
+		}
 		target.Elts = append(target.Elts, &ast.Field{Label: ast.NewIdent(field), Value: value})
 		return nil
 	}
