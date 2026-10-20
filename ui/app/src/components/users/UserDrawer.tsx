@@ -36,14 +36,8 @@ export function UserDrawer({
 }: UserDrawerProps): ReactElement {
   const [isDeleteUserDialogStateOpened, setDeleteUserDialogStateOpened] = useState<boolean>(false);
 
-  // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
-  // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
-  const handleClickOut = (): void => {
-    /* do nothing */
-  };
-
   return (
-    <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="user-editor">
+    <Drawer isOpen={isOpen} onClose={onClose} data-testid="user-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         {isOpen && (
           <UserEditorForm

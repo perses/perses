@@ -34,7 +34,13 @@ import {
 } from '@mui/material';
 import type { Secret, SecretsEditorSchemaType } from '@perses-dev/client';
 import { secretsEditorSchema } from '@perses-dev/client';
-import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
+import {
+  DiscardChangesConfirmationDialog,
+  FormActions,
+  getSubmitText,
+  getTitleAction,
+  useDrawerCloseHandler,
+} from '@perses-dev/components';
 import PlusIcon from 'mdi-material-ui/Plus';
 import TrashIcon from 'mdi-material-ui/TrashCan';
 import type { ReactElement, SyntheticEvent } from 'react';
@@ -118,6 +124,8 @@ export function SecretEditorForm({
       onClose();
     }
   }
+
+  useDrawerCloseHandler(handleCancel);
 
   // Form errors are removed only from latest input touched
   // This will remove errors for others inputs

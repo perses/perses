@@ -15,7 +15,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Autocomplete, Box, Divider, IconButton, Stack, TextField, Typography } from '@mui/material';
 import type { RoleBinding } from '@perses-dev/client';
 import { roleBindingsEditorSchema } from '@perses-dev/client';
-import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
+import {
+  DiscardChangesConfirmationDialog,
+  FormActions,
+  getSubmitText,
+  getTitleAction,
+  useDrawerCloseHandler,
+} from '@perses-dev/components';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import type { ReactElement } from 'react';
@@ -82,6 +88,8 @@ export function RoleBindingEditorForm({
       onClose();
     }
   }
+
+  useDrawerCloseHandler(handleCancel);
 
   return (
     <FormProvider {...form}>

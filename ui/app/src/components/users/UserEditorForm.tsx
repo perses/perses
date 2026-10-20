@@ -15,7 +15,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, Box, Divider, FormControl, IconButton, Stack, TextField, Typography } from '@mui/material';
 import type { Action, UserEditorSchemaType, UserResource } from '@perses-dev/client';
 import { userSchema } from '@perses-dev/client';
-import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
+import {
+  DiscardChangesConfirmationDialog,
+  FormActions,
+  getSubmitText,
+  getTitleAction,
+  useDrawerCloseHandler,
+} from '@perses-dev/components';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
@@ -88,6 +94,8 @@ export function UserEditorForm({
       onClose();
     }
   }
+
+  useDrawerCloseHandler(handleCancel);
 
   return (
     <FormProvider {...form}>

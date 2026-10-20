@@ -70,14 +70,8 @@ export function VariableDrawer<T extends VariableType>({
 
   const initialTimeRange = useInitialTimeRange('1h');
 
-  // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
-  // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
-  const handleClickOut = (): void => {
-    /* do nothing */
-  };
-
   return (
-    <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="variable-editor">
+    <Drawer isOpen={isOpen} onClose={onClose} data-testid="variable-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry pluginLoader={pluginLoader}>
           <ValidationProvider>

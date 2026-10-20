@@ -42,12 +42,6 @@ export function DatasourceDrawer<T extends Datasource>({
   const project = datasource.kind === 'Datasource' ? datasource.metadata.project : undefined;
   const testConnection = useMemo(() => createTestDatasourceConnection({ project }), [project]);
 
-  // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
-  // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
-  const handleClickOut = (): void => {
-    /* do nothing */
-  };
-
   const handleSave = (def: DatasourceDefinition): void => {
     const updatedDatasource = structuredClone(datasource);
     updatedDatasource.spec = def.spec;
@@ -58,7 +52,7 @@ export function DatasourceDrawer<T extends Datasource>({
   };
 
   return (
-    <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="datasource-editor">
+    <Drawer isOpen={isOpen} onClose={onClose} data-testid="datasource-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry pluginLoader={pluginLoader}>
           <ValidationProvider>

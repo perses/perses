@@ -15,7 +15,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Divider, IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import type { Action, Role } from '@perses-dev/client';
 import { ACTIONS, GLOBAL_SCOPES, PROJECT_SCOPES, rolesEditorSchema } from '@perses-dev/client';
-import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
+import {
+  DiscardChangesConfirmationDialog,
+  FormActions,
+  getSubmitText,
+  getTitleAction,
+  useDrawerCloseHandler,
+} from '@perses-dev/components';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import type { ReactElement } from 'react';
@@ -73,6 +79,8 @@ export function RoleEditorForm({
       onClose();
     }
   }
+
+  useDrawerCloseHandler(handleCancel);
 
   return (
     <FormProvider {...form}>
