@@ -100,12 +100,9 @@ func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 	}
 
 	// createdAt, updatedAt and version are set by the server: user-provided dashboards don't need them
-	final, changed, err := apiCue.MakeFieldsOptional(ctx, final, serverManagedMetadataStructs, serverManagedMetadataFields)
+	final, _, err := apiCue.MakeFieldsOptional(ctx, final, serverManagedMetadataStructs, serverManagedMetadataFields)
 	if err != nil {
 		return cue.Value{}, fmt.Errorf("failed to make server-managed metadata fields optional in dashboard schema: %w", err)
-	}
-	if changed == 0 {
-		return cue.Value{}, fmt.Errorf("no server-managed metadata field %v found in %v of the dashboard schema", serverManagedMetadataFields, serverManagedMetadataStructs)
 	}
 
 	// grab _Metadata_0 and _ProjectMetadataWrapper_0 from #Dashboard
