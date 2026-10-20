@@ -362,7 +362,7 @@ func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
 	defer s.mutex.RUnlock()
 
 	ctx := cuecontext.New()
-	plugins := map[plugin.Kind]cue.Value{}
+	plugins := map[plugin.Kind]PluginSchemas{}
 	for _, kind := range []plugin.Kind{
 		plugin.KindDatasource, plugin.KindPanel,
 		plugin.KindVariable, plugin.KindQuery, plugin.KindAnnotation,

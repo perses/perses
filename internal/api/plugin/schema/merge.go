@@ -23,12 +23,26 @@ import (
 	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/token"
 	apiCue "github.com/perses/perses/internal/api/cue"
+	specPlugin "github.com/perses/spec/go/plugin"
+	"github.com/sirupsen/logrus"
 )
 
-// Function generates a disjunction (OR join) of a list of LoadSchemas
-// and returns it in a single cue.Value
-func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
+// PluginSchemas is the CUE AST of the plugin schemas of a kind, as embedded in the dashboard schema.
+type PluginSchemas struct {
+	// Definitions holds one top-level definition per plugin (e.g. `#Plugin_Panel_TimeSeriesChart: {...}`).
+	Definitions []ast.Decl
+	// Disjunction is the OR join of the plugins. Its branches reference the regular fields of the definitions
+	// (e.g. `{kind: #Plugin_Panel_TimeSeriesChart.kind, spec: #Plugin_Panel_TimeSeriesChart.spec}`), so the
+	// definitions must be declared at the root of the value the disjunction is filled into.
+	Disjunction ast.Expr
+}
+
+// GenerateSchemaDisjunction generates the definitions of a list of LoadSchemas and a disjunction (OR join)
+// referencing them.
+func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (PluginSchemas, error) {
+	var result PluginSchemas
 	var expr []ast.Expr
+	usedNames := map[string]struct{}{}
 
 	// sorting the slice so that the plugin order is not random
 	slices.SortFunc(schemas, func(a, b LoadSchema) int {
@@ -39,38 +53,147 @@ func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (cue.Valu
 		// build instance for all schemas
 		inst := ctx.BuildInstance(ls.Instance, cue.InferBuiltins(true))
 		if inst.Err() != nil {
-			return cue.Value{}, fmt.Errorf("error while building instance %s: %w", ls.Name, inst.Err())
+			return PluginSchemas{}, fmt.Errorf("error while building instance %s: %w", ls.Name, inst.Err())
 		}
 
 		castExpr, err := apiCue.ValueToASTExpr(inst)
 		if err != nil {
-			return cue.Value{}, fmt.Errorf("could not process %s plugin schema: %w", ls.Name, err)
+			return PluginSchemas{}, fmt.Errorf("could not process %s plugin schema: %w", ls.Name, err)
 		}
-		expr = append(expr, castExpr)
+		defName := pluginDefinitionName(ls.Kind, ls.Name)
+		// names that only differ by a character replaced in the definition name must not be merged into the same definition
+		for i := 2; ; i++ {
+			if _, used := usedNames[defName]; !used {
+				break
+			}
+			defName = fmt.Sprintf("%s_%d", pluginDefinitionName(ls.Kind, ls.Name), i)
+		}
+		usedNames[defName] = struct{}{}
+		branch, ok := referencePluginFields(castExpr, defName)
+		if !ok {
+			logrus.Debugf("plugin %s (%s): schema can't be referenced from a definition, it is embedded as-is in the dashboard schema", ls.Name, ls.Kind)
+			expr = append(expr, castExpr)
+			continue
+		}
+		result.Definitions = append(result.Definitions, &ast.Field{Label: ast.NewIdent(defName), Value: castExpr})
+		expr = append(expr, branch)
 	}
 
 	if len(expr) == 0 {
-		return cue.Value{}, errors.New("no plugin schemas returned")
+		return PluginSchemas{}, errors.New("no plugin schemas returned")
 	}
 
 	// OR join all expressions
 	// start with the first expr, and OR join all the next ones'
-	complete := expr[0]
-	if len(expr) > 1 {
-		for _, e := range expr[1:] {
-			complete = &ast.BinaryExpr{
-				Op: token.OR,
-				X:  complete,
-				Y:  e,
-			}
+	result.Disjunction = expr[0]
+	for _, e := range expr[1:] {
+		result.Disjunction = &ast.BinaryExpr{
+			Op: token.OR,
+			X:  result.Disjunction,
+			Y:  e,
 		}
 	}
-	// build the final expression value
-	value := ctx.BuildExpr(complete)
-	if value.Err() != nil {
-		return cue.Value{}, fmt.Errorf("unable to merge schemas: %w", value.Err())
+	return result, nil
+}
+
+// pluginDefinitionName returns the name of the top-level definition of a plugin, e.g. #Plugin_Panel_TimeSeriesChart.
+func pluginDefinitionName(kind specPlugin.Kind, name string) string {
+	sanitize := func(s string) string {
+		return strings.Map(func(r rune) rune {
+			if r == '_' || ('a' <= r && r <= 'z') || ('A' <= r && r <= 'Z') || ('0' <= r && r <= '9') {
+				return r
+			}
+			return '_'
+		}, s)
 	}
-	return value, nil
+	return fmt.Sprintf("#Plugin_%s_%s", sanitize(string(kind)), sanitize(name))
+}
+
+// referencePluginFields returns a disjunction branch that only references the regular fields of the plugin
+// definition `defName` (e.g. `{kind: #Plugin_Panel_X.kind, spec: #Plugin_Panel_X.spec}`).
+// Referencing the fields, rather than embedding the plugin schema, keeps the definitions of the plugin (e.g.
+// #palette) out of the branch. When a definition is part of a disjunction branch, `cue vet -c` (cue v0.17.1)
+// requires it to be concrete and fails on a definition that can't be resolved without data, like a
+// comprehension over an undefaulted disjunction (`mode: "auto" | "categorical"` + `if mode == "categorical" {...}`),
+// while the same definition is accepted outside of a disjunction. This is a defensive workaround: plugins can avoid
+// the pattern (as perses/plugins#869 did for TimeSeriesChart), but the dashboard schema shouldn't break when one doesn't.
+// The branch only behaves like the plugin schema when the referenced fields don't depend on the plugin root: a
+// reference to a top-level field (e.g. `#x: spec.a`) keeps pointing to the field of the definition, which isn't
+// unified with the dashboard data. It also requires plain fields: an optional or required field (`metadata?:`) can't
+// be selected from the definition.
+// It returns false when the fields can't be referenced, in which case the plugin schema has to be embedded as-is.
+func referencePluginFields(expr ast.Expr, defName string) (ast.Expr, bool) {
+	st, ok := expr.(*ast.StructLit)
+	if !ok {
+		return nil, false
+	}
+	var fields []ast.Decl
+	regularNames := map[string]struct{}{}
+	for _, decl := range st.Elts {
+		switch d := decl.(type) {
+		case *ast.Field:
+			name, isIdent, err := ast.LabelName(d.Label)
+			if err != nil || !isIdent {
+				return nil, false
+			}
+			if strings.HasPrefix(name, "#") || strings.HasPrefix(name, "_") {
+				// definitions and hidden fields stay in the plugin definition
+				continue
+			}
+			if d.Constraint != token.ILLEGAL {
+				return nil, false
+			}
+			regularNames[name] = struct{}{}
+			fields = append(fields, &ast.Field{
+				Label: ast.NewIdent(name),
+				Value: ast.NewSel(ast.NewIdent(defName), name),
+			})
+		case *ast.LetClause, *ast.CommentGroup, *ast.Attribute:
+			// only reachable from within the plugin definition
+		default:
+			return nil, false
+		}
+	}
+	if len(fields) == 0 {
+		return nil, false
+	}
+	for _, decl := range st.Elts {
+		if referencesAny(decl, regularNames) {
+			return nil, false
+		}
+	}
+	return &ast.StructLit{Elts: fields}, true
+}
+
+// referencesAny returns whether the node contains an identifier named after one of the given names, other than a
+// field label or a selector. It can report references that resolve to another field of the same name, which is fine
+// for its conservative use.
+func referencesAny(node ast.Node, names map[string]struct{}) bool {
+	found := false
+	ast.Walk(node, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+		switch x := n.(type) {
+		case *ast.Field:
+			switch x.Label.(type) {
+			case *ast.Ident, *ast.BasicLit:
+			default:
+				found = referencesAny(x.Label, names)
+			}
+			if !found && x.Value != nil {
+				found = referencesAny(x.Value, names)
+			}
+			return false
+		case *ast.SelectorExpr:
+			found = referencesAny(x.X, names)
+			return false
+		case *ast.Ident:
+			_, found = names[x.Name]
+		}
+		return true
+	}, nil)
+	return found
 }
 
 // Generates a single cue.Value composed of a list of cue definitions (prefixed by #)

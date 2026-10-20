@@ -113,3 +113,38 @@ func TestRenameDefinition(t *testing.T) {
 	assert.NotContains(t, body, "_OldName_0")
 	assert.Contains(t, body, "_NewName_0")
 }
+
+func TestMakeFieldsOptional(t *testing.T) {
+	ctx := cuecontext.New()
+	v := ctx.CompileString(`
+#A: {
+	_Meta: {
+		name:      string
+		createdAt: string
+		version:   int
+	}
+	other: {
+		createdAt: string
+	}
+}
+`)
+	require.NoError(t, v.Err())
+	result, changed, err := MakeFieldsOptional(ctx, v, []string{"_Meta"}, []string{"createdAt", "version"})
+	require.NoError(t, err)
+	require.NoError(t, result.Err())
+	assert.Equal(t, 2, changed)
+
+	optionality := func(path cue.Path) map[string]bool {
+		fields := map[string]bool{}
+		iter, err := result.LookupPath(path).Fields(cue.Optional(true))
+		require.NoError(t, err)
+		for iter.Next() {
+			fields[iter.Selector().Unquoted()] = iter.IsOptional()
+		}
+		return fields
+	}
+	assert.Equal(t, map[string]bool{"name": false, "createdAt": true, "version": true},
+		optionality(cue.MakePath(cue.Def("#A"), cue.Hid("_Meta", "_"))))
+	// fields with the same name outside of the targeted structs are left untouched
+	assert.Equal(t, map[string]bool{"createdAt": false}, optionality(cue.MakePath(cue.Def("#A"), cue.Str("other"))))
+}
