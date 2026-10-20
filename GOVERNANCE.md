@@ -81,6 +81,22 @@ private mailing list (perses-team@googlegroups.com). A 2/3 majority of team memb
 must vote to approve a new maintainer. After the new maintainer is approved, they will
 be added to the private team member mailing list.
 
+## Onboarding a New Maintainer
+
+Once a new maintainer has been approved, an existing maintainer should go through the following checklist:
+
+- [ ] Add them to the private [perses-team](https://groups.google.com/g/perses-team) Google Group.
+- [ ] Invite them to the [Perses GitHub organization](https://github.com/orgs/perses/people) as a member.
+  Organization members have write access to the repositories by default.
+- [ ] Add them to the relevant [GitHub teams](https://github.com/orgs/perses/teams), if any (e.g. `frontend-maintainers`).
+- [ ] Add them to [MAINTAINERS.md](./MAINTAINERS.md).
+- [ ] Add their GitHub handle to `maintainers.yaml` in the [perses/.project](https://github.com/perses/.project)
+  repository. Ask them to link their GitHub handle to their LFID on [openprofile.dev](https://openprofile.dev) so they
+  get access to CNCF resources.
+- [ ] Add them to the [Perses maintainers Slack channel](https://cloud-native.slack.com/archives/C08K14VMU86) on the
+  CNCF Slack.
+- [ ] Invite them to the weekly [team meetings](./docs/contact.md#team-meetings).
+
 ## Voting
 
 While most business in Perses is conducted by "lazy consensus", periodically
