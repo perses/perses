@@ -69,6 +69,9 @@ var dashboardCueValidationOptions = []cue.Option{
 var (
 	serverManagedMetadataStructs = []string{metadataHidSelector.String(), projMetadataHidSelector.String()}
 	serverManagedMetadataFields  = []string{"createdAt", "updatedAt", "version"}
+
+	listVariableSpecStructs            = []string{listSpecHidSelector.String(), listVariableSpecSelector.String()}
+	listVariableSpecDefaultFalseFields = []string{"allowAllValue", "allowMultiple"}
 )
 
 func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
@@ -215,6 +218,12 @@ func generateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]sch
 		listVarSpec, err = apiCue.RemoveEmptyStringField(ctx, listVarSpec)
 		if err != nil {
 			return cue.Value{}, fmt.Errorf("failed to remove empty fields from ListVariable schema: %w", err)
+		}
+
+		// allowAllValue and allowMultiple are plain bools in Go: when omitted, Perses reads them as false
+		listVarSpec, _, err = apiCue.SetFieldsDefault(ctx, listVarSpec, listVariableSpecStructs, listVariableSpecDefaultFalseFields, ast.NewBool(false))
+		if err != nil {
+			return cue.Value{}, fmt.Errorf("failed to set default values in ListVariable schema: %w", err)
 		}
 
 		// grab _TextSpec_0 and inject it into _TextVariableSpec_0

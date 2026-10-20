@@ -120,6 +120,23 @@ func RemoveEmptyStringField(ctx *cue.Context, val cue.Value) (cue.Value, error) 
 // whose field label is one of structLabels (e.g. "_Metadata_0").
 // It returns the number of fields made optional.
 func MakeFieldsOptional(ctx *cue.Context, val cue.Value, structLabels []string, fields []string) (cue.Value, int, error) {
+	return updateFields(ctx, val, structLabels, fields, func(f *ast.Field) {
+		f.Constraint = token.OPTION
+	})
+}
+
+// SetFieldsDefault adds a default value to the given fields (`field: <type> | *<defaultValue>`) in every struct
+// whose field label is one of structLabels (e.g. "_ListSpec_0"), so that the fields can be omitted.
+// It returns the number of fields updated.
+func SetFieldsDefault(ctx *cue.Context, val cue.Value, structLabels []string, fields []string, defaultValue ast.Expr) (cue.Value, int, error) {
+	return updateFields(ctx, val, structLabels, fields, func(f *ast.Field) {
+		f.Value = ast.NewBinExpr(token.OR, f.Value, &ast.UnaryExpr{Op: token.MUL, X: defaultValue})
+	})
+}
+
+// updateFields applies update to the given fields in every struct whose field label is one of structLabels.
+// It returns the number of fields updated.
+func updateFields(ctx *cue.Context, val cue.Value, structLabels []string, fields []string, update func(f *ast.Field)) (cue.Value, int, error) {
 	node := val.Syntax()
 	changed := 0
 
@@ -138,7 +155,7 @@ func MakeFieldsOptional(ctx *cue.Context, val cue.Value, structLabels []string, 
 		for _, decl := range st.Elts {
 			if f, ok := decl.(*ast.Field); ok {
 				if name, _, err := ast.LabelName(f.Label); err == nil && slices.Contains(fields, name) {
-					f.Constraint = token.OPTION
+					update(f)
 					changed++
 				}
 			}
