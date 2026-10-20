@@ -38,6 +38,17 @@ func TestDashboardToCue(t *testing.T) {
 	assert.NoError(t, result.Validate(dashboardCueValidationOptions...))
 }
 
+func TestDashboardToCueServerManagedMetadataIsOptional(t *testing.T) {
+	dash, err := dashboardToCue(cuecontext.New())
+	require.NoError(t, err)
+	for _, sel := range []cue.Selector{metadataHidSelector, projMetadataHidSelector} {
+		for _, field := range serverManagedMetadataFields {
+			assert.True(t, dash.LookupPath(cue.MakePath(dashboardDefSelector, sel, cue.Str(field).Optional())).Exists(), "%s.%s should exist", sel, field)
+			assert.False(t, dash.LookupPath(cue.MakePath(dashboardDefSelector, sel, cue.Str(field))).Exists(), "%s.%s should be optional", sel, field)
+		}
+	}
+}
+
 func TestGenerateDashboardCueValueWithNoPluginKinds(t *testing.T) {
 	ctx := cuecontext.New()
 	// No plugins injected: the base dashboard schema must still be returned intact.

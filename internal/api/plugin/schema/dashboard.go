@@ -242,7 +242,7 @@ func generateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]sch
 
 		// plugins only present in ListVariable.
 		// They are added to the AST because the disjunction references the plugin definitions declared at the root.
-		if err := addFieldToStruct(listVarSpecExpr, listVariableSpecSelector.String(), pluginSelector.String(), variables.expr); err != nil {
+		if err := setStructField(listVarSpecExpr, listVariableSpecSelector.String(), pluginSelector.String(), variables.expr); err != nil {
 			return cue.Value{}, fmt.Errorf("could not add variable plugins to list variable spec schema: %w", err)
 		}
 
@@ -262,8 +262,9 @@ func generateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]sch
 	return result, nil
 }
 
-// addFieldToStruct adds `field: value` to the struct declared by the field `structLabel` of the struct expr.
-func addFieldToStruct(expr ast.Expr, structLabel string, field string, value ast.Expr) error {
+// setStructField sets `field: value` in the struct declared by the field `structLabel` of the struct expr,
+// replacing the value of the field if it already exists.
+func setStructField(expr ast.Expr, structLabel string, field string, value ast.Expr) error {
 	st, ok := expr.(*ast.StructLit)
 	if !ok {
 		return fmt.Errorf("unexpected AST expr type %T", expr)
