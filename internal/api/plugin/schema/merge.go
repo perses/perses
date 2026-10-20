@@ -27,20 +27,20 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// PluginSchemas is the CUE AST of the plugin schemas of a kind, as embedded in the dashboard schema.
-type PluginSchemas struct {
-	// Definitions holds one top-level definition per plugin (e.g. `#Plugin_Panel_TimeSeriesChart: {...}`).
-	Definitions []ast.Decl
-	// Disjunction is the OR join of the plugins. Its branches reference the regular fields of the definitions
+// schemaDisjunction is the CUE AST of the plugin schemas of a kind, as embedded in the dashboard schema.
+type schemaDisjunction struct {
+	// definitions holds one top-level definition per plugin (e.g. `#Plugin_Panel_TimeSeriesChart: {...}`).
+	definitions []ast.Decl
+	// expr is the OR join of the plugins. Its branches reference the regular fields of the definitions
 	// (e.g. `{kind: #Plugin_Panel_TimeSeriesChart.kind, spec: #Plugin_Panel_TimeSeriesChart.spec}`), so the
 	// definitions must be declared at the root of the value the disjunction is filled into.
-	Disjunction ast.Expr
+	expr ast.Expr
 }
 
-// GenerateSchemaDisjunction generates the definitions of a list of LoadSchemas and a disjunction (OR join)
+// generateSchemaDisjunction generates the definitions of a list of LoadSchemas and a disjunction (OR join)
 // referencing them.
-func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (PluginSchemas, error) {
-	var result PluginSchemas
+func generateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (schemaDisjunction, error) {
+	var result schemaDisjunction
 	var expr []ast.Expr
 	usedNames := map[string]struct{}{}
 
@@ -53,12 +53,12 @@ func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (PluginSc
 		// build instance for all schemas
 		inst := ctx.BuildInstance(ls.Instance, cue.InferBuiltins(true))
 		if inst.Err() != nil {
-			return PluginSchemas{}, fmt.Errorf("error while building instance %s: %w", ls.Name, inst.Err())
+			return schemaDisjunction{}, fmt.Errorf("error while building instance %s: %w", ls.Name, inst.Err())
 		}
 
 		castExpr, err := apiCue.ValueToASTExpr(inst)
 		if err != nil {
-			return PluginSchemas{}, fmt.Errorf("could not process %s plugin schema: %w", ls.Name, err)
+			return schemaDisjunction{}, fmt.Errorf("could not process %s plugin schema: %w", ls.Name, err)
 		}
 		defName := pluginDefinitionName(ls.Kind, ls.Name)
 		// names that only differ by a character replaced in the definition name must not be merged into the same definition
@@ -75,21 +75,21 @@ func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (PluginSc
 			expr = append(expr, castExpr)
 			continue
 		}
-		result.Definitions = append(result.Definitions, &ast.Field{Label: ast.NewIdent(defName), Value: castExpr})
+		result.definitions = append(result.definitions, &ast.Field{Label: ast.NewIdent(defName), Value: castExpr})
 		expr = append(expr, branch)
 	}
 
 	if len(expr) == 0 {
-		return PluginSchemas{}, errors.New("no plugin schemas returned")
+		return schemaDisjunction{}, errors.New("no plugin schemas returned")
 	}
 
 	// OR join all expressions
 	// start with the first expr, and OR join all the next ones'
-	result.Disjunction = expr[0]
+	result.expr = expr[0]
 	for _, e := range expr[1:] {
-		result.Disjunction = &ast.BinaryExpr{
+		result.expr = &ast.BinaryExpr{
 			Op: token.OR,
-			X:  result.Disjunction,
+			X:  result.expr,
 			Y:  e,
 		}
 	}

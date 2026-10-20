@@ -37,9 +37,9 @@ func loadSchemaFromTestdata(t *testing.T, schemaDir string) LoadSchema {
 }
 
 // buildDisjunction builds the disjunction of plugin schemas with their definitions in scope.
-func buildDisjunction(t *testing.T, ctx *cue.Context, plugins PluginSchemas) cue.Value {
+func buildDisjunction(t *testing.T, ctx *cue.Context, plugins schemaDisjunction) cue.Value {
 	t.Helper()
-	elts := append(slices.Clone(plugins.Definitions), &ast.Field{Label: ast.NewIdent("out"), Value: plugins.Disjunction})
+	elts := append(slices.Clone(plugins.definitions), &ast.Field{Label: ast.NewIdent("out"), Value: plugins.expr})
 	v := ctx.BuildExpr(&ast.StructLit{Elts: elts})
 	require.NoError(t, v.Err())
 	return v.LookupPath(cue.ParsePath("out"))
@@ -50,9 +50,9 @@ func TestGenerateSchemaDisjunctionSingleSchema(t *testing.T) {
 	schemas := []LoadSchema{
 		loadSchemaFromTestdata(t, "testdata/schemas/panels/first"),
 	}
-	result, err := GenerateSchemaDisjunction(ctx, schemas)
+	result, err := generateSchemaDisjunction(ctx, schemas)
 	require.NoError(t, err)
-	assert.Len(t, result.Definitions, len(schemas))
+	assert.Len(t, result.definitions, len(schemas))
 	assert.NoError(t, buildDisjunction(t, ctx, result).Validate())
 }
 
@@ -63,15 +63,15 @@ func TestGenerateSchemaDisjunctionMultipleSchemas(t *testing.T) {
 		loadSchemaFromTestdata(t, "testdata/schemas/panels/second"),
 		loadSchemaFromTestdata(t, "testdata/schemas/panels/third"),
 	}
-	result, err := GenerateSchemaDisjunction(ctx, schemas)
+	result, err := generateSchemaDisjunction(ctx, schemas)
 	require.NoError(t, err)
-	assert.Len(t, result.Definitions, len(schemas))
+	assert.Len(t, result.definitions, len(schemas))
 	assert.NoError(t, buildDisjunction(t, ctx, result).Validate())
 }
 
 func TestGenerateSchemaDisjunctionEmptySchemas(t *testing.T) {
 	ctx := cuecontext.New()
-	_, err := GenerateSchemaDisjunction(ctx, []LoadSchema{})
+	_, err := generateSchemaDisjunction(ctx, []LoadSchema{})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "no plugin schemas returned")
 }
@@ -120,11 +120,11 @@ func TestGenerateSchemaDisjunctionDefinitionNameCollision(t *testing.T) {
 	first := loadSchemaFromTestdata(t, "testdata/schemas/panels/first")
 	second := loadSchemaFromTestdata(t, "testdata/schemas/panels/second")
 	first.Name, second.Name = "my-chart", "my.chart"
-	result, err := GenerateSchemaDisjunction(ctx, []LoadSchema{first, second})
+	result, err := generateSchemaDisjunction(ctx, []LoadSchema{first, second})
 	require.NoError(t, err)
-	require.Len(t, result.Definitions, 2)
+	require.Len(t, result.definitions, 2)
 	var names []string
-	for _, decl := range result.Definitions {
+	for _, decl := range result.definitions {
 		name, _, err := ast.LabelName(decl.(*ast.Field).Label)
 		require.NoError(t, err)
 		names = append(names, name)
@@ -181,7 +181,7 @@ func TestReferencePluginFields(t *testing.T) {
 
 func TestGenerateSchemaDisjunctionWithDefinitions(t *testing.T) {
 	ctx := cuecontext.New()
-	plugins, err := GenerateSchemaDisjunction(ctx, []LoadSchema{
+	plugins, err := generateSchemaDisjunction(ctx, []LoadSchema{
 		loadSchemaFromTestdata(t, "testdata/schemas/panels/first"),
 		loadSchemaFromTestdata(t, "testdata/dashboard_schema/panels/palette"),
 	})

@@ -142,7 +142,7 @@ func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 	return final, nil
 }
 
-func generateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]PluginSchemas) (cue.Value, error) {
+func generateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]schemaDisjunction) (cue.Value, error) {
 	dashSpec, err := dashboardToCue(ctx)
 	if err != nil {
 		return cue.Value{}, fmt.Errorf("unable to load dashboard schema: %w", err)
@@ -153,7 +153,7 @@ func generateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]Plu
 	// declare the plugin definitions at the root, next to #Dashboard, so that the plugin disjunctions can reference them
 	var definitions []ast.Decl
 	for _, kind := range slices.Sorted(maps.Keys(plugins)) {
-		definitions = append(definitions, plugins[kind].Definitions...)
+		definitions = append(definitions, plugins[kind].definitions...)
 	}
 	if len(definitions) > 0 {
 		pluginDefinitions := ctx.BuildExpr(&ast.StructLit{Elts: definitions})
@@ -165,22 +165,22 @@ func generateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]Plu
 
 	// unify with panel plugins
 	if panels, ok := plugins[specPlugin.KindPanel]; ok {
-		result = result.FillPath(cue.MakePath(dashboardDefSelector, panelSpecHidSelector, pluginSelector), panels.Disjunction)
+		result = result.FillPath(cue.MakePath(dashboardDefSelector, panelSpecHidSelector, pluginSelector), panels.expr)
 	}
 
 	// unify with datasource plugins
 	if datasources, ok := plugins[specPlugin.KindDatasource]; ok {
-		result = result.FillPath(cue.MakePath(dashboardDefSelector, datasourceSpecHidSelector, pluginSelector), datasources.Disjunction)
+		result = result.FillPath(cue.MakePath(dashboardDefSelector, datasourceSpecHidSelector, pluginSelector), datasources.expr)
 	}
 
 	// unify with query plugins
 	if queries, ok := plugins[specPlugin.KindQuery]; ok {
-		result = result.FillPath(cue.MakePath(dashboardDefSelector, querySpecHidSelector, pluginSelector), queries.Disjunction)
+		result = result.FillPath(cue.MakePath(dashboardDefSelector, querySpecHidSelector, pluginSelector), queries.expr)
 	}
 
 	// unify with annotation plugins
 	if annotations, ok := plugins[specPlugin.KindAnnotation]; ok {
-		result = result.FillPath(cue.MakePath(dashboardDefSelector, annotationsSpecHidSelector, pluginSelector), annotations.Disjunction)
+		result = result.FillPath(cue.MakePath(dashboardDefSelector, annotationsSpecHidSelector, pluginSelector), annotations.expr)
 	}
 
 	if variables, ok := plugins[specPlugin.KindVariable]; ok {
@@ -242,7 +242,7 @@ func generateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]Plu
 
 		// plugins only present in ListVariable.
 		// They are added to the AST because the disjunction references the plugin definitions declared at the root.
-		if err := addFieldToStruct(listVarSpecExpr, listVariableSpecSelector.String(), pluginSelector.String(), variables.Disjunction); err != nil {
+		if err := addFieldToStruct(listVarSpecExpr, listVariableSpecSelector.String(), pluginSelector.String(), variables.expr); err != nil {
 			return cue.Value{}, fmt.Errorf("could not add variable plugins to list variable spec schema: %w", err)
 		}
 

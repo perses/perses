@@ -41,7 +41,7 @@ func TestDashboardToCue(t *testing.T) {
 func TestGenerateDashboardCueValueWithNoPluginKinds(t *testing.T) {
 	ctx := cuecontext.New()
 	// No plugins injected: the base dashboard schema must still be returned intact.
-	result, err := generateDashboardCueValue(ctx, map[specPlugin.Kind]PluginSchemas{})
+	result, err := generateDashboardCueValue(ctx, map[specPlugin.Kind]schemaDisjunction{})
 	require.NoError(t, err)
 
 	dashDef := result.LookupPath(cue.MakePath(cue.Def("#Dashboard")))
@@ -50,13 +50,13 @@ func TestGenerateDashboardCueValueWithNoPluginKinds(t *testing.T) {
 
 func TestGenerateDashboardCueValueWithAllPluginKinds(t *testing.T) {
 	ctx := cuecontext.New()
-	makePlugin := func(kind string) PluginSchemas {
+	makePlugin := func(kind string) schemaDisjunction {
 		expr, err := parser.ParseExpr("plugin", `{kind: "`+kind+`", spec: {}}`)
 		require.NoError(t, err)
-		return PluginSchemas{Disjunction: expr}
+		return schemaDisjunction{expr: expr}
 	}
 
-	plugins := map[specPlugin.Kind]PluginSchemas{
+	plugins := map[specPlugin.Kind]schemaDisjunction{
 		specPlugin.KindPanel:      makePlugin("TestPanel"),
 		specPlugin.KindDatasource: makePlugin("TestDatasource"),
 		specPlugin.KindQuery:      makePlugin("TestQuery"),
@@ -85,17 +85,17 @@ func TestGenerateDashboardCueValueWithAllPluginKinds(t *testing.T) {
 // /api/v1/schemas/dashboards (exported CUE), the way `cue vet -d '#Dashboard' schema.cue dashboard.json` does.
 func TestGeneratedDashboardSchemaValidatesDashboards(t *testing.T) {
 	ctx := cuecontext.New()
-	panels, err := GenerateSchemaDisjunction(ctx, []LoadSchema{
+	panels, err := generateSchemaDisjunction(ctx, []LoadSchema{
 		loadSchemaFromTestdata(t, "testdata/schemas/panels/first"),
 		loadSchemaFromTestdata(t, "testdata/dashboard_schema/panels/palette"),
 	})
 	require.NoError(t, err)
 	variable := loadSchemaFromTestdata(t, "testdata/schemas/variables/first")
 	variable.Kind = specPlugin.KindVariable
-	variables, err := GenerateSchemaDisjunction(ctx, []LoadSchema{variable})
+	variables, err := generateSchemaDisjunction(ctx, []LoadSchema{variable})
 	require.NoError(t, err)
 
-	generated, err := generateDashboardCueValue(ctx, map[specPlugin.Kind]PluginSchemas{
+	generated, err := generateDashboardCueValue(ctx, map[specPlugin.Kind]schemaDisjunction{
 		specPlugin.KindPanel:    panels,
 		specPlugin.KindVariable: variables,
 	})
