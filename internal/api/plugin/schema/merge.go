@@ -109,19 +109,12 @@ func pluginDefinitionName(kind specPlugin.Kind, name string) string {
 	return fmt.Sprintf("#Plugin_%s_%s", sanitize(string(kind)), sanitize(name))
 }
 
-// referencePluginFields returns a disjunction branch that only references the regular fields of the plugin
-// definition `defName` (e.g. `{kind: #Plugin_Panel_X.kind, spec: #Plugin_Panel_X.spec}`).
-// Referencing the fields, rather than embedding the plugin schema, keeps the definitions of the plugin (e.g.
-// #palette) out of the branch. When a definition is part of a disjunction branch, `cue vet -c` (cue v0.17.1)
-// requires it to be concrete and fails on a definition that can't be resolved without data, like a
-// comprehension over an undefaulted disjunction (`mode: "auto" | "categorical"` + `if mode == "categorical" {...}`),
-// while the same definition is accepted outside of a disjunction. This is a defensive workaround: plugins can avoid
-// the pattern (as perses/plugins#869 did for TimeSeriesChart), but the dashboard schema shouldn't break when one doesn't.
-// The branch only behaves like the plugin schema when the referenced fields don't depend on the plugin root: a
-// reference to a top-level field (e.g. `#x: spec.a`) keeps pointing to the field of the definition, which isn't
-// unified with the dashboard data. It also requires plain fields: an optional or required field (`metadata?:`) can't
-// be selected from the definition.
-// It returns false when the fields can't be referenced, in which case the plugin schema has to be embedded as-is.
+// referencePluginFields returns a disjunction branch that references the regular fields of the plugin definition
+// defName (e.g. `{kind: #Plugin_Panel_X.kind, spec: #Plugin_Panel_X.spec}`) instead of embedding the plugin schema.
+// This keeps the plugin's own definitions (e.g. #palette) out of the disjunction, where `cue vet -c` rejects
+// definitions that can't be resolved without data.
+// It returns false, meaning the schema must be embedded as-is, when a top-level field is optional/required or is
+// referenced from within the plugin (such references would point to the definition, not to the dashboard data).
 func referencePluginFields(expr ast.Expr, defName string) (ast.Expr, bool) {
 	st, ok := expr.(*ast.StructLit)
 	if !ok {
