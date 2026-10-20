@@ -96,6 +96,10 @@ Once a new maintainer has been approved, an existing maintainer should go throug
 - [ ] Add them to the [Perses maintainers Slack channel](https://cloud-native.slack.com/archives/C08K14VMU86) on the
   CNCF Slack.
 - [ ] Invite them to the weekly [team meetings](./docs/contact.md#team-meetings).
+- [ ] Let them know they can request a free GitHub Copilot Enterprise license from the CNCF via the
+  [CNCF Service Desk](https://servicedesk.cncf.io/) (see the
+  [announcement](https://contribute.cncf.io/blog/2025/12/16/github-copilot-enterprise-for-maintainers/)). This requires
+  them to be listed on the [CNCF maintainers list](https://maintainers.cncf.io/).
 
 ## Voting
 
