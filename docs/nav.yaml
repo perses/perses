@@ -1,0 +1,113 @@
+# Navigation of the documentation published on https://perses.dev.
+#
+# The website (https://github.com/perses/website) reads this file for each published version of the documentation,
+# so the navigation evolves with the documentation. When you add, move or remove a page, update this file.
+# A page missing from this file is still published, but it can only be reached through links and the search.
+#
+# Syntax:
+#   - overview.md                          # page, the title is the first h1 of the page
+#   - Getting started: getting-started.md  # page with an explicit title
+#   - Concepts:                            # section
+#       - Dashboard: concepts/dashboard.md
+#   - Helm: helm-charts:installation.md    # page of another documentation of the website
+#                                          # (perses, operator, helm-charts or plugins), in its latest version
+#   - Plugins: /docs/plugins/              # link to another page of the website
+#   - Demo: https://demo.perses.dev        # external link
+
+- Overview: overview.md
+- Getting Started: getting-started.md
+- Security: security.md
+- Concepts:
+    - Authentication: concepts/authentication.md
+    - Authorization: concepts/authorization.md
+    - Dashboard: concepts/dashboard.md
+    - Dashboard-as-Code: concepts/dashboard-as-code.md
+    - Datasource: concepts/datasource.md
+    - Datasource & Variable scopes: concepts/datasource-and-variable-scopes.md
+    - Ephemeral Dashboard: concepts/ephemeral-dashboard.md
+    - Folder: concepts/folder.md
+    - Open Specification: concepts/open-specification.md
+    - Plugin: concepts/plugin.md
+    - Project: concepts/project.md
+    - Proxy: concepts/proxy.md
+    - Timezone: concepts/timezone.md
+    - Variable: concepts/variable.md
+- User Docs:
+    - Installation:
+        - Installing Perses from Source: installation/from-source.md
+        - Installing Perses with package managers: installation/third-party.md
+        - Installing Perses in a Container: installation/in-a-container.md
+        - Installing Perses with Helm: helm-charts:installation.md
+    - Configuration:
+        - General: configuration/configuration.md
+        - OAuth Helper: configuration/oauth-configuration-helpers.md
+        - Provisioning: configuration/provisioning.md
+        - Custom Lint Rules: configuration/custom-lint-rules.md
+        - Datasource Discovery: configuration/datasource-discovery.md
+        - Loading Plugin: configuration/load-plugin.md
+    - Dashboard-as-Code:
+        - Getting started: dac/getting-started.md
+        - CUE:
+            - CUE SDK for Dashboard-as-Code: dac/cue/README.md
+            - Dashboard: dac/cue/dashboard.md
+            - Panel Groups: dac/cue/panelgroups.md
+            - Variable:
+                - Variable Group: dac/cue/variable/group.md
+                - List Variable: dac/cue/variable/list.md
+                - Text Variable: dac/cue/variable/text.md
+            - Plugins:
+                - Prometheus:
+                    - Filter: plugins:prometheus/cue-sdk/filter.md
+                    - Panel: plugins:prometheus/cue-sdk/panel.md
+                    - Label Names Variable: plugins:prometheus/cue-sdk/variable/label-names.md
+                    - Label Values Variable: plugins:prometheus/cue-sdk/variable/label-values.md
+                    - PromQL Variable: plugins:prometheus/cue-sdk/variable/promql.md
+                - Datasource Variable: plugins:datasourcevariable/cue-sdk.md
+                - Static List Variable: plugins:staticlistvariable/cue-sdk.md
+        - Go:
+            - Go SDK for Dashboard-as-Code: dac/go/README.md
+            - Annotations: dac/go/annotation.md
+            - Dashboard: dac/go/dashboard.md
+            - Datasource: dac/go/datasource.md
+            - Panel: dac/go/panel.md
+            - Panel Group: dac/go/panel-group.md
+            - Query: dac/go/query.md
+            - Variable: dac/go/variable.md
+            - Variable Group: dac/go/variable-group.md
+            - Helpers:
+                - HTTP Proxy: dac/go/helper/http-proxy.md
+            - Plugins: /docs/plugins/
+    - Perses CLI (percli): cli.md
+    - Upgrade Guide:
+        - v0.55.0: upgrade/v0.55.0.md
+        - v0.54.0: upgrade/v0.54.0.md
+        - v0.53.0: upgrade/v0.53.0.md
+    - Migrate from Grafana: migration.md
+    - Troubleshooting:
+        - TLS and HTTP Datasource: troubleshooting-tls-plain-http-datasource.md
+- Developer Docs:
+    - API:
+        - Introduction: api/README.md
+        - Dashboard: api/dashboard.md
+        - Datasource: api/datasource.md
+        - Ephemeral Dashboard: api/ephemeral-dashboard.md
+        - Folder: api/folder.md
+        - Project: api/project.md
+        - Role: api/role.md
+        - Role Binding: api/rolebinding.md
+        - Secret: api/secret.md
+        - User: api/user.md
+        - Variable: api/variable.md
+        - Migrate: api/migrate.md
+        - Metrics: api/metrics.md
+        - Plugins: api/plugins.md
+        - Validate: api/validate.md
+    - Embedding Perses Panels: embedding-panels.md
+    - UI package architecture: ui-package-architecture.md
+    - Plugins:
+        - Common definitions: plugins/common.md
+        - CUE in Perses: plugins/cue.md
+        - Create a plugin: plugins/creation.md
+        - Plugin models: /docs/plugins/
+- Materials: materials.md
+- Contact: contact.md
