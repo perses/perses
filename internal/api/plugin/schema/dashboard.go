@@ -15,8 +15,10 @@ package schema
 
 import (
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/ast"
@@ -64,6 +66,14 @@ var dashboardCueValidationOptions = []cue.Option{
 	cue.Hidden(false),
 }
 
+var (
+	serverManagedMetadataStructs = []string{metadataHidSelector.String(), projMetadataHidSelector.String()}
+	serverManagedMetadataFields  = []string{"createdAt", "updatedAt", "version"}
+
+	listVariableSpecStructs            = []string{listSpecHidSelector.String(), listVariableSpecSelector.String()}
+	listVariableSpecDefaultFalseFields = []string{"allowAllValue", "allowMultiple"}
+)
+
 func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 	// load dashboard
 	encoded := ctx.EncodeType(v1.Dashboard{})
@@ -90,6 +100,12 @@ func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 	final, err = apiCue.RemoveEmptyStringField(ctx, final)
 	if err != nil {
 		return cue.Value{}, fmt.Errorf("failed to remove empty fields from dashboard schema: %w", err)
+	}
+
+	// createdAt, updatedAt and version are set by the server: user-provided dashboards don't need them
+	final, _, err = apiCue.MakeFieldsOptional(ctx, final, serverManagedMetadataStructs, serverManagedMetadataFields)
+	if err != nil {
+		return cue.Value{}, fmt.Errorf("failed to make server-managed metadata fields optional in dashboard schema: %w", err)
 	}
 
 	// grab _Metadata_0 and _ProjectMetadataWrapper_0 from #Dashboard
@@ -129,7 +145,7 @@ func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 	return final, nil
 }
 
-func generateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]cue.Value) (cue.Value, error) {
+func generateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]schemaDisjunction) (cue.Value, error) {
 	dashSpec, err := dashboardToCue(ctx)
 	if err != nil {
 		return cue.Value{}, fmt.Errorf("unable to load dashboard schema: %w", err)
@@ -137,24 +153,37 @@ func generateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]cue
 
 	result := dashSpec
 
+	// declare the plugin definitions at the root, next to #Dashboard, so that the plugin disjunctions can reference them
+	var definitions []ast.Decl
+	for _, kind := range slices.Sorted(maps.Keys(plugins)) {
+		definitions = append(definitions, plugins[kind].definitions...)
+	}
+	if len(definitions) > 0 {
+		pluginDefinitions := ctx.BuildExpr(&ast.StructLit{Elts: definitions})
+		if err := pluginDefinitions.Err(); err != nil {
+			return cue.Value{}, fmt.Errorf("could not build plugin definitions: %w", err)
+		}
+		result = result.Unify(pluginDefinitions)
+	}
+
 	// unify with panel plugins
 	if panels, ok := plugins[specPlugin.KindPanel]; ok {
-		result = result.FillPath(cue.MakePath(dashboardDefSelector, panelSpecHidSelector, pluginSelector), panels)
+		result = result.FillPath(cue.MakePath(dashboardDefSelector, panelSpecHidSelector, pluginSelector), panels.expr)
 	}
 
 	// unify with datasource plugins
 	if datasources, ok := plugins[specPlugin.KindDatasource]; ok {
-		result = result.FillPath(cue.MakePath(dashboardDefSelector, datasourceSpecHidSelector, pluginSelector), datasources)
+		result = result.FillPath(cue.MakePath(dashboardDefSelector, datasourceSpecHidSelector, pluginSelector), datasources.expr)
 	}
 
 	// unify with query plugins
 	if queries, ok := plugins[specPlugin.KindQuery]; ok {
-		result = result.FillPath(cue.MakePath(dashboardDefSelector, querySpecHidSelector, pluginSelector), queries)
+		result = result.FillPath(cue.MakePath(dashboardDefSelector, querySpecHidSelector, pluginSelector), queries.expr)
 	}
 
 	// unify with annotation plugins
 	if annotations, ok := plugins[specPlugin.KindAnnotation]; ok {
-		result = result.FillPath(cue.MakePath(dashboardDefSelector, annotationsSpecHidSelector, pluginSelector), annotations)
+		result = result.FillPath(cue.MakePath(dashboardDefSelector, annotationsSpecHidSelector, pluginSelector), annotations.expr)
 	}
 
 	if variables, ok := plugins[specPlugin.KindVariable]; ok {
@@ -191,6 +220,12 @@ func generateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]cue
 			return cue.Value{}, fmt.Errorf("failed to remove empty fields from ListVariable schema: %w", err)
 		}
 
+		// allowAllValue and allowMultiple are plain bools in Go: when omitted, Perses reads them as false
+		listVarSpec, _, err = apiCue.SetFieldsDefault(ctx, listVarSpec, listVariableSpecStructs, listVariableSpecDefaultFalseFields, ast.NewBool(false))
+		if err != nil {
+			return cue.Value{}, fmt.Errorf("failed to set default values in ListVariable schema: %w", err)
+		}
+
 		// grab _TextSpec_0 and inject it into _TextVariableSpec_0
 		// this is done to avoid the incomplete value error during cue vet
 		// cue vet has trouble working with embedded fields
@@ -205,9 +240,6 @@ func generateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]cue
 			return cue.Value{}, fmt.Errorf("failed to remove empty fields from TextVariable schema: %w", err)
 		}
 
-		// plugins only present in ListVariable
-		listVarSpec = listVarSpec.FillPath(cue.MakePath(listVariableSpecSelector, pluginSelector), variables)
-
 		textVarSpecExpr, err := apiCue.ValueToASTExpr(textVarSpec)
 		if err != nil {
 			return cue.Value{}, fmt.Errorf("could not process text variable spec schema: %w", err)
@@ -217,20 +249,57 @@ func generateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]cue
 			return cue.Value{}, fmt.Errorf("could not process list variable spec schema: %w", err)
 		}
 
+		// plugins only present in ListVariable.
+		// They are added to the AST because the disjunction references the plugin definitions declared at the root.
+		if err := setStructField(listVarSpecExpr, listVariableSpecSelector.String(), pluginSelector.String(), variables.expr); err != nil {
+			return cue.Value{}, fmt.Errorf("could not add variable plugins to list variable spec schema: %w", err)
+		}
+
 		completeVarSpecExpr := &ast.BinaryExpr{
 			Op: token.OR,
 			X:  textVarSpecExpr,
 			Y:  listVarSpecExpr,
 		}
 
-		completeVarSpecValue := ctx.BuildExpr(completeVarSpecExpr)
-		if err := completeVarSpecValue.Err(); err != nil {
-			return cue.Value{}, fmt.Errorf("could not build variable schema: %w", err)
-		}
-
 		// unify the variable spec with the dashboard schema
-		result = result.FillPath(cue.MakePath(dashboardDefSelector, variableSpecHidSelector, specSelector), completeVarSpecValue)
+		result = result.FillPath(cue.MakePath(dashboardDefSelector, variableSpecHidSelector, specSelector), completeVarSpecExpr)
 	}
 
+	if err := result.Err(); err != nil {
+		return cue.Value{}, fmt.Errorf("could not build dashboard schema with plugins: %w", err)
+	}
 	return result, nil
+}
+
+// setStructField sets `field: value` in the struct declared by the field `structLabel` of the struct expr,
+// replacing the value of the field if it already exists.
+func setStructField(expr ast.Expr, structLabel string, field string, value ast.Expr) error {
+	st, ok := expr.(*ast.StructLit)
+	if !ok {
+		return fmt.Errorf("unexpected AST expr type %T", expr)
+	}
+	for _, decl := range st.Elts {
+		f, ok := decl.(*ast.Field)
+		if !ok {
+			continue
+		}
+		if name, _, err := ast.LabelName(f.Label); err != nil || name != structLabel {
+			continue
+		}
+		target, ok := f.Value.(*ast.StructLit)
+		if !ok {
+			return fmt.Errorf("unexpected AST expr type %T for %s", f.Value, structLabel)
+		}
+		for _, elt := range target.Elts {
+			if existing, ok := elt.(*ast.Field); ok {
+				if name, _, err := ast.LabelName(existing.Label); err == nil && name == field {
+					existing.Value = value
+					return nil
+				}
+			}
+		}
+		target.Elts = append(target.Elts, &ast.Field{Label: ast.NewIdent(field), Value: value})
+		return nil
+	}
+	return fmt.Errorf("%s not found", structLabel)
 }

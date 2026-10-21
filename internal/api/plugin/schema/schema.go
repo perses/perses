@@ -362,7 +362,7 @@ func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
 	defer s.mutex.RUnlock()
 
 	ctx := cuecontext.New()
-	plugins := map[plugin.Kind]cue.Value{}
+	plugins := map[plugin.Kind]schemaDisjunction{}
 	for _, kind := range []plugin.Kind{
 		plugin.KindDatasource, plugin.KindPanel,
 		plugin.KindVariable, plugin.KindQuery, plugin.KindAnnotation,
@@ -371,7 +371,7 @@ func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
 		if len(merged) == 0 {
 			continue
 		}
-		disjunction, err := GenerateSchemaDisjunction(ctx, merged)
+		disjunction, err := generateSchemaDisjunction(ctx, merged)
 		if err != nil {
 			return cue.Value{}, fmt.Errorf("unable to merge %s plugin schemas: %w", kind, err)
 		}

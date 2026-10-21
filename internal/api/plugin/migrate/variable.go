@@ -120,7 +120,7 @@ func (m *completeMigration) migrateListVariable(v TemplateVar) dashboard.Variabl
 	if isQueryMigrationEmpty {
 		isQueryMigrationEmpty = migrateListVar(m.mig.variables, v, spec)
 		if isQueryMigrationEmpty {
-			return buildDefaultVariable(v)
+			spec.Plugin = defaultVariablePlugin
 		}
 	}
 	result.Spec = spec
