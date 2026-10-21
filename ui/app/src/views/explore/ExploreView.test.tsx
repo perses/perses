@@ -32,8 +32,8 @@ vi.mock('@perses-dev/components', () => ({
   getResourceDisplayName: (): string => '',
 }));
 
-vi.mock('@perses-dev/explore', () => ({
-  ViewExplore: (props: { projectName?: string }): null => viewExplore(props),
+vi.mock('./ExploreWorkspace', () => ({
+  ExploreWorkspace: (props: { projectName?: string }): null => viewExplore(props),
 }));
 
 vi.mock('@perses-dev/plugin-system', () => ({
@@ -71,14 +71,14 @@ describe('ExploreView project param', () => {
     [undefined, undefined],
     [null, undefined],
     ['project-a', 'project-a'],
-  ])('forwards the project query param %s to ViewExplore', (param, expected) => {
+  ])('forwards the project query param %s to ExploreWorkspace', (param, expected) => {
     mockProjectParam = param;
     viewExplore.mockClear();
     render(<ExploreView />);
     expect(lastProjectName()).toBe(expected);
   });
 
-  it('forwards project changes to ViewExplore, including returning to global scope', () => {
+  it('forwards project changes to ExploreWorkspace, including returning to global scope', () => {
     mockProjectParam = undefined;
     const createView = (): ReactElement => <ExploreView />;
     const { rerender } = render(createView());
