@@ -11,69 +11,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  Alert,
-  CircularProgress,
-  InputAdornment,
-  List,
-  ListItemButton,
-  ListItemText,
-  MenuItem,
-  Select,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { DatasourceSelect, isVariableDatasource, useDatasourceClient, useTimeRange } from '@perses-dev/plugin-system';
+import { Alert, CircularProgress, InputAdornment, List, Stack, TextField, Typography } from '@mui/material';
+import type { DatasourceSelectValue } from '@perses-dev/plugin-system';
+import { DatasourceSelect, isVariableDatasource, useDatasourceClient } from '@perses-dev/plugin-system';
 import type { DatasourceSelector } from '@perses-dev/spec';
 import { useQuery } from '@tanstack/react-query';
-import ChevronDown from 'mdi-material-ui/ChevronDown';
-import ChevronRight from 'mdi-material-ui/ChevronRight';
 import Magnify from 'mdi-material-ui/Magnify';
-import type { ReactElement, ReactNode } from 'react';
-import { useMemo, useState } from 'react';
+import type { ChangeEvent, ReactElement } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
+import type { LabelClient, LabelRequestParams, LabelResponse } from './label-client';
+import { useLabelRequestParams } from './label-client';
+import { LabelItem } from './LabelItem';
 import type { LabelFilter, LabelOperator } from './log-selector';
-import { getValueOperator, LABEL_OPERATORS } from './log-selector';
 
-const MAX_DISPLAYED_VALUES = 200;
 const NO_FILTERS: LabelFilter[] = [];
+const ROOT_SX = { minHeight: 0 };
 const LOADING_SX = { alignSelf: 'center', my: 2 };
 const LIST_SX = { overflowY: 'auto' };
-const MONOSPACE_SX = { fontFamily: 'monospace', wordBreak: 'break-all' } as const;
-// Compact operator select, sized to the label value text next to it.
-const OPERATOR_SELECT_SX = {
-  flexShrink: 0,
-  width: 46,
-  height: 24,
-  fontFamily: 'monospace',
-  fontSize: '0.8125rem',
-  '& .MuiSelect-select': { py: 0, pl: 0.75, pr: '18px !important' },
-  '& .MuiSelect-icon': { right: 0, fontSize: '1.1rem' },
+const SEARCH_SLOT_PROPS = {
+  input: {
+    startAdornment: (
+      <InputAdornment position="start">
+        <Magnify fontSize="small" />
+      </InputAdornment>
+    ),
+  },
+  htmlInput: { 'aria-label': 'Filter labels' },
 };
-
-interface LabelRequestParams {
-  start: string;
-  end: string;
-}
-
-interface LabelResponse {
-  data?: string[];
-}
-
-/** The label endpoints of the Loki datasource client. */
-interface LabelClient {
-  labels: (params: LabelRequestParams) => Promise<LabelResponse>;
-  labelValues: (params: LabelRequestParams & { labelName: string }) => Promise<LabelResponse>;
-}
-
-function useLabelRequestParams(): LabelRequestParams {
-  const { absoluteTimeRange } = useTimeRange();
-  return useMemo(
-    () => ({ start: absoluteTimeRange.start.toISOString(), end: absoluteTimeRange.end.toISOString() }),
-    [absoluteTimeRange],
-  );
-}
 
 export interface LabelExplorerProps {
   datasourceKind: string;
@@ -86,6 +51,7 @@ export interface LabelExplorerProps {
   onOperatorChange: (label: string, value: string, operator: LabelOperator) => void;
 }
 
+/** Lists the labels of a datasource and their values, which can be selected as query filters. */
 export function LabelExplorer(props: LabelExplorerProps): ReactElement {
   const { datasourceKind, datasource, onDatasourceChange, projectName, filters, onToggleValue, onOperatorChange } =
     props;
@@ -110,18 +76,26 @@ export function LabelExplorer(props: LabelExplorerProps): ReactElement {
     return (labelNames ?? []).filter((name) => name.toLowerCase().includes(term));
   }, [labelNames, search]);
 
+  const handleDatasourceChange = useCallback(
+    (next: DatasourceSelectValue) => {
+      if (isVariableDatasource(next)) return;
+      onDatasourceChange(next);
+      setExpandedLabel(undefined);
+    },
+    [onDatasourceChange],
+  );
+  const handleSearchChange = useCallback((event: ChangeEvent<HTMLInputElement>) => setSearch(event.target.value), []);
+
   return (
-    <Stack gap={1} sx={{ minHeight: 0 }} data-testid="label-explorer">
-      <Typography variant="h4">Labels</Typography>
+    <Stack gap={1} sx={ROOT_SX}>
+      <Typography variant="h4" component="h2">
+        Labels
+      </Typography>
       <DatasourceSelect
         datasourcePluginKind={datasourceKind}
         project={projectName}
         value={datasource}
-        onChange={(next) => {
-          if (isVariableDatasource(next)) return;
-          onDatasourceChange(next);
-          setExpandedLabel(undefined);
-        }}
+        onChange={handleDatasourceChange}
         label="Datasource"
         size="small"
       />
@@ -129,19 +103,11 @@ export function LabelExplorer(props: LabelExplorerProps): ReactElement {
         size="small"
         placeholder="Filter labels"
         value={search}
-        onChange={(event) => setSearch(event.target.value)}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <Magnify fontSize="small" />
-              </InputAdornment>
-            ),
-          },
-        }}
+        onChange={handleSearchChange}
+        slotProps={SEARCH_SLOT_PROPS}
       />
       {filters === undefined && (
-        <Typography variant="caption" color="text.secondary" data-testid="label-explorer-custom-query">
+        <Typography variant="caption" color="text.secondary">
           Custom query: it can&apos;t be shown as label filters. Selecting a value replaces it.
         </Typography>
       )}
@@ -149,22 +115,14 @@ export function LabelExplorer(props: LabelExplorerProps): ReactElement {
         error={clientError ?? labelsError}
         isLoading={isLoading}
         labels={filteredLabels}
-        renderLabel={(label) =>
-          client && (
-            <LabelItem
-              key={label}
-              label={label}
-              client={client}
-              params={params}
-              datasource={datasource}
-              filters={filters?.filter((f) => f.label === label) ?? NO_FILTERS}
-              expanded={expandedLabel === label}
-              onToggle={() => setExpandedLabel(expandedLabel === label ? undefined : label)}
-              onToggleValue={(value, operator) => onToggleValue(label, value, operator)}
-              onOperatorChange={(value, operator) => onOperatorChange(label, value, operator)}
-            />
-          )
-        }
+        client={client}
+        params={params}
+        datasource={datasource}
+        filters={filters ?? NO_FILTERS}
+        expandedLabel={expandedLabel}
+        onExpandedLabelChange={setExpandedLabel}
+        onToggleValue={onToggleValue}
+        onOperatorChange={onOperatorChange}
       />
     </Stack>
   );
@@ -174,16 +132,35 @@ interface LabelListProps {
   error: unknown;
   isLoading: boolean;
   labels: string[];
-  renderLabel: (label: string) => ReactNode;
+  client?: LabelClient;
+  params: LabelRequestParams;
+  datasource: DatasourceSelector;
+  filters: LabelFilter[];
+  expandedLabel?: string;
+  onExpandedLabelChange: (label: string | undefined) => void;
+  onToggleValue: (label: string, value: string, operator: LabelOperator) => void;
+  onOperatorChange: (label: string, value: string, operator: LabelOperator) => void;
 }
 
 function LabelList(props: LabelListProps): ReactElement {
-  const { error, isLoading, labels, renderLabel } = props;
+  const {
+    error,
+    isLoading,
+    labels,
+    client,
+    params,
+    datasource,
+    filters,
+    expandedLabel,
+    onExpandedLabelChange,
+    onToggleValue,
+    onOperatorChange,
+  } = props;
   if (error) {
     return <Alert severity="error">{error instanceof Error ? error.message : String(error)}</Alert>;
   }
-  if (isLoading) {
-    return <CircularProgress size={24} sx={LOADING_SX} />;
+  if (isLoading || !client) {
+    return <CircularProgress size={24} sx={LOADING_SX} aria-label="Loading labels" />;
   }
   if (labels.length === 0) {
     return (
@@ -193,112 +170,21 @@ function LabelList(props: LabelListProps): ReactElement {
     );
   }
   return (
-    <List dense disablePadding sx={LIST_SX}>
-      {labels.map(renderLabel)}
-    </List>
-  );
-}
-
-interface LabelItemProps {
-  label: string;
-  client: LabelClient;
-  params: LabelRequestParams;
-  datasource: DatasourceSelector;
-  filters: LabelFilter[];
-  expanded: boolean;
-  onToggle: () => void;
-  onToggleValue: (value: string, operator: LabelOperator) => void;
-  onOperatorChange: (value: string, operator: LabelOperator) => void;
-}
-
-function LabelItem(props: LabelItemProps): ReactElement {
-  const { label, client, params, datasource, filters, expanded, onToggle, onToggleValue, onOperatorChange } = props;
-  // Operators picked for values that are not selected yet.
-  const [pendingOperators, setPendingOperators] = useState<Record<string, LabelOperator>>({});
-  const selectedCount = filters.reduce((count, filter) => count + filter.values.length, 0);
-  const {
-    data: values,
-    isLoading,
-    error,
-  } = useQuery<LabelResponse, Error, string[]>({
-    queryKey: ['explore-label-values', datasource, label, params],
-    queryFn: () => client.labelValues({ ...params, labelName: label }),
-    enabled: expanded,
-    select: (response) => response.data ?? [],
-  });
-
-  return (
-    <>
-      <ListItemButton onClick={onToggle} sx={{ px: 0.5 }} aria-expanded={expanded}>
-        {expanded ? <ChevronDown fontSize="small" /> : <ChevronRight fontSize="small" />}
-        <ListItemText
-          primary={label}
-          slotProps={{
-            primary: {
-              sx: {
-                ...MONOSPACE_SX,
-                color: selectedCount > 0 ? 'primary.main' : undefined,
-                fontWeight: selectedCount > 0 ? 600 : 400,
-              },
-            },
-          }}
+    <List dense disablePadding sx={LIST_SX} aria-label="Labels">
+      {labels.map((label) => (
+        <LabelItem
+          key={label}
+          label={label}
+          client={client}
+          params={params}
+          datasource={datasource}
+          filters={filters}
+          expanded={expandedLabel === label}
+          onExpandedChange={onExpandedLabelChange}
+          onToggleValue={onToggleValue}
+          onOperatorChange={onOperatorChange}
         />
-        {selectedCount > 0 && (
-          <Typography variant="caption" color="primary">
-            ({selectedCount})
-          </Typography>
-        )}
-      </ListItemButton>
-      {expanded && (
-        <List dense disablePadding sx={{ pl: 3 }}>
-          {isLoading && <CircularProgress size={16} sx={{ m: 1 }} />}
-          {error && <Alert severity="error">{error.message}</Alert>}
-          {values?.slice(0, MAX_DISPLAYED_VALUES).map((value) => {
-            const selectedOperator = getValueOperator(filters, label, value);
-            const operator = selectedOperator ?? pendingOperators[value] ?? '=';
-            const selected = selectedOperator !== undefined;
-            return (
-              <Stack key={value} direction="row" alignItems="center" gap={0.5}>
-                <Select
-                  size="small"
-                  value={operator}
-                  onChange={(event) => {
-                    const next = event.target.value as LabelOperator;
-                    setPendingOperators((current) => ({ ...current, [value]: next }));
-                    if (selected) onOperatorChange(value, next);
-                  }}
-                  inputProps={{ 'aria-label': `Operator for ${label} ${value}` }}
-                  sx={OPERATOR_SELECT_SX}
-                >
-                  {LABEL_OPERATORS.map((op) => (
-                    <MenuItem key={op} value={op} dense sx={MONOSPACE_SX}>
-                      {op}
-                    </MenuItem>
-                  ))}
-                </Select>
-                <ListItemButton
-                  selected={selected}
-                  title={selected ? 'Remove this filter' : `Filter ${label}${operator}"${value}"`}
-                  onClick={() => onToggleValue(value, operator)}
-                  sx={{ px: 0.5, py: 0, borderRadius: 1, minWidth: 0 }}
-                >
-                  <ListItemText
-                    primary={value === '' ? '(empty)' : value}
-                    slotProps={{
-                      primary: { variant: 'body2', sx: { wordBreak: 'break-all', fontWeight: selected ? 600 : 400 } },
-                    }}
-                  />
-                </ListItemButton>
-              </Stack>
-            );
-          })}
-          {values && values.length > MAX_DISPLAYED_VALUES && (
-            <Typography variant="caption" color="text.secondary" sx={{ px: 0.5 }}>
-              Showing the first {MAX_DISPLAYED_VALUES} of {values.length} values.
-            </Typography>
-          )}
-        </List>
-      )}
-    </>
+      ))}
+    </List>
   );
 }

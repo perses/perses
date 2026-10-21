@@ -35,6 +35,10 @@ const LABEL_NAME_REGEX = /^[a-zA-Z_][a-zA-Z0-9_]*/;
 const REGEX_META_CHARS = '.^$*+?()[]{}|\\';
 const STRING_ESCAPES: Record<string, string> = { n: '\n', t: '\t' };
 
+export function isLabelOperator(value: unknown): value is LabelOperator {
+  return LABEL_OPERATORS.some((operator) => operator === value);
+}
+
 export function isRegexOperator(operator: LabelOperator): boolean {
   return operator === '=~' || operator === '!~';
 }

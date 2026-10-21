@@ -35,12 +35,19 @@ import {
   useInitialTimeRange,
   usePluginRegistry,
 } from '@perses-dev/plugin-system';
-import type { ReactElement, ReactNode } from 'react';
-import { useMemo } from 'react';
+import type { ReactElement, ReactNode, SyntheticEvent } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import type { ExploreSignal } from './explore-signals';
 import { EXPLORE_SIGNALS, getPlaceholderExplorerKey } from './explore-signals';
 import { LogsExplorer } from './LogsExplorer';
+
+const ROOT_SX = { display: 'flex', width: '100%', height: '100%', position: 'relative', overflow: 'hidden' };
+const SCROLL_SX = { flexGrow: 1, overflowX: 'hidden', overflowY: 'auto', display: 'flex', flexDirection: 'column' };
+const LOADING_SX = { alignSelf: 'center', mt: 4 };
+const FULL_WIDTH_SX = { width: '100%' };
+const TABS_SX = { borderBottom: 1, borderColor: 'divider' };
+const CARD_SX = { padding: '10px', width: '100%', minWidth: 0 };
 
 interface SignalTab {
   signal: ExploreSignal;
@@ -73,11 +80,11 @@ export function ExploreWorkspace(props: ExploreWorkspaceProps): ReactElement {
         initialRefreshInterval={initialRefreshInterval}
       >
         <VariableProvider externalVariableDefinitions={externalVariableDefinitions}>
-          <Box sx={{ display: 'flex', width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
-            <Box sx={{ flexGrow: 1, overflowX: 'hidden', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+          <Box sx={ROOT_SX}>
+            <Box sx={SCROLL_SX}>
               <ChartsProvider chartsTheme={chartsTheme} enablePinning={false}>
                 {signalTabs === undefined ? (
-                  <CircularProgress sx={{ alignSelf: 'center', mt: 4 }} />
+                  <CircularProgress sx={LOADING_SX} aria-label="Loading explorers" />
                 ) : (
                   <ExplorerManagerProviderWithQueryParams defaultExplorer={signalTabs[0]?.explorerKey}>
                     <ExploreSignals
@@ -134,38 +141,40 @@ function ExploreSignals(props: ExploreSignalsProps): ReactElement {
   const { explorer, setExplorer } = useExplorerManagerContext();
   const { pluginsBaseURL } = usePluginRegistry();
   const current = signalTabs.find((tab) => tab.explorerKey === explorer) ?? signalTabs[0];
+  const handleTabChange = useCallback((_: SyntheticEvent, key: string) => setExplorer(key), [setExplorer]);
+  const explorerPlugin = useMemo(
+    () =>
+      current?.plugin && {
+        name: current.plugin.spec.name,
+        moduleName: current.plugin.module.name,
+        version: current.plugin.module.version,
+        registry: current.plugin.module.registry,
+        baseURL: pluginsBaseURL,
+      },
+    [current, pluginsBaseURL],
+  );
+  const isLogs = current?.signal.id === 'logs' && current.plugin !== undefined;
 
   return (
-    <Stack sx={{ width: '100%' }} px={2} pb={2} pt={1.5} gap={1}>
+    <Stack sx={FULL_WIDTH_SX} px={2} pb={2} pt={1.5} gap={1}>
       <ExploreToolbar exploreTitleComponent={exploreTitleComponent} />
       <Tabs
         value={current?.explorerKey ?? false}
-        onChange={(_, key: string) => setExplorer(key)}
+        onChange={handleTabChange}
         variant="scrollable"
-        sx={{ borderBottom: 1, borderColor: 'divider' }}
+        aria-label="Signals"
+        sx={TABS_SX}
       >
         {signalTabs.map(({ signal, explorerKey }) => (
-          <Tab key={signal.id} value={explorerKey} label={signal.label} data-testid={`explore-tab-${signal.id}`} />
+          <Tab key={signal.id} value={explorerKey} label={signal.label} />
         ))}
       </Tabs>
-      {current?.plugin && current.signal.id === 'logs' ? (
-        <LogsExplorer key={current.explorerKey} projectName={projectName} />
-      ) : (
-        <Card sx={{ padding: '10px', width: '100%', minWidth: 0 }}>
-          {current?.plugin && (
-            <PluginLoaderComponent
-              key={current.explorerKey}
-              plugin={{
-                name: current.plugin.spec.name,
-                moduleName: current.plugin.module.name,
-                version: current.plugin.module.version,
-                registry: current.plugin.module.registry,
-                baseURL: pluginsBaseURL,
-              }}
-            />
-          )}
+      {isLogs && <LogsExplorer key={current.explorerKey} projectName={projectName} />}
+      {!isLogs && (
+        <Card sx={CARD_SX}>
+          {explorerPlugin && current && <PluginLoaderComponent key={current.explorerKey} plugin={explorerPlugin} />}
           {current && !current.plugin && (
-            <Alert severity="info" data-testid="explore-placeholder">
+            <Alert severity="info">
               {current.signal.label} exploration is not available yet: the {current.signal.explorerPluginName} plugin is
               not installed.
             </Alert>

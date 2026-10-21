@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { LabelFilter } from './log-selector';
-import { formatLogQuery, parseLogQuery, setValueOperator, toggleLabelValue } from './log-selector';
+import { formatLogQuery, isLabelOperator, parseLogQuery, setValueOperator, toggleLabelValue } from './log-selector';
 
 describe('parseLogQuery', () => {
   it('parses an empty query', () => {
@@ -76,7 +76,9 @@ describe('formatLogQuery', () => {
 
   it('round-trips through parseLogQuery', () => {
     const query = '{app="web", svc=~"a|b\\\\.c"} | json';
-    expect(formatLogQuery(parseLogQuery(query)!)).toBe(query);
+    const parsed = parseLogQuery(query);
+    expect(parsed).toBeDefined();
+    if (parsed) expect(formatLogQuery(parsed)).toBe(query);
   });
 });
 
@@ -122,5 +124,12 @@ describe('setValueOperator', () => {
   it('ignores values that are not selected', () => {
     const filters: LabelFilter[] = [{ label: 'app', operator: '=', values: ['a'] }];
     expect(setValueOperator(filters, 'app', 'b', '!=')).toBe(filters);
+  });
+});
+
+describe('isLabelOperator', () => {
+  it('accepts only label operators', () => {
+    expect(['=', '!=', '=~', '!~'].every(isLabelOperator)).toBe(true);
+    expect(isLabelOperator('==')).toBe(false);
   });
 });
