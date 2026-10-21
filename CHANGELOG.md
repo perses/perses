@@ -382,7 +382,7 @@ even if it will make the upgrade process a bit more complex, you will stay with 
 improvements.
 
 While you can read this blog post to have details about the changes and how to upgrade, we are also providing a
-[migration guide](https://perses.dev/perses/docs/upgrade-guide/) that is more condensed and focused on the steps
+[migration guide](https://perses.dev/perses/docs/upgrade/v0.53.0/) that is more condensed and focused on the steps
 required to upgrade from previous versions to v0.53.0.
 
 On a different topic, we are happy to being able to list [Logz.io](https://logz.io/) as a new officially company using
