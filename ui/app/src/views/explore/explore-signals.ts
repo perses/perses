@@ -31,11 +31,6 @@ export const EXPLORE_SIGNALS: ExploreSignal[] = [
     id: 'metrics',
     label: 'Metrics',
     explorerPluginName: 'PrometheusExplorer',
-    labelSource: {
-      datasourceKind: 'PrometheusDatasource',
-      queryKind: 'TimeSeriesQuery',
-      queryPluginKind: 'PrometheusTimeSeriesQuery',
-    },
   },
   {
     id: 'logs',
