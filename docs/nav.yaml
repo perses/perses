@@ -2,7 +2,7 @@
 #
 # The website (https://github.com/perses/website) reads this file for each published version of the documentation,
 # so the navigation evolves with the documentation. When you add, move or remove a page, update this file.
-# A page missing from this file is still published, but it can only be reached through links and the search.
+# `make checkdocs` verifies that every page of docs/ is referenced here and that every referenced page exists.
 #
 # Syntax:
 #   - overview.md                          # page, the title is the first h1 of the page
