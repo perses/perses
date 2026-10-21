@@ -1,0 +1,209 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+export const LABEL_OPERATORS = ['=', '!=', '=~', '!~'] as const;
+export type LabelOperator = (typeof LABEL_OPERATORS)[number];
+
+/**
+ * A label filter of the label explorer. Regex operators can hold several values, which are written as an alternation
+ * of literals (`label=~"a|b"`). `!=` can hold several values, written as one matcher each. `=` holds a single value.
+ */
+export interface LabelFilter {
+  label: string;
+  operator: LabelOperator;
+  values: string[];
+}
+
+/** A LogQL query split into the stream selector filters and the rest of the query (the pipeline). */
+export interface ParsedLogQuery {
+  filters: LabelFilter[];
+  pipeline: string;
+}
+
+const LABEL_NAME_REGEX = /^[a-zA-Z_][a-zA-Z0-9_]*/;
+const REGEX_META_CHARS = '.^$*+?()[]{}|\\';
+const STRING_ESCAPES: Record<string, string> = { n: '\n', t: '\t' };
+
+export function isRegexOperator(operator: LabelOperator): boolean {
+  return operator === '=~' || operator === '!~';
+}
+
+function quote(value: string): string {
+  return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+}
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Splits a regex made only of an alternation of literals (e.g. `a|b\.c`) into its literals. */
+function splitLiteralAlternation(regex: string): string[] | undefined {
+  const values: string[] = [];
+  let current = '';
+  for (let i = 0; i < regex.length; i++) {
+    const char = regex.charAt(i);
+    if (char === '\\') {
+      const next = regex.charAt(i + 1);
+      if (next === '' || !REGEX_META_CHARS.includes(next)) return undefined;
+      current += next;
+      i++;
+    } else if (char === '|') {
+      values.push(current);
+      current = '';
+    } else if (REGEX_META_CHARS.includes(char)) {
+      return undefined;
+    } else {
+      current += char;
+    }
+  }
+  values.push(current);
+  return values.includes('') ? undefined : values;
+}
+
+interface RawMatcher {
+  label: string;
+  operator: LabelOperator;
+  value: string;
+}
+
+/** Reads a quoted string starting at `start`. Returns the unescaped value and the index after the closing quote. */
+function readString(query: string, start: number): { value: string; end: number } | undefined {
+  const quoteChar = query.charAt(start);
+  if (quoteChar === '`') {
+    const close = query.indexOf('`', start + 1);
+    return close === -1 ? undefined : { value: query.slice(start + 1, close), end: close + 1 };
+  }
+  if (quoteChar !== '"') return undefined;
+
+  let value = '';
+  for (let i = start + 1; i < query.length; i++) {
+    const char = query.charAt(i);
+    if (char === '"') return { value, end: i + 1 };
+    if (char === '\\') {
+      const next = query.charAt(i + 1);
+      value += STRING_ESCAPES[next] ?? next;
+      i++;
+    } else {
+      value += char;
+    }
+  }
+  return undefined;
+}
+
+/** Parses the matchers of the stream selector at the start of the query, and returns the index after it. */
+function readSelector(query: string): { matchers: RawMatcher[]; end: number } | undefined {
+  const matchers: RawMatcher[] = [];
+  let pos = 1;
+  const skipSpaces = (): void => {
+    while (/\s/.test(query.charAt(pos))) pos++;
+  };
+
+  skipSpaces();
+  if (query.charAt(pos) === '}') return { matchers, end: pos + 1 };
+
+  while (pos < query.length) {
+    skipSpaces();
+    const label = LABEL_NAME_REGEX.exec(query.slice(pos))?.[0];
+    if (!label) return undefined;
+    pos += label.length;
+    skipSpaces();
+
+    const operator = (['=~', '!~', '!=', '='] as const).find((op) => query.startsWith(op, pos));
+    if (!operator) return undefined;
+    pos += operator.length;
+    skipSpaces();
+
+    const str = readString(query, pos);
+    if (!str) return undefined;
+    matchers.push({ label, operator, value: str.value });
+    pos = str.end;
+    skipSpaces();
+
+    const separator = query.charAt(pos);
+    pos++;
+    if (separator === '}') return { matchers, end: pos };
+    if (separator !== ',') return undefined;
+  }
+  return undefined;
+}
+
+/**
+ * Parses a LogQL query into label filters and its pipeline.
+ * Returns undefined when the label explorer cannot represent the query (a custom query).
+ */
+export function parseLogQuery(query: string): ParsedLogQuery | undefined {
+  const trimmed = query.trim();
+  if (trimmed === '') return { filters: [], pipeline: '' };
+  if (!trimmed.startsWith('{')) return undefined;
+
+  const selector = readSelector(trimmed);
+  if (!selector) return undefined;
+
+  const filters: LabelFilter[] = [];
+  for (const { label, operator, value } of selector.matchers) {
+    const existing = filters.find((filter) => filter.label === label);
+    if (existing) {
+      // Several `!=` matchers on a label are the only repeated matchers the label explorer can represent.
+      if (operator !== '!=' || existing.operator !== '!=') return undefined;
+      existing.values.push(value);
+      continue;
+    }
+    const values = isRegexOperator(operator) ? splitLiteralAlternation(value) : [value];
+    if (!values) return undefined;
+    filters.push({ label, operator, values });
+  }
+
+  return { filters, pipeline: trimmed.slice(selector.end).trim() };
+}
+
+/** Builds a LogQL query from label filters and a pipeline. */
+export function formatLogQuery({ filters, pipeline }: ParsedLogQuery): string {
+  const matchers = filters.flatMap(({ label, operator, values }) => {
+    if (values.length === 0) return [];
+    if (isRegexOperator(operator)) return [`${label}${operator}${quote(values.map(escapeRegex).join('|'))}`];
+    return values.map((value) => `${label}${operator}${quote(value)}`);
+  });
+  if (matchers.length === 0 && pipeline === '') return '';
+  return [`{${matchers.join(', ')}}`, pipeline].filter(Boolean).join(' ');
+}
+
+/**
+ * Selects or deselects a label value. A selected value is removed. Otherwise it is added to the label's filter when
+ * the operator accepts several values, or replaces the label's filter.
+ */
+export function toggleLabelValue(
+  filters: LabelFilter[],
+  label: string,
+  value: string,
+  operator: LabelOperator,
+): LabelFilter[] {
+  const existing = filters.find((filter) => filter.label === label);
+  if (existing?.values.includes(value)) {
+    const values = existing.values.filter((v) => v !== value);
+    if (values.length === 0) return filters.filter((filter) => filter !== existing);
+    return filters.map((filter) => (filter === existing ? { ...filter, values } : filter));
+  }
+
+  if (!existing) return [...filters, { label, operator, values: [value] }];
+  const appendable = existing.operator === operator && operator !== '=';
+  const next: LabelFilter = { label, operator, values: appendable ? [...existing.values, value] : [value] };
+  return filters.map((filter) => (filter === existing ? next : filter));
+}
+
+/** Changes the operator of a label's filter. `=` only keeps the first value. */
+export function setLabelOperator(filters: LabelFilter[], label: string, operator: LabelOperator): LabelFilter[] {
+  return filters.map((filter) => {
+    if (filter.label !== label) return filter;
+    return { label, operator, values: operator === '=' ? filter.values.slice(0, 1) : filter.values };
+  });
+}

@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert, Box, Button, Card, CircularProgress, Stack, Tab, Tabs, useMediaQuery } from '@mui/material';
-import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme, useLocalStorage } from '@perses-dev/components';
+import { Alert, Box, Card, CircularProgress, Stack, Tab, Tabs } from '@mui/material';
+import { ChartsProvider, useChartsTheme } from '@perses-dev/components';
 import type { DatasourceStoreProviderProps, VariableProviderProps } from '@perses-dev/dashboards';
 import {
   DatasourceStoreProvider,
@@ -35,26 +35,12 @@ import {
   useInitialTimeRange,
   usePluginRegistry,
 } from '@perses-dev/plugin-system';
-import type { DatasourceSelector, QueryDefinition } from '@perses-dev/spec';
-import ChevronLeft from 'mdi-material-ui/ChevronLeft';
-import ChevronRight from 'mdi-material-ui/ChevronRight';
 import type { ReactElement, ReactNode } from 'react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
-import type { ExploreSignal, LabelSource } from './explore-signals';
+import type { ExploreSignal } from './explore-signals';
 import { EXPLORE_SIGNALS, getPlaceholderExplorerKey } from './explore-signals';
-import type { MatchOperator } from './label-matchers';
-import { addLabelMatcher, formatLabelMatcher } from './label-matchers';
-import { LabelExplorer } from './LabelExplorer';
-
-const LABEL_EXPLORER_COLLAPSED_KEY = 'PERSES_EXPLORE_LABELS_COLLAPSED';
-const LABEL_EXPLORER_WIDTH = 280;
-
-interface ExplorerQueryData {
-  tab?: string;
-  queries?: QueryDefinition[];
-  [key: string]: unknown;
-}
+import { LogsExplorer } from './LogsExplorer';
 
 interface SignalTab {
   signal: ExploreSignal;
@@ -145,74 +131,16 @@ interface ExploreSignalsProps {
 
 function ExploreSignals(props: ExploreSignalsProps): ReactElement {
   const { signalTabs, projectName, exploreTitleComponent } = props;
-  const { explorer, data, setExplorer, setData } = useExplorerManagerContext<ExplorerQueryData>();
+  const { explorer, setExplorer } = useExplorerManagerContext();
   const { pluginsBaseURL } = usePluginRegistry();
-  const isSmallScreen = useMediaQuery('(max-width: 768px)');
-  const [isCollapsed, setIsCollapsed] = useLocalStorage(LABEL_EXPLORER_COLLAPSED_KEY, false);
-  // Explorers copy their queries into local state when mounted, so they are remounted when the label explorer
-  // changes the queries.
-  const [revision, setRevision] = useState(0);
-  const [matcherHint, setMatcherHint] = useState<string>();
-
   const current = signalTabs.find((tab) => tab.explorerKey === explorer) ?? signalTabs[0];
-  const labelSource = current?.plugin ? current.signal.labelSource : undefined;
-
-  const handleAddMatcher = (
-    source: LabelSource,
-    label: string,
-    value: string,
-    operator: MatchOperator,
-    datasource: DatasourceSelector,
-  ): void => {
-    const queries = data.queries ?? [];
-    const [first, ...rest] = queries;
-    const firstQuery = first?.spec.plugin.kind === source.queryPluginKind ? first : undefined;
-    const currentQuery = String(firstQuery?.spec.plugin.spec.query ?? '');
-    const nextQuery = addLabelMatcher(currentQuery, label, value, operator);
-
-    const buildQuery = (query: string): QueryDefinition => ({
-      kind: source.queryKind,
-      spec: {
-        plugin: {
-          kind: source.queryPluginKind,
-          spec: { ...firstQuery?.spec.plugin.spec, query, datasource },
-        },
-      },
-    });
-
-    let nextQueries: QueryDefinition[];
-    if (firstQuery && nextQuery !== undefined) {
-      nextQueries = [buildQuery(nextQuery), ...rest];
-      setMatcherHint(undefined);
-    } else if (firstQuery) {
-      // The first query has no selector to extend (e.g. `sum(up)`), so the matcher starts a new query instead.
-      nextQueries = [...queries, buildQuery(`{${formatLabelMatcher(label, value, operator)}}`)];
-      setMatcherHint('The first query has no label selector, so a new query was added.');
-    } else {
-      nextQueries = [buildQuery(nextQuery ?? ''), ...queries];
-      setMatcherHint(undefined);
-    }
-
-    // The Prometheus finder tab does not show queries, so switch to the table view.
-    const tab = data.tab === 'finder' ? 'table' : data.tab;
-    setData({ ...data, ...(tab ? { tab } : {}), queries: nextQueries });
-    setRevision((r) => r + 1);
-  };
-
-  let labelPanelWidth: number | string = isCollapsed ? 15 : LABEL_EXPLORER_WIDTH;
-  if (isSmallScreen) {
-    labelPanelWidth = '100%';
-  }
 
   return (
     <Stack sx={{ width: '100%' }} px={2} pb={2} pt={1.5} gap={1}>
       <ExploreToolbar exploreTitleComponent={exploreTitleComponent} />
       <Tabs
         value={current?.explorerKey ?? false}
-        onChange={(_, key: string) => {
-          setMatcherHint(undefined);
-          setExplorer(key);
-        }}
+        onChange={(_, key: string) => setExplorer(key)}
         variant="scrollable"
         sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
@@ -220,62 +148,13 @@ function ExploreSignals(props: ExploreSignalsProps): ReactElement {
           <Tab key={signal.id} value={explorerKey} label={signal.label} data-testid={`explore-tab-${signal.id}`} />
         ))}
       </Tabs>
-      <Stack direction={isSmallScreen ? 'column' : 'row'} gap={2} sx={{ width: '100%' }}>
-        {labelSource && (
-          <Stack
-            sx={{
-              position: 'relative',
-              flexShrink: 0,
-              width: labelPanelWidth,
-              maxHeight: isSmallScreen ? 400 : 'calc(100vh - 200px)',
-              borderRight: isSmallScreen ? 0 : 1,
-              borderBottom: isSmallScreen ? 1 : 0,
-              borderColor: 'divider',
-              pr: isCollapsed ? 0 : 2,
-            }}
-          >
-            {!isSmallScreen && (
-              <Button
-                title={isCollapsed ? 'Expand label explorer' : 'Collapse label explorer'}
-                aria-label={isCollapsed ? 'Expand label explorer' : 'Collapse label explorer'}
-                variant="text"
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  right: -15,
-                  zIndex: 1,
-                  padding: 0.5,
-                  minWidth: 'auto',
-                  backgroundColor: (theme) => theme.palette.background.default,
-                }}
-                onClick={() => setIsCollapsed(!isCollapsed)}
-              >
-                {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
-              </Button>
-            )}
-            {(!isCollapsed || isSmallScreen) && (
-              <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <LabelExplorer
-                  key={labelSource.datasourceKind}
-                  labelSource={labelSource}
-                  projectName={projectName}
-                  onAddMatcher={(label, value, operator, datasource) =>
-                    handleAddMatcher(labelSource, label, value, operator, datasource)
-                  }
-                />
-              </ErrorBoundary>
-            )}
-          </Stack>
-        )}
+      {current?.plugin && current.signal.id === 'logs' ? (
+        <LogsExplorer key={current.explorerKey} projectName={projectName} />
+      ) : (
         <Card sx={{ padding: '10px', width: '100%', minWidth: 0 }}>
-          {matcherHint && (
-            <Alert severity="info" onClose={() => setMatcherHint(undefined)} sx={{ mb: 1 }}>
-              {matcherHint}
-            </Alert>
-          )}
           {current?.plugin && (
             <PluginLoaderComponent
-              key={`${current.explorerKey}-${revision}`}
+              key={current.explorerKey}
               plugin={{
                 name: current.plugin.spec.name,
                 moduleName: current.plugin.module.name,
@@ -292,7 +171,7 @@ function ExploreSignals(props: ExploreSignalsProps): ReactElement {
             </Alert>
           )}
         </Card>
-      </Stack>
+      )}
     </Stack>
   );
 }

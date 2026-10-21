@@ -11,37 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/** Where the label explorer reads labels from, and which query it writes matchers into. */
-export interface LabelSource {
-  datasourceKind: 'PrometheusDatasource' | 'LokiDatasource';
-  queryKind: 'TimeSeriesQuery' | 'LogQuery';
-  queryPluginKind: 'PrometheusTimeSeriesQuery' | 'LokiLogQuery';
-}
-
 export interface ExploreSignal {
   id: string;
   label: string;
   /** Name of the Explore plugin rendering this signal. */
   explorerPluginName: string;
-  labelSource?: LabelSource;
 }
 
 export const EXPLORE_SIGNALS: ExploreSignal[] = [
-  {
-    id: 'metrics',
-    label: 'Metrics',
-    explorerPluginName: 'PrometheusExplorer',
-  },
-  {
-    id: 'logs',
-    label: 'Logs',
-    explorerPluginName: 'LogExplorer',
-    labelSource: {
-      datasourceKind: 'LokiDatasource',
-      queryKind: 'LogQuery',
-      queryPluginKind: 'LokiLogQuery',
-    },
-  },
+  { id: 'metrics', label: 'Metrics', explorerPluginName: 'PrometheusExplorer' },
+  { id: 'logs', label: 'Logs', explorerPluginName: 'LogExplorer' },
   { id: 'traces', label: 'Traces', explorerPluginName: 'TempoExplorer' },
   { id: 'profiling', label: 'Profiling', explorerPluginName: 'PyroscopeExplorer' },
   { id: 'alerts', label: 'Alerts', explorerPluginName: 'AlertManagerAlertsExplorer' },

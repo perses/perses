@@ -14,11 +14,12 @@
 import {
   Alert,
   CircularProgress,
-  IconButton,
   InputAdornment,
   List,
   ListItemButton,
   ListItemText,
+  MenuItem,
+  Select,
   Stack,
   TextField,
   Typography,
@@ -29,16 +30,16 @@ import { useQuery } from '@tanstack/react-query';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import Magnify from 'mdi-material-ui/Magnify';
-import MinusCircleOutline from 'mdi-material-ui/MinusCircleOutline';
 import type { ReactElement, ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 
-import type { LabelSource } from './explore-signals';
-import type { MatchOperator } from './label-matchers';
+import type { LabelFilter, LabelOperator } from './log-selector';
+import { LABEL_OPERATORS } from './log-selector';
 
 const MAX_DISPLAYED_VALUES = 200;
 const LOADING_SX = { alignSelf: 'center', my: 2 };
 const LIST_SX = { overflowY: 'auto' };
+const MONOSPACE_SX = { fontFamily: 'monospace', wordBreak: 'break-all' } as const;
 
 interface LabelRequestParams {
   start: string;
@@ -49,17 +50,10 @@ interface LabelResponse {
   data?: string[];
 }
 
-/** The label endpoints shared by the Prometheus and Loki datasource clients. */
+/** The label endpoints of the Loki datasource client. */
 interface LabelClient {
-  labelNames?: (params: LabelRequestParams) => Promise<LabelResponse>;
-  labels?: (params: LabelRequestParams) => Promise<LabelResponse>;
+  labels: (params: LabelRequestParams) => Promise<LabelResponse>;
   labelValues: (params: LabelRequestParams & { labelName: string }) => Promise<LabelResponse>;
-}
-
-function fetchLabelNames(client: LabelClient, params: LabelRequestParams): Promise<LabelResponse> {
-  if (client.labelNames) return client.labelNames(params);
-  if (client.labels) return client.labels(params);
-  return Promise.reject(new Error('This datasource does not support listing labels'));
 }
 
 function useLabelRequestParams(): LabelRequestParams {
@@ -71,15 +65,20 @@ function useLabelRequestParams(): LabelRequestParams {
 }
 
 export interface LabelExplorerProps {
-  labelSource: LabelSource;
+  datasourceKind: string;
+  datasource: DatasourceSelector;
+  onDatasourceChange: (datasource: DatasourceSelector) => void;
   projectName?: string;
-  onAddMatcher: (label: string, value: string, operator: MatchOperator, datasource: DatasourceSelector) => void;
+  /** Filters of the current query, or undefined when the query is a custom query the filters cannot represent. */
+  filters?: LabelFilter[];
+  onToggleValue: (label: string, value: string, operator: LabelOperator) => void;
+  onOperatorChange: (label: string, operator: LabelOperator) => void;
 }
 
 export function LabelExplorer(props: LabelExplorerProps): ReactElement {
-  const { labelSource, projectName, onAddMatcher } = props;
-  const [datasource, setDatasource] = useState<DatasourceSelector>({ kind: labelSource.datasourceKind });
-  const [filter, setFilter] = useState('');
+  const { datasourceKind, datasource, onDatasourceChange, projectName, filters, onToggleValue, onOperatorChange } =
+    props;
+  const [search, setSearch] = useState('');
   const [expandedLabel, setExpandedLabel] = useState<string>();
 
   const params = useLabelRequestParams();
@@ -90,27 +89,26 @@ export function LabelExplorer(props: LabelExplorerProps): ReactElement {
     error: labelsError,
   } = useQuery<LabelResponse, Error, string[]>({
     queryKey: ['explore-label-names', datasource, params],
-    queryFn: () =>
-      client ? fetchLabelNames(client, params) : Promise.reject(new Error('Datasource client is not ready')),
+    queryFn: () => (client ? client.labels(params) : Promise.reject(new Error('Datasource client is not ready'))),
     enabled: client !== undefined,
     select: (response) => response.data ?? [],
   });
 
   const filteredLabels = useMemo(() => {
-    const search = filter.trim().toLowerCase();
-    return (labelNames ?? []).filter((name) => name.toLowerCase().includes(search));
-  }, [labelNames, filter]);
+    const term = search.trim().toLowerCase();
+    return (labelNames ?? []).filter((name) => name.toLowerCase().includes(term));
+  }, [labelNames, search]);
 
   return (
     <Stack gap={1} sx={{ minHeight: 0 }} data-testid="label-explorer">
       <Typography variant="h4">Labels</Typography>
       <DatasourceSelect
-        datasourcePluginKind={labelSource.datasourceKind}
+        datasourcePluginKind={datasourceKind}
         project={projectName}
         value={datasource}
         onChange={(next) => {
           if (isVariableDatasource(next)) return;
-          setDatasource(next);
+          onDatasourceChange(next);
           setExpandedLabel(undefined);
         }}
         label="Datasource"
@@ -119,8 +117,8 @@ export function LabelExplorer(props: LabelExplorerProps): ReactElement {
       <TextField
         size="small"
         placeholder="Filter labels"
-        value={filter}
-        onChange={(event) => setFilter(event.target.value)}
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
         slotProps={{
           input: {
             startAdornment: (
@@ -131,6 +129,11 @@ export function LabelExplorer(props: LabelExplorerProps): ReactElement {
           },
         }}
       />
+      {filters === undefined && (
+        <Typography variant="caption" color="text.secondary" data-testid="label-explorer-custom-query">
+          Custom query: it can&apos;t be shown as label filters. Selecting a value replaces it.
+        </Typography>
+      )}
       <LabelList
         error={clientError ?? labelsError}
         isLoading={isLoading}
@@ -143,9 +146,11 @@ export function LabelExplorer(props: LabelExplorerProps): ReactElement {
               client={client}
               params={params}
               datasource={datasource}
+              filter={filters?.find((f) => f.label === label)}
               expanded={expandedLabel === label}
               onToggle={() => setExpandedLabel(expandedLabel === label ? undefined : label)}
-              onAddMatcher={(value, operator) => onAddMatcher(label, value, operator, datasource)}
+              onToggleValue={(value, operator) => onToggleValue(label, value, operator)}
+              onOperatorChange={(operator) => onOperatorChange(label, operator)}
             />
           )
         }
@@ -188,13 +193,18 @@ interface LabelItemProps {
   client: LabelClient;
   params: LabelRequestParams;
   datasource: DatasourceSelector;
+  filter?: LabelFilter;
   expanded: boolean;
   onToggle: () => void;
-  onAddMatcher: (value: string, operator: MatchOperator) => void;
+  onToggleValue: (value: string, operator: LabelOperator) => void;
+  onOperatorChange: (operator: LabelOperator) => void;
 }
 
 function LabelItem(props: LabelItemProps): ReactElement {
-  const { label, client, params, datasource, expanded, onToggle, onAddMatcher } = props;
+  const { label, client, params, datasource, filter, expanded, onToggle, onToggleValue, onOperatorChange } = props;
+  // Operator used for the next selected value while the label has no filter.
+  const [pendingOperator, setPendingOperator] = useState<LabelOperator>('=');
+  const operator = filter?.operator ?? pendingOperator;
   const {
     data: values,
     isLoading,
@@ -212,48 +222,66 @@ function LabelItem(props: LabelItemProps): ReactElement {
         {expanded ? <ChevronDown fontSize="small" /> : <ChevronRight fontSize="small" />}
         <ListItemText
           primary={label}
-          slotProps={{ primary: { sx: { fontFamily: 'monospace', wordBreak: 'break-all' } } }}
+          slotProps={{
+            primary: {
+              sx: { ...MONOSPACE_SX, color: filter ? 'primary.main' : undefined, fontWeight: filter ? 600 : 400 },
+            },
+          }}
         />
-        {expanded && values && (
-          <Typography variant="caption" color="text.secondary">
-            {values.length}
+        {filter && (
+          <Typography variant="caption" color="primary" sx={MONOSPACE_SX}>
+            {filter.operator} ({filter.values.length})
           </Typography>
         )}
       </ListItemButton>
       {expanded && (
-        <List dense disablePadding sx={{ pl: 3 }}>
-          {isLoading && <CircularProgress size={16} sx={{ m: 1 }} />}
-          {error && <Alert severity="error">{error.message}</Alert>}
-          {values?.slice(0, MAX_DISPLAYED_VALUES).map((value) => (
-            <ListItemButton
-              key={value}
-              title={`Add ${label}="${value}" to the query`}
-              onClick={() => onAddMatcher(value, '=')}
-              sx={{ px: 0.5, py: 0 }}
-            >
-              <ListItemText
-                primary={value === '' ? '(empty)' : value}
-                slotProps={{ primary: { variant: 'body2', sx: { wordBreak: 'break-all' } } }}
-              />
-              <IconButton
-                size="small"
-                title={`Add ${label}!="${value}" to the query`}
-                aria-label={`Exclude ${value}`}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onAddMatcher(value, '!=');
-                }}
-              >
-                <MinusCircleOutline fontSize="inherit" />
-              </IconButton>
-            </ListItemButton>
-          ))}
-          {values && values.length > MAX_DISPLAYED_VALUES && (
-            <Typography variant="caption" color="text.secondary" sx={{ px: 0.5 }}>
-              Showing the first {MAX_DISPLAYED_VALUES} of {values.length} values.
-            </Typography>
-          )}
-        </List>
+        <Stack sx={{ pl: 3 }} gap={0.5}>
+          <Select
+            size="small"
+            value={operator}
+            onChange={(event) => {
+              const next = event.target.value as LabelOperator;
+              setPendingOperator(next);
+              if (filter) onOperatorChange(next);
+            }}
+            inputProps={{ 'aria-label': `Operator for ${label}` }}
+            sx={{ width: 90, fontFamily: 'monospace' }}
+          >
+            {LABEL_OPERATORS.map((op) => (
+              <MenuItem key={op} value={op} sx={{ fontFamily: 'monospace' }}>
+                {op}
+              </MenuItem>
+            ))}
+          </Select>
+          <List dense disablePadding>
+            {isLoading && <CircularProgress size={16} sx={{ m: 1 }} />}
+            {error && <Alert severity="error">{error.message}</Alert>}
+            {values?.slice(0, MAX_DISPLAYED_VALUES).map((value) => {
+              const selected = filter?.values.includes(value) ?? false;
+              return (
+                <ListItemButton
+                  key={value}
+                  selected={selected}
+                  title={selected ? 'Remove this filter' : `Filter ${label}${operator}"${value}"`}
+                  onClick={() => onToggleValue(value, operator)}
+                  sx={{ px: 0.5, py: 0, borderRadius: 1 }}
+                >
+                  <ListItemText
+                    primary={value === '' ? '(empty)' : value}
+                    slotProps={{
+                      primary: { variant: 'body2', sx: { wordBreak: 'break-all', fontWeight: selected ? 600 : 400 } },
+                    }}
+                  />
+                </ListItemButton>
+              );
+            })}
+            {values && values.length > MAX_DISPLAYED_VALUES && (
+              <Typography variant="caption" color="text.secondary" sx={{ px: 0.5 }}>
+                Showing the first {MAX_DISPLAYED_VALUES} of {values.length} values.
+              </Typography>
+            )}
+          </List>
+        </Stack>
       )}
     </>
   );
