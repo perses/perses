@@ -40,6 +40,16 @@ const MAX_DISPLAYED_VALUES = 200;
 const LOADING_SX = { alignSelf: 'center', my: 2 };
 const LIST_SX = { overflowY: 'auto' };
 const MONOSPACE_SX = { fontFamily: 'monospace', wordBreak: 'break-all' } as const;
+// Compact operator select, sized to the label text next to it.
+const OPERATOR_SELECT_SX = {
+  flexShrink: 0,
+  width: 46,
+  height: 24,
+  fontFamily: 'monospace',
+  fontSize: '0.8125rem',
+  '& .MuiSelect-select': { py: 0, pl: 0.75, pr: '18px !important' },
+  '& .MuiSelect-icon': { right: 0, fontSize: '1.1rem' },
+};
 
 interface LabelRequestParams {
   start: string;
@@ -218,41 +228,43 @@ function LabelItem(props: LabelItemProps): ReactElement {
 
   return (
     <>
-      <ListItemButton onClick={onToggle} sx={{ px: 0.5 }} aria-expanded={expanded}>
-        {expanded ? <ChevronDown fontSize="small" /> : <ChevronRight fontSize="small" />}
-        <ListItemText
-          primary={label}
-          slotProps={{
-            primary: {
-              sx: { ...MONOSPACE_SX, color: filter ? 'primary.main' : undefined, fontWeight: filter ? 600 : 400 },
-            },
+      <Stack direction="row" alignItems="center" gap={0.5}>
+        <Select
+          size="small"
+          value={operator}
+          onChange={(event) => {
+            const next = event.target.value as LabelOperator;
+            setPendingOperator(next);
+            if (filter) onOperatorChange(next);
           }}
-        />
-        {filter && (
-          <Typography variant="caption" color="primary" sx={MONOSPACE_SX}>
-            {filter.operator} ({filter.values.length})
-          </Typography>
-        )}
-      </ListItemButton>
-      {expanded && (
-        <Stack sx={{ pl: 3 }} gap={0.5}>
-          <Select
-            size="small"
-            value={operator}
-            onChange={(event) => {
-              const next = event.target.value as LabelOperator;
-              setPendingOperator(next);
-              if (filter) onOperatorChange(next);
+          inputProps={{ 'aria-label': `Operator for ${label}` }}
+          sx={OPERATOR_SELECT_SX}
+        >
+          {LABEL_OPERATORS.map((op) => (
+            <MenuItem key={op} value={op} dense sx={MONOSPACE_SX}>
+              {op}
+            </MenuItem>
+          ))}
+        </Select>
+        <ListItemButton onClick={onToggle} sx={{ px: 0.5, minWidth: 0 }} aria-expanded={expanded}>
+          {expanded ? <ChevronDown fontSize="small" /> : <ChevronRight fontSize="small" />}
+          <ListItemText
+            primary={label}
+            slotProps={{
+              primary: {
+                sx: { ...MONOSPACE_SX, color: filter ? 'primary.main' : undefined, fontWeight: filter ? 600 : 400 },
+              },
             }}
-            inputProps={{ 'aria-label': `Operator for ${label}` }}
-            sx={{ width: 90, fontFamily: 'monospace' }}
-          >
-            {LABEL_OPERATORS.map((op) => (
-              <MenuItem key={op} value={op} sx={{ fontFamily: 'monospace' }}>
-                {op}
-              </MenuItem>
-            ))}
-          </Select>
+          />
+          {filter && (
+            <Typography variant="caption" color="primary">
+              ({filter.values.length})
+            </Typography>
+          )}
+        </ListItemButton>
+      </Stack>
+      {expanded && (
+        <Stack sx={{ pl: 7 }} gap={0.5}>
           <List dense disablePadding>
             {isLoading && <CircularProgress size={16} sx={{ m: 1 }} />}
             {error && <Alert severity="error">{error.message}</Alert>}
