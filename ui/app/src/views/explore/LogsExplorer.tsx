@@ -20,7 +20,6 @@ import {
   Stack,
   ToggleButton,
   ToggleButtonGroup,
-  Typography,
   useMediaQuery,
 } from '@mui/material';
 import { ErrorAlert, ErrorBoundary, useLocalStorage } from '@perses-dev/components';
@@ -28,12 +27,15 @@ import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
 import {
   DataQueriesProvider,
+  PluginKindSelect,
   useAllVariableValues,
   useDatasourceStore,
   usePlugin,
+  usePluginEditor,
   useTimeRange,
 } from '@perses-dev/plugin-system';
-import type { DatasourceSelector, QueryDefinition } from '@perses-dev/spec';
+import type { PluginEditorValue, PluginType } from '@perses-dev/plugin-system';
+import type { DatasourceSelector, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 import ChevronLeft from 'mdi-material-ui/ChevronLeft';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import Refresh from 'mdi-material-ui/Refresh';
@@ -51,6 +53,7 @@ const LABEL_EXPLORER_WIDTH = 280;
 const PANEL_PREVIEW_HEIGHT = 700;
 const HISTOGRAM_HEIGHT = 200;
 const EMPTY_PARSED_QUERY: ParsedLogQuery = { filters: [], pipeline: '' };
+const LOG_PLUGIN_TYPES: PluginType[] = ['LogQuery'];
 
 // The Loki query editor renders its own order toggle as its last row. The order toggle is shown next to the Run Query
 // button instead, so that row is hidden.
@@ -70,8 +73,13 @@ interface LogsExplorerData {
   queries?: QueryDefinition[];
 }
 
-function toQueryDefinition(spec: LokiLogQuerySpec): QueryDefinition {
-  return { kind: 'LogQuery', spec: { plugin: { kind: LOKI_LOG_QUERY_KIND, spec } } };
+function toQueryDefinition(value: PluginEditorValue): QueryDefinition {
+  return { kind: 'LogQuery', spec: { plugin: { kind: value.selection.kind, spec: value.spec } } };
+}
+
+function toEditorValue(query: QueryDefinition | undefined): PluginEditorValue {
+  if (!query) return { selection: { type: 'LogQuery', kind: LOKI_LOG_QUERY_KIND }, spec: { query: '' } };
+  return { selection: { type: 'LogQuery', kind: query.spec.plugin.kind }, spec: query.spec.plugin.spec };
 }
 
 export interface LogsExplorerProps {
@@ -79,36 +87,50 @@ export interface LogsExplorerProps {
 }
 
 /**
- * Explorer for Loki logs. The label explorer and the query editor are kept in sync: selecting label values updates
- * the query, and editing the query updates the selected label values when they can represent it.
+ * Explorer for logs of any log query plugin. For Loki, the label explorer and the query editor are kept in sync:
+ * selecting label values updates the query, and editing the query updates the selected label values when they can
+ * represent it. Other log sources get an empty side panel for now.
  */
 export function LogsExplorer(props: LogsExplorerProps): ReactElement {
   const { projectName } = props;
   const { data, setData } = useExplorerManagerContext<LogsExplorerData>();
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
   const [isCollapsed, setIsCollapsed] = useLocalStorage(LABEL_EXPLORER_COLLAPSED_KEY, false);
+
+  const committedQuery = data.queries?.find((query) => query.kind === 'LogQuery');
+  const [draft, setDraft] = useState<PluginEditorValue>(() => toEditorValue(committedQuery));
   const {
-    data: lokiPlugin,
+    onSelectionChange,
+    onSpecChange,
+    pendingSelection,
+    isLoading: isChangingKind,
+  } = usePluginEditor({
+    pluginTypes: ['LogQuery'],
+    value: draft,
+    onChange: setDraft,
+  });
+  const {
+    data: queryPlugin,
     isLoading: isLoadingPlugin,
     error: pluginError,
-  } = usePlugin('LogQuery', LOKI_LOG_QUERY_KIND);
+  } = usePlugin('LogQuery', draft.selection.kind);
 
-  const committedQuery = data.queries?.find((query) => query.spec.plugin.kind === LOKI_LOG_QUERY_KIND);
-  const [draft, setDraft] = useState<LokiLogQuerySpec>(
-    () => (committedQuery?.spec.plugin.spec as LokiLogQuerySpec | undefined) ?? { query: '' },
-  );
-  const parsed = useMemo(() => parseLogQuery(draft.query), [draft.query]);
+  const isLoki = draft.selection.kind === LOKI_LOG_QUERY_KIND;
+  const lokiSpec = draft.spec as LokiLogQuerySpec;
+  const parsed = useMemo(() => (isLoki ? parseLogQuery(lokiSpec.query ?? '') : undefined), [isLoki, lokiSpec.query]);
   // Set when Mod+Enter is pressed in the editor, so the change it emits also runs the query.
   const runOnNextChange = useRef(false);
 
-  const runQuery = (spec: LokiLogQuerySpec): void => {
-    setDraft(spec);
-    setData({ ...data, queries: [toQueryDefinition(spec)] });
+  const runQuery = (value: PluginEditorValue): void => {
+    setDraft(value);
+    setData({ ...data, queries: [toQueryDefinition(value)] });
   };
+
+  const runLokiQuery = (spec: LokiLogQuerySpec): void => runQuery({ ...draft, spec });
 
   const updateFilters = (update: (current: ParsedLogQuery) => ParsedLogQuery): void => {
     // A custom query is replaced by the label filters.
-    runQuery({ ...draft, query: formatLogQuery(update(parsed ?? EMPTY_PARSED_QUERY)) });
+    runLokiQuery({ ...lokiSpec, query: formatLogQuery(update(parsed ?? EMPTY_PARSED_QUERY)) });
   };
 
   const handleToggleValue = (label: string, value: string, operator: LabelOperator): void =>
@@ -117,12 +139,12 @@ export function LogsExplorer(props: LogsExplorerProps): ReactElement {
   const handleOperatorChange = (label: string, value: string, operator: LabelOperator): void =>
     updateFilters((current) => ({ ...current, filters: setValueOperator(current.filters, label, value, operator) }));
 
-  const handleEditorChange = (next: LokiLogQuerySpec): void => {
+  const handleEditorChange = (spec: UnknownSpec): void => {
     if (runOnNextChange.current) {
       runOnNextChange.current = false;
-      runQuery(next);
+      runQuery({ ...draft, spec });
     } else {
-      setDraft(next);
+      onSpecChange(spec);
     }
   };
 
@@ -132,8 +154,7 @@ export function LogsExplorer(props: LogsExplorerProps): ReactElement {
     }
   };
 
-  const Editor = lokiPlugin?.OptionsEditorComponent;
-  const datasource = draft.datasource ?? { kind: LOKI_DATASOURCE_KIND };
+  const Editor = queryPlugin?.OptionsEditorComponent;
   let labelPanelWidth: number | string = isCollapsed ? 15 : LABEL_EXPLORER_WIDTH;
   if (isSmallScreen) {
     labelPanelWidth = '100%';
@@ -172,12 +193,12 @@ export function LogsExplorer(props: LogsExplorerProps): ReactElement {
             {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
           </Button>
         )}
-        {(!isCollapsed || isSmallScreen) && (
+        {(!isCollapsed || isSmallScreen) && isLoki && (
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <LabelExplorer
               datasourceKind={LOKI_DATASOURCE_KIND}
-              datasource={datasource}
-              onDatasourceChange={(next) => setDraft({ ...draft, datasource: next.name ? next : undefined })}
+              datasource={lokiSpec.datasource ?? { kind: LOKI_DATASOURCE_KIND }}
+              onDatasourceChange={(next) => onSpecChange({ ...lokiSpec, datasource: next.name ? next : undefined })}
               projectName={projectName}
               filters={parsed?.filters}
               onToggleValue={handleToggleValue}
@@ -185,23 +206,33 @@ export function LogsExplorer(props: LogsExplorerProps): ReactElement {
             />
           </ErrorBoundary>
         )}
+        {/* Placeholder for the label explorers of other log sources. */}
+        {(!isCollapsed || isSmallScreen) && !isLoki && <Box data-testid="label-explorer-placeholder" />}
       </Stack>
       <Card sx={{ padding: '10px', width: '100%', minWidth: 0 }}>
         <Stack gap={2}>
           <Stack direction="row" alignItems="center" gap={1} flexWrap="wrap">
-            <Typography variant="h4" sx={{ mr: 'auto' }}>
-              Log query
-            </Typography>
-            <ToggleButtonGroup
-              exclusive
+            <PluginKindSelect
+              label="Query Type"
               size="small"
-              value={draft.direction ?? 'backward'}
-              onChange={(_, direction: LogsDirection | null) => direction && runQuery({ ...draft, direction })}
-              aria-label="Order"
-            >
-              <ToggleButton value="backward">Newest first</ToggleButton>
-              <ToggleButton value="forward">Oldest first</ToggleButton>
-            </ToggleButtonGroup>
+              pluginTypes={LOG_PLUGIN_TYPES}
+              value={pendingSelection ?? draft.selection}
+              onChange={onSelectionChange}
+              disabled={isChangingKind}
+              sx={{ minWidth: 220, mr: 'auto' }}
+            />
+            {isLoki && (
+              <ToggleButtonGroup
+                exclusive
+                size="small"
+                value={lokiSpec.direction ?? 'backward'}
+                onChange={(_, direction: LogsDirection | null) => direction && runLokiQuery({ ...lokiSpec, direction })}
+                aria-label="Order"
+              >
+                <ToggleButton value="backward">Newest first</ToggleButton>
+                <ToggleButton value="forward">Oldest first</ToggleButton>
+              </ToggleButtonGroup>
+            )}
             <Button variant="contained" startIcon={<Refresh />} onClick={() => runQuery(draft)}>
               Run Query
             </Button>
@@ -209,8 +240,8 @@ export function LogsExplorer(props: LogsExplorerProps): ReactElement {
           {isLoadingPlugin && <CircularProgress size={24} />}
           {pluginError && <Alert severity="error">{pluginError.message}</Alert>}
           {Editor && (
-            <Box sx={LOKI_EDITOR_SX} onKeyDownCapture={handleEditorKeyDown}>
-              <Editor value={draft} onChange={(next) => handleEditorChange(next as LokiLogQuerySpec)} />
+            <Box sx={isLoki ? LOKI_EDITOR_SX : undefined} onKeyDownCapture={handleEditorKeyDown}>
+              <Editor key={draft.selection.kind} value={draft.spec} onChange={handleEditorChange} />
             </Box>
           )}
           {committedQuery && <LogResults query={committedQuery} />}
@@ -225,21 +256,21 @@ interface LogResultsProps {
 }
 
 function LogResults({ query }: LogResultsProps): ReactElement {
-  const { data: lokiPlugin } = usePlugin('LogQuery', LOKI_LOG_QUERY_KIND);
+  const { data: queryPlugin } = usePlugin('LogQuery', query.spec.plugin.kind);
   const { absoluteTimeRange } = useTimeRange();
   const datasourceStore = useDatasourceStore();
   const variableState = useAllVariableValues();
   const queries = useMemo(() => [query], [query]);
 
   const volumeQueries = useMemo(() => {
-    const volumeQuery = lokiPlugin?.createVolumeQuery?.(query.spec.plugin.spec, {
+    const volumeQuery = queryPlugin?.createVolumeQuery?.(query.spec.plugin.spec, {
       timeRange: absoluteTimeRange,
       variableState,
       datasourceStore,
       refreshKey: '',
     });
     return volumeQuery ? [volumeQuery] : [];
-  }, [lokiPlugin, query, absoluteTimeRange, variableState, datasourceStore]);
+  }, [queryPlugin, query, absoluteTimeRange, variableState, datasourceStore]);
 
   return (
     <>
