@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { LabelFilter } from './log-selector';
-import { formatLogQuery, parseLogQuery, setLabelOperator, toggleLabelValue } from './log-selector';
+import { formatLogQuery, parseLogQuery, setValueOperator, toggleLabelValue } from './log-selector';
 
 describe('parseLogQuery', () => {
   it('parses an empty query', () => {
@@ -33,6 +33,14 @@ describe('parseLogQuery', () => {
     });
   });
 
+  it('parses different operators on one label', () => {
+    expect(parseLogQuery('{app="a", app!="b", app!~"c"}')?.filters).toEqual([
+      { label: 'app', operator: '=', values: ['a'] },
+      { label: 'app', operator: '!=', values: ['b'] },
+      { label: 'app', operator: '!~', values: ['c'] },
+    ]);
+  });
+
   it('unescapes quoted values', () => {
     expect(parseLogQuery('{msg="say \\"hi\\" }"}')?.filters).toEqual([
       { label: 'msg', operator: '=', values: ['say "hi" }'] },
@@ -43,7 +51,6 @@ describe('parseLogQuery', () => {
     ['a metric query', 'sum(count_over_time({app="web"}[5m]))'],
     ['a regex that is not a list of literals', '{app=~"web.*"}'],
     ['two equality matchers on one label', '{app="a", app="b"}'],
-    ['mixed operators on one label', '{app="a", app!="b"}'],
     ['an unclosed selector', '{app="web"'],
     ['an unquoted value', '{app=web}'],
   ])('treats %s as a custom query', (_, query) => {
@@ -95,15 +102,25 @@ describe('toggleLabelValue', () => {
     expect(toggleLabelValue([regex], 'app', 'b', '=~')).toEqual([{ ...regex, values: ['a', 'b'] }]);
   });
 
-  it('replaces the filter when the operator differs', () => {
-    expect(toggleLabelValue([app], 'app', 'api', '!=')).toEqual([{ label: 'app', operator: '!=', values: ['api'] }]);
+  it('keeps a filter per operator on one label', () => {
+    expect(toggleLabelValue([app], 'app', 'api', '!=')).toEqual([
+      app,
+      { label: 'app', operator: '!=', values: ['api'] },
+    ]);
   });
 });
 
-describe('setLabelOperator', () => {
-  it('changes the operator and keeps one value for equality', () => {
+describe('setValueOperator', () => {
+  it('moves a selected value to the filter of the new operator', () => {
     const filters: LabelFilter[] = [{ label: 'app', operator: '=~', values: ['a', 'b'] }];
-    expect(setLabelOperator(filters, 'app', '!~')).toEqual([{ label: 'app', operator: '!~', values: ['a', 'b'] }]);
-    expect(setLabelOperator(filters, 'app', '=')).toEqual([{ label: 'app', operator: '=', values: ['a'] }]);
+    expect(setValueOperator(filters, 'app', 'b', '!=')).toEqual([
+      { label: 'app', operator: '=~', values: ['a'] },
+      { label: 'app', operator: '!=', values: ['b'] },
+    ]);
+  });
+
+  it('ignores values that are not selected', () => {
+    const filters: LabelFilter[] = [{ label: 'app', operator: '=', values: ['a'] }];
+    expect(setValueOperator(filters, 'app', 'b', '!=')).toBe(filters);
   });
 });

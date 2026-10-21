@@ -15,8 +15,9 @@ export const LABEL_OPERATORS = ['=', '!=', '=~', '!~'] as const;
 export type LabelOperator = (typeof LABEL_OPERATORS)[number];
 
 /**
- * A label filter of the label explorer. Regex operators can hold several values, which are written as an alternation
- * of literals (`label=~"a|b"`). `!=` can hold several values, written as one matcher each. `=` holds a single value.
+ * A label filter of the label explorer: the values selected for a label with one operator. A label has at most one
+ * filter per operator. Regex operators can hold several values, which are written as an alternation of literals
+ * (`label=~"a|b"`). `!=` can hold several values, written as one matcher each. `=` holds a single value.
  */
 export interface LabelFilter {
   label: string;
@@ -151,10 +152,10 @@ export function parseLogQuery(query: string): ParsedLogQuery | undefined {
 
   const filters: LabelFilter[] = [];
   for (const { label, operator, value } of selector.matchers) {
-    const existing = filters.find((filter) => filter.label === label);
+    const existing = filters.find((filter) => filter.label === label && filter.operator === operator);
     if (existing) {
       // Several `!=` matchers on a label are the only repeated matchers the label explorer can represent.
-      if (operator !== '!=' || existing.operator !== '!=') return undefined;
+      if (operator !== '!=') return undefined;
       existing.values.push(value);
       continue;
     }
@@ -177,33 +178,45 @@ export function formatLogQuery({ filters, pipeline }: ParsedLogQuery): string {
   return [`{${matchers.join(', ')}}`, pipeline].filter(Boolean).join(' ');
 }
 
-/**
- * Selects or deselects a label value. A selected value is removed. Otherwise it is added to the label's filter when
- * the operator accepts several values, or replaces the label's filter.
- */
+function removeValue(filters: LabelFilter[], label: string, value: string): LabelFilter[] {
+  return filters
+    .map((filter) =>
+      filter.label === label ? { ...filter, values: filter.values.filter((v) => v !== value) } : filter,
+    )
+    .filter((filter) => filter.values.length > 0);
+}
+
+function addValue(filters: LabelFilter[], label: string, value: string, operator: LabelOperator): LabelFilter[] {
+  const existing = filters.find((filter) => filter.label === label && filter.operator === operator);
+  if (!existing) return [...filters, { label, operator, values: [value] }];
+  // `=` holds a single value, so a new value replaces it.
+  const values = operator === '=' ? [value] : [...existing.values, value];
+  return filters.map((filter) => (filter === existing ? { ...filter, values } : filter));
+}
+
+/** Returns the operator a label value is selected with, if it is selected. */
+export function getValueOperator(filters: LabelFilter[], label: string, value: string): LabelOperator | undefined {
+  return filters.find((filter) => filter.label === label && filter.values.includes(value))?.operator;
+}
+
+/** Selects a label value with the given operator, or deselects it when it is already selected. */
 export function toggleLabelValue(
   filters: LabelFilter[],
   label: string,
   value: string,
   operator: LabelOperator,
 ): LabelFilter[] {
-  const existing = filters.find((filter) => filter.label === label);
-  if (existing?.values.includes(value)) {
-    const values = existing.values.filter((v) => v !== value);
-    if (values.length === 0) return filters.filter((filter) => filter !== existing);
-    return filters.map((filter) => (filter === existing ? { ...filter, values } : filter));
-  }
-
-  if (!existing) return [...filters, { label, operator, values: [value] }];
-  const appendable = existing.operator === operator && operator !== '=';
-  const next: LabelFilter = { label, operator, values: appendable ? [...existing.values, value] : [value] };
-  return filters.map((filter) => (filter === existing ? next : filter));
+  if (getValueOperator(filters, label, value) !== undefined) return removeValue(filters, label, value);
+  return addValue(filters, label, value, operator);
 }
 
-/** Changes the operator of a label's filter. `=` only keeps the first value. */
-export function setLabelOperator(filters: LabelFilter[], label: string, operator: LabelOperator): LabelFilter[] {
-  return filters.map((filter) => {
-    if (filter.label !== label) return filter;
-    return { label, operator, values: operator === '=' ? filter.values.slice(0, 1) : filter.values };
-  });
+/** Changes the operator of a selected label value. */
+export function setValueOperator(
+  filters: LabelFilter[],
+  label: string,
+  value: string,
+  operator: LabelOperator,
+): LabelFilter[] {
+  if (getValueOperator(filters, label, value) === undefined) return filters;
+  return addValue(removeValue(filters, label, value), label, value, operator);
 }

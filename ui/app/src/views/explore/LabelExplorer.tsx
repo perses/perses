@@ -34,13 +34,14 @@ import type { ReactElement, ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 
 import type { LabelFilter, LabelOperator } from './log-selector';
-import { LABEL_OPERATORS } from './log-selector';
+import { getValueOperator, LABEL_OPERATORS } from './log-selector';
 
 const MAX_DISPLAYED_VALUES = 200;
+const NO_FILTERS: LabelFilter[] = [];
 const LOADING_SX = { alignSelf: 'center', my: 2 };
 const LIST_SX = { overflowY: 'auto' };
 const MONOSPACE_SX = { fontFamily: 'monospace', wordBreak: 'break-all' } as const;
-// Compact operator select, sized to the label text next to it.
+// Compact operator select, sized to the label value text next to it.
 const OPERATOR_SELECT_SX = {
   flexShrink: 0,
   width: 46,
@@ -82,7 +83,7 @@ export interface LabelExplorerProps {
   /** Filters of the current query, or undefined when the query is a custom query the filters cannot represent. */
   filters?: LabelFilter[];
   onToggleValue: (label: string, value: string, operator: LabelOperator) => void;
-  onOperatorChange: (label: string, operator: LabelOperator) => void;
+  onOperatorChange: (label: string, value: string, operator: LabelOperator) => void;
 }
 
 export function LabelExplorer(props: LabelExplorerProps): ReactElement {
@@ -156,11 +157,11 @@ export function LabelExplorer(props: LabelExplorerProps): ReactElement {
               client={client}
               params={params}
               datasource={datasource}
-              filter={filters?.find((f) => f.label === label)}
+              filters={filters?.filter((f) => f.label === label) ?? NO_FILTERS}
               expanded={expandedLabel === label}
               onToggle={() => setExpandedLabel(expandedLabel === label ? undefined : label)}
               onToggleValue={(value, operator) => onToggleValue(label, value, operator)}
-              onOperatorChange={(operator) => onOperatorChange(label, operator)}
+              onOperatorChange={(value, operator) => onOperatorChange(label, value, operator)}
             />
           )
         }
@@ -203,18 +204,18 @@ interface LabelItemProps {
   client: LabelClient;
   params: LabelRequestParams;
   datasource: DatasourceSelector;
-  filter?: LabelFilter;
+  filters: LabelFilter[];
   expanded: boolean;
   onToggle: () => void;
   onToggleValue: (value: string, operator: LabelOperator) => void;
-  onOperatorChange: (operator: LabelOperator) => void;
+  onOperatorChange: (value: string, operator: LabelOperator) => void;
 }
 
 function LabelItem(props: LabelItemProps): ReactElement {
-  const { label, client, params, datasource, filter, expanded, onToggle, onToggleValue, onOperatorChange } = props;
-  // Operator used for the next selected value while the label has no filter.
-  const [pendingOperator, setPendingOperator] = useState<LabelOperator>('=');
-  const operator = filter?.operator ?? pendingOperator;
+  const { label, client, params, datasource, filters, expanded, onToggle, onToggleValue, onOperatorChange } = props;
+  // Operators picked for values that are not selected yet.
+  const [pendingOperators, setPendingOperators] = useState<Record<string, LabelOperator>>({});
+  const selectedCount = filters.reduce((count, filter) => count + filter.values.length, 0);
   const {
     data: values,
     isLoading,
@@ -228,55 +229,58 @@ function LabelItem(props: LabelItemProps): ReactElement {
 
   return (
     <>
-      <Stack direction="row" alignItems="center" gap={0.5}>
-        <Select
-          size="small"
-          value={operator}
-          onChange={(event) => {
-            const next = event.target.value as LabelOperator;
-            setPendingOperator(next);
-            if (filter) onOperatorChange(next);
-          }}
-          inputProps={{ 'aria-label': `Operator for ${label}` }}
-          sx={OPERATOR_SELECT_SX}
-        >
-          {LABEL_OPERATORS.map((op) => (
-            <MenuItem key={op} value={op} dense sx={MONOSPACE_SX}>
-              {op}
-            </MenuItem>
-          ))}
-        </Select>
-        <ListItemButton onClick={onToggle} sx={{ px: 0.5, minWidth: 0 }} aria-expanded={expanded}>
-          {expanded ? <ChevronDown fontSize="small" /> : <ChevronRight fontSize="small" />}
-          <ListItemText
-            primary={label}
-            slotProps={{
-              primary: {
-                sx: { ...MONOSPACE_SX, color: filter ? 'primary.main' : undefined, fontWeight: filter ? 600 : 400 },
+      <ListItemButton onClick={onToggle} sx={{ px: 0.5 }} aria-expanded={expanded}>
+        {expanded ? <ChevronDown fontSize="small" /> : <ChevronRight fontSize="small" />}
+        <ListItemText
+          primary={label}
+          slotProps={{
+            primary: {
+              sx: {
+                ...MONOSPACE_SX,
+                color: selectedCount > 0 ? 'primary.main' : undefined,
+                fontWeight: selectedCount > 0 ? 600 : 400,
               },
-            }}
-          />
-          {filter && (
-            <Typography variant="caption" color="primary">
-              ({filter.values.length})
-            </Typography>
-          )}
-        </ListItemButton>
-      </Stack>
+            },
+          }}
+        />
+        {selectedCount > 0 && (
+          <Typography variant="caption" color="primary">
+            ({selectedCount})
+          </Typography>
+        )}
+      </ListItemButton>
       {expanded && (
-        <Stack sx={{ pl: 7 }} gap={0.5}>
-          <List dense disablePadding>
-            {isLoading && <CircularProgress size={16} sx={{ m: 1 }} />}
-            {error && <Alert severity="error">{error.message}</Alert>}
-            {values?.slice(0, MAX_DISPLAYED_VALUES).map((value) => {
-              const selected = filter?.values.includes(value) ?? false;
-              return (
+        <List dense disablePadding sx={{ pl: 3 }}>
+          {isLoading && <CircularProgress size={16} sx={{ m: 1 }} />}
+          {error && <Alert severity="error">{error.message}</Alert>}
+          {values?.slice(0, MAX_DISPLAYED_VALUES).map((value) => {
+            const selectedOperator = getValueOperator(filters, label, value);
+            const operator = selectedOperator ?? pendingOperators[value] ?? '=';
+            const selected = selectedOperator !== undefined;
+            return (
+              <Stack key={value} direction="row" alignItems="center" gap={0.5}>
+                <Select
+                  size="small"
+                  value={operator}
+                  onChange={(event) => {
+                    const next = event.target.value as LabelOperator;
+                    setPendingOperators((current) => ({ ...current, [value]: next }));
+                    if (selected) onOperatorChange(value, next);
+                  }}
+                  inputProps={{ 'aria-label': `Operator for ${label} ${value}` }}
+                  sx={OPERATOR_SELECT_SX}
+                >
+                  {LABEL_OPERATORS.map((op) => (
+                    <MenuItem key={op} value={op} dense sx={MONOSPACE_SX}>
+                      {op}
+                    </MenuItem>
+                  ))}
+                </Select>
                 <ListItemButton
-                  key={value}
                   selected={selected}
                   title={selected ? 'Remove this filter' : `Filter ${label}${operator}"${value}"`}
                   onClick={() => onToggleValue(value, operator)}
-                  sx={{ px: 0.5, py: 0, borderRadius: 1 }}
+                  sx={{ px: 0.5, py: 0, borderRadius: 1, minWidth: 0 }}
                 >
                   <ListItemText
                     primary={value === '' ? '(empty)' : value}
@@ -285,15 +289,15 @@ function LabelItem(props: LabelItemProps): ReactElement {
                     }}
                   />
                 </ListItemButton>
-              );
-            })}
-            {values && values.length > MAX_DISPLAYED_VALUES && (
-              <Typography variant="caption" color="text.secondary" sx={{ px: 0.5 }}>
-                Showing the first {MAX_DISPLAYED_VALUES} of {values.length} values.
-              </Typography>
-            )}
-          </List>
-        </Stack>
+              </Stack>
+            );
+          })}
+          {values && values.length > MAX_DISPLAYED_VALUES && (
+            <Typography variant="caption" color="text.secondary" sx={{ px: 0.5 }}>
+              Showing the first {MAX_DISPLAYED_VALUES} of {values.length} values.
+            </Typography>
+          )}
+        </List>
       )}
     </>
   );

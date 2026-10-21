@@ -42,7 +42,7 @@ import { useMemo, useRef, useState } from 'react';
 
 import { LabelExplorer } from './LabelExplorer';
 import type { LabelOperator, ParsedLogQuery } from './log-selector';
-import { formatLogQuery, parseLogQuery, setLabelOperator, toggleLabelValue } from './log-selector';
+import { formatLogQuery, parseLogQuery, setValueOperator, toggleLabelValue } from './log-selector';
 
 const LOKI_DATASOURCE_KIND = 'LokiDatasource';
 const LOKI_LOG_QUERY_KIND = 'LokiLogQuery';
@@ -114,8 +114,8 @@ export function LogsExplorer(props: LogsExplorerProps): ReactElement {
   const handleToggleValue = (label: string, value: string, operator: LabelOperator): void =>
     updateFilters((current) => ({ ...current, filters: toggleLabelValue(current.filters, label, value, operator) }));
 
-  const handleOperatorChange = (label: string, operator: LabelOperator): void =>
-    updateFilters((current) => ({ ...current, filters: setLabelOperator(current.filters, label, operator) }));
+  const handleOperatorChange = (label: string, value: string, operator: LabelOperator): void =>
+    updateFilters((current) => ({ ...current, filters: setValueOperator(current.filters, label, value, operator) }));
 
   const handleEditorChange = (next: LokiLogQuerySpec): void => {
     if (runOnNextChange.current) {
