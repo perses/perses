@@ -48,10 +48,10 @@ import (
 )
 
 const (
-	// DefaultDocsDir is the directory containing the documentation, relative to the root of the repository.
-	DefaultDocsDir = "docs"
-	// NavFile is the name of the navigation file, at the root of the documentation directory.
-	NavFile = "nav.yaml"
+	// defaultDocsDir is the directory containing the documentation, relative to the root of the repository.
+	defaultDocsDir = "docs"
+	// navFile is the name of the navigation file, at the root of the documentation directory.
+	navFile = "nav.yaml"
 )
 
 var (
@@ -59,53 +59,53 @@ var (
 	crossSourceRegexp = regexp.MustCompile(`^([a-z0-9-]+):(.+)$`)
 )
 
-// EntryKind is the kind of entry of the navigation.
-type EntryKind string
+// entryKind is the kind of entry of the navigation.
+type entryKind string
 
 const (
-	// KindPage is a page of the documentation, referenced by its path relative to the documentation directory.
-	KindPage EntryKind = "page"
-	// KindCrossSourcePage is a page of another documentation of the website, like `plugins:prometheus/README.md`.
+	// kindPage is a page of the documentation, referenced by its path relative to the documentation directory.
+	kindPage entryKind = "page"
+	// kindCrossSourcePage is a page of another documentation of the website, like `plugins:prometheus/README.md`.
 	// It can't be validated here, as the other documentation lives in another repository.
-	KindCrossSourcePage EntryKind = "cross-source page"
-	// KindLink is an external link or a link to another page of the website.
-	KindLink EntryKind = "link"
-	// KindSection groups other entries.
-	KindSection EntryKind = "section"
+	kindCrossSourcePage entryKind = "cross-source page"
+	// kindLink is an external link or a link to another page of the website.
+	kindLink entryKind = "link"
+	// kindSection groups other entries.
+	kindSection entryKind = "section"
 )
 
-// Entry is an entry of the navigation.
-type Entry struct {
-	Kind  EntryKind
-	Title string
-	// Target is the path of the page, the reference of the page of another documentation or the URL of the link.
-	Target   string
-	Children []Entry
-	// Line is the line of the entry in the navigation file.
-	Line int
+// navEntry is an entry of the navigation.
+type navEntry struct {
+	kind  entryKind
+	title string
+	// target is the path of the page, the reference of the page of another documentation or the URL of the link.
+	target   string
+	children []navEntry
+	// line is the line of the entry in the navigation file.
+	line int
 }
 
-func parseTarget(title string, value *yaml.Node) (Entry, error) {
+func parseTarget(title string, value *yaml.Node) (navEntry, error) {
 	target := strings.TrimSpace(value.Value)
-	entry := Entry{Title: title, Target: target, Line: value.Line}
+	entry := navEntry{title: title, target: target, line: value.Line}
 	switch {
 	case target == "":
 		return entry, fmt.Errorf("line %d: empty target", value.Line)
 	case urlRegexp.MatchString(target), strings.HasPrefix(target, "/"), strings.HasPrefix(target, "mailto:"):
-		entry.Kind = KindLink
+		entry.kind = kindLink
 	case crossSourceRegexp.MatchString(target):
-		entry.Kind = KindCrossSourcePage
+		entry.kind = kindCrossSourcePage
 	default:
-		entry.Kind = KindPage
+		entry.kind = kindPage
 	}
 	return entry, nil
 }
 
-func parseEntries(node *yaml.Node) ([]Entry, error) {
+func parseEntries(node *yaml.Node) ([]navEntry, error) {
 	if node.Kind != yaml.SequenceNode {
 		return nil, fmt.Errorf("line %d: expected a list of entries", node.Line)
 	}
-	var entries []Entry
+	var entries []navEntry
 	var errs []error
 	for _, item := range node.Content {
 		entry, err := parseEntry(item)
@@ -118,18 +118,18 @@ func parseEntries(node *yaml.Node) ([]Entry, error) {
 	return entries, errors.Join(errs...)
 }
 
-func parseEntry(node *yaml.Node) (Entry, error) {
+func parseEntry(node *yaml.Node) (navEntry, error) {
 	switch node.Kind {
 	case yaml.ScalarNode:
 		return parseTarget("", node)
 	case yaml.MappingNode:
 		if len(node.Content) != 2 {
-			return Entry{}, fmt.Errorf("line %d: an entry must have exactly one key, got %d", node.Line, len(node.Content)/2)
+			return navEntry{}, fmt.Errorf("line %d: an entry must have exactly one key, got %d", node.Line, len(node.Content)/2)
 		}
 		key, value := node.Content[0], node.Content[1]
 		title := strings.TrimSpace(key.Value)
 		if key.Kind != yaml.ScalarNode || title == "" {
-			return Entry{}, fmt.Errorf("line %d: the title of an entry must be a non-empty string", key.Line)
+			return navEntry{}, fmt.Errorf("line %d: the title of an entry must be a non-empty string", key.Line)
 		}
 		switch value.Kind {
 		case yaml.ScalarNode:
@@ -137,22 +137,22 @@ func parseEntry(node *yaml.Node) (Entry, error) {
 		case yaml.SequenceNode:
 			children, err := parseEntries(value)
 			if err != nil {
-				return Entry{}, err
+				return navEntry{}, err
 			}
 			if len(children) == 0 {
-				return Entry{}, fmt.Errorf("line %d: the section %q is empty", key.Line, title)
+				return navEntry{}, fmt.Errorf("line %d: the section %q is empty", key.Line, title)
 			}
-			return Entry{Kind: KindSection, Title: title, Children: children, Line: key.Line}, nil
+			return navEntry{kind: kindSection, title: title, children: children, line: key.Line}, nil
 		default:
-			return Entry{}, fmt.Errorf("line %d: the entry %q must be a page, a link or a list of entries", value.Line, title)
+			return navEntry{}, fmt.Errorf("line %d: the entry %q must be a page, a link or a list of entries", value.Line, title)
 		}
 	default:
-		return Entry{}, fmt.Errorf("line %d: expected a page, a link or a \"title: value\" entry", node.Line)
+		return navEntry{}, fmt.Errorf("line %d: expected a page, a link or a \"title: value\" entry", node.Line)
 	}
 }
 
-// Parse parses the content of a navigation file.
-func Parse(data []byte) ([]Entry, error) {
+// parse parses the content of a navigation file.
+func parse(data []byte) ([]navEntry, error) {
 	var document yaml.Node
 	if err := yaml.Unmarshal(data, &document); err != nil {
 		return nil, err
@@ -163,12 +163,12 @@ func Parse(data []byte) ([]Entry, error) {
 	return parseEntries(document.Content[0])
 }
 
-// Result is the result of the validation of the navigation.
-type Result struct {
-	Errors   []string
-	Warnings []string
-	// Pages is the number of pages of the documentation.
-	Pages int
+// checkResult is the result of the validation of the navigation.
+type checkResult struct {
+	errors   []string
+	warnings []string
+	// pages is the number of pages of the documentation.
+	pages int
 }
 
 func listPages(docsDir string) ([]string, error) {
@@ -214,53 +214,53 @@ type checker struct {
 	navPath    string
 	existing   set.Set[string]
 	referenced map[string]int
-	result     *Result
+	result     *checkResult
 }
 
-func (c *checker) visit(entries []Entry) {
+func (c *checker) visit(entries []navEntry) {
 	for _, entry := range entries {
-		switch entry.Kind {
-		case KindSection:
-			c.visit(entry.Children)
-		case KindPage:
+		switch entry.kind {
+		case kindSection:
+			c.visit(entry.children)
+		case kindPage:
 			c.checkPage(entry)
-		case KindCrossSourcePage, KindLink:
+		case kindCrossSourcePage, kindLink:
 			// Validated by the website, which knows the other documentations and the pages of the website.
 		}
 	}
 }
 
-func (c *checker) checkPage(entry Entry) {
-	page := path.Clean(strings.TrimPrefix(entry.Target, "./"))
+func (c *checker) checkPage(entry navEntry) {
+	page := path.Clean(strings.TrimPrefix(entry.target, "./"))
 	switch {
 	case page == ".." || strings.HasPrefix(page, "../") || path.IsAbs(page):
-		c.result.Errors = append(c.result.Errors, fmt.Sprintf("%s:%d: the page %q is outside of the documentation", c.navPath, entry.Line, entry.Target))
+		c.result.errors = append(c.result.errors, fmt.Sprintf("%s:%d: the page %q is outside of the documentation", c.navPath, entry.line, entry.target))
 	case !c.existing.Contains(page):
-		c.result.Errors = append(c.result.Errors, fmt.Sprintf("%s:%d: the page %q doesn't exist", c.navPath, entry.Line, entry.Target))
+		c.result.errors = append(c.result.errors, fmt.Sprintf("%s:%d: the page %q doesn't exist", c.navPath, entry.line, entry.target))
 	case c.referenced[page] > 0:
-		c.result.Warnings = append(c.result.Warnings, fmt.Sprintf("%s:%d: the page %q is already referenced at line %d", c.navPath, entry.Line, entry.Target, c.referenced[page]))
+		c.result.warnings = append(c.result.warnings, fmt.Sprintf("%s:%d: the page %q is already referenced at line %d", c.navPath, entry.line, entry.target, c.referenced[page]))
 	default:
-		c.referenced[page] = entry.Line
+		c.referenced[page] = entry.line
 	}
 }
 
-// Check validates the navigation of the documentation located in docsDir. The pages matching one of the ignored
+// check validates the navigation of the documentation located in docsDir. The pages matching one of the ignored
 // patterns (path.Match syntax, relative to docsDir, for example `dev/*.md`) don't need to be referenced.
-func Check(docsDir string, ignoredPatterns set.Set[string]) (Result, error) {
-	navPath := filepath.Join(docsDir, NavFile)
+func check(docsDir string, ignoredPatterns set.Set[string]) (checkResult, error) {
+	navPath := filepath.Join(docsDir, navFile)
 	data, err := os.ReadFile(navPath) // nolint:gosec
 	if err != nil {
-		return Result{}, fmt.Errorf("unable to read the navigation: %w", err)
+		return checkResult{}, fmt.Errorf("unable to read the navigation: %w", err)
 	}
 	pages, err := listPages(docsDir)
 	if err != nil {
-		return Result{}, fmt.Errorf("unable to list the pages of the documentation: %w", err)
+		return checkResult{}, fmt.Errorf("unable to list the pages of the documentation: %w", err)
 	}
-	result := Result{Pages: len(pages)}
-	entries, err := Parse(data)
+	result := checkResult{pages: len(pages)}
+	entries, err := parse(data)
 	if err != nil {
 		for _, line := range strings.Split(err.Error(), "\n") {
-			result.Errors = append(result.Errors, fmt.Sprintf("%s: %s", navPath, line))
+			result.errors = append(result.errors, fmt.Sprintf("%s: %s", navPath, line))
 		}
 		return result, nil
 	}
@@ -277,7 +277,7 @@ func Check(docsDir string, ignoredPatterns set.Set[string]) (Result, error) {
 			return result, ignoreErr
 		}
 		if !ignored {
-			result.Errors = append(result.Errors, fmt.Sprintf("%s: the page is not referenced in %s", filepath.Join(docsDir, filepath.FromSlash(page)), navPath))
+			result.errors = append(result.errors, fmt.Sprintf("%s: the page is not referenced in %s", filepath.Join(docsDir, filepath.FromSlash(page)), navPath))
 		}
 	}
 	return result, nil
@@ -285,7 +285,7 @@ func Check(docsDir string, ignoredPatterns set.Set[string]) (Result, error) {
 
 // DocsNav validates the navigation of the documentation of a repository from the command line.
 type DocsNav interface {
-	// SetDocsDir sets the directory containing the documentation. The default is DefaultDocsDir.
+	// SetDocsDir sets the directory containing the documentation. The default is `docs`.
 	SetDocsDir(dir string) DocsNav
 	// AddIgnoredPattern adds patterns (path.Match syntax, relative to the documentation directory) of pages that don't
 	// need to be referenced in the navigation. Adding the same pattern multiple times has no effect.
@@ -296,9 +296,9 @@ type DocsNav interface {
 	Execute()
 }
 
-// New returns a DocsNav validating the documentation located in DefaultDocsDir.
+// New returns a DocsNav validating the documentation located in `docs`, with its navigation in `docs/nav.yaml`.
 func New() DocsNav {
-	return &docsNav{docsDir: DefaultDocsDir, ignoredPatterns: set.New[string]()}
+	return &docsNav{docsDir: defaultDocsDir, ignoredPatterns: set.New[string]()}
 }
 
 type docsNav struct {
@@ -317,7 +317,7 @@ func (d *docsNav) AddIgnoredPattern(patterns ...string) DocsNav {
 }
 
 func (d *docsNav) RegisterFlags() {
-	flag.StringVar(&d.docsDir, "docs-dir", d.docsDir, "Directory containing the documentation and its navigation file "+NavFile+".")
+	flag.StringVar(&d.docsDir, "docs-dir", d.docsDir, "Directory containing the documentation and its navigation file "+navFile+".")
 	flag.Func("ignore", "Pattern (path.Match syntax, relative to the documentation directory) of pages that don't need to be referenced in the navigation. Can be repeated.", func(pattern string) error {
 		if _, err := path.Match(pattern, ""); err != nil {
 			return err
@@ -328,18 +328,18 @@ func (d *docsNav) RegisterFlags() {
 }
 
 func (d *docsNav) Execute() {
-	result, err := Check(d.docsDir, d.ignoredPatterns)
+	result, err := check(d.docsDir, d.ignoredPatterns)
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	for _, warning := range result.Warnings {
+	for _, warning := range result.warnings {
 		logrus.Warn(warning)
 	}
-	if len(result.Errors) > 0 {
-		for _, e := range result.Errors {
+	if len(result.errors) > 0 {
+		for _, e := range result.errors {
 			logrus.Error(e)
 		}
-		logrus.Fatalf("The navigation of the documentation is not valid: every page of %s must be referenced in %s and every page it references must exist. See https://github.com/perses/website for the syntax.", d.docsDir, filepath.Join(d.docsDir, NavFile))
+		logrus.Fatalf("The navigation of the documentation is not valid: every page of %s must be referenced in %s and every page it references must exist. See https://github.com/perses/website for the syntax.", d.docsDir, filepath.Join(d.docsDir, navFile))
 	}
-	fmt.Printf("The navigation of the documentation is valid (%d pages).\n", result.Pages)
+	fmt.Printf("The navigation of the documentation is valid (%d pages).\n", result.pages)
 }

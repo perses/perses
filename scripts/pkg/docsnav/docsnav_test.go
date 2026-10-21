@@ -24,7 +24,7 @@ import (
 )
 
 func TestParse(t *testing.T) {
-	entries, err := Parse([]byte(`
+	entries, err := parse([]byte(`
 - overview.md
 - Getting started: getting-started.md
 - Concepts:
@@ -34,15 +34,15 @@ func TestParse(t *testing.T) {
 - Demo: https://demo.perses.dev
 `))
 	assert.NoError(t, err)
-	assert.Equal(t, []Entry{
-		{Kind: KindPage, Target: "overview.md", Line: 2},
-		{Kind: KindPage, Title: "Getting started", Target: "getting-started.md", Line: 3},
-		{Kind: KindSection, Title: "Concepts", Line: 4, Children: []Entry{
-			{Kind: KindPage, Title: "Dashboard", Target: "concepts/dashboard.md", Line: 5},
+	assert.Equal(t, []navEntry{
+		{kind: kindPage, target: "overview.md", line: 2},
+		{kind: kindPage, title: "Getting started", target: "getting-started.md", line: 3},
+		{kind: kindSection, title: "Concepts", line: 4, children: []navEntry{
+			{kind: kindPage, title: "Dashboard", target: "concepts/dashboard.md", line: 5},
 		}},
-		{Kind: KindCrossSourcePage, Title: "Helm", Target: "helm-charts:installation.md", Line: 6},
-		{Kind: KindLink, Title: "Plugins", Target: "/docs/plugins/", Line: 7},
-		{Kind: KindLink, Title: "Demo", Target: "https://demo.perses.dev", Line: 8},
+		{kind: kindCrossSourcePage, title: "Helm", target: "helm-charts:installation.md", line: 6},
+		{kind: kindLink, title: "Plugins", target: "/docs/plugins/", line: 7},
+		{kind: kindLink, title: "Demo", target: "https://demo.perses.dev", line: 8},
 	}, entries)
 }
 
@@ -62,7 +62,7 @@ func TestParseInvalid(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			_, err := Parse([]byte(test.nav))
+			_, err := parse([]byte(test.nav))
 			assert.EqualError(t, err, test.err)
 		})
 	}
@@ -154,7 +154,7 @@ func TestCheck(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			files := map[string]string{NavFile: test.nav}
+			files := map[string]string{navFile: test.nav}
 			for name, content := range pages {
 				files[name] = content
 			}
@@ -164,7 +164,7 @@ func TestCheck(t *testing.T) {
 			replace := func(messages []string) []string {
 				var result []string
 				for _, message := range messages {
-					message = strings.ReplaceAll(message, "{nav}", filepath.Join(dir, NavFile))
+					message = strings.ReplaceAll(message, "{nav}", filepath.Join(dir, navFile))
 					if rest, ok := strings.CutPrefix(message, "{dir}/"); ok {
 						page, suffix, _ := strings.Cut(rest, ":")
 						message = filepath.Join(dir, filepath.FromSlash(page)) + ":" + suffix
@@ -173,17 +173,17 @@ func TestCheck(t *testing.T) {
 				}
 				return result
 			}
-			result, err := Check(dir, set.New(test.ignored...))
+			result, err := check(dir, set.New(test.ignored...))
 			assert.NoError(t, err)
-			assert.Equal(t, replace(test.errors), result.Errors)
-			assert.Equal(t, replace(test.warnings), result.Warnings)
-			assert.Equal(t, 3, result.Pages)
+			assert.Equal(t, replace(test.errors), result.errors)
+			assert.Equal(t, replace(test.warnings), result.warnings)
+			assert.Equal(t, 3, result.pages)
 		})
 	}
 }
 
 func TestCheckWithoutNavigation(t *testing.T) {
 	dir := writeDocs(t, map[string]string{"overview.md": "# Overview"})
-	_, err := Check(dir, set.New[string]())
+	_, err := check(dir, set.New[string]())
 	assert.ErrorContains(t, err, "unable to read the navigation")
 }
