@@ -19,7 +19,7 @@ import ExploreView from './ExploreView';
 
 let mockProjectParam: string | null | undefined;
 const setProjectParam = vi.fn();
-const viewExplore = vi.fn((_props: { projectName?: string }): null => null);
+const viewExplore = vi.fn((_props: { projectName?: string; tabs?: Array<{ label: string }> }): null => null);
 
 vi.mock('use-query-params', () => ({
   StringParam: {},
@@ -32,8 +32,12 @@ vi.mock('@perses-dev/components', () => ({
   getResourceDisplayName: (): string => '',
 }));
 
-vi.mock('./ExploreWorkspace', () => ({
-  ExploreWorkspace: (props: { projectName?: string }): null => viewExplore(props),
+vi.mock('@perses-dev/explore', () => ({
+  ViewExplore: (props: { projectName?: string; tabs?: Array<{ label: string }> }): null => viewExplore(props),
+}));
+
+vi.mock('./LogsExplorer', () => ({
+  LogsExplorer: (): null => null,
 }));
 
 vi.mock('@perses-dev/plugin-system', () => ({
@@ -71,14 +75,14 @@ describe('ExploreView project param', () => {
     [undefined, undefined],
     [null, undefined],
     ['project-a', 'project-a'],
-  ])('forwards the project query param %s to ExploreWorkspace', (param, expected) => {
+  ])('forwards the project query param %s to ViewExplore', (param, expected) => {
     mockProjectParam = param;
     viewExplore.mockClear();
     render(<ExploreView />);
     expect(lastProjectName()).toBe(expected);
   });
 
-  it('forwards project changes to ExploreWorkspace, including returning to global scope', () => {
+  it('forwards project changes to ViewExplore, including returning to global scope', () => {
     mockProjectParam = undefined;
     const createView = (): ReactElement => <ExploreView />;
     const { rerender } = render(createView());
@@ -88,5 +92,21 @@ describe('ExploreView project param', () => {
       rerender(createView());
       expect(lastProjectName()).toBe(project);
     }
+  });
+});
+
+describe('ExploreView tabs', () => {
+  it('shows a tab per observability signal', () => {
+    mockProjectParam = undefined;
+    viewExplore.mockClear();
+    render(<ExploreView />);
+    expect(viewExplore.mock.lastCall?.[0]?.tabs?.map((tab) => tab.label)).toEqual([
+      'Metrics',
+      'Logs',
+      'Traces',
+      'Profiling',
+      'Alerts',
+      'Silences',
+    ]);
   });
 });

@@ -15,6 +15,7 @@ import { CircularProgress, Menu, MenuItem, Stack, ListItemIcon, ListItemText } f
 import type { ProjectResource } from '@perses-dev/client';
 import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/components';
 import type { ExternalVariableDefinition } from '@perses-dev/dashboards';
+import { ViewExplore } from '@perses-dev/explore';
 import { PluginRegistry } from '@perses-dev/plugin-system';
 import Archive from 'mdi-material-ui/Archive';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
@@ -31,7 +32,7 @@ import { useProjectList } from '../../model/project-client';
 import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { buildGlobalVariableDefinition } from '../../utils/variables';
-import { ExploreWorkspace } from './ExploreWorkspace';
+import { buildExploreTabs } from './explore-tabs';
 
 function ExploreView(): ReactElement {
   return <HelperExploreView />;
@@ -139,6 +140,8 @@ function HelperExploreView(): ReactElement {
     [globalVars],
   );
 
+  const exploreTabs = useMemo(() => buildExploreTabs(projectName), [projectName]);
+
   const exploreTitleComponent = useMemo(() => {
     const breadcrumbContent = isMobileSize ? (
       <Breadcrumbs>
@@ -178,11 +181,12 @@ function HelperExploreView(): ReactElement {
     <ErrorBoundary FallbackComponent={ErrorAlert}>
       <PluginRegistry pluginLoader={pluginLoader}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
-          <ExploreWorkspace
+          <ViewExplore
             datasourceApi={datasourceApi}
             projectName={projectName}
             externalVariableDefinitions={externalVariableDefinitions}
             exploreTitleComponent={exploreTitleComponent}
+            tabs={exploreTabs}
           />
         </ErrorBoundary>
       </PluginRegistry>
