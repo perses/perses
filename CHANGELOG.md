@@ -1,209 +1,166 @@
 # Changelog
 
-## 0.55.0-rc.1 / 2026-10-16
+## 0.55.0 / 2026-10-21
+
+Welcome to the v0.55.0 release!
+
+First of all, this release fixes a large number of security vulnerabilities, several of them critical. Most of them could
+be exploited without authentication with the default configuration. They include JWT forgery, SSRF and credential
+leaks through the datasource proxy, arbitrary file reads, and path traversals in the file system database.
+We strongly recommend upgrading as soon as possible.
+Some of these fixes require a configuration change: when authentication is enabled, an encryption key is now mandatory.
+The datasource proxy also denies loopback, link-local, cloud metadata and Kubernetes API destinations by default.
+Please read the [upgrade guide](https://perses.dev/perses/docs/upgrade/v0.55.0/) and the new
+[security considerations](https://perses.dev/perses/docs/security/) page before upgrading.
+
+This release also comes with other breaking changes: the package `@perses-dev/core` and the old dashboard and
+datasource specifications have been removed, React 17 is no longer supported, Node 24 is now required, and the
+packages are published as ESM only.
+
+On the dashboard side, you can now repeat a single panel, define annotations per panel, drag and drop panels between
+groups, and lock the plugin versions used by a dashboard. Prometheus exemplars are supported, the search has been
+rewritten on the backend, and two new plugins are available: Canvas and Json.
+
+Finally, the datasource proxy, the native authorization, the plugin extraction, and the caching of static assets have
+all been made faster.
 
 ### Core & UI
-
-- [BUGFIX] percli plugin build: download all CUE deps before vendoring them (#4564)
-
-### Spec
-
-- [BUGFIX] Variable display: make hidden optional (omitempty) (perses/spec#113)
-
-### Shared packages
-
-- [BUGFIX] Remove the useEffect for adding default queries, now handled on the plugin side (perses/shared#361)
-
-## 0.55.0-rc.0 / 2026-10-08
-
-### Core & UI
-
-- [FEATURE] Add annotation support to Go SDK (#4448)
-- [ENHANCEMENT] Add NewSelector convenience constructor to go-sdk/datasource (#4557)
-- [ENHANCEMENT] Grafana migration: keep the default time range, refresh interval and timezone (#4555)
-- [ENHANCEMENT] Allow duplicating a dashboard into another project (#4536)
-- [ENHANCEMENT] Native authorization: build the permission cache in linear time and deduplicate role binding subjects (#4540)
-- [ENHANCEMENT] Support grouped important dashboards (#4506)
-- [ENHANCEMENT] Cache content-hashed fonts and images as immutable static assets (#4533)
-- [ENHANCEMENT] SQL proxy: reject INTO OUTFILE/DUMPFILE, document PostgreSQL file-reading functions (#4535)
-- [ENHANCEMENT] Skip the extraction of plugin archives already extracted (#4534)
-- [BUGFIX] Harden the headers of the datasource proxy responses (#4558)
-- [BUGFIX] Emit datasource variable references as plain JSON/YAML strings (#4545)
-- [BUGFIX] OAuth passthrough: use the refreshed token in the current proxy request (#4554)
-- [BUGFIX] Proxy: do not forward the caller credentials to the datasource (#4553)
-- [BUGFIX] Native authorization: fix deadlock between permissions retrieval and cache refresh (#4537)
-- [BUGFIX] Include dashboard tags in project view search (#4446)
-- [BREAKINGCHANGE] Validate datasource proxy targets to prevent SSRF (#4518)
-- [BREAKINGCHANGE] Config: when auth is enabled, encryption_key must be provided (#4550)
-- [DOC] Split upgrade guide per version (#4566)
-- [DOC] Complete the upgrade guide for v0.55.0 (#4561)
-
-### Plugins improvements
-
-- [FEATURE] TimeSeriesChart: Add color palette selection (perse/plugins#845)
-- [ENHANCEMENT] Allow plugins to use fetch provided by a fetch provider (perse/plugins#854)
-- [ENHANCEMENT] Prometheus: explain why $__rate_interval cannot be used as Min Step (perse/plugins#861)
-- [ENHANCEMENT] Upgrade Oxlint and fix React Compiler errors (perse/plugins#826)
-- [BUGFIX] Update plugin Selector functions for new datasource.Selector union type (perse/plugins#857)
-- [BUGFIX] Keep annotation markers visible when y-axis excludes zero (perse/plugins#855)
-- [BUGFIX] pyroscope: include time range in lookup query keys (perse/plugins#849)
-- [BUGFIX] AlertTable: only link runbook annotations that are http(s) URLs (perse/plugins#829)
-- [BUGFIX] StatChart: size auto tiles from the panel height (perse/plugins#850)
-- [BUGFIX] pyroscope: scope label lookups to the selected service (perse/plugins#835)
-- [BUGFIX] Prometheus: ignore empty series selectors in label variables (perse/plugins#862)
-
-## 0.55.0-beta.4 / 2026-09-30
-
-### Core & UI
-
-- [FEATURE] Datasource proxy: bound the HTTP proxy timeout with the server config (#4525)
-- [FEATURE] Exposing complete dashboard and plugin CUE schema endpoint (#4505)
-- [ENHANCEMENT] Proxy: reuse HTTP transport per saved datasource (#4521)
-- [ENHANCEMENT] Extract plugin archives in parallel (#4507)
-- [ENHANCEMENT] UI: use dashboard list from search endpoint (#4366)
-- [ENHANCEMENT] Improve the way the cache is set when serving static file (#4497)
-- [BUGFIX] SQL proxy: fix TLS handling, read-only enforcement and driver options (#4522)
-- [BUGFIX] Missing secret read permission when creating an embedded datasource in ephemeralDashboard (#4524)
-- [BUGFIX] Align percli new plugin output (#4523)
-- [BUGFIX] Make file database writes atomic (#4513)
-- [BUGFIX] Handle wildcard access mixed with specifying projects (#4511)
-- [BUGFIX] DaC SDK: fix panelgroup lib not resolving layout kind (#4470)
-- [BUGFIX] Safely decode user names for permission API (#4510)
-- [BUGFIX] Ensure the name parameter is also verified before being used (#4499)
-- [BREAKINGCHANGE] Restrict files referenced in secrets to allowed directories (#4503)
-- [DOC] Add security considerations page (#4512)
-
-### Plugins improvements
-
-- [FEATURE] TimeSeriesChart: add Exemplars support (perses/plugins#800)
-- [FEATURE] StatChart: configurable multi-series layout (auto/row/grid) (perses/plugins#814)
-- [ENHANCEMENT] Improve time series chart performance (perses/plugins#832)
-- [ENHANCEMENT] Support responsive Stat Chart tile orientations (perses/plugins#812)
-- [BUGFIX] Prometheus: fix exemplars & ts labels not matching (perses/plugins#834)
-- [DOC] Document missing Go SDK options and fix stale examples (perses/plugins#831)
-
-## 0.55.0-beta.3 / 2026-09-22
-
-### Core & UI
-
-- [FEATURE] Add dynamic page title (#4489)
-- [ENHANCEMENT] Protect the database against path transversal attack (#4492)
-- [ENHANCEMENT] Validate the value used in `metadata.name` (#4488)
-- [BUGFIX] Ensure the project name parameter is valid for any HTTP methods (#4491)
-- [BUGFIX] Missing secret read permission when creating an embedded datasource in dashboard (#4487)
-- [BUGFIX] Prevent path transversal attack when using project query parameter (#4485)
-
-### Plugins improvements
-
-- [FEATURE] Add new plugin: Json (perses/plugins#770)
-
-## 0.55.0-beta.2 / 2026-09-18
-
-### Core & UI
-
-- [FEATURE] Add dashboard lock mode (#4370)
+- [SECURITY] Prevent path transversal attack when using project query parameter (#4485)
+- [SECURITY] Missing secret read permission when creating an embedded datasource in dashboard (#4487)
+- [SECURITY] Validate the value used in `metadata.name` (#4488)
+- [SECURITY] Ensure the project name parameter is valid for any HTTP methods (#4491)
+- [SECURITY] Protect the database against path transversal attack (#4492)
+- [SECURITY] Ensure the name parameter is also verified before being used (#4499)
+- [SECURITY] Restrict files referenced in secrets to allowed directories (#4503)
+- [SECURITY] Validate datasource proxy targets to prevent SSRF (#4518)
+- [SECURITY] SQL proxy: fix TLS handling, read-only enforcement and driver options (#4522)
+- [SECURITY] SQL proxy: reject INTO OUTFILE/DUMPFILE, document PostgreSQL file-reading functions (#4535)
+- [SECURITY] Config: when auth is enabled, encryption_key must be provided (#4550)
+- [SECURITY] Proxy: do not forward the caller credentials to the datasource (#4553)
+- [SECURITY] Harden the headers of the datasource proxy responses (#4558)
+- [FEATURE] New `percli dac watch` command (#3903)
+- [FEATURE] Add claim-based role assignment from OAuth/OIDC access tokens (#4172)
+- [FEATURE] Add server defaults for user preferences (#4268)
+- [FEATURE] Validate panel-level annotation definitions (#4299)
+- [FEATURE] Add panel repeat migration from grafana (#4328)
+- [FEATURE] Add disable_auto_refresh config (#4338)
+- [FEATURE] Add k8s user impersonation support (#4339)
+- [FEATURE] Add new search endpoint (#4355) (#4601)
+- [FEATURE] Consume panel-level annotations in the UI (#4356)
 - [FEATURE] Add default flag to datasource discovery configuration (#4368)
-- [ENHANCEMENT] Allow opening dashboards and tabs in new tabs (#4252)
-- [ENHANCEMENT] Add Cache-Control headers for static UI assets (#4475)
-- [ENHANCEMENT] Support custom login property for the OIDC provider (#4468)
-- [ENHANCEMENT] CLI/LOGIN: check the terminal if it is interactive (#4469)
-- [BUGFIX] CUE SDK: fix wrong lib (#4471)
-- [DOC] Fix configuration doc: discovery is an array (#4462)
-
-### Plugins improvements
-
-- [FEATURE] Pyroscope: add configurable minStep to datasource (#810)
-- [FEATURE] Prometheus: add Exemplars support (#799)
-- [ENHANCEMENT] Pyroscope: scope profile type options to the selected service for pyroscope (#820)
-- [ENHANCEMENT] DatasourceVariable, Jaeger, OpenSearch: support jaeger and opensearch in migration (#769)
-- [DOC] Table: Document Table embedded panels (#816)
-
-## 0.55.0-beta.1 / 2026-09-16
-
-This release comes to fix the 0.55.0-beta.0 release that was not fully released.
-Please don't use 0.55.0-beta.0.
-
-- [BUGFIX] Fix error not well handled in perses http client for auth (#4450)
-
-## 0.55.0-beta.0 / 2026-09-15
-
-Time for a new release! Here is the first beta of the 0.55.X cycle that contains already some tremendous improvements and bug fixes.
-
-A new plugin! Canvas (perses/plugins#729) is now available. :rocket: Go and see it in action!
-Feedback is more than welcome.
-
-Some core improvements come as well and complete the picture, like claim-based role assignment, new `percli dac watch`
-command, and the improved search experience.
-
-Mind some breaking changes that we couldn't avoid:
-- the removal of `@perses-dev/core` announced as deprecated in the previous release,
-- as an effort of being always up-to-date, we have done some major upgrade of dependencies (drop React 17, upgrade to
-  Node 24 (LTS), upgrade TypeScript to v7...),
-- we also dropped the support of CommonJS.
-
-We hope you will enjoy this release and we are looking forward to your feedback and contributions.
-Thank you also for all the contributors who made this release possible!
-
-### Core & UI
-
+- [FEATURE] Add dashboard lock mode (#4370)
+- [FEATURE] Enable decompress middleware for all route (#4381)
 - [FEATURE] Go SDK: add dashboard.Timezone option for Spec.timezone (#4386)
-- [FEATURE] Add configurable refresh interval (#4432)
+- [FEATURE] Wire test datasource connection button into DatasourceDrawer (#4396)
+- [FEATURE] Add metrics+logs+traces demo dashboard to dev environment (#4402)
 - [FEATURE] Implement oauthPassThru, handles OIDC refreshToken as well (#4404)
 - [FEATURE] Support pre-computed bcrypt password hash for user provisioning (#4423)
 - [FEATURE] Add HTTP proxy header filtering policies (#4428)
-- [FEATURE] Add metrics+logs+traces demo dashboard to dev environment (#4402)
-- [FEATURE] Add disable_auto_refresh config (#4338)
-- [FEATURE] Wire test datasource connection button into DatasourceDrawer (#4396)
-- [FEATURE] Enable decompress middleware for all route (#4381)
-- [FEATURE] Add claim-based role assignment from OAuth/OIDC access tokens (#4172)
-- [FEATURE] Add new search endpoint (#4355)
-- [FEATURE] Add server defaults for user preferences (#4268)
-- [FEATURE] Consume panel-level annotations in the UI (#4356)
-- [FEATURE] Validate panel-level annotation definitions (#4299)
-- [FEATURE] Add panel repeat migration from grafana (#4328)
-- [FEATURE] Add k8s user impersonation support (#4339)
-- [FEATURE] New `percli dac watch` command (#3903)
-- [ENHANCEMENT] `percli dac preview`: add new flag `--create-project` (#4413)
-- [ENHANCEMENT] Config: `frontend.time_range.options` is sorted in ascending order and values are verified (#4352)
-- [ENHANCEMENT] Update the statchart version to 0.14.0 (#4354)
-- [ENHANCEMENT] Multi yaml file support for provisioning (#4332)
+- [FEATURE] Add configurable refresh interval (#4432)
+- [FEATURE] Add annotation support to Go SDK (#4448)
+- [FEATURE] Add dynamic page title (#4489)
+- [FEATURE] Exposing complete dashboard and plugin CUE schema endpoint (#4505)
+- [FEATURE] Datasource proxy: bound the HTTP proxy timeout with the server config (#4525)
 - [ENHANCEMENT] Allow provisioning by watching folders (#4136)
-- [BUGFIX] Fix SecretSpec validation of mutually exclusive auth methods (#4269)
-- [BUGFIX] Fix drop of query parameter when redirection is running with api_prefix (#4449)
-- [BUGFIX] Default OIDC/OAuth redirect path to api_prefix, not router basename-relative root (#4437)
-- [BUGFIX] Prefix OIDC/OAuth login redirect with api_prefix (#4433)
-- [BUGFIX] Prevent infinite spinner when creating dashboards on an empty project (#4412)
-- [BUGFIX] Handle semver comparission with plugins that do not include v as version prefix (#4387)
-- [BUGFIX] Support curly braces ${} variable in variable validation (#4379)
-- [BUGFIX] Honor kubeconfig exec credential plugins during Kubernetes login (#4343)
-- [BUGFIX] Fix data race when listing project resources across authorized projects (#4342)
+- [ENHANCEMENT] Allow opening dashboards and tabs in new tabs (#4252)
+- [ENHANCEMENT] Multi yaml file support for provisioning (#4332)
+- [ENHANCEMENT] Config: `frontend.time_range.options` is sorted in ascending order and values are verified (#4352)
+- [ENHANCEMENT] UI: use dashboard list from search endpoint (#4366)
+- [ENHANCEMENT] `percli dac preview`: add new flag `--create-project` (#4413)
+- [ENHANCEMENT] Support custom login property for the OIDC provider (#4468)
+- [ENHANCEMENT] CLI/LOGIN: check the terminal if it is interactive (#4469)
+- [ENHANCEMENT] Add Cache-Control headers for static UI assets (#4475)
+- [ENHANCEMENT] Improve the way the cache is set when serving static file (#4497)
+- [ENHANCEMENT] Support grouped important dashboards (#4506)
+- [ENHANCEMENT] Extract plugin archives in parallel (#4507)
+- [ENHANCEMENT] Proxy: reuse HTTP transport per saved datasource (#4521)
+- [ENHANCEMENT] Cache content-hashed fonts and images as immutable static assets (#4533)
+- [ENHANCEMENT] Skip the extraction of plugin archives already extracted (#4534)
+- [ENHANCEMENT] Allow duplicating a dashboard into another project (#4536)
+- [ENHANCEMENT] Native authorization: build the permission cache in linear time and deduplicate role binding subjects (#4540)
+- [ENHANCEMENT] Grafana migration: keep the default time range, refresh interval and timezone (#4555)
+- [ENHANCEMENT] Add NewSelector convenience constructor to go-sdk/datasource (#4557)
 - [BUGFIX] Align mdox docs checks (#4203)
-- [BREAKINGCHANGE] Upgrade TypeScript, Zod and React Hook Forms deps + remove TypeDoc (#4421)
+- [BUGFIX] Fix SecretSpec validation of mutually exclusive auth methods (#4269)
+- [BUGFIX] Fix data race when listing project resources across authorized projects (#4342)
+- [BUGFIX] Honor kubeconfig exec credential plugins during Kubernetes login (#4343)
+- [BUGFIX] Support curly braces ${} variable in variable validation (#4379)
+- [BUGFIX] Handle semver comparission with plugins that do not include v as version prefix (#4387)
+- [BUGFIX] Prevent infinite spinner when creating dashboards on an empty project (#4412)
+- [BUGFIX] Prefix OIDC/OAuth login redirect with api_prefix (#4433)
+- [BUGFIX] Default OIDC/OAuth redirect path to api_prefix, not router basename-relative root (#4437)
+- [BUGFIX] Include dashboard tags in project view search (#4446)
+- [BUGFIX] Fix drop of query parameter when redirection is running with api_prefix (#4449)
+- [BUGFIX] Fix error not well handled in perses http client for auth (#4450)
+- [BUGFIX] DaC SDK: fix panelgroup lib not resolving layout kind (#4470)
+- [BUGFIX] CUE SDK: fix wrong lib (#4471)
+- [BUGFIX] Safely decode user names for permission API (#4510)
+- [BUGFIX] Handle wildcard access mixed with specifying projects (#4511)
+- [BUGFIX] Make file database writes atomic (#4513)
+- [BUGFIX] Align percli new plugin output (#4523)
+- [BUGFIX] Missing secret read permission when creating an embedded datasource in ephemeralDashboard (#4524)
+- [BUGFIX] Native authorization: fix deadlock between permissions retrieval and cache refresh (#4537)
+- [BUGFIX] Emit datasource variable references as plain JSON/YAML strings (#4545)
+- [BUGFIX] OAuth passthrough: use the refreshed token in the current proxy request (#4554)
+- [BUGFIX] percli plugin build: download all CUE deps before vendoring them (#4564)
+- [BUGFIX] Dashboard CUE schema: accept dashboards without server metadata or with definition-based plugins (#4577)
+- [BUGFIX] Grafana migration: drop allValue when includeAll is off (#4606)
+- [BUGFIX] Fix gzip request bodies forwarded by the datasource proxy (#4613)
+- [BUGFIX] Dashboard CUE schema: make ListVariable allowAllValue and allowMultiple default to false (#4615)
+- [BREAKINGCHANGE] Remove @perses-dev/core package (#4325)
+- [BREAKINGCHANGE] Remove old dashboard and datasource specification (#4326)
 - [BREAKINGCHANGE] Upgrade to Node 24 (LTS) and remove CommonJS (#4380)
 - [BREAKINGCHANGE] Dropping React 17 (#4391)
-- [BREAKINGCHANGE] Remove old dashboard and datasource specification (#4326)
-- [BREAKINGCHANGE] Remove @perses-dev/core package (#4325)
-- [DOC] Document the Annotation plugin kind (#4427)
+- [BREAKINGCHANGE] Upgrade TypeScript, Zod and React Hook Forms deps + remove TypeDoc (#4421)
 - [DOC] Improve `percli dac watch` doc to use provisioning watcher (#4298)
-- [DOC] Update release doc (#4389)
-- [DOC] Fix typos in troubleshooting doc, client error message, and comments (#4394)
-- [DOC] Update migration doc (#4308)
 - [DOC] Warn about usage of postgreSQL (#4306)
+- [DOC] Update migration doc (#4308)
 - [DOC] Fix link in getting started redirecting to the API (#4313)
+- [DOC] Update release doc (#4389)
 - [DOC] Fix typo knowm -> known (#4390)
+- [DOC] Fix typos in troubleshooting doc, client error message, and comments (#4394)
+- [DOC] Document the Annotation plugin kind (#4427)
+- [DOC] Fix configuration doc: discovery is an array (#4462)
+- [DOC] Add security considerations page (#4512)
+- [DOC] Complete the upgrade guide for v0.55.0 (#4561)
+- [DOC] Split upgrade guide per version (#4566)
 
 ### Plugins improvements
 
+- [FEATURE] TimeSeriesChart: Add color palette selection (perses/plugins#845)
+- [FEATURE] TimeSeriesChart: add Exemplars support (perses/plugins#800)
+- [FEATURE] TimeSeriesChart: Scope TimeSeriesChart annotations to the panel (perses/plugins#754)
+- [FEATURE] StatChart: configurable multi-series layout (auto/row/grid) (perses/plugins#814)
+- [FEATURE] Add new plugin: JSON (perses/plugins#770)
 - [FEATURE] Add new plugin: Canvas (perses/plugins#729)
+- [FEATURE] Pyroscope: add configurable minStep to datasource (perses/plugins#810)
+- [FEATURE] Pyroscope: migrate profile queries to the Connect API (perses/plugins#763)
+- [FEATURE] Prometheus: add Exemplars support (perses/plugins#799) (perses/plugins#834)
+- [FEATURE] Prometheus: add test connection button to prometheus plugin (perses/plugins#620)
 - [FEATURE] OpenSearch: Add health check path to OpenSearch plugin (perses/plugins#797)
 - [FEATURE] AlertManager: Add health check path to AlertManager plugin (perses/plugins#798)
-- [FEATURE] Prometheus: add test connection button to prometheus plugin (perses/plugins#620)
 - [FEATURE] Table: adds a table-wide Enable Sorting option (perses/plugins#759)
-- [FEATURE] Pyroscope: migrate profile queries to the Connect API (perses/plugins#763)
 - [FEATURE] BarChart: add regex based color override (perses/plugins#774)
-- [FEATURE] TimeSeriesChart: Scope TimeSeriesChart annotations to the panel (perses/plugins#754)
+- [ENHANCEMENT] Allow plugins to use fetch provided by a fetch provider (perses/plugins#854)
+- [ENHANCEMENT] Prometheus: explain why $__rate_interval cannot be used as Min Step (perses/plugins#861)
 - [ENHANCEMENT] Prometheus: add instant mode to queries (perses/plugins#752)
+- [ENHANCEMENT] TimeSeriesChart: Improve performance (perses/plugins#832)
+- [ENHANCEMENT] Support responsive Stat Chart tile orientations (perses/plugins#812)
+- [ENHANCEMENT] Pyroscope: scope profile type options to the selected service for pyroscope (perses/plugins#820)
+- [ENHANCEMENT] DatasourceVariable, Jaeger, OpenSearch: support jaeger and opensearch in migration (perses/plugins#769)
+- [BUGFIX] Update plugin Selector functions for new datasource.Selector union type (perses/plugins#857)
+- [BUGFIX] Keep annotation markers visible when y-axis excludes zero (perses/plugins#855)
+- [BUGFIX] Pyroscope: include time range in lookup query keys (perses/plugins#849)
+- [BUGFIX] Pyroscope: scope label lookups to the selected service (perses/plugins#835)
+- [BUGFIX] AlertTable: only link runbook annotations that are http(s) URLs (perses/plugins#829)
+- [BUGFIX] StatChart: size auto tiles from the panel height (perses/plugins#850)
+- [BUGFIX] Prometheus: ignore empty series selectors in label variables (perses/plugins#862)
 - [BUGFIX] Table: align filter rows with table columns (perses/plugins#755)
+- [BUGFIX] Table: add table cell format (perses/plugins#881)
+- [BUGFIX] TimeSeriesChart: express palette schema without comprehension (perses/plugins#869)
+- [DOC] Prometheus: explain how Grafana query variables are migrated (perses/plugins#880)
+- [DOC] Document missing Go SDK options and fix stale examples (perses/plugins#831)
+- [DOC] Table: Document Table embedded panels (perses/plugins#816)
 
 ## 0.54.0 / 2026-07-29
 
@@ -425,7 +382,7 @@ even if it will make the upgrade process a bit more complex, you will stay with 
 improvements.
 
 While you can read this blog post to have details about the changes and how to upgrade, we are also providing a
-[migration guide](https://perses.dev/perses/docs/upgrade-guide/) that is more condensed and focused on the steps
+[migration guide](https://perses.dev/perses/docs/upgrade/v0.53.0/) that is more condensed and focused on the steps
 required to upgrade from previous versions to v0.53.0.
 
 On a different topic, we are happy to being able to list [Logz.io](https://logz.io/) as a new officially company using

@@ -223,6 +223,67 @@ func TestMig_MigrateTimeSettings(t *testing.T) {
 	}
 }
 
+func TestMig_MigrateVariableAllValue(t *testing.T) {
+	// The test plugins only migrate "custom" variables (SomeVariable), so a "query" variable gets the placeholder plugin.
+	testSuite := []struct {
+		title                  string
+		grafanaVariable        string
+		expectedPluginKind     string
+		expectedAllowAllValue  bool
+		expectedCustomAllValue string
+	}{
+		{
+			title:              "variable that no plugin can migrate, allValue without includeAll is dropped",
+			grafanaVariable:    `{"name": "host", "type": "query", "datasource": {"type": "elasticsearch", "uid": "es"}, "includeAll": false, "allValue": ".*"}`,
+			expectedPluginKind: "StaticListVariable",
+		},
+		{
+			title:                  "variable that no plugin can migrate, allValue with includeAll is kept",
+			grafanaVariable:        `{"name": "host", "type": "query", "datasource": {"type": "elasticsearch", "uid": "es"}, "includeAll": true, "allValue": ".*"}`,
+			expectedPluginKind:     "StaticListVariable",
+			expectedAllowAllValue:  true,
+			expectedCustomAllValue: ".*",
+		},
+		{
+			title:              "variable migrated by a plugin, allValue without includeAll is dropped",
+			grafanaVariable:    `{"name": "env", "type": "custom", "query": "dev,prod", "includeAll": false, "allValue": ".*"}`,
+			expectedPluginKind: "SomeVariable",
+		},
+		{
+			title:                  "variable migrated by a plugin, allValue with includeAll is kept",
+			grafanaVariable:        `{"name": "env", "type": "custom", "query": "dev,prod", "includeAll": true, "allValue": ".*"}`,
+			expectedPluginKind:     "SomeVariable",
+			expectedAllowAllValue:  true,
+			expectedCustomAllValue: ".*",
+		},
+	}
+
+	pl := loadDefaultTestPlugins()
+
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			input := `{"uid": "variable-all-value", "title": "Variable all value", "templating": {"list": [` + test.grafanaVariable + `]}}`
+			grafanaDashboard := &migrate.SimplifiedDashboard{}
+			if unmarshallErr := json.Unmarshal([]byte(input), grafanaDashboard); unmarshallErr != nil {
+				t.Fatal(unmarshallErr)
+			}
+			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			spec, ok := persesDashboard.Spec.Variables[0].Spec.(*dashboard.ListVariableSpec)
+			if !ok {
+				t.Fatalf("expected a list variable, got %T", persesDashboard.Spec.Variables[0].Spec)
+			}
+			assert.Equal(t, test.expectedPluginKind, spec.Plugin.Kind)
+			assert.Equal(t, test.expectedAllowAllValue, spec.AllowAllValue)
+			assert.Equal(t, test.expectedCustomAllValue, spec.CustomAllValue)
+			// Decoding the migrated dashboard runs the validation of a Perses dashboard.
+			assert.NoError(t, json.Unmarshal(testUtils.JSONMarshalStrict(persesDashboard), &v1.Dashboard{}))
+		})
+	}
+}
+
 func TestMigrateDashboardLinks(t *testing.T) {
 	pl := loadDefaultTestPlugins()
 
