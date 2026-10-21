@@ -15,18 +15,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, Box, Divider, FormControl, IconButton, Stack, TextField, Typography } from '@mui/material';
 import type { Action, UserEditorSchemaType, UserResource } from '@perses-dev/client';
 import { userSchema } from '@perses-dev/client';
-import {
-  DiscardChangesConfirmationDialog,
-  FormActions,
-  getSubmitText,
-  getTitleAction,
-  useDrawerCloseHandler,
-} from '@perses-dev/components';
+import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
-import type { ReactElement } from 'react';
-import { Fragment, useMemo, useState } from 'react';
+import type { ForwardedRef, ReactElement } from 'react';
+import { forwardRef, Fragment, useImperativeHandle, useMemo, useState } from 'react';
 import type { Control, SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
@@ -40,16 +35,10 @@ type UserEditorFormProps = FormEditorProps<UserResource>;
 // TODO: Remove in the next shared beta release.
 const formSchema = z.transform((value: UserEditorSchemaType): unknown => value).pipe(userSchema);
 
-export function UserEditorForm({
-  initialValue,
-  action,
-  isDraft,
-  isReadonly,
-  onActionChange,
-  onSave,
-  onClose,
-  onDelete,
-}: UserEditorFormProps): ReactElement {
+export const UserEditorForm = forwardRef(function UserEditorForm(
+  { initialValue, action, isDraft, isReadonly, onActionChange, onSave, onClose, onDelete }: UserEditorFormProps,
+  ref: ForwardedRef<FormEditorHandle>,
+): ReactElement {
   const externalAuthnProvidersEnabled = useIsExternalAuthnProviderEnabled();
   const nativeAuthnProviderEnabled = useIsNativeAuthnProviderEnabled();
 
@@ -95,7 +84,7 @@ export function UserEditorForm({
     }
   }
 
-  useDrawerCloseHandler(handleCancel);
+  useImperativeHandle(ref, () => ({ requestClose: handleCancel }));
 
   return (
     <FormProvider {...form}>
@@ -302,7 +291,7 @@ export function UserEditorForm({
       />
     </FormProvider>
   );
-}
+});
 
 function OAuthProvider({
   control,

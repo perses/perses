@@ -14,9 +14,10 @@
 import type { Datasource, DatasourceDefinition } from '@perses-dev/client';
 import { createTestDatasourceConnection } from '@perses-dev/client';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import { DatasourceEditorForm, PluginRegistry, ValidationProvider } from '@perses-dev/plugin-system';
 import type { ReactElement } from 'react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 import { DeleteResourceDialog } from '../dialogs';
@@ -37,6 +38,16 @@ export function DatasourceDrawer<T extends Datasource>({
   onDelete,
 }: DatasourceDrawerProps<T>): ReactElement {
   const [isDeleteDatasourceDialogStateOpened, setDeleteDatasourceDialogStateOpened] = useState<boolean>(false);
+
+  // Let the form handle click out / Escape, so that it can ask for confirmation before discarding unsaved changes
+  const formRef = useRef<FormEditorHandle>(null);
+  const handleDrawerClose = (): void => {
+    if (formRef.current) {
+      formRef.current.requestClose();
+    } else {
+      onClose();
+    }
+  };
   const pluginLoader = useRemotePluginLoader();
 
   const project = datasource.kind === 'Datasource' ? datasource.metadata.project : undefined;
@@ -52,12 +63,13 @@ export function DatasourceDrawer<T extends Datasource>({
   };
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} data-testid="datasource-editor">
+    <Drawer isOpen={isOpen} onClose={handleDrawerClose} data-testid="datasource-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry pluginLoader={pluginLoader}>
           <ValidationProvider>
             {isOpen && (
               <DatasourceEditorForm
+                ref={formRef}
                 initialDatasourceDefinition={{ name: datasource.metadata.name, spec: datasource.spec }}
                 action={action}
                 isDraft={false}

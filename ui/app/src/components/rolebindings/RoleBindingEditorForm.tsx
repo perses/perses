@@ -15,17 +15,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Autocomplete, Box, Divider, IconButton, Stack, TextField, Typography } from '@mui/material';
 import type { RoleBinding } from '@perses-dev/client';
 import { roleBindingsEditorSchema } from '@perses-dev/client';
-import {
-  DiscardChangesConfirmationDialog,
-  FormActions,
-  getSubmitText,
-  getTitleAction,
-  useDrawerCloseHandler,
-} from '@perses-dev/components';
+import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
-import type { ReactElement } from 'react';
-import React, { useMemo, useState } from 'react';
+import type { ForwardedRef, ReactElement } from 'react';
+import React, { forwardRef, useImperativeHandle, useMemo, useState } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -41,17 +36,20 @@ interface RoleBindingEditorFormProps extends FormEditorProps<RoleBinding> {
 // TODO: Remove in the next shared beta release.
 const formSchema = z.transform((value: RoleBinding): unknown => value).pipe(roleBindingsEditorSchema);
 
-export function RoleBindingEditorForm({
-  initialValue,
-  action,
-  roleSuggestions,
-  isDraft,
-  isReadonly,
-  onActionChange,
-  onSave,
-  onClose,
-  onDelete,
-}: RoleBindingEditorFormProps): ReactElement {
+export const RoleBindingEditorForm = forwardRef(function RoleBindingEditorForm(
+  {
+    initialValue,
+    action,
+    roleSuggestions,
+    isDraft,
+    isReadonly,
+    onActionChange,
+    onSave,
+    onClose,
+    onDelete,
+  }: RoleBindingEditorFormProps,
+  ref: ForwardedRef<FormEditorHandle>,
+): ReactElement {
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
 
   const titleAction = getTitleAction(action, isDraft);
@@ -89,7 +87,7 @@ export function RoleBindingEditorForm({
     }
   }
 
-  useDrawerCloseHandler(handleCancel);
+  useImperativeHandle(ref, () => ({ requestClose: handleCancel }));
 
   return (
     <FormProvider {...form}>
@@ -241,4 +239,4 @@ export function RoleBindingEditorForm({
       />
     </FormProvider>
   );
-}
+});

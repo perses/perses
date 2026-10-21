@@ -13,8 +13,9 @@
 
 import type { Secret } from '@perses-dev/client';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import type { Dispatch, ReactElement } from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { DeleteResourceDialog } from '../dialogs';
 import type { DrawerProps } from '../form-drawers';
@@ -36,11 +37,22 @@ export function SecretDrawer<T extends Secret>({
 }: SecretDrawerProps<T>): ReactElement {
   const [isDeleteSecretDialogStateOpened, setDeleteSecretDialogStateOpened] = useState<boolean>(false);
 
+  // Let the form handle click out / Escape, so that it can ask for confirmation before discarding unsaved changes
+  const formRef = useRef<FormEditorHandle>(null);
+  const handleDrawerClose = (): void => {
+    if (formRef.current) {
+      formRef.current.requestClose();
+    } else {
+      onClose();
+    }
+  };
+
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} data-testid="secret-editor">
+    <Drawer isOpen={isOpen} onClose={handleDrawerClose} data-testid="secret-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         {isOpen && (
           <SecretEditorForm
+            ref={formRef}
             initialValue={secret}
             action={action}
             isDraft={false}
