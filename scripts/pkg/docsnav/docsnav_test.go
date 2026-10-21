@@ -115,7 +115,7 @@ func TestCheck(t *testing.T) {
 			title: "page not referenced",
 			nav:   "- overview.md\n- api/README.md",
 			errors: []string{
-				"{dir}/concepts/dashboard.md: the page is not referenced in {dir}/nav.yaml",
+				"{dir}/concepts/dashboard.md: the page is not referenced in {nav}",
 			},
 		},
 		{
@@ -127,28 +127,28 @@ func TestCheck(t *testing.T) {
 			title: "page not found",
 			nav:   "- overview.md\n- concepts/dashboard.md\n- api/README.md\n- Missing: concepts/missing.md",
 			errors: []string{
-				`{dir}/nav.yaml:4: the page "concepts/missing.md" doesn't exist`,
+				`{nav}:4: the page "concepts/missing.md" doesn't exist`,
 			},
 		},
 		{
 			title: "page outside of the documentation",
 			nav:   "- overview.md\n- concepts/dashboard.md\n- api/README.md\n- ../README.md",
 			errors: []string{
-				`{dir}/nav.yaml:4: the page "../README.md" is outside of the documentation`,
+				`{nav}:4: the page "../README.md" is outside of the documentation`,
 			},
 		},
 		{
 			title: "page referenced twice",
 			nav:   "- overview.md\n- concepts/dashboard.md\n- api/README.md\n- Again: overview.md",
 			warnings: []string{
-				`{dir}/nav.yaml:4: the page "overview.md" is already referenced at line 1`,
+				`{nav}:4: the page "overview.md" is already referenced at line 1`,
 			},
 		},
 		{
 			title: "invalid navigation",
 			nav:   "- a: a.md\n  b: b.md",
 			errors: []string{
-				"{dir}/nav.yaml: line 1: an entry must have exactly one key, got 2",
+				"{nav}: line 1: an entry must have exactly one key, got 2",
 			},
 		},
 	}
@@ -159,10 +159,17 @@ func TestCheck(t *testing.T) {
 				files[name] = content
 			}
 			dir := writeDocs(t, files)
+			// {nav} is the path of the navigation file and {dir}/<page> the path of a page, using the separator of the
+			// OS. The paths of the pages written in the navigation are reported as is.
 			replace := func(messages []string) []string {
 				var result []string
 				for _, message := range messages {
-					result = append(result, filepath.FromSlash(strings.ReplaceAll(message, "{dir}", filepath.ToSlash(dir))))
+					message = strings.ReplaceAll(message, "{nav}", filepath.Join(dir, NavFile))
+					if rest, ok := strings.CutPrefix(message, "{dir}/"); ok {
+						page, suffix, _ := strings.Cut(rest, ":")
+						message = filepath.Join(dir, filepath.FromSlash(page)) + ":" + suffix
+					}
+					result = append(result, message)
 				}
 				return result
 			}
