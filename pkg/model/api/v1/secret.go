@@ -104,6 +104,7 @@ type GlobalSecret struct {
 	Kind     Kind       `json:"kind" yaml:"kind"`
 	Metadata Metadata   `json:"metadata" yaml:"metadata"`
 	Spec     SecretSpec `json:"spec" yaml:"spec"`
+	Source   *Source    `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 func (g *GlobalSecret) GetMetadata() modelAPI.Metadata {
@@ -118,10 +119,19 @@ func (g *GlobalSecret) GetSpec() any {
 	return g.Spec
 }
 
+func (g *GlobalSecret) GetSource() *Source {
+	return g.Source
+}
+
+func (g *GlobalSecret) SetSource(s *Source) {
+	g.Source = s
+}
+
 type Secret struct {
 	Kind     Kind            `json:"kind" yaml:"kind"`
 	Metadata ProjectMetadata `json:"metadata" yaml:"metadata"`
 	Spec     SecretSpec      `json:"spec" yaml:"spec"`
+	Source   *Source         `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 func (s *Secret) GetMetadata() modelAPI.Metadata {
@@ -134,4 +144,12 @@ func (s *Secret) GetKind() string {
 
 func (s *Secret) GetSpec() any {
 	return s.Spec
+}
+
+func (s *Secret) GetSource() *Source {
+	return s.Source
+}
+
+func (s *Secret) SetSource(src *Source) {
+	s.Source = src
 }

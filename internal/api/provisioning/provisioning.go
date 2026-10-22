@@ -31,10 +31,11 @@ import (
 // written at once) into a single applyEntity call.
 const watchDebounce = 500 * time.Millisecond
 
-func New(serviceManager dependency.ServiceManager, folders []string, caseSensitive bool) (async.SimpleTask, async.SimpleTask) {
+func New(serviceManager dependency.ServiceManager, folders []string, caseSensitive bool, enablePrune bool) (async.SimpleTask, async.SimpleTask) {
 	svc := &provisioningService{
 		serviceManager: serviceManager,
 		caseSensitive:  caseSensitive,
+		enablePrune:    enablePrune,
 	}
 	return &provisioningTask{
 		folders: folders,
