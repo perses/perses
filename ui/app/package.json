@@ -37,6 +37,7 @@
     "marked": "^15.0.7",
     "mdi-material-ui": "^7.9.2",
     "react": "^18.3.0",
+    "react-compiler-runtime": "^1.0.0",
     "react-cookie": "^8.0.1",
     "react-dom": "^18.3.0",
     "react-error-boundary": "^3.1.4",
@@ -50,8 +51,8 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
-    "@rspack/cli": "^2.0.1",
-    "@rspack/core": "^2.0.1",
+    "@rspack/cli": "^2.2.9",
+    "@rspack/core": "^2.2.9",
     "@rspack/dev-server": "^2.1.0",
     "@rspack/plugin-react-refresh": "^2.0.0",
     "cross-fetch": "^4.1.0"
