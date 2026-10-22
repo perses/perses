@@ -14,6 +14,7 @@
 import type { VariableType } from '@perses-dev/client';
 import { getVariableProject } from '@perses-dev/client';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import type { VariableDefinition } from '@perses-dev/dashboards';
 import { DatasourceStoreProvider, VariableProviderWithQueryParams } from '@perses-dev/dashboards';
 import {
@@ -24,7 +25,7 @@ import {
   useInitialTimeRange,
 } from '@perses-dev/plugin-system';
 import type { ReactElement } from 'react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import { useDatasourceApi } from '../../model/datasource-api';
 import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
@@ -50,6 +51,16 @@ export function VariableDrawer<T extends VariableType>({
   const projectName = getVariableProject(variable);
   const [isDeleteVariableDialogStateOpened, setDeleteVariableDialogStateOpened] = useState<boolean>(false);
 
+  // Let the form handle click out / Escape, so that it can ask for confirmation before discarding unsaved changes
+  const formRef = useRef<FormEditorHandle>(null);
+  const handleDrawerClose = (): void => {
+    if (formRef.current) {
+      formRef.current.requestClose();
+    } else {
+      onClose();
+    }
+  };
+
   const datasourceApi = useDatasourceApi();
   const pluginLoader = useRemotePluginLoader();
 
@@ -70,14 +81,8 @@ export function VariableDrawer<T extends VariableType>({
 
   const initialTimeRange = useInitialTimeRange('1h');
 
-  // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
-  // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
-  const handleClickOut = (): void => {
-    /* do nothing */
-  };
-
   return (
-    <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="variable-editor">
+    <Drawer isOpen={isOpen} onClose={handleDrawerClose} data-testid="variable-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry pluginLoader={pluginLoader}>
           <ValidationProvider>
@@ -85,6 +90,7 @@ export function VariableDrawer<T extends VariableType>({
               <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>
                 <VariableProviderWithQueryParams initialVariableDefinitions={INITIAL_VARIABLE_DEFINITIONS}>
                   <VariableEditorForm
+                    ref={formRef}
                     initialVariableDefinition={variableDef}
                     action={action}
                     isDraft={false}

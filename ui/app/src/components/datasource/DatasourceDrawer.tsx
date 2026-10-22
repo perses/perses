@@ -14,9 +14,10 @@
 import type { Datasource, DatasourceDefinition } from '@perses-dev/client';
 import { createTestDatasourceConnection } from '@perses-dev/client';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import { DatasourceEditorForm, PluginRegistry, ValidationProvider } from '@perses-dev/plugin-system';
 import type { ReactElement } from 'react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 import { DeleteResourceDialog } from '../dialogs';
@@ -37,16 +38,20 @@ export function DatasourceDrawer<T extends Datasource>({
   onDelete,
 }: DatasourceDrawerProps<T>): ReactElement {
   const [isDeleteDatasourceDialogStateOpened, setDeleteDatasourceDialogStateOpened] = useState<boolean>(false);
+
+  // Let the form handle click out / Escape, so that it can ask for confirmation before discarding unsaved changes
+  const formRef = useRef<FormEditorHandle>(null);
+  const handleDrawerClose = (): void => {
+    if (formRef.current) {
+      formRef.current.requestClose();
+    } else {
+      onClose();
+    }
+  };
   const pluginLoader = useRemotePluginLoader();
 
   const project = datasource.kind === 'Datasource' ? datasource.metadata.project : undefined;
   const testConnection = useMemo(() => createTestDatasourceConnection({ project }), [project]);
-
-  // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
-  // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
-  const handleClickOut = (): void => {
-    /* do nothing */
-  };
 
   const handleSave = (def: DatasourceDefinition): void => {
     const updatedDatasource = structuredClone(datasource);
@@ -58,12 +63,13 @@ export function DatasourceDrawer<T extends Datasource>({
   };
 
   return (
-    <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="datasource-editor">
+    <Drawer isOpen={isOpen} onClose={handleDrawerClose} data-testid="datasource-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry pluginLoader={pluginLoader}>
           <ValidationProvider>
             {isOpen && (
               <DatasourceEditorForm
+                ref={formRef}
                 initialDatasourceDefinition={{ name: datasource.metadata.name, spec: datasource.spec }}
                 action={action}
                 isDraft={false}
