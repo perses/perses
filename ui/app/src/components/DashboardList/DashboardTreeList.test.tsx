@@ -13,9 +13,10 @@
 
 import type { FolderResource } from '@perses-dev/client';
 import type { TableColumnConfig } from '@perses-dev/components';
+import type { RenderResult } from '@testing-library/react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import type { ReactElement, ReactNode } from 'react';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { vi } from 'vitest';
 
 import type { DashboardListRow } from './DashboardList';
@@ -27,17 +28,34 @@ interface MockTableProps {
   columns: Array<TableColumnConfig<DashboardTreeTableRow>>;
   pagination: { pageIndex: number; pageSize: number };
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void;
+  expanded?: Record<string, boolean>;
+  onExpandedChange: (expanded: Record<string, boolean>) => void;
 }
 
 // Only renders the actions cell of each row.
-function MockTable({ data, columns, pagination, onPaginationChange }: MockTableProps): ReactElement {
+function MockTable({
+  data,
+  columns,
+  pagination,
+  onPaginationChange,
+  expanded,
+  onExpandedChange,
+}: MockTableProps): ReactElement {
   const showTenRows = useCallback((): void => onPaginationChange({ pageIndex: 0, pageSize: 10 }), [onPaginationChange]);
+  const expandTeamFolder = useCallback(
+    (): void => onExpandedChange({ ...expanded, 'team-folder': true }),
+    [expanded, onExpandedChange],
+  );
   const renderActionsCell = columns.find((column) => column.id === 'actions')?.cell;
   return (
     <>
       <span>Rows per page: {pagination.pageSize}</span>
       <button type="button" onClick={showTenRows}>
         Show 10 rows
+      </button>
+      <span>Expanded: {Object.keys(expanded ?? {}).join(',')}</span>
+      <button type="button" onClick={expandTeamFolder}>
+        Expand team folder
       </button>
       {typeof renderActionsCell === 'function' &&
         data.map((row) => (
@@ -47,8 +65,25 @@ function MockTable({ data, columns, pagination, onPaginationChange }: MockTableP
   );
 }
 
+// Minimal localStorage-backed stand-in for the shared hook, enough to check what the list stores and reads back.
+function useMockLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => void] {
+  const [value, setValue] = useState<T>(() => {
+    const stored = window.localStorage.getItem(key);
+    return stored === null ? initialValue : (JSON.parse(stored) as T);
+  });
+  const setValueAndStore = useCallback(
+    (newValue: T): void => {
+      window.localStorage.setItem(key, JSON.stringify(newValue));
+      setValue(newValue);
+    },
+    [key],
+  );
+  return [value, setValueAndStore];
+}
+
 vi.mock('@perses-dev/components', () => ({
   Table: MockTable,
+  useLocalStorage: useMockLocalStorage,
 }));
 
 vi.mock('../../context/Config', () => ({
@@ -92,9 +127,11 @@ const dashboardsMap = new Map([
 function renderDashboardTreeList(
   map: Map<string, Map<string, DashboardListRow>> = emptyDashboardsMap,
   duplicationDisabledReason?: string,
-): void {
-  render(
+  projectName = 'myproject',
+): RenderResult {
+  return render(
     <DashboardTreeList
+      projectName={projectName}
       folderList={emptyFolderList}
       dashboardsMap={map}
       handleRenameButtonClick={noopHandler}
@@ -109,6 +146,10 @@ function renderDashboardTreeList(
 }
 
 describe('DashboardTreeList', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
   it('uses the configured default rows per page for its initial pagination', () => {
     renderDashboardTreeList();
 
@@ -135,5 +176,39 @@ describe('DashboardTreeList', () => {
 
     expect(screen.queryByLabelText('Duplicate')).toBeNull();
     expect(within(screen.getByLabelText(reason)).getByRole('button').hasAttribute('disabled')).toBe(true);
+  });
+
+  it('keeps the folders a user expanded when the list is shown again', () => {
+    const { unmount } = renderDashboardTreeList();
+    fireEvent.click(screen.getByRole('button', { name: 'Expand team folder' }));
+    expect(screen.queryByText('Expanded: team-folder')).not.toBeNull();
+
+    unmount();
+    renderDashboardTreeList();
+
+    expect(screen.queryByText('Expanded: team-folder')).not.toBeNull();
+  });
+
+  it('remembers expanded folders separately for each project', () => {
+    const { unmount } = renderDashboardTreeList(emptyDashboardsMap, undefined, 'myproject');
+    fireEvent.click(screen.getByRole('button', { name: 'Expand team folder' }));
+    unmount();
+
+    renderDashboardTreeList(emptyDashboardsMap, undefined, 'otherproject');
+
+    expect(screen.queryByText('Expanded: team-folder')).toBeNull();
+  });
+
+  it("does not erase another project's folders when both lists are open at once, e.g. in two tabs", () => {
+    const tabA = renderDashboardTreeList(emptyDashboardsMap, undefined, 'project-a');
+    const tabB = renderDashboardTreeList(emptyDashboardsMap, undefined, 'project-b');
+
+    fireEvent.click(within(tabA.container).getByRole('button', { name: 'Expand team folder' }));
+    fireEvent.click(within(tabB.container).getByRole('button', { name: 'Expand team folder' }));
+    tabA.unmount();
+    tabB.unmount();
+
+    const { container } = renderDashboardTreeList(emptyDashboardsMap, undefined, 'project-a');
+    expect(within(container).queryByText('Expanded: team-folder')).not.toBeNull();
   });
 });
