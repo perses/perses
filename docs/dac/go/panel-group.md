@@ -70,6 +70,19 @@ panelgroup.Collapsed(true)
 Define if the panel group is collapsed or not when the dashboard is loaded.
 Collapsed panel group are lazy loaded when they are opened.
 
+### Visibility
+
+```golang
+import "github.com/perses/perses/go-sdk/panel-group"
+import "github.com/perses/spec/go/dashboard"
+
+panelgroup.Visibility("phase", dashboard.VisibilityOperatorNotEquals, "PRD")
+```
+
+Render the panel group only when the selected values of the variable satisfy the operator against the given values.
+The operator is one of `VisibilityOperatorEquals`, `VisibilityOperatorNotEquals`, `VisibilityOperatorMatches` and `VisibilityOperatorNotMatches`.
+The patterns of the `matches` operators are anchored (full match).
+
 ### AddPanel
 
 ```golang
