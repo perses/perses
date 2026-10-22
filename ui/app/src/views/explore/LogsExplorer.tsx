@@ -32,6 +32,7 @@ import type { KeyboardEvent, MouseEvent, ReactElement } from 'react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { ExploreSidePanel } from './ExploreSidePanel';
+import { useLabelCatalog } from './label-client';
 import { LabelExplorer } from './LabelExplorer';
 import {
   getLogQuery,
@@ -43,8 +44,9 @@ import {
   toQueryDefinition,
 } from './log-query';
 import type { LabelOperator, ParsedLogQuery } from './log-selector';
-import { formatLogQuery, parseLogQuery, setValueOperator, toggleLabelValue } from './log-selector';
+import { formatLogQuery, getSidebarFilters, parseLogQuery, setValueOperator, toggleLabelValue } from './log-selector';
 import { LogResults } from './LogResults';
+import { useCodeEditorText } from './use-code-editor-text';
 
 const LOG_PLUGIN_TYPES: PluginType[] = ['LogQuery'];
 const EMPTY_PARSED_QUERY: ParsedLogQuery = { filters: [], pipeline: '' };
@@ -59,8 +61,9 @@ const LOKI_EDITOR_SX = { '& > .MuiStack-root > div:nth-of-type(3)': { display: '
 
 /**
  * Explorer for logs of any log query plugin. For Loki, the label explorer and the query editor are kept in sync:
- * selecting label values updates the query, and editing the query updates the selected label values when they can
- * represent it. Other log sources get an empty side panel for now.
+ * selecting label values updates the query, and typing in the query updates the selected label values. A query that
+ * does not exactly match label values listed by the label explorer is a custom query. Other log sources get an empty
+ * side panel for now.
  */
 export function LogsExplorer(): ReactElement {
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
@@ -82,7 +85,16 @@ export function LogsExplorer(): ReactElement {
 
   const isLoki = draft.selection.kind === LOKI_LOG_QUERY_KIND;
   const lokiSpec = useMemo(() => toLokiSpec(draft.spec), [draft.spec]);
-  const parsed = useMemo(() => (isLoki ? parseLogQuery(lokiSpec.query) : undefined), [isLoki, lokiSpec.query]);
+  const Editor = queryPlugin?.OptionsEditorComponent;
+  // The label explorer follows the query box as it is typed in, before the edit is committed.
+  const { containerRef: editorRef, text: editorText } = useCodeEditorText();
+  const liveQuery = editorText ?? lokiSpec.query;
+  const parsed = useMemo(() => (isLoki ? parseLogQuery(liveQuery) : undefined), [isLoki, liveQuery]);
+  const datasource = lokiSpec.datasource ?? DEFAULT_LOKI_DATASOURCE;
+  const queryLabels = useMemo(() => [...new Set(parsed?.filters.map((filter) => filter.label) ?? [])], [parsed]);
+  const catalog = useLabelCatalog(datasource, queryLabels, isLoki);
+  // Undefined when the query is a custom query, which the label explorer does not show.
+  const sidebarFilters = getSidebarFilters(parsed, catalog);
   // Set when Mod+Enter is pressed in the editor, so the change it emits also runs the query.
   const runOnNextChange = useRef(false);
 
@@ -98,9 +110,10 @@ export function LogsExplorer(): ReactElement {
   const updateFilters = useCallback(
     (update: (current: ParsedLogQuery) => ParsedLogQuery) => {
       // A custom query is replaced by the label filters.
-      runSpec({ ...lokiSpec, query: formatLogQuery(update(parsed ?? EMPTY_PARSED_QUERY)) });
+      const current = sidebarFilters ? { filters: sidebarFilters, pipeline: '' } : EMPTY_PARSED_QUERY;
+      runSpec({ ...lokiSpec, query: formatLogQuery(update(current)) });
     },
-    [lokiSpec, parsed, runSpec],
+    [lokiSpec, sidebarFilters, runSpec],
   );
 
   const handleToggleValue = useCallback(
@@ -142,8 +155,6 @@ export function LogsExplorer(): ReactElement {
     }
   }, []);
 
-  const Editor = queryPlugin?.OptionsEditorComponent;
-
   return (
     <Stack direction={isSmallScreen ? 'column' : 'row'} gap={2} sx={ROOT_DIRECTION_SX}>
       <ExploreSidePanel label="label explorer">
@@ -151,8 +162,8 @@ export function LogsExplorer(): ReactElement {
         {isLoki && (
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <LabelExplorer
-              datasource={lokiSpec.datasource ?? DEFAULT_LOKI_DATASOURCE}
-              filters={parsed?.filters}
+              datasource={datasource}
+              filters={sidebarFilters}
               onToggleValue={handleToggleValue}
               onOperatorChange={handleOperatorChange}
             />
@@ -190,7 +201,7 @@ export function LogsExplorer(): ReactElement {
           {isLoadingPlugin && <CircularProgress size={24} aria-label="Loading query editor" />}
           {pluginError && <Alert severity="error">{pluginError.message}</Alert>}
           {Editor && (
-            <Box sx={isLoki ? LOKI_EDITOR_SX : undefined} onKeyDownCapture={handleEditorKeyDown}>
+            <Box ref={editorRef} sx={isLoki ? LOKI_EDITOR_SX : undefined} onKeyDownCapture={handleEditorKeyDown}>
               <Editor key={draft.selection.kind} value={draft.spec} onChange={handleEditorChange} />
             </Box>
           )}

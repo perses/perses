@@ -14,13 +14,12 @@
 import { Alert, CircularProgress, InputAdornment, List, Stack, TextField, Typography } from '@mui/material';
 import { useDatasourceClient } from '@perses-dev/plugin-system';
 import type { DatasourceSelector } from '@perses-dev/spec';
-import { useQuery } from '@tanstack/react-query';
 import Magnify from 'mdi-material-ui/Magnify';
 import type { ChangeEvent, ReactElement } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 
-import type { LabelClient, LabelRequestParams, LabelResponse } from './label-client';
-import { useLabelRequestParams } from './label-client';
+import type { LabelClient, LabelRequestParams } from './label-client';
+import { useLabelNames, useLabelRequestParams } from './label-client';
 import { LabelItem } from './LabelItem';
 import type { LabelFilter, LabelOperator } from './log-selector';
 
@@ -56,16 +55,7 @@ export function LabelExplorer(props: LabelExplorerProps): ReactElement {
 
   const params = useLabelRequestParams();
   const { data: client, error: clientError } = useDatasourceClient<LabelClient>(datasource);
-  const {
-    data: labelNames,
-    isLoading,
-    error: labelsError,
-  } = useQuery<LabelResponse, Error, string[]>({
-    queryKey: ['explore-label-names', datasource, params],
-    queryFn: () => (client ? client.labels(params) : Promise.reject(new Error('Datasource client is not ready'))),
-    enabled: client !== undefined,
-    select: (response) => response.data ?? [],
-  });
+  const { data: labelNames, isLoading, error: labelsError } = useLabelNames(datasource, client, params);
 
   const filteredLabels = useMemo(() => {
     const term = search.trim().toLowerCase();

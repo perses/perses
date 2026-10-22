@@ -11,8 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { LabelFilter } from './log-selector';
-import { formatLogQuery, isLabelOperator, parseLogQuery, setValueOperator, toggleLabelValue } from './log-selector';
+import type { LabelCatalog, LabelFilter } from './log-selector';
+import {
+  formatLogQuery,
+  getSidebarFilters,
+  isLabelOperator,
+  parseLogQuery,
+  setValueOperator,
+  toggleLabelValue,
+} from './log-selector';
 
 describe('parseLogQuery', () => {
   it('parses an empty query', () => {
@@ -131,5 +138,30 @@ describe('isLabelOperator', () => {
   it('accepts only label operators', () => {
     expect(['=', '!=', '=~', '!~'].every(isLabelOperator)).toBe(true);
     expect(isLabelOperator('==')).toBe(false);
+  });
+});
+
+describe('getSidebarFilters', () => {
+  const catalog: LabelCatalog = { labels: ['app', 'env'], values: { app: ['web', 'api'], env: ['prod'] } };
+
+  it('returns the filters when every label and value is listed', () => {
+    const parsed = parseLogQuery('{app=~"web|api", env!="prod"}');
+    expect(getSidebarFilters(parsed, catalog)).toEqual(parsed?.filters);
+  });
+
+  it.each([
+    ['an unparseable query', 'sum(count_over_time({app="web"}[5m]))'],
+    ['a pipeline', '{app="web"} |= "error"'],
+    ['an unknown label', '{app="web", test=""}'],
+    ['an unknown value', '{app="mobile"}'],
+    ['an unknown value in a regex', '{app=~"web|mobile"}'],
+  ])('treats %s as a custom query', (_, query) => {
+    expect(getSidebarFilters(parseLogQuery(query), catalog)).toBeUndefined();
+  });
+
+  it('does not check labels and values that are still loading', () => {
+    const parsed = parseLogQuery('{team="core"}');
+    expect(getSidebarFilters(parsed, { values: {} })).toEqual(parsed?.filters);
+    expect(getSidebarFilters(parsed, { labels: ['team'], values: { team: undefined } })).toEqual(parsed?.filters);
   });
 });

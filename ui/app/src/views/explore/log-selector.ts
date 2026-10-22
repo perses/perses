@@ -224,3 +224,27 @@ export function setValueOperator(
   if (getValueOperator(filters, label, value) === undefined) return filters;
   return addValue(removeValue(filters, label, value), label, value, operator);
 }
+
+/** Labels and label values listed by the label explorer. Undefined entries are still loading. */
+export interface LabelCatalog {
+  labels?: string[];
+  values: Record<string, string[] | undefined>;
+}
+
+/**
+ * Returns the filters the label explorer shows for a parsed query, or undefined when the query is a custom query. A
+ * query is custom when it could not be parsed, has anything besides the stream selector (e.g. a pipeline), or uses a
+ * label or value the label explorer does not list. Labels and values that are still loading are not checked yet.
+ */
+export function getSidebarFilters(
+  parsed: ParsedLogQuery | undefined,
+  catalog: LabelCatalog,
+): LabelFilter[] | undefined {
+  if (!parsed || parsed.pipeline !== '') return undefined;
+  for (const { label, values } of parsed.filters) {
+    if (catalog.labels && !catalog.labels.includes(label)) return undefined;
+    const listedValues = catalog.values[label];
+    if (listedValues && values.some((value) => !listedValues.includes(value))) return undefined;
+  }
+  return parsed.filters;
+}

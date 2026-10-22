@@ -24,13 +24,13 @@ import {
   Typography,
 } from '@mui/material';
 import type { DatasourceSelector } from '@perses-dev/spec';
-import { useQuery } from '@tanstack/react-query';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import type { ReactElement } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 
-import type { LabelClient, LabelRequestParams, LabelResponse } from './label-client';
+import type { LabelClient, LabelRequestParams } from './label-client';
+import { useLabelValues } from './label-client';
 import type { LabelFilter, LabelOperator } from './log-selector';
 import { getValueOperator, isLabelOperator, LABEL_OPERATORS } from './log-selector';
 
@@ -81,16 +81,7 @@ export function LabelItem(props: LabelItemProps): ReactElement {
     (count, filter) => (filter.label === label ? count + filter.values.length : count),
     0,
   );
-  const {
-    data: values,
-    isLoading,
-    error,
-  } = useQuery<LabelResponse, Error, string[]>({
-    queryKey: ['explore-label-values', datasource, label, params],
-    queryFn: () => client.labelValues({ ...params, labelName: label }),
-    enabled: expanded,
-    select: (response) => response.data ?? [],
-  });
+  const { data: values, isLoading, error } = useLabelValues(datasource, client, params, label, expanded);
 
   const handleExpandedChange = useCallback(
     () => onExpandedChange(expanded ? undefined : label),
