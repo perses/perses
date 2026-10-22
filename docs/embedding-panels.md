@@ -14,16 +14,33 @@ application.
 # Create new React app or modify an existing app using the dependencies below
 # Example: https://react.dev/learn/build-a-react-app-from-scratch
 
-# Install Perses dependencies
-# Note: React 19 is not supported yet
-npm i --save @perses-dev/components \
+# Install Perses dependencies (React 18 and React 19+ are both supported)
+npm i --save @perses-dev/client @perses-dev/spec @perses-dev/components \
   @perses-dev/plugin-system @perses-dev/timeseries-chart-plugin \
   @perses-dev/prometheus-plugin @perses-dev/dashboards \
   @tanstack/react-query \
   @mui/material \
   @emotion/styled @hookform/resolvers \
-  react@18 react-dom@18
+  react@19 react-dom@19 # or react@18 react-dom@18
 ```
+
+Complete, buildable examples are available for [React 18](https://github.com/perses/perses/tree/main/examples/embedded-react18)
+and [React 19](https://github.com/perses/perses/tree/main/examples/embedded-react19).
+
+!!! note
+    The Perses packages are published as ES modules and default-import some CommonJS dependencies (e.g. `mdi-material-ui`
+    icons). With Rspack or webpack, treat dependencies as `javascript/auto` modules so these imports resolve correctly,
+    as done in the `rsbuild.config.ts` of the examples above.
+
+### React Compiler
+
+The Perses packages are compiled with the [React Compiler](https://react.dev/learn/react-compiler), targeting the
+minimum supported React version (18). The compiled code relies on the `react-compiler-runtime` package, a dependency of
+the Perses packages, which delegates to the runtime built into React 19+. No extra setup is required on your side.
+
+To also compile your own components, enable the compiler in your bundler: on React 18, set the compiler target to `18`
+and install `react-compiler-runtime`; on React 19+, the default target works without additional dependencies. The
+examples above show both configurations with [Rsbuild](https://rsbuild.rs/plugins/list/plugin-react#reactcompiler).
 
 ## Minimal code
 
@@ -42,7 +59,6 @@ import {
 import {
   DataQueriesProvider,
   dynamicImportPluginLoader,
-  PluginModuleResource,
   PluginRegistry,
   TimeRangeProvider,
 } from "@perses-dev/plugin-system";
@@ -53,14 +69,13 @@ import {
   Panel,
   VariableProvider,
 } from "@perses-dev/dashboards";
-import {
+import type {
   DashboardResource,
-  DurationString,
-  GlobalDatasourceResource,
+  DatasourceApi,
   DatasourceResource,
-  TimeRangeValue,
-} from "@perses-dev/core";
-import { DatasourceApi } from "@perses-dev/dashboards";
+  GlobalDatasourceResource,
+} from "@perses-dev/client";
+import type { DurationString, TimeRangeValue } from "@perses-dev/spec";
 import * as prometheusPlugin from "@perses-dev/prometheus-plugin";
 import * as timeseriesChartPlugin from "@perses-dev/timeseries-chart-plugin";
 
@@ -157,8 +172,13 @@ function App() {
                     <DataQueriesProvider
                       definitions={[
                         {
-                          kind: "PrometheusTimeSeriesQuery",
-                          spec: { query: `up{job="prometheus"}` },
+                          kind: "TimeSeriesQuery",
+                          spec: {
+                            plugin: {
+                              kind: "PrometheusTimeSeriesQuery",
+                              spec: { query: 'up{job="prometheus"}' },
+                            },
+                          },
                         },
                       ]}
                     >

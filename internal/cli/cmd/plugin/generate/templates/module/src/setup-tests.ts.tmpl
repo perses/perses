@@ -15,3 +15,15 @@ import '@testing-library/jest-dom/vitest';
 
 // Always mock e-charts during tests since we don't have a proper canvas in jsdom
 vi.mock('echarts/core');
+
+// jsdom has no layout engine nor ResizeObserver; observed elements are never measured during tests.
+if (typeof ResizeObserver === 'undefined') {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe(): void {}
+      unobserve(): void {}
+      disconnect(): void {}
+    },
+  );
+}
