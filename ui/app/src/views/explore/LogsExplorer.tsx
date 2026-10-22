@@ -57,17 +57,12 @@ const RUN_ICON = <Refresh />;
 // button instead, so that row is hidden.
 const LOKI_EDITOR_SX = { '& > .MuiStack-root > div:nth-of-type(3)': { display: 'none' } };
 
-export interface LogsExplorerProps {
-  projectName?: string;
-}
-
 /**
  * Explorer for logs of any log query plugin. For Loki, the label explorer and the query editor are kept in sync:
  * selecting label values updates the query, and editing the query updates the selected label values when they can
  * represent it. Other log sources get an empty side panel for now.
  */
-export function LogsExplorer(props: LogsExplorerProps): ReactElement {
-  const { projectName } = props;
+export function LogsExplorer(): ReactElement {
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
   const { data, setData } = useExplorerManagerContext<unknown>();
 
@@ -120,14 +115,6 @@ export function LogsExplorer(props: LogsExplorerProps): ReactElement {
     [updateFilters],
   );
 
-  const handleDatasourceChange = useCallback(
-    (next: DatasourceSelector) => {
-      const { datasource: _previous, ...rest } = lokiSpec;
-      onSpecChange(next.name ? { ...rest, datasource: next } : rest);
-    },
-    [lokiSpec, onSpecChange],
-  );
-
   const handleDirectionChange = useCallback(
     (_: MouseEvent<HTMLElement>, direction: unknown) => {
       if (isLogsDirection(direction)) runSpec({ ...lokiSpec, direction });
@@ -164,10 +151,7 @@ export function LogsExplorer(props: LogsExplorerProps): ReactElement {
         {isLoki && (
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <LabelExplorer
-              datasourceKind={LOKI_DATASOURCE_KIND}
               datasource={lokiSpec.datasource ?? DEFAULT_LOKI_DATASOURCE}
-              onDatasourceChange={handleDatasourceChange}
-              projectName={projectName}
               filters={parsed?.filters}
               onToggleValue={handleToggleValue}
               onOperatorChange={handleOperatorChange}

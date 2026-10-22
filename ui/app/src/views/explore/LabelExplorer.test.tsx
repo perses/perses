@@ -29,8 +29,6 @@ const client = {
 };
 
 vi.mock('@perses-dev/plugin-system', () => ({
-  DatasourceSelect: (): null => null,
-  isVariableDatasource: (): boolean => false,
   useDatasourceClient: (): object => ({ data: client }),
   useTimeRange: (): object => ({
     absoluteTimeRange: { start: new Date('2026-01-01T00:00:00Z'), end: new Date('2026-01-01T01:00:00Z') },
@@ -39,9 +37,7 @@ vi.mock('@perses-dev/plugin-system', () => ({
 
 function renderLabelExplorer(props: Partial<LabelExplorerProps> = {}): LabelExplorerProps {
   const allProps: LabelExplorerProps = {
-    datasourceKind: 'LokiDatasource',
     datasource: { kind: 'LokiDatasource' },
-    onDatasourceChange: vi.fn(),
     filters: [],
     onToggleValue: vi.fn(),
     onOperatorChange: vi.fn(),

@@ -12,8 +12,7 @@
 // limitations under the License.
 
 import { Alert, CircularProgress, InputAdornment, List, Stack, TextField, Typography } from '@mui/material';
-import type { DatasourceSelectValue } from '@perses-dev/plugin-system';
-import { DatasourceSelect, isVariableDatasource, useDatasourceClient } from '@perses-dev/plugin-system';
+import { useDatasourceClient } from '@perses-dev/plugin-system';
 import type { DatasourceSelector } from '@perses-dev/spec';
 import { useQuery } from '@tanstack/react-query';
 import Magnify from 'mdi-material-ui/Magnify';
@@ -41,10 +40,8 @@ const SEARCH_SLOT_PROPS = {
 };
 
 export interface LabelExplorerProps {
-  datasourceKind: string;
+  /** Datasource of the query, which the labels are read from. */
   datasource: DatasourceSelector;
-  onDatasourceChange: (datasource: DatasourceSelector) => void;
-  projectName?: string;
   /** Filters of the current query, or undefined when the query is a custom query the filters cannot represent. */
   filters?: LabelFilter[];
   onToggleValue: (label: string, value: string, operator: LabelOperator) => void;
@@ -53,8 +50,7 @@ export interface LabelExplorerProps {
 
 /** Lists the labels of a datasource and their values, which can be selected as query filters. */
 export function LabelExplorer(props: LabelExplorerProps): ReactElement {
-  const { datasourceKind, datasource, onDatasourceChange, projectName, filters, onToggleValue, onOperatorChange } =
-    props;
+  const { datasource, filters, onToggleValue, onOperatorChange } = props;
   const [search, setSearch] = useState('');
   const [expandedLabel, setExpandedLabel] = useState<string>();
 
@@ -76,14 +72,6 @@ export function LabelExplorer(props: LabelExplorerProps): ReactElement {
     return (labelNames ?? []).filter((name) => name.toLowerCase().includes(term));
   }, [labelNames, search]);
 
-  const handleDatasourceChange = useCallback(
-    (next: DatasourceSelectValue) => {
-      if (isVariableDatasource(next)) return;
-      onDatasourceChange(next);
-      setExpandedLabel(undefined);
-    },
-    [onDatasourceChange],
-  );
   const handleSearchChange = useCallback((event: ChangeEvent<HTMLInputElement>) => setSearch(event.target.value), []);
 
   return (
@@ -91,14 +79,6 @@ export function LabelExplorer(props: LabelExplorerProps): ReactElement {
       <Typography variant="h4" component="h2">
         Labels
       </Typography>
-      <DatasourceSelect
-        datasourcePluginKind={datasourceKind}
-        project={projectName}
-        value={datasource}
-        onChange={handleDatasourceChange}
-        label="Datasource"
-        size="small"
-      />
       <TextField
         size="small"
         placeholder="Filter labels"

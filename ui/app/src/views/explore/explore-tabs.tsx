@@ -16,19 +16,17 @@ import type { ExploreTab } from '@perses-dev/explore';
 import { LogsExplorer } from './LogsExplorer';
 
 /** Tabs of the explore page: one per observability signal, each rendered by its Explore plugin. */
-export function buildExploreTabs(projectName?: string): ExploreTab[] {
-  return [
-    { id: 'metrics', label: 'Metrics', explorerPluginName: 'PrometheusExplorer' },
-    // The logs tab uses the app's logs explorer, which syncs a label explorer with the query.
-    {
-      id: 'logs',
-      label: 'Logs',
-      explorerPluginName: 'LogExplorer',
-      content: <LogsExplorer projectName={projectName} />,
-    },
-    { id: 'traces', label: 'Traces', explorerPluginName: 'TempoExplorer' },
-    { id: 'profiling', label: 'Profiling', explorerPluginName: 'PyroscopeExplorer' },
-    { id: 'alerts', label: 'Alerts', explorerPluginName: 'AlertManagerAlertsExplorer' },
-    { id: 'silences', label: 'Silences', explorerPluginName: 'AlertManagerSilencesExplorer' },
-  ];
-}
+export const EXPLORE_TABS: ExploreTab[] = [
+  { id: 'metrics', label: 'Metrics', explorerPluginName: 'PrometheusExplorer' },
+  // The logs tab uses the app's logs explorer, which syncs a label explorer with the query.
+  {
+    id: 'logs',
+    label: 'Logs',
+    explorerPluginName: 'LogExplorer',
+    content: <LogsExplorer />,
+  },
+  { id: 'traces', label: 'Traces', explorerPluginName: 'TempoExplorer' },
+  { id: 'profiling', label: 'Profiling', explorerPluginName: 'PyroscopeExplorer' },
+  { id: 'alerts', label: 'Alerts', explorerPluginName: 'AlertManagerAlertsExplorer' },
+  { id: 'silences', label: 'Silences', explorerPluginName: 'AlertManagerSilencesExplorer' },
+];

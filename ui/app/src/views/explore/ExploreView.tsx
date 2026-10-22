@@ -32,7 +32,7 @@ import { useProjectList } from '../../model/project-client';
 import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { buildGlobalVariableDefinition } from '../../utils/variables';
-import { buildExploreTabs } from './explore-tabs';
+import { EXPLORE_TABS } from './explore-tabs';
 
 function ExploreView(): ReactElement {
   return <HelperExploreView />;
@@ -140,8 +140,6 @@ function HelperExploreView(): ReactElement {
     [globalVars],
   );
 
-  const exploreTabs = useMemo(() => buildExploreTabs(projectName), [projectName]);
-
   const exploreTitleComponent = useMemo(() => {
     const breadcrumbContent = isMobileSize ? (
       <Breadcrumbs>
@@ -186,7 +184,7 @@ function HelperExploreView(): ReactElement {
             projectName={projectName}
             externalVariableDefinitions={externalVariableDefinitions}
             exploreTitleComponent={exploreTitleComponent}
-            tabs={exploreTabs}
+            tabs={EXPLORE_TABS}
           />
         </ErrorBoundary>
       </PluginRegistry>
