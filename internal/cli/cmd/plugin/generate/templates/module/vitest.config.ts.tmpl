@@ -14,11 +14,6 @@
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      'use-resize-observer': 'use-resize-observer/polyfilled',
-    },
-  },
   test: {
     environment: 'jsdom',
     globals: true,
