@@ -58,3 +58,22 @@ jobs:
       - name: install deps
         run: cd ./ui && npm ci
       - run: cd ./ui && npm run test
+  examples:
+    name: "example (${{ matrix.example }})"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example:
+          - embedded-react18
+          - embedded-react19
+    steps:
+      - name: checkout
+        uses: actions/checkout@v7
+      - uses: perses/github-actions@v0.13.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_npm: true
+          nvmrc_path: "./ui/.nvmrc"
+      - name: install, type-check and build the example
+        run: cd ./examples && ./test.sh ${{ matrix.example }}
