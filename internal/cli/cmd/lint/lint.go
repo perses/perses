@@ -29,6 +29,7 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	apiConfig "github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -39,6 +40,8 @@ type option struct {
 	writer         io.Writer
 	errWriter      io.Writer
 	pluginPath     string
+	schemaPath     string
+	dashboardSch   *dashboardSchema
 	customRulePath string
 	customRules    []*apiConfig.CustomLintRule
 	online         bool
@@ -62,6 +65,13 @@ func (o *option) Complete(args []string) error {
 			return err
 		}
 		o.sch = pl.Schema()
+	}
+	if len(o.schemaPath) > 0 {
+		sch, err := loadDashboardSchema(o.schemaPath)
+		if err != nil {
+			return err
+		}
+		o.dashboardSch = sch
 	}
 	if len(o.customRulePath) > 0 {
 		if err := file.Unmarshal(o.customRulePath, &o.customRules); err != nil {
@@ -91,20 +101,22 @@ func (o *option) Validate() error {
 
 func (o *option) Execute() error {
 	var entities []modelAPI.Entity
+	// The raw objects are kept for the validation against the dashboard schema, as the entities lose the unknown fields.
+	var objects []map[string]any
 	if len(o.File) > 0 {
 		var err error
-		entities, err = file.UnmarshalEntitiesFromFile(o.File)
+		entities, objects, err = file.UnmarshalEntitiesAndObjectsFromFile(o.File)
 		if err != nil {
 			return err
 		}
 	} else if len(o.Directory) > 0 {
 		var errorList []error
-		entities, errorList = file.UnmarshalEntitiesFromDirectory(o.Directory)
+		entities, objects, errorList = file.UnmarshalEntitiesAndObjectsFromDirectory(o.Directory)
 		if len(errorList) > 0 {
 			return errorList[0]
 		}
 	}
-	if validateErr := o.validate(entities); validateErr != nil {
+	if validateErr := o.validate(entities, objects); validateErr != nil {
 		return validateErr
 	}
 	return output.HandleString(o.writer, "your resources look good")
@@ -118,7 +130,10 @@ func (o *option) SetErrWriter(errWriter io.Writer) {
 	o.errWriter = errWriter
 }
 
-func (o *option) validate(objects []modelAPI.Entity) error {
+func (o *option) validate(objects []modelAPI.Entity, rawObjects []map[string]any) error {
+	if o.dashboardSch != nil {
+		return o.validateWithDashboardSchema(objects, rawObjects)
+	}
 	if o.sch == nil && !o.online {
 		return nil
 	}
@@ -177,6 +192,28 @@ func (o *option) validate(objects []modelAPI.Entity) error {
 	return nil
 }
 
+// validateWithDashboardSchema validates the dashboards against the complete dashboard schema.
+// The other resources are not checked, as the schema only describes the dashboards.
+func (o *option) validateWithDashboardSchema(objects []modelAPI.Entity, rawObjects []map[string]any) error {
+	for i, object := range objects {
+		entity, ok := object.(*modelV1.Dashboard)
+		if !ok {
+			continue
+		}
+		if err := validate.DashboardWithCustomRules(entity, o.customRules); err != nil {
+			return err
+		}
+		// The schema is checked first, as the variable order expects valid variables.
+		if err := o.dashboardSch.validate(rawObjects[i]); err != nil {
+			return fmt.Errorf("invalid dashboard %q: %w", entity.Metadata.Name, err)
+		}
+		if _, err := utils.BuildVariableOrder(entity.Spec.Variables, nil, nil); err != nil {
+			return fmt.Errorf("invalid dashboard %q: %w", entity.Metadata.Name, err)
+		}
+	}
+	return nil
+}
+
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
@@ -197,6 +234,11 @@ cat resources.json | percli lint -f -
 
 # Use a remote server to make additional validation (useful only for the datasources and the dashboards)
 percli lint -f ./resources.json --online
+
+# Validate the dashboards offline against the complete dashboard schema of a Perses server.
+# It also rejects the unknown or misspelled fields.
+percli schema get dashboards --output-file dashboard-schema.cue
+percli lint -d ./dashboards --schema dashboard-schema.cue
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
@@ -208,9 +250,13 @@ percli lint -f ./resources.json --online
 	cmd.Flags().StringVar(&o.customRulePath, "custom-rule.path", "", "Path to the custom rules.")
 	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the Perses plugins.")
 	cmd.Flags().BoolVar(&o.online, "online", false, "When enable, it can request the API to make additional validation")
+	cmd.Flags().StringVar(&o.schemaPath, "schema", "", "Path to the complete dashboard CUE schema, as downloaded with 'percli schema get dashboards'. The dashboards are validated against its definition #Dashboard, without any remote server. The other resources are not checked.")
 	// When "online" flag is used, the CLI will call the endpoint /validate that will then use the schema from the server.
 	// So no need to use / load the plugins with the CLI.
 	cmd.MarkFlagsMutuallyExclusive("plugin.path", "online")
+	// The dashboard schema already contains the plugin schemas, and it is meant to be used without a remote server.
+	cmd.MarkFlagsMutuallyExclusive("schema", "online")
+	cmd.MarkFlagsMutuallyExclusive("schema", "plugin.path")
 	// When "online" flag is used, the CLI  will use the custom-rule from the server.
 	cmd.MarkFlagsMutuallyExclusive("custom-rule.path", "online")
 	return cmd

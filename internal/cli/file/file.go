@@ -77,26 +77,47 @@ func UnmarshalEntities(file string, dir string) ([]modelAPI.Entity, error) {
 }
 
 func UnmarshalEntitiesFromDirectory(dir string) ([]modelAPI.Entity, []error) {
+	entities, _, errors := UnmarshalEntitiesAndObjectsFromDirectory(dir)
+	return entities, errors
+}
+
+// UnmarshalEntitiesAndObjectsFromDirectory is like UnmarshalEntitiesFromDirectory,
+// but it also returns the raw object decoded for each entity, at the same index.
+// The raw objects keep the fields unknown by the Go structs, which is useful to validate the resources against a CUE schema.
+func UnmarshalEntitiesAndObjectsFromDirectory(dir string) ([]modelAPI.Entity, []map[string]any, []error) {
 	files, err := visit(dir)
 	if err != nil {
-		return nil, []error{err}
+		return nil, nil, []error{err}
 	}
 	var entities []modelAPI.Entity
+	var objects []map[string]any
 	var errors []error
 	for _, f := range files {
-		es, unmarshalErr := UnmarshalEntitiesFromFile(f)
+		es, objs, unmarshalErr := UnmarshalEntitiesAndObjectsFromFile(f)
 		if unmarshalErr != nil {
 			errors = append(errors, unmarshalErr)
 			continue
 		}
 		entities = append(entities, es...)
+		objects = append(objects, objs...)
 	}
-	return entities, errors
+	return entities, objects, errors
 }
 
 func UnmarshalEntitiesFromFile(file string) ([]modelAPI.Entity, error) {
 	u := &unmarshaller{file: file}
 	return u.unmarshal()
+}
+
+// UnmarshalEntitiesAndObjectsFromFile is like UnmarshalEntitiesFromFile,
+// but it also returns the raw object decoded for each entity, at the same index.
+func UnmarshalEntitiesAndObjectsFromFile(file string) ([]modelAPI.Entity, []map[string]any, error) {
+	u := &unmarshaller{file: file}
+	entities, err := u.unmarshal()
+	if err != nil {
+		return nil, nil, err
+	}
+	return entities, u.objects, nil
 }
 
 func visit(dir string) ([]string, error) {

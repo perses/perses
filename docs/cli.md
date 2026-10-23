@@ -284,6 +284,17 @@ use a remote Perses server for additional validation. For example, when it has t
 use the endpoint `/api/validate/dashboards`. That can be useful if you want to be sure that your dashboard is compatible
 with the server (because it will match the plugins known by the server instead of the local ones)
 
+You can also validate the dashboards without any remote server, against the complete dashboard schema of a Perses
+server (see [Download the dashboard schema](#download-the-dashboard-schema)):
+
+```bash
+$ percli schema get dashboards --output-file dashboard-schema.cue
+$ percli lint -d ./dashboards --schema dashboard-schema.cue
+```
+
+Unlike the other modes, it also rejects the unknown or misspelled fields outside the plugins (e.g. `durration` instead
+of `duration`), which are otherwise silently ignored. Only the dashboards are checked.
+
 ### Migrate from Grafana dashboard to Perses format
 
 The command `migrate` is for the moment only used to translate a Grafana dashboard to the Perses format. This command
