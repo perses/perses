@@ -19,6 +19,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"slices"
@@ -332,6 +333,12 @@ func (o *generateOptions) Execute() error {
 		createdPaths = append(createdPaths, outputRelativePath)
 	}
 
+	goModPaths, err := o.ensureGoModule(data["ModuleOrg"].(string), data["ModuleName"].(string))
+	if err != nil {
+		return err
+	}
+	createdPaths = append(createdPaths, goModPaths...)
+
 	msg := fmt.Sprintf("plugin %s generated successfully", o.pluginPascalName)
 	if isModuleGeneration {
 		msg = fmt.Sprintf("module %s created successfully, %s", o.pluginModuleName, msg)
@@ -342,6 +349,37 @@ func (o *generateOptions) Execute() error {
 	}
 
 	return output.HandleString(o.writer, msg)
+}
+
+// ensureGoModule initializes the Go module with `go mod init` and `go mod tidy` when the output directory
+// doesn't have a go.mod yet. An existing go.mod is left untouched. It returns the relative paths of the created files.
+func (o *generateOptions) ensureGoModule(org, name string) ([]string, error) {
+	if _, err := os.Stat(filepath.Join(o.outputDir, "go.mod")); err == nil {
+		return nil, nil
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return nil, fmt.Errorf("could not check for an existing go.mod under %q: %w", o.outputDir, err)
+	}
+
+	if _, err := exec.LookPath("go"); err != nil {
+		return nil, fmt.Errorf("the go binary is required to initialize the Go module but was not found in PATH: %w", err)
+	}
+
+	for _, args := range [][]string{
+		{"mod", "init", fmt.Sprintf("github.com/%s/%s", org, name)},
+		{"mod", "tidy"},
+	} {
+		cmd := exec.Command("go", args...) //nolint:gosec
+		cmd.Dir = o.outputDir
+		if out, err := cmd.CombinedOutput(); err != nil {
+			return nil, fmt.Errorf("`go %s` failed under %q: %w\n%s", strings.Join(args, " "), o.outputDir, err, out)
+		}
+	}
+
+	created := []string{"go.mod"}
+	if _, err := os.Stat(filepath.Join(o.outputDir, "go.sum")); err == nil {
+		created = append(created, "go.sum")
+	}
+	return created, nil
 }
 
 func (o *generateOptions) SetWriter(writer io.Writer) {
