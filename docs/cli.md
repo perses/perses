@@ -35,6 +35,7 @@ Available Commands:
   plugin      Commands related to plugins development
   project     Select the project used by default.
   refresh     refresh the access token when it expires
+  schema      Commands related to the CUE schemas served by the Perses server
   version     Display client version.
   whoami      Display current user used
 
@@ -266,6 +267,23 @@ By default, the command doesn't require any remote server. We are providing a fl
 use a remote Perses server for additional validation. For example, when it has to validate a dashboard, it will
 use the endpoint `/api/validate/dashboards`. That can be useful if you want to be sure that your dashboard is compatible
 with the server (because it will match the plugins known by the server instead of the local ones)
+
+### Download the dashboard schema
+
+The command `schema get` downloads a CUE schema from the Perses server you are logged in to.
+`dashboards` is the complete dashboard schema, including the schemas of all the plugins loaded by the server.
+It defines `#Dashboard`, so you can use it to validate your dashboards offline, for example in a CI pipeline:
+
+```bash
+$ percli schema get dashboards --output-file dashboard-schema.cue
+$ cue vet -d '#Dashboard' dashboard-schema.cue ./dashboard.json
+```
+
+The schema matches the version of the server and the plugins it loads, so download it again when the server is upgraded.
+The file starts with comments giving the server URL, its version and the download time.
+
+You can also get the schemas of the plugins with `percli schema get plugins`, or of a single plugin with
+`percli schema get plugins <name> [--version <version>] [--registry <registry>]`.
 
 ### Migrate from Grafana dashboard to Perses format
 
