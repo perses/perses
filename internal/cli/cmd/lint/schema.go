@@ -33,13 +33,28 @@ const dashboardDefinition = "#Dashboard"
 // conflictRegexp matches the message of a CUE error like: conflicting values "a" and "b"
 var conflictRegexp = regexp.MustCompile(`^conflicting values (.+) and (.+)$`)
 
-// pluginTypes maps the field containing a plugin to the type used in the name of its definition (#Plugin_<type>_<kind>).
-var pluginTypes = map[string]string{
-	"annotations": "Annotation",
-	"datasources": "Datasource",
-	"panels":      "Panel",
-	"queries":     "Query",
-	"variables":   "Variable",
+// anyKey and anyIndex match any user-defined map key and any list index in a plugin location.
+const (
+	anyKey   = "<key>"
+	anyIndex = "<index>"
+)
+
+// pluginLocation is the path of a plugin in a dashboard,
+// with the type used in the name of its definition (#Plugin_<type>_<kind>).
+type pluginLocation struct {
+	path       []string
+	pluginType string
+}
+
+// pluginLocations lists where the plugins are in a dashboard. Matching the whole path, instead of looking for a
+// collection name anywhere in it, avoids mistaking a user-defined key (e.g. a panel named "queries") for a collection.
+var pluginLocations = []pluginLocation{
+	{path: []string{"spec", "panels", anyKey, "spec", "plugin"}, pluginType: "Panel"},
+	{path: []string{"spec", "panels", anyKey, "spec", "queries", anyIndex, "spec", "plugin"}, pluginType: "Query"},
+	{path: []string{"spec", "panels", anyKey, "spec", "annotations", anyIndex, "plugin"}, pluginType: "Annotation"},
+	{path: []string{"spec", "datasources", anyKey, "plugin"}, pluginType: "Datasource"},
+	{path: []string{"spec", "variables", anyIndex, "spec", "plugin"}, pluginType: "Variable"},
+	{path: []string{"spec", "annotations", anyIndex, "plugin"}, pluginType: "Annotation"},
 }
 
 // textVariableFields and listVariableFields are the fields of the spec of the two kinds of variables.
@@ -78,6 +93,7 @@ func loadDashboardSchema(path string) (*dashboardSchema, error) {
 // It is the equivalent of "cue vet -d '#Dashboard' schema.cue dashboard.json".
 // The raw object is used instead of the Go struct, because the latter silently drops the unknown fields.
 func (s *dashboardSchema) validate(object map[string]any) error {
+	object = normalize(object).(map[string]any)
 	if err := s.validateObject(s.definition, object); err != nil {
 		return fmt.Errorf("%s", strings.Join(s.summarize(err, object), "; "))
 	}
@@ -135,11 +151,16 @@ func (s *dashboardSchema) summarize(err error, object map[string]any) []string {
 		if len(path) >= 2 && path[len(path)-1] == "kind" && path[len(path)-2] == "plugin" {
 			pluginPath := path[:len(path)-1]
 			key := strings.Join(pluginPath, ".")
-			if !checkedPlugins[key] {
-				checkedPlugins[key] = true
-				messages = append(messages, s.validatePlugin(pluginPath, object)...)
+			handled, checked := checkedPlugins[key]
+			if !checked {
+				var pluginMessages []string
+				pluginMessages, handled = s.validatePlugin(pluginPath, object)
+				checkedPlugins[key] = handled
+				messages = append(messages, pluginMessages...)
 			}
-			continue
+			if handled {
+				continue
+			}
 		}
 		if matches := conflictRegexp.FindStringSubmatch(msg); matches != nil {
 			if isContainer(matches[1]) || isContainer(matches[2]) {
@@ -187,34 +208,171 @@ func (s *dashboardSchema) summarize(err error, object map[string]any) []string {
 }
 
 // validatePlugin validates the plugin found at the given path against the definition of its kind.
-func (s *dashboardSchema) validatePlugin(pluginPath []string, object map[string]any) []string {
+// It returns false when the plugin can't be validated on its own, in which case the original CUE errors must be kept.
+func (s *dashboardSchema) validatePlugin(pluginPath []string, object map[string]any) ([]string, bool) {
 	pathStr := strings.Join(pluginPath, ".")
 	raw, ok := lookup(object, pluginPath)
 	if !ok {
-		return []string{withPath(pathStr, "invalid plugin")}
+		return []string{withPath(pathStr, "invalid plugin")}, true
 	}
 	plugin, ok := raw.(map[string]any)
 	if !ok {
-		return []string{withPath(pathStr, "invalid plugin")}
+		return []string{withPath(pathStr, "invalid plugin")}, true
 	}
-	kind := fmt.Sprintf("%v", plugin["kind"])
-	pluginType := ""
-	for i := len(pluginPath) - 1; i >= 0 && len(pluginType) == 0; i-- {
-		pluginType = pluginTypes[pluginPath[i]]
+	kind, ok := plugin["kind"].(string)
+	if !ok {
+		return nil, false
 	}
-	definition := s.root.LookupPath(cue.MakePath(cue.Def(fmt.Sprintf("#Plugin_%s_%s", pluginType, kind))))
-	if len(pluginType) == 0 || !definition.Exists() {
-		return []string{withPath(pathStr+".kind", fmt.Sprintf("unknown %s plugin %q", strings.ToLower(pluginType), kind))}
+	location, ok := findPluginLocation(pluginPath)
+	if !ok {
+		return nil, false
+	}
+	kinds, ok := s.pluginKinds(location)
+	if !ok {
+		return nil, false
+	}
+	if !slices.Contains(kinds, kind) {
+		return []string{withPath(pathStr+".kind", fmt.Sprintf("unknown %s plugin %q", strings.ToLower(location.pluginType), kind))}, true
+	}
+	definition, ok := s.pluginDefinition(location.pluginType, kind)
+	if !ok {
+		// The plugin is known, but its schema is embedded in the dashboard schema instead of being declared in a
+		// definition (see internal/api/plugin/schema/merge.go). The "conflicting values" errors on its kind come from
+		// the other plugins and are dropped, the other errors are kept.
+		return nil, true
 	}
 	err := s.validateObject(definition, plugin)
 	if err == nil {
-		return []string{withPath(pathStr, "invalid plugin")}
+		return nil, false
 	}
 	var messages []string
 	for _, m := range s.summarize(err, plugin) {
 		messages = append(messages, pathStr+"."+m)
 	}
-	return messages
+	return messages, true
+}
+
+// findPluginLocation returns the location matching the path of a plugin.
+func findPluginLocation(pluginPath []string) (pluginLocation, bool) {
+	for _, location := range pluginLocations {
+		if len(location.path) != len(pluginPath) {
+			continue
+		}
+		matches := true
+		for i, element := range location.path {
+			if element != anyKey && element != anyIndex && element != pluginPath[i] {
+				matches = false
+				break
+			}
+		}
+		if matches {
+			return location, true
+		}
+	}
+	return pluginLocation{}, false
+}
+
+// pluginKinds returns the kinds of the plugins allowed by the dashboard schema at the given location.
+// It returns false when the schema doesn't list the plugins with a fixed kind, e.g. when no plugin of this type is loaded.
+func (s *dashboardSchema) pluginKinds(location pluginLocation) ([]string, bool) {
+	selectors := make([]cue.Selector, 0, len(location.path))
+	for _, element := range location.path {
+		switch element {
+		case anyKey:
+			selectors = append(selectors, cue.AnyString)
+		case anyIndex:
+			selectors = append(selectors, cue.AnyIndex)
+		default:
+			selectors = append(selectors, cue.Str(element))
+		}
+	}
+	plugins := lookupSchema(s.definition, selectors)
+	if len(plugins) == 0 {
+		return nil, false
+	}
+	var kinds []string
+	for _, plugin := range plugins {
+		kind, err := plugin.LookupPath(cue.MakePath(cue.Str("kind"))).String()
+		if err != nil {
+			return nil, false
+		}
+		kinds = append(kinds, kind)
+	}
+	return kinds, true
+}
+
+// lookupSchema returns the values found in the schema at the given path.
+// Every branch of a disjunction (e.g. `*null | {...}` or the plugins of a type) is looked up separately.
+func lookupSchema(value cue.Value, selectors []cue.Selector) []cue.Value {
+	if op, branches := value.Expr(); op == cue.OrOp {
+		var result []cue.Value
+		for _, branch := range branches {
+			result = append(result, lookupSchema(branch, selectors)...)
+		}
+		return result
+	}
+	if len(selectors) == 0 {
+		return []cue.Value{value}
+	}
+	next := value.LookupPath(cue.MakePath(selectors[0]))
+	if !next.Exists() && selectors[0].Type() == cue.StringLabel {
+		next = value.LookupPath(cue.MakePath(selectors[0].Optional()))
+	}
+	if !next.Exists() {
+		return nil
+	}
+	return lookupSchema(next, selectors[1:])
+}
+
+// pluginDefinition returns the definition of the plugin of the given type and kind.
+// The definition is found by its kind rather than by its name, because the name is sanitized and can have a suffix
+// (see internal/api/plugin/schema/merge.go).
+func (s *dashboardSchema) pluginDefinition(pluginType, kind string) (cue.Value, bool) {
+	iter, err := s.root.Fields(cue.Definitions(true))
+	if err != nil {
+		return cue.Value{}, false
+	}
+	prefix := fmt.Sprintf("#Plugin_%s_", pluginType)
+	var definitions []cue.Value
+	for iter.Next() {
+		if !iter.Selector().IsDefinition() || !strings.HasPrefix(iter.Selector().String(), prefix) {
+			continue
+		}
+		if k, err := iter.Value().LookupPath(cue.MakePath(cue.Str("kind"))).String(); err == nil && k == kind {
+			definitions = append(definitions, iter.Value())
+		}
+	}
+	if len(definitions) != 1 {
+		return cue.Value{}, false
+	}
+	return definitions[0], true
+}
+
+// normalize converts the YAML mappings decoded as map[any]any (e.g. when a key is an unquoted number)
+// into string-keyed maps, so the object can be encoded as JSON and browsed by lookup.
+func normalize(value any) any {
+	switch v := value.(type) {
+	case map[string]any:
+		result := make(map[string]any, len(v))
+		for key, item := range v {
+			result[key] = normalize(item)
+		}
+		return result
+	case map[any]any:
+		result := make(map[string]any, len(v))
+		for key, item := range v {
+			result[fmt.Sprint(key)] = normalize(item)
+		}
+		return result
+	case []any:
+		result := make([]any, len(v))
+		for i, item := range v {
+			result[i] = normalize(item)
+		}
+		return result
+	default:
+		return value
+	}
 }
 
 // lookup returns the value found in the raw object at the given CUE path.

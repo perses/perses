@@ -23,6 +23,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/utils"
 	"github.com/perses/spec/go/dashboard"
+	specDatasource "github.com/perses/spec/go/datasource"
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	"github.com/perses/spec/go/plugin"
 )
@@ -42,6 +43,16 @@ func DashboardSpec(spec dashboard.Spec, sch schema.Schema, proxyCfg *config.HTTP
 	}
 	return validateDashboardSpec(spec, sch, proxyCfg)
 
+}
+
+// DashboardSpecConsistency runs the checks of DashboardSpec that need neither the plugin schemas nor the server configuration:
+// the variable order and names, and the unicity of the default local datasource per plugin kind.
+// It is meant to complement a validation against a complete dashboard schema, which should run first as the variables are expected to be valid.
+func DashboardSpecConsistency(spec dashboard.Spec) error {
+	if _, err := utils.BuildVariableOrder(spec.Variables, nil, nil); err != nil {
+		return err
+	}
+	return validateDashboardSpecConsistency(spec)
 }
 
 // DashboardSpecWithVars is like DashboardSpec, but also takes into account the project and global variables.
@@ -161,19 +172,31 @@ func validateDashboardSpec(spec dashboard.Spec, sch schema.Schema, proxyCfg *con
 			return err
 		}
 	}
-	if len(spec.Datasources) > 0 {
-		defaultDts := make(map[string]bool)
-		for dtsName, dtsSpec := range spec.Datasources {
-			if err := validateDatasourcePlugin(dtsSpec.Plugin, dtsName, sch, proxyCfg); err != nil {
-				return err
-			}
-			if dtsSpec.Default {
-				if defaultDts[dtsSpec.Plugin.Kind] {
-					return fmt.Errorf("%s can not be defined as default datasource: there is already a default defined for kind %q", dtsName, dtsSpec.Plugin.Kind)
-				}
-				defaultDts[dtsSpec.Plugin.Kind] = true
-			}
+	for dtsName, dtsSpec := range spec.Datasources {
+		if err := validateDatasourcePlugin(dtsSpec.Plugin, dtsName, sch, proxyCfg); err != nil {
+			return err
 		}
+	}
+	return validateUnicityOfDefaultLocalDTS(spec.Datasources)
+}
+
+func validateDashboardSpecConsistency(spec dashboard.Spec) error {
+	if err := validateVariableNames(spec.Variables); err != nil {
+		return err
+	}
+	return validateUnicityOfDefaultLocalDTS(spec.Datasources)
+}
+
+func validateUnicityOfDefaultLocalDTS(datasources map[string]*specDatasource.Spec) error {
+	defaultDts := make(map[string]bool)
+	for dtsName, dtsSpec := range datasources {
+		if !dtsSpec.Default {
+			continue
+		}
+		if defaultDts[dtsSpec.Plugin.Kind] {
+			return fmt.Errorf("%s can not be defined as default datasource: there is already a default defined for kind %q", dtsName, dtsSpec.Plugin.Kind)
+		}
+		defaultDts[dtsSpec.Plugin.Kind] = true
 	}
 	return nil
 }

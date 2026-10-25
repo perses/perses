@@ -14,6 +14,7 @@
 package lint
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -91,6 +92,10 @@ func TestDashboardSchemaValidate(t *testing.T) {
 	misspelled := newTestDashboard(map[string]any{"kind": "Markdown", "spec": map[string]any{"text": "x"}})
 	misspelled["spec"].(map[string]any)["durration"] = "6h"
 
+	// The YAML decoder returns a map[any]any when a key is an unquoted number.
+	numericKey := newTestDashboard(map[string]any{"kind": "Chart", "spec": map[string]any{"unit": "ops"}})
+	numericKey["spec"].(map[string]any)["panels"] = map[any]any{0: numericKey["spec"].(map[string]any)["panels"].(map[string]any)["cpu"]}
+
 	testSuites := []struct {
 		title     string
 		dashboard map[string]any
@@ -119,6 +124,11 @@ func TestDashboardSchemaValidate(t *testing.T) {
 			title:     "unknown plugin",
 			dashboard: newTestDashboard(map[string]any{"kind": "Gauge", "spec": map[string]any{}}),
 			expected:  `spec.panels.cpu.spec.plugin.kind: unknown panel plugin "Gauge"`,
+		},
+		{
+			title:     "invalid plugin under a numeric YAML key",
+			dashboard: numericKey,
+			expected:  `spec.panels."0".spec.plugin.spec.unit: invalid value "ops"`,
 		},
 	}
 	for _, test := range testSuites {
@@ -151,11 +161,36 @@ func TestLintCMDWithSchema(t *testing.T) {
 	schemaPath := writeFile(t, dir, "schema.cue", string(data))
 	valid := writeFile(t, dir, "valid.json", `{"kind":"Dashboard","metadata":{"name":"demo","project":"perses"},"spec":{"display":{"name":"demo"},"duration":"6h","layouts":[],"panels":{}}}`)
 	misspelled := writeFile(t, dir, "misspelled.json", `{"kind":"Dashboard","metadata":{"name":"demo","project":"perses"},"spec":{"display":{"name":"demo"},"durration":"6h","layouts":[],"panels":{}}}`)
+	// The panel key is an unquoted number, which the YAML decoder doesn't decode as a string key.
+	numericKey := writeFile(t, dir, "numeric-key.yaml", `kind: Dashboard
+metadata:
+  name: demo
+  project: perses
+spec:
+  display:
+    name: demo
+  duration: 6h
+  layouts: []
+  panels:
+    0:
+      kind: Panel
+      spec:
+        display:
+          name: panel
+        plugin:
+          kind: Unknown
+          spec: {}
+`)
 
 	cmdTest.ExecuteSuiteTest(t, NewCMD, []cmdTest.Suite{
 		{
 			Title:           "valid dashboard",
 			Args:            []string{"-f", valid, "--schema", schemaPath},
+			ExpectedMessage: "your resources look good\n",
+		},
+		{
+			Title:           "yaml dashboard with a numeric panel key",
+			Args:            []string{"-f", numericKey, "--schema", schemaPath},
 			ExpectedMessage: "your resources look good\n",
 		},
 		{
@@ -177,4 +212,161 @@ func TestLintCMDWithSchema(t *testing.T) {
 			ExpectedRegexMessage: "no such file or directory",
 		},
 	})
+}
+
+// TestLintCMDWithSchemaConsistency verifies the consistency checks that don't depend on the plugin schemas still run with --schema.
+func TestLintCMDWithSchemaConsistency(t *testing.T) {
+	dir := t.TempDir()
+	schemaPath := writeFile(t, dir, "schema.cue", `
+#Dashboard: {
+	kind: "Dashboard"
+	metadata: {
+		name:     string
+		project?: string
+	}
+	spec: close({
+		display?: name: string
+		duration: string
+		layouts: [...]
+		panels: {}
+		datasources?: [string]: close({
+			default: bool
+			plugin: {
+				kind: "PrometheusDatasource"
+				spec: {}
+			}
+		})
+	})
+}
+`)
+	dashboardWithDatasources := func(secondDefault bool) string {
+		return fmt.Sprintf(`{"kind":"Dashboard","metadata":{"name":"demo","project":"perses"},"spec":{"display":{"name":"demo"},"duration":"6h","layouts":[],"panels":{},"datasources":{"a":{"default":true,"plugin":{"kind":"PrometheusDatasource","spec":{}}},"b":{"default":%t,"plugin":{"kind":"PrometheusDatasource","spec":{}}}}}}`, secondDefault)
+	}
+	oneDefault := writeFile(t, dir, "one-default.json", dashboardWithDatasources(false))
+	twoDefaults := writeFile(t, dir, "two-defaults.json", dashboardWithDatasources(true))
+
+	cmdTest.ExecuteSuiteTest(t, NewCMD, []cmdTest.Suite{
+		{
+			Title:           "one default datasource per kind",
+			Args:            []string{"-f", oneDefault, "--schema", schemaPath},
+			ExpectedMessage: "your resources look good\n",
+		},
+		{
+			Title:                "two default datasources of the same kind",
+			Args:                 []string{"-f", twoDefaults, "--schema", schemaPath},
+			IsErrorExpected:      true,
+			ExpectedRegexMessage: `^invalid dashboard "demo": [ab] can not be defined as default datasource: there is already a default defined for kind "PrometheusDatasource"$`,
+		},
+	})
+}
+
+// pluginResolutionSchema has plugin definitions whose name differs from the kind, as generated for names containing
+// characters not allowed in a definition name, and a plugin embedded in the disjunction without a definition.
+const pluginResolutionSchema = `
+#Plugin_Panel_Chart: {
+	kind: "Chart"
+	spec: close({
+		unit?: "bytes" | "seconds" | "percent"
+	})
+}
+#Plugin_Panel_Bar_Chart: {
+	kind: "Bar-Chart"
+	spec: close({
+		size?: int
+	})
+}
+#Plugin_Query_Prom: {
+	kind: "Prom"
+	spec: close({
+		query: string
+	})
+}
+#Dashboard: {
+	kind: "Dashboard"
+	spec: close({
+		panels: [string]: {
+			kind: "Panel"
+			spec: close({
+				plugin: {
+					kind: #Plugin_Panel_Chart.kind
+					spec: #Plugin_Panel_Chart.spec
+				} | {
+					kind: #Plugin_Panel_Bar_Chart.kind
+					spec: #Plugin_Panel_Bar_Chart.spec
+				} | {
+					kind: "Text"
+					spec: close({
+						content: string
+					})
+				}
+				queries?: [...{
+					kind: "Query"
+					spec: close({
+						plugin: {
+							kind: #Plugin_Query_Prom.kind
+							spec: #Plugin_Query_Prom.spec
+						}
+					})
+				}]
+			})
+		}
+	})
+}
+`
+
+func TestDashboardSchemaValidatePluginResolution(t *testing.T) {
+	sch, err := loadDashboardSchema(writeFile(t, t.TempDir(), "schema.cue", pluginResolutionSchema))
+	require.NoError(t, err)
+
+	newDashboard := func(panelID string, panelSpec map[string]any) map[string]any {
+		return map[string]any{
+			"kind": "Dashboard",
+			"spec": map[string]any{
+				"panels": map[string]any{panelID: map[string]any{"kind": "Panel", "spec": panelSpec}},
+			},
+		}
+	}
+	chart := map[string]any{"kind": "Chart", "spec": map[string]any{}}
+
+	testSuites := []struct {
+		title     string
+		dashboard map[string]any
+		expected  string
+	}{
+		{
+			title:     "panel named like a plugin collection",
+			dashboard: newDashboard("queries", map[string]any{"plugin": map[string]any{"kind": "Chart", "spec": map[string]any{"unit": "ops"}}}),
+			expected:  `spec.panels.queries.spec.plugin.spec.unit: invalid value "ops"`,
+		},
+		{
+			title:     "plugin with a definition name different from its kind",
+			dashboard: newDashboard("cpu", map[string]any{"plugin": map[string]any{"kind": "Bar-Chart", "spec": map[string]any{"sise": 1}}}),
+			expected:  "spec.panels.cpu.spec.plugin.spec.sise: field not allowed",
+		},
+		{
+			title:     "plugin embedded without a definition",
+			dashboard: newDashboard("cpu", map[string]any{"plugin": map[string]any{"kind": "Text", "spec": map[string]any{"content": "x", "txt": "x"}}}),
+			expected:  "spec.panels.cpu.spec.plugin.spec.txt: field not allowed",
+		},
+		{
+			title:     "unknown panel plugin",
+			dashboard: newDashboard("cpu", map[string]any{"plugin": map[string]any{"kind": "Gauge", "spec": map[string]any{}}}),
+			expected:  `spec.panels.cpu.spec.plugin.kind: unknown panel plugin "Gauge"`,
+		},
+		{
+			title: "invalid query plugin",
+			dashboard: newDashboard("cpu", map[string]any{"plugin": chart, "queries": []any{
+				map[string]any{"kind": "Query", "spec": map[string]any{"plugin": map[string]any{"kind": "Prom", "spec": map[string]any{"query": 1}}}},
+			}}),
+			expected: "spec.panels.cpu.spec.queries.0.spec.plugin.spec.query: conflicting values 1 and string (mismatched types int and string)",
+		},
+	}
+	for _, test := range testSuites {
+		t.Run(test.title, func(t *testing.T) {
+			err := sch.validate(test.dashboard)
+			if assert.Error(t, err) {
+				assert.Equal(t, test.expected, err.Error())
+			}
+		})
+	}
 }

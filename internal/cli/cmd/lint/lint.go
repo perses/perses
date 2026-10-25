@@ -29,7 +29,6 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	apiConfig "github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -203,11 +202,11 @@ func (o *option) validateWithDashboardSchema(objects []modelAPI.Entity, rawObjec
 		if err := validate.DashboardWithCustomRules(entity, o.customRules); err != nil {
 			return err
 		}
-		// The schema is checked first, as the variable order expects valid variables.
+		// The schema is checked first, as the consistency checks expect valid variables.
 		if err := o.dashboardSch.validate(rawObjects[i]); err != nil {
 			return fmt.Errorf("invalid dashboard %q: %w", entity.Metadata.Name, err)
 		}
-		if _, err := utils.BuildVariableOrder(entity.Spec.Variables, nil, nil); err != nil {
+		if err := validate.DashboardSpecConsistency(entity.Spec); err != nil {
 			return fmt.Errorf("invalid dashboard %q: %w", entity.Metadata.Name, err)
 		}
 	}
