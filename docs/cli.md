@@ -271,8 +271,7 @@ with the server (because it will match the plugins known by the server instead o
 ### Download the dashboard schema
 
 The command `schema get` downloads a CUE schema from the Perses server you are logged in to.
-`dashboards` is the complete dashboard schema, including the schemas of all the plugins loaded by the server.
-It defines `#Dashboard`, so you can use it to validate your dashboards offline, for example in a CI pipeline:
+`dashboards` is the complete dashboard schema, including the schemas of all the plugins loaded by the server:
 
 ```bash
 $ percli schema get dashboards --output-file dashboard-schema.cue
