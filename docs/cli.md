@@ -276,7 +276,6 @@ It defines `#Dashboard`, so you can use it to validate your dashboards offline, 
 
 ```bash
 $ percli schema get dashboards --output-file dashboard-schema.cue
-$ cue vet -d '#Dashboard' dashboard-schema.cue ./dashboard.json
 ```
 
 The schema matches the version of the server and the plugins it loads, so download it again when the server is upgraded.

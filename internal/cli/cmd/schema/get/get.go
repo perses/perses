@@ -148,8 +148,7 @@ func NewCMD() *cobra.Command {
 Download a CUE schema from the Perses server you are logged in to.
 
 - "dashboards" is the complete dashboard schema, including the schemas of all the plugins loaded by the server.
-  It defines #Dashboard, which can be used to validate dashboards offline, for example with
-  "cue vet -d '#Dashboard' dashboard-schema.cue dashboard.json".
+  It defines #Dashboard, which can be used to validate dashboards offline.
 - "plugins" is the schema definitions of all the loaded plugins, or of a single plugin when NAME is set.
 
 The schema matches the version of the server and the plugins it loads, so download it again when the server is upgraded.
