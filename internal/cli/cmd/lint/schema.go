@@ -39,7 +39,12 @@ const (
 	anyIndex = "<index>"
 )
 
-const panelsField = "panels"
+const (
+	specField   = "spec"
+	pluginField = "plugin"
+	kindField   = "kind"
+	panelsField = "panels"
+)
 
 // pluginLocation is the path of a plugin in a dashboard,
 // with the type used in the name of its definition (#Plugin_<type>_<kind>).
@@ -51,12 +56,12 @@ type pluginLocation struct {
 // pluginLocations lists where the plugins are in a dashboard. Matching the whole path, instead of looking for a
 // collection name anywhere in it, avoids mistaking a user-defined key (e.g. a panel named "queries") for a collection.
 var pluginLocations = []pluginLocation{
-	{path: []string{"spec", panelsField, anyKey, "spec", "plugin"}, pluginType: "Panel"},
-	{path: []string{"spec", panelsField, anyKey, "spec", "queries", anyIndex, "spec", "plugin"}, pluginType: "Query"},
-	{path: []string{"spec", panelsField, anyKey, "spec", "annotations", anyIndex, "plugin"}, pluginType: "Annotation"},
-	{path: []string{"spec", "datasources", anyKey, "plugin"}, pluginType: "Datasource"},
-	{path: []string{"spec", "variables", anyIndex, "spec", "plugin"}, pluginType: "Variable"},
-	{path: []string{"spec", "annotations", anyIndex, "plugin"}, pluginType: "Annotation"},
+	{path: []string{specField, panelsField, anyKey, specField, pluginField}, pluginType: "Panel"},
+	{path: []string{specField, panelsField, anyKey, specField, "queries", anyIndex, specField, pluginField}, pluginType: "Query"},
+	{path: []string{specField, panelsField, anyKey, specField, "annotations", anyIndex, pluginField}, pluginType: "Annotation"},
+	{path: []string{specField, "datasources", anyKey, pluginField}, pluginType: "Datasource"},
+	{path: []string{specField, "variables", anyIndex, specField, pluginField}, pluginType: "Variable"},
+	{path: []string{specField, "annotations", anyIndex, pluginField}, pluginType: "Annotation"},
 }
 
 // textVariableFields and listVariableFields are the fields of the spec of the two kinds of variables.
@@ -64,7 +69,7 @@ var pluginLocations = []pluginLocation{
 // So when a variable is invalid, CUE also reports the errors of the other kind, which are ignored.
 var (
 	textVariableFields = []string{"value", "constant"}
-	listVariableFields = []string{"plugin", "defaultValue", "allowAllValue", "allowMultiple", "customAllValue", "capturingRegexp", "sort"}
+	listVariableFields = []string{pluginField, "defaultValue", "allowAllValue", "allowMultiple", "customAllValue", "capturingRegexp", "sort"}
 )
 
 type dashboardSchema struct {
@@ -150,7 +155,7 @@ func (s *dashboardSchema) summarize(err error, object map[string]any) []string {
 			continue
 		}
 		pathStr := strings.Join(path, ".")
-		if len(path) >= 2 && path[len(path)-1] == "kind" && path[len(path)-2] == "plugin" {
+		if len(path) >= 2 && path[len(path)-1] == kindField && path[len(path)-2] == pluginField {
 			pluginPath := path[:len(path)-1]
 			key := strings.Join(pluginPath, ".")
 			handled, checked := checkedPlugins[key]
@@ -221,7 +226,7 @@ func (s *dashboardSchema) validatePlugin(pluginPath []string, object map[string]
 	if !ok {
 		return []string{withPath(pathStr, "invalid plugin")}, true
 	}
-	kind, ok := plugin["kind"].(string)
+	kind, ok := plugin[kindField].(string)
 	if !ok {
 		return nil, false
 	}
@@ -294,7 +299,7 @@ func (s *dashboardSchema) pluginKinds(location pluginLocation) ([]string, bool) 
 	}
 	var kinds []string
 	for _, plugin := range plugins {
-		kind, err := plugin.LookupPath(cue.MakePath(cue.Str("kind"))).String()
+		kind, err := plugin.LookupPath(cue.MakePath(cue.Str(kindField))).String()
 		if err != nil {
 			return nil, false
 		}
@@ -340,7 +345,7 @@ func (s *dashboardSchema) pluginDefinition(pluginType, kind string) (cue.Value, 
 		if !iter.Selector().IsDefinition() || !strings.HasPrefix(iter.Selector().String(), prefix) {
 			continue
 		}
-		if k, err := iter.Value().LookupPath(cue.MakePath(cue.Str("kind"))).String(); err == nil && k == kind {
+		if k, err := iter.Value().LookupPath(cue.MakePath(cue.Str(kindField))).String(); err == nil && k == kind {
 			definitions = append(definitions, iter.Value())
 		}
 	}
@@ -407,7 +412,7 @@ func lookup(object any, path []string) (any, bool) {
 // isOtherVariableKindError tells whether the error comes from the schema of the other kind of variable.
 // path is expected to look like: spec.variables.<index>.spec.<field>...
 func isOtherVariableKindError(path []string, msg string, object map[string]any) bool {
-	if len(path) < 5 || path[0] != "spec" || path[1] != "variables" || path[3] != "spec" {
+	if len(path) < 5 || path[0] != specField || path[1] != "variables" || path[3] != specField {
 		return false
 	}
 	variable, ok := lookup(object, path[:3])
@@ -419,7 +424,7 @@ func isOtherVariableKindError(path []string, msg string, object map[string]any) 
 		return false
 	}
 	var ownFields, otherFields []string
-	switch variableObject["kind"] {
+	switch variableObject[kindField] {
 	case "ListVariable":
 		ownFields, otherFields = listVariableFields, textVariableFields
 	case "TextVariable":
