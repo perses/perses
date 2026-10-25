@@ -190,7 +190,8 @@ func validateDashboardSpecConsistency(spec dashboard.Spec) error {
 func validateUnicityOfDefaultLocalDTS(datasources map[string]*specDatasource.Spec) error {
 	defaultDts := make(map[string]bool)
 	for dtsName, dtsSpec := range datasources {
-		if !dtsSpec.Default {
+		// A local datasource can be null in a dashboard (e.g. `"datasources": {"a": null}`).
+		if dtsSpec == nil || !dtsSpec.Default {
 			continue
 		}
 		if defaultDts[dtsSpec.Plugin.Kind] {
