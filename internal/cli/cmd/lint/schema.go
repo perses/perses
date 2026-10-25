@@ -39,6 +39,8 @@ const (
 	anyIndex = "<index>"
 )
 
+const panelsField = "panels"
+
 // pluginLocation is the path of a plugin in a dashboard,
 // with the type used in the name of its definition (#Plugin_<type>_<kind>).
 type pluginLocation struct {
@@ -49,9 +51,9 @@ type pluginLocation struct {
 // pluginLocations lists where the plugins are in a dashboard. Matching the whole path, instead of looking for a
 // collection name anywhere in it, avoids mistaking a user-defined key (e.g. a panel named "queries") for a collection.
 var pluginLocations = []pluginLocation{
-	{path: []string{"spec", "panels", anyKey, "spec", "plugin"}, pluginType: "Panel"},
-	{path: []string{"spec", "panels", anyKey, "spec", "queries", anyIndex, "spec", "plugin"}, pluginType: "Query"},
-	{path: []string{"spec", "panels", anyKey, "spec", "annotations", anyIndex, "plugin"}, pluginType: "Annotation"},
+	{path: []string{"spec", panelsField, anyKey, "spec", "plugin"}, pluginType: "Panel"},
+	{path: []string{"spec", panelsField, anyKey, "spec", "queries", anyIndex, "spec", "plugin"}, pluginType: "Query"},
+	{path: []string{"spec", panelsField, anyKey, "spec", "annotations", anyIndex, "plugin"}, pluginType: "Annotation"},
 	{path: []string{"spec", "datasources", anyKey, "plugin"}, pluginType: "Datasource"},
 	{path: []string{"spec", "variables", anyIndex, "spec", "plugin"}, pluginType: "Variable"},
 	{path: []string{"spec", "annotations", anyIndex, "plugin"}, pluginType: "Annotation"},
