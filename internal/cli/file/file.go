@@ -204,8 +204,9 @@ func (u *unmarshaller) read() error {
 	var object map[string]any
 
 	if u.isJSON {
-		if jsonErr := json.Unmarshal(data, &objects); jsonErr != nil {
-			if jsonErr = json.Unmarshal(data, &object); jsonErr != nil {
+		// The numbers are kept as json.Number, so the raw objects hold the exact values written in the file.
+		if jsonErr := unmarshalJSONWithNumbers(data, &objects); jsonErr != nil {
+			if jsonErr = unmarshalJSONWithNumbers(data, &object); jsonErr != nil {
 				return newReadFileErr(u.file, jsonErr)
 			}
 			objects = append(objects, object)
@@ -218,6 +219,18 @@ func (u *unmarshaller) read() error {
 		objects = decodedObjects
 	}
 	u.objects = objects
+	return nil
+}
+
+func unmarshalJSONWithNumbers(data []byte, obj any) error {
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.UseNumber()
+	if err := decoder.Decode(obj); err != nil {
+		return err
+	}
+	if decoder.More() {
+		return fmt.Errorf("unexpected data after the JSON value")
+	}
 	return nil
 }
 

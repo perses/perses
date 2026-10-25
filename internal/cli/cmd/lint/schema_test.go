@@ -14,6 +14,7 @@
 package lint
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -367,6 +368,48 @@ func TestDashboardSchemaValidatePluginResolution(t *testing.T) {
 			if assert.Error(t, err) {
 				assert.Equal(t, test.expected, err.Error())
 			}
+		})
+	}
+}
+
+func TestDashboardSchemaValidateDiagnostics(t *testing.T) {
+	const schema = `
+#Dashboard: {
+	kind: "Dashboard"
+	spec: close({
+		duration?: string
+		refresh?:  1 | 2 | 3
+		count?:    int
+	})
+}
+`
+	sch, err := loadDashboardSchema(writeFile(t, t.TempDir(), "schema.cue", schema))
+	require.NoError(t, err)
+	testSuite := []struct {
+		title    string
+		spec     map[string]any
+		expected string
+	}{
+		{
+			title:    "enum of numbers with a string",
+			spec:     map[string]any{"refresh": "fast"},
+			expected: `spec.refresh: invalid value "fast"`,
+		},
+		{
+			title:    "list for a string field next to another error",
+			spec:     map[string]any{"duration": []any{"1h"}, "refresh": 4},
+			expected: "spec.refresh: invalid value 4; spec.duration: invalid type list, expected string",
+		},
+		{
+			title:    "number that is not exactly an integer",
+			spec:     map[string]any{"count": json.Number("1.0000000000000001")},
+			expected: "spec.count: conflicting values 1.0000000000000001 and int (mismatched types float and int)",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			err := sch.validate(map[string]any{"kind": "Dashboard", "spec": test.spec})
+			assert.EqualError(t, err, test.expected)
 		})
 	}
 }

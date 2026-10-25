@@ -30,8 +30,14 @@ import (
 
 const dashboardDefinition = "#Dashboard"
 
+const invalidValue = "invalid value"
+
 // conflictRegexp matches the message of a CUE error like: conflicting values "a" and "b"
 var conflictRegexp = regexp.MustCompile(`^conflicting values (.+) and (.+)$`)
+
+// mismatchedTypesRegexp matches the suffix CUE adds to a conflict between values of different types,
+// e.g. conflicting values 1 and "a" (mismatched types int and string)
+var mismatchedTypesRegexp = regexp.MustCompile(` \(mismatched types (\S+) and (\S+)\)$`)
 
 // anyKey and anyIndex match any user-defined map key and any list index in a plugin location.
 const (
@@ -136,9 +142,11 @@ func (s *dashboardSchema) summarize(err error, object map[string]any) []string {
 		path  string
 		left  []string
 		right []string
+		msgs  []string
 	}
 	var messages []string
 	var conflicts []*conflict
+	var containerConflicts []string
 	checkedPlugins := map[string]bool{}
 	for _, e := range cueErrors.Errors(err) {
 		path := e.Path()
@@ -169,9 +177,20 @@ func (s *dashboardSchema) summarize(err error, object map[string]any) []string {
 				continue
 			}
 		}
-		if matches := conflictRegexp.FindStringSubmatch(msg); matches != nil {
+		conflictMsg := msg
+		mismatchedTypes := mismatchedTypesRegexp.FindStringSubmatch(msg)
+		if mismatchedTypes != nil {
+			conflictMsg = strings.TrimSuffix(msg, mismatchedTypes[0])
+		}
+		if matches := conflictRegexp.FindStringSubmatch(conflictMsg); matches != nil {
 			if isContainer(matches[1]) || isContainer(matches[2]) {
-				// A whole struct or list conflicting with the schema, the actual error is reported on its fields.
+				// A whole struct or list conflicting with the schema. The actual error is usually reported on its fields,
+				// so this one is only kept when no more specific error is reported (e.g. a list given for a string).
+				containerMsg := invalidValue
+				if mismatchedTypes != nil {
+					containerMsg = fmt.Sprintf("invalid type %s, expected %s", mismatchedTypes[1], mismatchedTypes[2])
+				}
+				containerConflicts = append(containerConflicts, withPath(pathStr, containerMsg))
 				continue
 			}
 			index := slices.IndexFunc(conflicts, func(c *conflict) bool { return c.path == pathStr })
@@ -181,6 +200,7 @@ func (s *dashboardSchema) summarize(err error, object map[string]any) []string {
 			}
 			conflicts[index].left = append(conflicts[index].left, matches[1])
 			conflicts[index].right = append(conflicts[index].right, matches[2])
+			conflicts[index].msgs = append(conflicts[index].msgs, msg)
 			continue
 		}
 		if strings.HasPrefix(msg, "incomplete value ") && isContainer(strings.TrimPrefix(msg, "incomplete value ")) {
@@ -192,13 +212,21 @@ func (s *dashboardSchema) summarize(err error, object map[string]any) []string {
 	for _, c := range conflicts {
 		switch {
 		case len(c.left) == 1:
-			messages = append(messages, withPath(c.path, fmt.Sprintf("conflicting values %s and %s", c.left[0], c.right[0])))
+			messages = append(messages, withPath(c.path, c.msgs[0]))
 		case allEqual(c.right):
-			messages = append(messages, withPath(c.path, "invalid value "+c.right[0]))
+			messages = append(messages, withPath(c.path, invalidValue+" "+c.right[0]))
 		case allEqual(c.left):
-			messages = append(messages, withPath(c.path, "invalid value "+c.left[0]))
+			messages = append(messages, withPath(c.path, invalidValue+" "+c.left[0]))
 		default:
-			messages = append(messages, withPath(c.path, "invalid value"))
+			messages = append(messages, withPath(c.path, invalidValue))
+		}
+	}
+	for _, c := range containerConflicts {
+		path, _, _ := strings.Cut(c, ": ")
+		if !slices.ContainsFunc(messages, func(m string) bool {
+			return path == "" || strings.HasPrefix(m, path+".") || strings.HasPrefix(m, path+": ")
+		}) {
+			messages = append(messages, c)
 		}
 	}
 	var unique []string

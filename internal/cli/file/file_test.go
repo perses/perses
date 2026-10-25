@@ -14,6 +14,7 @@
 package file
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -154,5 +155,19 @@ error-message-testing
 				}
 			}
 		})
+	}
+}
+
+func TestReadJSONKeepsExactNumbers(t *testing.T) {
+	p := writeTemp(t, "dashboard.json", `{"kind": "Dashboard", "spec": {"count": 1.0000000000000001, "big": 9007199254740993}}`)
+	u := &unmarshaller{file: p}
+	if err := u.read(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	spec := u.objects[0]["spec"].(map[string]any)
+	for field, expected := range map[string]json.Number{"count": "1.0000000000000001", "big": "9007199254740993"} {
+		if spec[field] != expected {
+			t.Errorf("%s: expected %v, got %#v", field, expected, spec[field])
+		}
 	}
 }
