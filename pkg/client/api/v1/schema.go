@@ -51,6 +51,10 @@ type PluginSchemaQuery struct {
 
 func (q *PluginSchemaQuery) GetValues() url.Values {
 	values := make(url.Values)
+	// A nil *PluginSchemaQuery passed to Request.Query is a non-nil interface, so it must be handled here.
+	if q == nil {
+		return values
+	}
 	if len(q.Version) > 0 {
 		values["version"] = []string{q.Version}
 	}
@@ -86,11 +90,10 @@ func (c *schema) Plugins() ([]byte, error) {
 }
 
 func (c *schema) Plugin(name string, query *PluginSchemaQuery) ([]byte, error) {
-	req := c.client.Get().
+	return c.client.Get().
 		Resource(pluginSchemaResource).
-		Name(name)
-	if query != nil {
-		req = req.Query(query)
-	}
-	return req.Do().Bytes()
+		Name(name).
+		Query(query).
+		Do().
+		Bytes()
 }
