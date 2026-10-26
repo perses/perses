@@ -322,11 +322,13 @@ func (m *completeMigration) migrateDashboardLinks(grafanaDashboard *SimplifiedDa
 			continue
 		}
 		link := dashboard.Link{
-			URL:             l.URL,
-			Name:            l.Title,
-			RenderVariables: l.IncludeVars,
-			Tooltip:         l.Tooltip,
-			TargetBlank:     l.TargetBlank,
+			URL:              l.URL,
+			Name:             l.Title,
+			RenderVariables:  hasGrafanaVariables(l.URL),
+			Tooltip:          l.Tooltip,
+			TargetBlank:      l.TargetBlank,
+			KeepTime:         l.KeepTime,
+			IncludeVariables: l.IncludeVars,
 		}
 		links = append(links, link)
 	}

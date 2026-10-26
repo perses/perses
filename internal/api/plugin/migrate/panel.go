@@ -65,10 +65,12 @@ func convertGrafanaLinksToPerses(grafanaLinks []GrafanaLink) []dashboard.Link {
 			continue
 		}
 		persesLinks = append(persesLinks, dashboard.Link{
-			Name:            grafanaLink.Title,
-			URL:             grafanaLink.URL,
-			TargetBlank:     grafanaLink.TargetBlank,
-			RenderVariables: hasGrafanaVariables(grafanaLink.URL),
+			Name:             grafanaLink.Title,
+			URL:              grafanaLink.URL,
+			TargetBlank:      grafanaLink.TargetBlank,
+			RenderVariables:  hasGrafanaVariables(grafanaLink.URL),
+			KeepTime:         grafanaLink.KeepTime,
+			IncludeVariables: grafanaLink.IncludeVars,
 		})
 	}
 	if len(persesLinks) == 0 {

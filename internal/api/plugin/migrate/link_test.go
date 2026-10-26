@@ -36,18 +36,22 @@ func TestMigrateDashboardTagLink(t *testing.T) {
 	assert.True(t, got[0].IncludeVariables)
 	assert.Empty(t, got[0].URL)
 	assert.Equal(t, "https://perses.dev", got[1].URL)
-	assert.True(t, got[1].RenderVariables)
+	assert.False(t, got[1].RenderVariables)
+	assert.True(t, got[1].IncludeVariables)
+	assert.True(t, got[1].TargetBlank)
 	assert.Empty(t, got[1].Tags)
 }
 
 func TestConvertGrafanaPanelTagLink(t *testing.T) {
 	got := convertGrafanaLinksToPerses([]GrafanaLink{
-		{Title: "Runbook", URL: "https://example.com/${region}"},
+		{Title: "Runbook", URL: "https://example.com/${region}", KeepTime: true, IncludeVars: true},
 		{Title: "Traffic", Type: "dashboards", Tags: []string{"traffic"}, KeepTime: true, IncludeVars: true},
 		{URL: ""},
 	})
 	require.Len(t, got, 2)
 	assert.True(t, got[0].RenderVariables)
+	assert.True(t, got[0].KeepTime)
+	assert.True(t, got[0].IncludeVariables)
 	assert.Equal(t, []string{"traffic"}, got[1].Tags)
 	assert.True(t, got[1].KeepTime)
 	assert.True(t, got[1].IncludeVariables)
