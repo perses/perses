@@ -339,6 +339,11 @@ func (o *generateOptions) Execute() error {
 	}
 	createdPaths = append(createdPaths, goModPaths...)
 
+	return output.HandleString(o.writer, o.successMessage(isModuleGeneration, createdPaths))
+}
+
+// successMessage lists the files created by the generation.
+func (o *generateOptions) successMessage(isModuleGeneration bool, createdPaths []string) string {
 	msg := fmt.Sprintf("plugin %s generated successfully", o.pluginPascalName)
 	if isModuleGeneration {
 		msg = fmt.Sprintf("module %s created successfully, %s", o.pluginModuleName, msg)
@@ -348,7 +353,7 @@ func (o *generateOptions) Execute() error {
 		msg += fmt.Sprintf("\n- %s", p)
 	}
 
-	return output.HandleString(o.writer, msg)
+	return msg
 }
 
 // ensureGoModule initializes the Go module with `go mod init` and `go mod tidy` when the output directory
