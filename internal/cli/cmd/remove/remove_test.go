@@ -14,6 +14,8 @@
 package remove
 
 import (
+	"fmt"
+	"path/filepath"
 	"testing"
 
 	"github.com/perses/perses/internal/cli/resource"
@@ -84,6 +86,29 @@ object "Folder" "ff15" has been deleted in the project "perses"
 object "Folder" "foo" has been deleted in the project "perses"
 object "Project" "perses" has been deleted
 `,
+		},
+		{
+			Title:           "file and directory are mutually exclusive",
+			Args:            []string{"-f", "../../test/sample_resources/single_resource.json", "-d", "testdata/resources"},
+			IsErrorExpected: true,
+			ExpectedMessage: "if any flags in the group [file directory] are set none of the others can be; [directory file] were all set",
+		},
+		{
+			Title:           "delete resources from a directory",
+			Args:            []string{"-d", "testdata/resources", "--project", "perses"},
+			APIClient:       fakeapi.New(),
+			IsErrorExpected: false,
+			ExpectedMessage: `object "Folder" "aoe4" has been deleted in the project "game"
+object "Folder" "ff15" has been deleted in the project "perses"
+object "Project" "perses" has been deleted
+`,
+		},
+		{
+			Title:           "delete unknown document from a directory",
+			Args:            []string{"-d", "../../test/sample_resources", "--project", "perses"},
+			APIClient:       fakeapi.New(),
+			IsErrorExpected: true,
+			ExpectedMessage: fmt.Sprintf(`resource "game" from file %q not supported by the command`, filepath.Join("..", "..", "test", "sample_resources", "unknown_resource.json")),
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)

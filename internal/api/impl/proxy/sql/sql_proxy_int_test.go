@@ -138,6 +138,13 @@ func TestSQLProxy_Postgres(t *testing.T) {
 		assert.Equal(t, 10, countRows(t, newPostgresProxy(nil), table))
 	})
 
+	t.Run("error while reading the rows", func(t *testing.T) {
+		// The first rows are sent before the database fails on the division by zero.
+		rec, err := serveSQLQuery(t, newPostgresProxy(nil), "SELECT 10 / (x - 3) AS ratio FROM generate_series(1, 5) AS x")
+		require.Error(t, err)
+		assert.Empty(t, rec.Body.String())
+	})
+
 	t.Run("connection error not reported as a read-only transaction error", func(t *testing.T) {
 		// The connection is established when the query is executed: the error happens before starting the transaction.
 		s := newPostgresProxy(nil)
@@ -200,6 +207,14 @@ func TestSQLProxy_MariaDB(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusOK, rec.Code)
 		assert.Contains(t, rec.Body.String(), `"rows":[{"count":3}]`)
+	})
+
+	t.Run("error while reading the rows", func(t *testing.T) {
+		// The subquery returns at most one row for the ids 3 and 2, but two rows for the id 1:
+		// the database fails after sending the first rows.
+		rec, err := serveSQLQuery(t, newMariaDBProxy(nil), fmt.Sprintf("SELECT o.id, (SELECT i.id FROM %s i WHERE i.id > o.id) AS next FROM %s o ORDER BY o.id DESC", table, table))
+		require.Error(t, err)
+		assert.Empty(t, rec.Body.String())
 	})
 
 	t.Run("stored procedure rejected", func(t *testing.T) {

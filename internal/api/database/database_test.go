@@ -15,11 +15,16 @@ package database
 
 import (
 	"crypto/tls"
+	"encoding/json"
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
+	databaseModel "github.com/perses/perses/internal/api/database/model"
+	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/config"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/perses/spec/go/common"
 	"github.com/stretchr/testify/assert"
@@ -172,4 +177,37 @@ func TestNewSQL(t *testing.T) {
 			require.NoError(t, d.Close())
 		})
 	}
+}
+
+// failingStreamDAO streams one dashboard and then fails.
+// Like the real implementations, it closes the channel before StreamRaw returns the error.
+type failingStreamDAO struct {
+	databaseModel.DAO
+	err error
+}
+
+func (f *failingStreamDAO) StreamRaw(_ databaseModel.Query, ch chan<- json.RawMessage) error {
+	// The deferred calls run in reverse order: the channel is closed, then the reader is given time
+	// to notice it before the error is returned.
+	defer time.Sleep(50 * time.Millisecond)
+	defer close(ch)
+	ch <- json.RawMessage(`{"kind":"Dashboard","metadata":{"name":"foo","project":"perses"},"spec":{}}`)
+	return f.err
+}
+
+func TestRawQueriesReturnStreamError(t *testing.T) {
+	streamErr := errors.New("unable to read the dashboards")
+	d := &dao{client: &failingStreamDAO{err: streamErr}}
+
+	t.Run("RawQuery", func(t *testing.T) {
+		result, err := d.RawQuery(&dashboard.Query{})
+		assert.ErrorIs(t, err, streamErr)
+		assert.Nil(t, result)
+	})
+
+	t.Run("RawMetadataQuery", func(t *testing.T) {
+		result, err := d.RawMetadataQuery(&dashboard.Query{}, modelV1.KindDashboard)
+		assert.ErrorIs(t, err, streamErr)
+		assert.Nil(t, result)
+	})
 }
