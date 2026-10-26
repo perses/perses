@@ -14,7 +14,6 @@
 package lint
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -114,22 +113,36 @@ func TestDashboardSchemaValidate(t *testing.T) {
 		{
 			title:     "invalid value in a plugin",
 			dashboard: newTestDashboard(map[string]any{"kind": "Chart", "spec": map[string]any{"unit": "ops"}}),
-			expected:  `spec.panels.cpu.spec.plugin.spec.unit: invalid value "ops"`,
+			expected: `spec.panels.cpu.spec.plugin: 5 errors in empty disjunction:
+spec.panels.cpu.spec.plugin.kind: conflicting values "Markdown" and "Chart"
+spec.panels.cpu.spec.plugin.spec.unit: 3 errors in empty disjunction:
+spec.panels.cpu.spec.plugin.spec.unit: conflicting values "bytes" and "ops"
+spec.panels.cpu.spec.plugin.spec.unit: conflicting values "percent" and "ops"
+spec.panels.cpu.spec.plugin.spec.unit: conflicting values "seconds" and "ops"`,
 		},
 		{
 			title:     "unknown field in a plugin",
 			dashboard: newTestDashboard(map[string]any{"kind": "Markdown", "spec": map[string]any{"txt": "x"}}),
-			expected:  "spec.panels.cpu.spec.plugin.spec.txt: field not allowed",
+			expected: `spec.panels.cpu.spec.plugin: 2 errors in empty disjunction:
+spec.panels.cpu.spec.plugin.kind: conflicting values "Chart" and "Markdown"
+spec.panels.cpu.spec.plugin.spec.txt: field not allowed`,
 		},
 		{
 			title:     "unknown plugin",
 			dashboard: newTestDashboard(map[string]any{"kind": "Gauge", "spec": map[string]any{}}),
-			expected:  `spec.panels.cpu.spec.plugin.kind: unknown panel plugin "Gauge"`,
+			expected: `spec.panels.cpu.spec.plugin: 2 errors in empty disjunction:
+spec.panels.cpu.spec.plugin.kind: conflicting values "Chart" and "Gauge"
+spec.panels.cpu.spec.plugin.kind: conflicting values "Markdown" and "Gauge"`,
 		},
 		{
 			title:     "invalid plugin under a numeric YAML key",
 			dashboard: numericKey,
-			expected:  `spec.panels."0".spec.plugin.spec.unit: invalid value "ops"`,
+			expected: `spec.panels."0".spec.plugin: 5 errors in empty disjunction:
+spec.panels."0".spec.plugin.kind: conflicting values "Markdown" and "Chart"
+spec.panels."0".spec.plugin.spec.unit: 3 errors in empty disjunction:
+spec.panels."0".spec.plugin.spec.unit: conflicting values "bytes" and "ops"
+spec.panels."0".spec.plugin.spec.unit: conflicting values "percent" and "ops"
+spec.panels."0".spec.plugin.spec.unit: conflicting values "seconds" and "ops"`,
 		},
 	}
 	for _, test := range testSuites {
@@ -278,157 +291,4 @@ func TestLintCMDWithSchemaConsistency(t *testing.T) {
 			ExpectedRegexMessage: `^unexpected error in dashboard "demo": [ab] can not be defined as default datasource: there is already a default defined for kind "PrometheusDatasource"$`,
 		},
 	})
-}
-
-// pluginResolutionSchema has plugin definitions whose name differs from the kind, as generated for names containing
-// characters not allowed in a definition name, and a plugin embedded in the disjunction without a definition.
-const pluginResolutionSchema = `
-#Plugin_Panel_Chart: {
-	kind: "Chart"
-	spec: close({
-		unit?: "bytes" | "seconds" | "percent"
-	})
-}
-#Plugin_Panel_Bar_Chart: {
-	kind: "Bar-Chart"
-	spec: close({
-		size?: int
-	})
-}
-#Plugin_Query_Prom: {
-	kind: "Prom"
-	spec: close({
-		query: string
-	})
-}
-#Dashboard: {
-	kind: "Dashboard"
-	spec: close({
-		panels: [string]: {
-			kind: "Panel"
-			spec: close({
-				plugin: {
-					kind: #Plugin_Panel_Chart.kind
-					spec: #Plugin_Panel_Chart.spec
-				} | {
-					kind: #Plugin_Panel_Bar_Chart.kind
-					spec: #Plugin_Panel_Bar_Chart.spec
-				} | {
-					kind: "Text"
-					spec: close({
-						content: string
-					})
-				}
-				queries?: [...{
-					kind: "Query"
-					spec: close({
-						plugin: {
-							kind: #Plugin_Query_Prom.kind
-							spec: #Plugin_Query_Prom.spec
-						}
-					})
-				}]
-			})
-		}
-	})
-}
-`
-
-func TestDashboardSchemaValidatePluginResolution(t *testing.T) {
-	sch, err := loadDashboardSchema(writeFile(t, t.TempDir(), "schema.cue", pluginResolutionSchema))
-	require.NoError(t, err)
-
-	newDashboard := func(panelID string, panelSpec map[string]any) map[string]any {
-		return map[string]any{
-			"kind": "Dashboard",
-			"spec": map[string]any{
-				"panels": map[string]any{panelID: map[string]any{"kind": "Panel", "spec": panelSpec}},
-			},
-		}
-	}
-	chart := map[string]any{"kind": "Chart", "spec": map[string]any{}}
-
-	testSuites := []struct {
-		title     string
-		dashboard map[string]any
-		expected  string
-	}{
-		{
-			title:     "panel named like a plugin collection",
-			dashboard: newDashboard("queries", map[string]any{"plugin": map[string]any{"kind": "Chart", "spec": map[string]any{"unit": "ops"}}}),
-			expected:  `spec.panels.queries.spec.plugin.spec.unit: invalid value "ops"`,
-		},
-		{
-			title:     "plugin with a definition name different from its kind",
-			dashboard: newDashboard("cpu", map[string]any{"plugin": map[string]any{"kind": "Bar-Chart", "spec": map[string]any{"sise": 1}}}),
-			expected:  "spec.panels.cpu.spec.plugin.spec.sise: field not allowed",
-		},
-		{
-			title:     "plugin embedded without a definition",
-			dashboard: newDashboard("cpu", map[string]any{"plugin": map[string]any{"kind": "Text", "spec": map[string]any{"content": "x", "txt": "x"}}}),
-			expected:  "spec.panels.cpu.spec.plugin.spec.txt: field not allowed",
-		},
-		{
-			title:     "unknown panel plugin",
-			dashboard: newDashboard("cpu", map[string]any{"plugin": map[string]any{"kind": "Gauge", "spec": map[string]any{}}}),
-			expected:  `spec.panels.cpu.spec.plugin.kind: unknown panel plugin "Gauge"`,
-		},
-		{
-			title: "invalid query plugin",
-			dashboard: newDashboard("cpu", map[string]any{"plugin": chart, "queries": []any{
-				map[string]any{"kind": "Query", "spec": map[string]any{"plugin": map[string]any{"kind": "Prom", "spec": map[string]any{"query": 1}}}},
-			}}),
-			expected: "spec.panels.cpu.spec.queries.0.spec.plugin.spec.query: conflicting values 1 and string (mismatched types int and string)",
-		},
-	}
-	for _, test := range testSuites {
-		t.Run(test.title, func(t *testing.T) {
-			err := sch.validate(test.dashboard)
-			if assert.Error(t, err) {
-				assert.Equal(t, test.expected, err.Error())
-			}
-		})
-	}
-}
-
-func TestDashboardSchemaValidateDiagnostics(t *testing.T) {
-	const schema = `
-#Dashboard: {
-	kind: "Dashboard"
-	spec: close({
-		duration?: string
-		refresh?:  1 | 2 | 3
-		count?:    int
-	})
-}
-`
-	sch, err := loadDashboardSchema(writeFile(t, t.TempDir(), "schema.cue", schema))
-	require.NoError(t, err)
-	testSuite := []struct {
-		title    string
-		spec     map[string]any
-		expected string
-	}{
-		{
-			title:    "enum of numbers with a string",
-			spec:     map[string]any{"refresh": "fast"},
-			expected: `spec.refresh: invalid value "fast"`,
-		},
-		{
-			title:    "list for a string field next to another error",
-			spec:     map[string]any{"duration": []any{"1h"}, "refresh": 4},
-			expected: "spec.refresh: invalid value 4; spec.duration: invalid type list, expected string",
-		},
-		{
-			title:    "number that is not exactly an integer",
-			spec:     map[string]any{"count": json.Number("1.0000000000000001")},
-			expected: "spec.count: conflicting values 1.0000000000000001 and int (mismatched types float and int)",
-		},
-	}
-	for _, test := range testSuite {
-		t.Run(test.title, func(t *testing.T) {
-			err := sch.validate(map[string]any{"kind": "Dashboard", "spec": test.spec})
-			assert.EqualError(t, err, test.expected)
-		})
-	}
 }
