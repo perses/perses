@@ -35,6 +35,7 @@ Available Commands:
   plugin      Commands related to plugins development
   project     Select the project used by default.
   refresh     refresh the access token when it expires
+  schema      Commands related to the CUE schemas served by the Perses server
   version     Display client version.
   whoami      Display current user used
 
@@ -251,6 +252,22 @@ Dashboard Demo has been deleted
 ```
 
 ## Advanced Commands
+
+### Download the dashboard schema
+
+The command `schema get` downloads a CUE schema from the Perses server you are logged in to.
+`dashboards` is the complete dashboard schema, including the schemas of all the plugins loaded by the server.
+It defines `#Dashboard`, which can be used to validate the dashboards offline. To download it:
+
+```bash
+$ percli schema get dashboards --output-file dashboard-schema.cue
+```
+
+The schema matches the version of the server and the plugins it loads, so download it again when the server is upgraded.
+The file starts with comments giving the server URL, its version and the download time.
+
+You can also get the schemas of the plugins with `percli schema get plugins`, or of a single plugin with
+`percli schema get plugins <name> [--version <version>] [--registry <registry>]`.
 
 ### Linter
 

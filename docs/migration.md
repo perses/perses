@@ -14,6 +14,9 @@ data model). This documentation will guide you through the process of doing such
 Perses. Since Perses is much younger project than Grafana, it is certain that it doesn't support every possible
 plugin. Therefore, the migration is in best-effort basis. However we are working hard to expand coverage!
 
+- The `Regex` field of the Grafana variables is not migrated. See [Variables with a regex](#variables-with-a-regex) to
+  learn why, and how to filter the values of a migrated variable again.
+
 ## Prerequisites
 
 We are trying to support as many versions of Grafana as possible. But unfortunately, we can't support all of them. 
@@ -98,6 +101,54 @@ Note: In case you would like to have the result as a K8s CustomResource, you can
 percli apply -f perses-dashboard.json --project my-project
 ```
 
+### After the migration
+
+#### Variables with a regex
+
+The migration doesn't keep the `Regex` field of a Grafana variable: the migrated variable lists all the values
+returned by its plugin.
+
+This is because a Grafana regex is written against the values as the Grafana datasource returns them. The
+corresponding Perses variable plugin often returns different values, because it doesn't query the datasource the
+same way. Applying the original regex as it is would then give wrong or empty results without any warning.
+
+To filter the values of a migrated variable again, you can:
+
+- Filter in the query itself, if the datasource supports it. This is usually the simplest and most efficient option.
+  How to do it depends on the plugin. Check its documentation, for example
+  [Migrating variables from Grafana](https://perses.dev/plugins/docs/prometheus/#migrating-variables-from-grafana)
+  for Prometheus.
+- Set the [Capturing Regexp Filter](#using-the-capturing-regexp-filter) of the variable. It works with any variable
+  plugin.
+
+!!! tip
+    To see the values returned by a migrated variable, click `Run Query` in the variable editor and check
+    `Preview Values`. Write your filter based on these values, not on the values Grafana showed.
+
+##### Using the Capturing Regexp Filter
+
+The `Capturing Regexp Filter` of a variable (`capturingRegexp` in the
+[list variable specification](./api/variable.md#list-variable-specification)) is, like the regex of Grafana, a
+JavaScript regular expression that your browser applies to each value. However:
+
+- Write it without the `/` delimiters and flags. To ignore the case, put both cases of each letter in a character
+  class, such as `[Pp][Rr][Oo][Dd]`: `(?i)` is invalid in JavaScript. It isn't anchored, while Grafana anchors a regex
+  written without `/`. Variables such as `$env` aren't replaced in it.
+- It must capture something: a value is kept only if a group captures some text, and the new value is the text
+  captured by all the groups, put together. So `^prod-.*` removes every value: write `^(prod-.*)` instead. Grafana
+  uses only the first group, so write the other groups as non-capturing groups, such as `(?:eu|us)`. Groups named
+  `text` or `value` have no special meaning.
+- It's always global: it uses every match in the value, not only the first one, and puts their captured text
+  together. So `([^:]+)` turns `demo:9100` into `demo9100`, while Grafana's `/([^:]+)/` gives `demo`. To use only
+  the first match, anchor it with `^`, and match what comes before the group if needed, such as `^([^:]+)`, or
+  `^\D*(\d+)` for the first number.
+- To only filter, make the group capture the whole value, such as `^(prod-.*)` or `(.*prod-.*)`: a group around a
+  part of the value keeps only this part, so `(prod-.*)` turns `preprod-x` into `prod-x`.
+
+!!! note
+    `Preview Values` lists one entry per captured text. Like the dropdown of the dashboard, each entry shows the first
+    original value that gave this text, while the value of the variable, used in the queries, is the captured text.
+
 ## To go further
 
 ### How it works
@@ -115,3 +166,6 @@ The migration process is done in two parts:
 
 If you need more information about how to write a migration script in Golang for a plugin, please refer to
 the [associated documentation](./plugins/cue.md#migration-from-grafana).
+
+As each plugin migrates its own variables, panels and queries, check the documentation of the plugin for details
+on what is migrated and what to adjust afterwards.

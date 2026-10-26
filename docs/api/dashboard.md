@@ -47,7 +47,10 @@ duration: <duration> # Optional
 # `refreshInterval` is the default refresh interval to use on the initial load of the dashboard.
 refreshInterval: <duration> # Optional
 
-# `links` is an optional list of header links. Each link is either a URL or a tag menu.
+# `timezone` is the default timezone to use on the dashboard (e.g. "local", "UTC", or an IANA timezone name such as "Europe/Paris").
+timezone: <string> # Optional
+
+# `links` is an optional list of links to display at the dashboard level. Each link is either a URL or a tag menu.
 links:
   - <Link specification> # Optional
 ```
@@ -79,25 +82,37 @@ See the [variable](./variable.md) documentation.
 
 ### Link specification
 
-A link is either a URL or a menu of dashboards in the current project. Set one of `url` or `tags`, not both. A tag menu needs a `name`, which is the menu title, and at least one tag. A dashboard is listed when it has every tag. The current dashboard is left out.
+Links can be defined at the dashboard level (`spec.links`) or on individual panels (`spec.panels.<name>.spec.links`).
 
-`renderVariables` interpolates `$var` inside `url`. `keepTime` and `includeVariables` apply to a tag menu: they forward the current time range, and the variables whose names exist on the destination.
+A link is either a URL or a menu of dashboards in the current project. Set `url` or `tags`, not both. A link with neither is still accepted: dashboards stored before tag menus used an empty URL. A tag menu needs a `name`, which is the menu title, and at least one tag. A dashboard is listed when it has every tag. The current dashboard is left out.
+
+`renderVariables` interpolates `$var` inside a URL. `keepTime` copies the current time range. `includeVariables` copies variables: a URL receives every current variable, and a tag menu receives the variables whose names exist on the destination.
 
 ```yaml
-# URL link
+# Display name. Required for a tag menu, where it is the menu title.
 name: <string> # Optional
-url: <string>
-tooltip: <string> # Optional
-renderVariables: <bool> # Optional
-targetBlank: <bool> # Optional
 
-# Tag menu. Mutually exclusive with url.
-name: <string>
-tags:
-  - <string>
+# Target URL. Mutually exclusive with tags. May be empty.
+url: <string> # Optional
+
+# Text displayed when hovering over the link.
 tooltip: <string> # Optional
-keepTime: <bool> # Optional
-includeVariables: <bool> # Optional
+
+# Whether variables present in the URL should be interpolated with their current values.
+renderVariables: <boolean> | default = false # Optional
+
+# Whether to open the link in a new browser tab. Used by URL links.
+targetBlank: <boolean> | default = false # Optional
+
+# Tags selecting dashboards in the current project. Mutually exclusive with a non-empty URL.
+tags:
+  - <string> # Optional
+
+# Whether to copy the current time range. Applies to a URL and to a tag menu.
+keepTime: <boolean> | default = false # Optional
+
+# Whether to copy variables. A URL receives every current variable. A tag menu receives those the destination declares.
+includeVariables: <boolean> | default = false # Optional
 ```
 
 ### Panel specification
@@ -114,6 +129,10 @@ spec:
   # `queries` is the list of queries to be executed by the panel. The available types of query are conditioned by the type of panel & the type of datasource used.
   queries:
     - <Query specification> # Optional
+
+  # `links` is an optional list of links to display at the panel level.
+  links:
+    - <Link specification> # Optional
 ```
 
 #### Panel Plugin specification
@@ -197,6 +216,10 @@ height: <int>
 content:
   "$ref": <json_panel_ref>
 ```
+
+### Timezone
+
+`timezone` sets the dashboard-level timezone used to format timestamps across panels. Accepted values are `""` (unset, inherits from user/server/browser defaults), `"local"` (browser local timezone), or any valid IANA timezone name (such as `"UTC"` or `"Europe/Paris"`). See the [timezone](../concepts/timezone.md) documentation for more details.
 
 ## API definition
 
