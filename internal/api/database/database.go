@@ -62,30 +62,38 @@ func (d *dao) StreamRaw(query databaseModel.Query, ch chan<- json.RawMessage) er
 }
 func (d *dao) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
 	ch := make(chan json.RawMessage)
-	var err error
+	// StreamRaw closes ch in a defer, before the goroutine stores the returned error.
+	errc := make(chan error, 1)
 	go func() {
-		err = d.StreamRaw(query, ch)
+		errc <- d.StreamRaw(query, ch)
 	}()
 	result := make([]json.RawMessage, 0)
 	for data := range ch {
 		result = append(result, data)
 	}
-	return result, err
+	if err := <-errc; err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 func (d *dao) RawMetadataQuery(query databaseModel.Query, kind modelV1.Kind) ([]json.RawMessage, error) {
 	ch := make(chan json.RawMessage)
-	var err error
+	// StreamRaw closes ch in a defer, before the goroutine stores the returned error.
+	errc := make(chan error, 1)
 	go func() {
 		// Using the StreamRaw method to get the raw data in a stream will reduce the cost of memory allocation
 		// and improve performance when the number of resources is large.
-		err = d.StreamRaw(query, ch)
+		errc <- d.StreamRaw(query, ch)
 	}()
 	result := make([]json.RawMessage, 0)
 	for raw := range ch {
 		metadata := gjson.GetBytes(raw, "metadata").String()
 		result = append(result, fmt.Appendf(nil, `{"kind":"%s","metadata":%s,"spec":{}}`, kind, metadata))
 	}
-	return result, err
+	if err := <-errc; err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 func (d *dao) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
 	return d.client.Delete(kind, metadata)
