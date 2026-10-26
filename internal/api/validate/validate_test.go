@@ -257,7 +257,8 @@ func TestDashboardSpec_localDatasourceTimeout(t *testing.T) {
 	assert.EqualError(t, err, `invalid proxy of the datasource "prometheus": timeout "10m" exceeds the maximum allowed by the server (30s)`)
 }
 
-func TestDashboardSpecConsistency(t *testing.T) {
+// TestDashboardSpecWithoutSchema runs the checks that need neither the plugin schemas nor the server configuration.
+func TestDashboardSpecWithoutSchema(t *testing.T) {
 	prometheus := func(isDefault bool) *datasourceSpec.Spec {
 		return &datasourceSpec.Spec{Default: isDefault, Plugin: specPlugin.Plugin{Kind: "PrometheusDatasource"}}
 	}
@@ -278,7 +279,7 @@ func TestDashboardSpecConsistency(t *testing.T) {
 	}
 	for _, test := range testSuites {
 		t.Run(test.title, func(t *testing.T) {
-			err := DashboardSpecConsistency(dashboard.Spec{Datasources: test.datasources})
+			err := DashboardSpec(dashboard.Spec{Datasources: test.datasources}, nil, nil)
 			if len(test.expectedErr) == 0 {
 				assert.NoError(t, err)
 			} else {

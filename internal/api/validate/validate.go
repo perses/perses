@@ -45,16 +45,6 @@ func DashboardSpec(spec dashboard.Spec, sch schema.Schema, proxyCfg *config.HTTP
 
 }
 
-// DashboardSpecConsistency runs the checks of DashboardSpec that need neither the plugin schemas nor the server configuration:
-// the variable order and names, and the unicity of the default local datasource per plugin kind.
-// It is meant to complement a validation against a complete dashboard schema, which should run first as the variables are expected to be valid.
-func DashboardSpecConsistency(spec dashboard.Spec) error {
-	if _, err := utils.BuildVariableOrder(spec.Variables, nil, nil); err != nil {
-		return err
-	}
-	return validateDashboardSpecConsistency(spec)
-}
-
 // DashboardSpecWithVars is like DashboardSpec, but also takes into account the project and global variables.
 func DashboardSpecWithVars(spec dashboard.Spec, sch schema.Schema, proxyCfg *config.HTTPProxyConfig, projectVariables []*modelV1.Variable, globalVariables []*modelV1.GlobalVariable) error {
 	if _, err := utils.BuildVariableOrder(spec.Variables, projectVariables, globalVariables); err != nil {
@@ -136,6 +126,9 @@ func validateDatasourcePlugin(plugin plugin.Plugin, name string, sch schema.Sche
 	if err := validateHTTPProxyTimeout(proxyConfig, name, proxyCfg); err != nil {
 		return err
 	}
+	if sch == nil {
+		return nil
+	}
 	return sch.ValidateDatasource(plugin, name)
 }
 
@@ -173,16 +166,12 @@ func validateDashboardSpec(spec dashboard.Spec, sch schema.Schema, proxyCfg *con
 		}
 	}
 	for dtsName, dtsSpec := range spec.Datasources {
+		if dtsSpec == nil {
+			continue
+		}
 		if err := validateDatasourcePlugin(dtsSpec.Plugin, dtsName, sch, proxyCfg); err != nil {
 			return err
 		}
-	}
-	return validateUnicityOfDefaultLocalDTS(spec.Datasources)
-}
-
-func validateDashboardSpecConsistency(spec dashboard.Spec) error {
-	if err := validateVariableNames(spec.Variables); err != nil {
-		return err
 	}
 	return validateUnicityOfDefaultLocalDTS(spec.Datasources)
 }

@@ -130,16 +130,17 @@ func (o *option) SetErrWriter(errWriter io.Writer) {
 }
 
 func (o *option) validate(objects []modelAPI.Entity, rawObjects []map[string]any) error {
-	if o.dashboardSch != nil {
-		return o.validateWithDashboardSchema(objects, rawObjects)
-	}
-	if o.sch == nil && !o.online {
+	if o.sch == nil && !o.online && o.dashboardSch == nil {
 		return nil
 	}
 	// When linting offline, the configuration of the server is unknown.
 	// So the server-dependent checks (like the maximum timeout of the datasource proxy) are skipped by passing a nil proxy config.
 	// They are done by the server when using the online mode.
-	for _, object := range objects {
+	for i, object := range objects {
+		if _, isDashboard := object.(*modelV1.Dashboard); !isDashboard && o.sch == nil && !o.online {
+			// The complete dashboard schema only describes the dashboards, the other resources are not checked.
+			continue
+		}
 		switch entity := object.(type) {
 		case *modelV1.Dashboard:
 			if err := validate.DashboardWithCustomRules(entity, o.customRules); err != nil {
@@ -150,6 +151,13 @@ func (o *option) validate(objects []modelAPI.Entity, rawObjects []map[string]any
 					return err
 				}
 			} else {
+				// The complete dashboard schema is checked with the raw object, as the Go struct silently drops the unknown fields.
+				// It is checked first, as the checks of DashboardSpec expect valid variables.
+				if o.dashboardSch != nil {
+					if err := o.dashboardSch.validate(rawObjects[i]); err != nil {
+						return fmt.Errorf("invalid dashboard %q: %w", entity.Metadata.Name, err)
+					}
+				}
 				if err := validate.DashboardSpec(entity.Spec, o.sch, nil); err != nil {
 					return fmt.Errorf("unexpected error in dashboard %q: %w", entity.Metadata.Name, err)
 				}
@@ -186,28 +194,6 @@ func (o *option) validate(objects []modelAPI.Entity, rawObjects []map[string]any
 			} else if err := validate.Variable(entity, o.sch); err != nil {
 				return err
 			}
-		}
-	}
-	return nil
-}
-
-// validateWithDashboardSchema validates the dashboards against the complete dashboard schema.
-// The other resources are not checked, as the schema only describes the dashboards.
-func (o *option) validateWithDashboardSchema(objects []modelAPI.Entity, rawObjects []map[string]any) error {
-	for i, object := range objects {
-		entity, ok := object.(*modelV1.Dashboard)
-		if !ok {
-			continue
-		}
-		if err := validate.DashboardWithCustomRules(entity, o.customRules); err != nil {
-			return err
-		}
-		// The schema is checked first, as the consistency checks expect valid variables.
-		if err := o.dashboardSch.validate(rawObjects[i]); err != nil {
-			return fmt.Errorf("invalid dashboard %q: %w", entity.Metadata.Name, err)
-		}
-		if err := validate.DashboardSpecConsistency(entity.Spec); err != nil {
-			return fmt.Errorf("invalid dashboard %q: %w", entity.Metadata.Name, err)
 		}
 	}
 	return nil

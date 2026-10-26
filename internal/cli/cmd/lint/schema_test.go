@@ -256,7 +256,7 @@ func TestLintCMDWithSchemaConsistency(t *testing.T) {
 			Title:                "two default datasources of the same kind",
 			Args:                 []string{"-f", twoDefaults, "--schema", schemaPath},
 			IsErrorExpected:      true,
-			ExpectedRegexMessage: `^invalid dashboard "demo": [ab] can not be defined as default datasource: there is already a default defined for kind "PrometheusDatasource"$`,
+			ExpectedRegexMessage: `^unexpected error in dashboard "demo": [ab] can not be defined as default datasource: there is already a default defined for kind "PrometheusDatasource"$`,
 		},
 	})
 }
