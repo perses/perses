@@ -67,9 +67,13 @@ func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schema.Sc
 	return nil
 }
 
+// Variable validates the variable. The plugin schema check is skipped when sch is nil.
 func Variable(entity modelV1.VariableInterface, sch schema.Schema) error {
 	if err := validateVariableName(entity.GetMetadata().GetName()); err != nil {
 		return err
+	}
+	if sch == nil {
+		return nil
 	}
 	return sch.ValidateGlobalVariable(entity.GetVarSpec())
 }

@@ -183,7 +183,26 @@ spec:
           spec: {}
 `)
 
+	// The other resources only get the checks that don't need the plugin schemas.
+	otherResources := writeFile(t, dir, "other-resources.json", `[
+		{"kind":"GlobalVariable","metadata":{"name":"env"},"spec":{"kind":"TextVariable","spec":{"name":"env","value":"prod"}}},
+		{"kind":"Variable","metadata":{"name":"region","project":"perses"},"spec":{"kind":"TextVariable","spec":{"name":"region","value":"eu"}}},
+		{"kind":"GlobalDatasource","metadata":{"name":"prom"},"spec":{"default":true,"plugin":{"kind":"PrometheusDatasource","spec":{}}}}
+	]`)
+	invalidVariable := writeFile(t, dir, "invalid-variable.json", `{"kind":"GlobalVariable","metadata":{"name":"123"},"spec":{"kind":"TextVariable","spec":{"name":"123","value":"prod"}}}`)
+
 	cmdTest.ExecuteSuiteTest(t, NewCMD, []cmdTest.Suite{
+		{
+			Title:           "other resources",
+			Args:            []string{"-f", otherResources, "--schema", schemaPath},
+			ExpectedMessage: "your resources look good\n",
+		},
+		{
+			Title:           "variable with an invalid name",
+			Args:            []string{"-f", invalidVariable, "--schema", schemaPath},
+			IsErrorExpected: true,
+			ExpectedMessage: "variable name '123' is not valid",
+		},
 		{
 			Title:           "valid dashboard",
 			Args:            []string{"-f", valid, "--schema", schemaPath},

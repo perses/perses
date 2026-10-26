@@ -137,10 +137,6 @@ func (o *option) validate(objects []modelAPI.Entity, rawObjects []map[string]any
 	// So the server-dependent checks (like the maximum timeout of the datasource proxy) are skipped by passing a nil proxy config.
 	// They are done by the server when using the online mode.
 	for i, object := range objects {
-		if _, isDashboard := object.(*modelV1.Dashboard); !isDashboard && o.sch == nil && !o.online {
-			// The complete dashboard schema only describes the dashboards, the other resources are not checked.
-			continue
-		}
 		switch entity := object.(type) {
 		case *modelV1.Dashboard:
 			if err := validate.DashboardWithCustomRules(entity, o.customRules); err != nil {
@@ -235,7 +231,7 @@ percli lint -d ./dashboards --schema dashboard-schema.cue
 	cmd.Flags().StringVar(&o.customRulePath, "custom-rule.path", "", "Path to the custom rules.")
 	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the Perses plugins.")
 	cmd.Flags().BoolVar(&o.online, "online", false, "When enable, it can request the API to make additional validation")
-	cmd.Flags().StringVar(&o.schemaPath, "schema", "", "Path to the complete dashboard CUE schema, as downloaded with 'percli schema get dashboards'. The dashboards are validated against its definition #Dashboard, without any remote server. The other resources are not checked.")
+	cmd.Flags().StringVar(&o.schemaPath, "schema", "", "Path to the complete dashboard CUE schema, as downloaded with 'percli schema get dashboards'. The dashboards are validated against its definition #Dashboard, without any remote server. The other resources only get the checks that don't need the plugin schemas.")
 	// When "online" flag is used, the CLI will call the endpoint /validate that will then use the schema from the server.
 	// So no need to use / load the plugins with the CLI.
 	cmd.MarkFlagsMutuallyExclusive("plugin.path", "online")
