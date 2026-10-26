@@ -1,0 +1,21 @@
+[
+  {
+    "kind": "Folder",
+    "metadata": {
+      "name": "aoe4",
+      "project": "game"
+    },
+    "spec": {
+      "items": []
+    }
+  },
+  {
+    "kind": "Folder",
+    "metadata": {
+      "name": "ff15"
+    },
+    "spec": {
+      "items": []
+    }
+  }
+]

@@ -58,7 +58,7 @@ func (o *option) Complete(args []string) error {
 	if len(o.Project) == 0 {
 		o.Project = config.Global.Project
 	}
-	if len(o.File) == 0 {
+	if len(o.File) == 0 && len(o.Directory) == 0 {
 		// Then the user needs to specify the resource type and the name of the resource to delete
 		if len(args) == 0 {
 			return errors.New(resource.FormatMessage())
@@ -199,13 +199,12 @@ func (o *option) SetErrWriter(errWriter io.Writer) {
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
-		Use:   "delete (-f [FILENAME] | TYPE ([NAME1 NAME2] | --all))",
+		Use:   "delete (-f [FILENAME] | -d [DIRECTORY] | TYPE ([NAME1 NAME2] | --all))",
 		Short: "Delete resources",
 		Long: `
 JSON and YAML formats are accepted.
 
-If both a filename and command line arguments are passed, the command line arguments are used and the filename is
-ignored.
+If a filename or a directory is passed, the command line arguments are ignored.
 
 Note that the delete command does NOT do resource version checks, so if someone submits an update to a resource right
 when you submit a delete, their update will be lost along with the rest of the resource.
@@ -216,6 +215,9 @@ percli delete -f data.json
 
 # Delete any kind of resources from stdin
 cat data.json | percli delete -f -
+
+# Delete any kind of resources from the files of a directory
+percli delete -d ./resources
 
 # Delete a specific dashboard
 percli delete dashboards node_exporter cadvisor
@@ -230,6 +232,7 @@ percli delete dashboards --all
 	opt.AddFileFlags(cmd, &o.FileOption)
 	opt.AddDirectoryFlags(cmd, &o.DirectoryOption)
 	opt.AddProjectFlags(cmd, &o.ProjectOption)
+	cmd.MarkFlagsMutuallyExclusive("file", "directory")
 	cmd.Flags().BoolVarP(&o.all, "all", "a", o.all, "Delete all resources in the project of the specified resource types.")
 	return cmd
 }
