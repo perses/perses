@@ -293,8 +293,8 @@ $ percli lint -d ./dashboards --schema dashboard-schema.cue
 ```
 
 Unlike the other modes, it also rejects the unknown or misspelled fields outside the plugins (e.g. `durration` instead
-of `duration`), which are otherwise silently ignored. The schema only describes the dashboards, so the other resources
-only get the checks that don't need the plugin schemas (e.g. the name of a variable).
+of `duration`), which are otherwise silently ignored. The schema only describes the dashboards: for the other resources
+(datasources, variables), the plugins are not validated, only basic checks are done, like the name of a variable.
 
 ### Migrate from Grafana dashboard to Perses format
 

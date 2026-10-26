@@ -231,7 +231,7 @@ percli lint -d ./dashboards --schema dashboard-schema.cue
 	cmd.Flags().StringVar(&o.customRulePath, "custom-rule.path", "", "Path to the custom rules.")
 	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the Perses plugins.")
 	cmd.Flags().BoolVar(&o.online, "online", false, "When enable, it can request the API to make additional validation")
-	cmd.Flags().StringVar(&o.schemaPath, "schema", "", "Path to the complete dashboard CUE schema, as downloaded with 'percli schema get dashboards'. The dashboards are validated against its definition #Dashboard, without any remote server. The other resources only get the checks that don't need the plugin schemas.")
+	cmd.Flags().StringVar(&o.schemaPath, "schema", "", "Path to the complete dashboard CUE schema, as downloaded with 'percli schema get dashboards'. The dashboards are validated against its definition #Dashboard, without any remote server. The schema doesn't describe the other resources (datasources, variables): their plugins are not validated, only basic checks are done, like the name of a variable.")
 	// When "online" flag is used, the CLI will call the endpoint /validate that will then use the schema from the server.
 	// So no need to use / load the plugins with the CLI.
 	cmd.MarkFlagsMutuallyExclusive("plugin.path", "online")
