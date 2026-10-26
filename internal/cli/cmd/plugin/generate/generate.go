@@ -28,6 +28,7 @@ import (
 
 	"github.com/perses/perses/internal/api/plugin"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
+	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/module"
@@ -359,10 +360,12 @@ func (o *generateOptions) successMessage(isModuleGeneration bool, createdPaths [
 // ensureGoModule initializes the Go module with `go mod init` and `go mod tidy` when the output directory
 // doesn't have a go.mod yet. An existing go.mod is left untouched. It returns the relative paths of the created files.
 func (o *generateOptions) ensureGoModule(org, name string) ([]string, error) {
-	if _, err := os.Stat(filepath.Join(o.outputDir, "go.mod")); err == nil {
-		return nil, nil
-	} else if !errors.Is(err, os.ErrNotExist) {
+	goModExists, err := file.Exists(filepath.Join(o.outputDir, "go.mod"))
+	if err != nil {
 		return nil, fmt.Errorf("could not check for an existing go.mod under %q: %w", o.outputDir, err)
+	}
+	if goModExists {
+		return nil, nil
 	}
 
 	if _, err := exec.LookPath("go"); err != nil {
@@ -381,7 +384,11 @@ func (o *generateOptions) ensureGoModule(org, name string) ([]string, error) {
 	}
 
 	created := []string{"go.mod"}
-	if _, err := os.Stat(filepath.Join(o.outputDir, "go.sum")); err == nil {
+	goSumExists, err := file.Exists(filepath.Join(o.outputDir, "go.sum"))
+	if err != nil {
+		return nil, fmt.Errorf("could not check for the go.sum under %q: %w", o.outputDir, err)
+	}
+	if goSumExists {
 		created = append(created, "go.sum")
 	}
 	return created, nil
