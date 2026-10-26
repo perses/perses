@@ -14,6 +14,7 @@
 package generate
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -46,8 +47,11 @@ type generateOptions struct {
 	pluginPascalName  string
 	pluginDisplayName string
 	outputDir         string
-	writer            io.Writer
-	errWriter         io.Writer
+	// goModuleMissing is true when the output directory has no go.mod yet, so one has to be created.
+	goModuleMissing bool
+	ctx             context.Context
+	writer          io.Writer
+	errWriter       io.Writer
 }
 
 type ExposedModule struct {
@@ -101,6 +105,10 @@ func (o *generateOptions) Validate() error {
 	}
 
 	o.outputDir = destDir
+
+	if err := o.checkGoModuleRequirements(); err != nil {
+		return err
+	}
 
 	if o.pluginName == "" || o.pluginType == "" {
 		return fmt.Errorf("plugin.name and plugin.type are required")
@@ -220,6 +228,11 @@ func (o *generateOptions) Execute() error {
 		}
 	}
 
+	goModulePath, err := o.goModulePath()
+	if err != nil {
+		return err
+	}
+
 	persesPlugins = append(persesPlugins, toGeneratedPlugin(module.Plugin{
 		Kind: o.pluginType,
 		Spec: module.PluginSpec{
@@ -334,7 +347,7 @@ func (o *generateOptions) Execute() error {
 		createdPaths = append(createdPaths, outputRelativePath)
 	}
 
-	goModPaths, err := o.ensureGoModule(data["ModuleOrg"].(string), data["ModuleName"].(string))
+	goModPaths, err := o.ensureGoModule(goModulePath)
 	if err != nil {
 		return err
 	}
@@ -357,26 +370,61 @@ func (o *generateOptions) successMessage(isModuleGeneration bool, createdPaths [
 	return msg
 }
 
-// ensureGoModule initializes the Go module with `go mod init` and `go mod tidy` when the output directory
-// doesn't have a go.mod yet. An existing go.mod is left untouched. It returns the relative paths of the created files.
-func (o *generateOptions) ensureGoModule(org, name string) ([]string, error) {
+// checkGoModuleRequirements records whether the output directory needs a go.mod and, if so, checks that the go binary
+// is available. It runs before anything is written, so the command doesn't leave a half-generated module behind.
+func (o *generateOptions) checkGoModuleRequirements() error {
 	goModExists, err := file.Exists(filepath.Join(o.outputDir, "go.mod"))
 	if err != nil {
-		return nil, fmt.Errorf("could not check for an existing go.mod under %q: %w", o.outputDir, err)
+		return fmt.Errorf("could not check for an existing go.mod under %q: %w", o.outputDir, err)
 	}
-	if goModExists {
-		return nil, nil
+
+	o.goModuleMissing = !goModExists
+	if !o.goModuleMissing {
+		return nil
 	}
 
 	if _, err := exec.LookPath("go"); err != nil {
-		return nil, fmt.Errorf("the go binary is required to initialize the Go module but was not found in PATH: %w", err)
+		return fmt.Errorf("the go binary is required to initialize the Go module but was not found in PATH: %w", err)
+	}
+
+	return nil
+}
+
+// goModulePath returns the path of the Go module to initialize, or an empty string when the output directory
+// already has a go.mod. It fails when the module org or name is empty, since `go mod init` would reject the path.
+func (o *generateOptions) goModulePath() (string, error) {
+	if !o.goModuleMissing {
+		return "", nil
+	}
+
+	org := GetKebabCase(o.pluginModuleOrg)
+	name := GetKebabCase(o.pluginModuleName)
+
+	if org == "" || name == "" {
+		return "", fmt.Errorf("the module org and name are required to initialize the Go module under %q, "+
+			"set the registry and the name of the module in its package.json or pass --module.org and --module.name", o.outputDir)
+	}
+
+	return fmt.Sprintf("github.com/%s/%s", org, name), nil
+}
+
+// ensureGoModule initializes the Go module with `go mod init` and `go mod tidy` when the output directory
+// doesn't have a go.mod yet. An existing go.mod is left untouched. It returns the relative paths of the created files.
+func (o *generateOptions) ensureGoModule(modulePath string) ([]string, error) {
+	if !o.goModuleMissing {
+		return nil, nil
+	}
+
+	ctx := o.ctx
+	if ctx == nil {
+		ctx = context.Background()
 	}
 
 	for _, args := range [][]string{
-		{"mod", "init", fmt.Sprintf("github.com/%s/%s", org, name)},
+		{"mod", "init", modulePath},
 		{"mod", "tidy"},
 	} {
-		cmd := exec.Command("go", args...) //nolint:gosec
+		cmd := exec.CommandContext(ctx, "go", args...) //nolint:gosec // the arguments are passed straight to exec, no shell is involved
 		cmd.Dir = o.outputDir
 		if out, err := cmd.CombinedOutput(); err != nil {
 			return nil, fmt.Errorf("`go %s` failed under %q: %w\n%s", strings.Join(args, " "), o.outputDir, err, out)
@@ -413,6 +461,7 @@ This command can be used several times to add more plugins to the same module.
 A single plugin can be generated at a time.
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			o.ctx = cmd.Context()
 			return persesCMD.Run(o, cmd, args)
 		},
 	}

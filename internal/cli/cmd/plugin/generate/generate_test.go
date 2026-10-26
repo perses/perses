@@ -16,9 +16,12 @@ package generate
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	cmdTest "github.com/perses/perses/internal/cli/test"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const testFolder = "test"
@@ -144,4 +147,102 @@ func TestPluginGenerateCMD(t *testing.T) {
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
+}
+
+// generateModule creates a module with a datasource plugin under dir.
+func generateModule(t *testing.T, dir string) {
+	t.Helper()
+
+	cmdTest.ExecuteSuiteTest(t, NewCMD, []cmdTest.Suite{
+		{
+			Title: "Build module with a plugin",
+			Args: []string{
+				"--module.name", "MyPluginModule",
+				"--module.org", "MyPluginOrg",
+				"--plugin.name", "MyTestDatasource",
+				"--plugin.type", "Datasource",
+				dir,
+			},
+			ExpectedRegexMessage: `module MyPluginModule created successfully`,
+		},
+	})
+}
+
+func TestPluginGenerateKeepsExistingGoMod(t *testing.T) {
+	dir := t.TempDir()
+	generateModule(t, dir)
+
+	goModPath := filepath.Join(dir, "go.mod")
+	customGoMod := "module example.com/custom\n\ngo 1.21\n"
+	require.NoError(t, os.WriteFile(goModPath, []byte(customGoMod), 0o600))
+
+	cmdTest.ExecuteSuiteTest(t, NewCMD, []cmdTest.Suite{
+		{
+			Title: "Build a plugin in a module that already has a go.mod",
+			Args: []string{
+				"--plugin.name", "MyTestPanel",
+				"--plugin.type", "Panel",
+				dir,
+			},
+			ExpectedRegexMessage: `plugin MyTestPanel generated successfully`,
+		},
+	})
+
+	content, err := os.ReadFile(goModPath)
+	require.NoError(t, err)
+	assert.Equal(t, customGoMod, string(content))
+}
+
+func TestPluginGenerateFailsBeforeWritingWithoutGo(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("PATH", t.TempDir())
+
+	cmdTest.ExecuteSuiteTest(t, NewCMD, []cmdTest.Suite{
+		{
+			Title: "Build a module without the go binary",
+			Args: []string{
+				"--module.name", "MyPluginModule",
+				"--module.org", "MyPluginOrg",
+				"--plugin.name", "MyTestDatasource",
+				"--plugin.type", "Datasource",
+				dir,
+			},
+			IsErrorExpected:      true,
+			ExpectedRegexMessage: `the go binary is required to initialize the Go module`,
+		},
+	})
+
+	entries, err := os.ReadDir(dir)
+	require.NoError(t, err)
+	assert.Empty(t, entries, "nothing must be generated when the go binary is missing")
+}
+
+func TestPluginGenerateFailsBeforeWritingWithEmptyRegistry(t *testing.T) {
+	dir := t.TempDir()
+	generateModule(t, dir)
+
+	// An existing module without a go.mod and with an empty registry.
+	require.NoError(t, os.Remove(filepath.Join(dir, "go.mod")))
+	packageJSONPath := filepath.Join(dir, "package.json")
+	packageJSON, err := os.ReadFile(packageJSONPath)
+	require.NoError(t, err)
+	emptyRegistry := strings.Replace(string(packageJSON), `"registry": "my-plugin-org"`, `"registry": ""`, 1)
+	require.NotEqual(t, string(packageJSON), emptyRegistry, "the registry must be present in the generated package.json")
+	require.NoError(t, os.WriteFile(packageJSONPath, []byte(emptyRegistry), 0o600))
+
+	cmdTest.ExecuteSuiteTest(t, NewCMD, []cmdTest.Suite{
+		{
+			Title: "Build a plugin in a module with an empty registry",
+			Args: []string{
+				"--plugin.name", "MyTestPanel",
+				"--plugin.type", "Panel",
+				dir,
+			},
+			IsErrorExpected:      true,
+			ExpectedRegexMessage: `the module org and name are required to initialize the Go module`,
+		},
+	})
+
+	assert.NoDirExists(t, filepath.Join(dir, "src", "panels", "my-test-panel"))
+	assert.NoFileExists(t, filepath.Join(dir, "go.mod"))
 }
