@@ -169,7 +169,17 @@ spec:
 title: <string>
 collapse:
   open: <boolean>
+
+# The grid is only rendered when the selected values of the variable satisfy the operator against the values.
+# =~ and !~ use anchored patterns.
+[ visibility:
+  variable: <string>
+  [ operator: <"=" | "!=" | "=~" | "!~"> | default = "=" ]
+  value:
+    - <string> ]
 ```
+
+Panel visibility is a follow-up. The same rule will apply to a panel display, with the same edit-mode indicator, once group visibility is accepted.
 
 ### Grid Item specification
 
