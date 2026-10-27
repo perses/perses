@@ -31,6 +31,7 @@ export function ProjectDashboards({ projectName, ...props }: ProjectDashboardsPr
   return (
     <Box {...props}>
       <DashboardList
+        projectName={projectName}
         dashboardList={data ?? []}
         folderList={folderList ?? []}
         isLoading={isLoading || isLoadingFolderList}

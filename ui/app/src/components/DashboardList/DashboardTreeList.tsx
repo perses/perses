@@ -13,8 +13,8 @@
 
 import { Box, Chip, CircularProgress, Stack } from '@mui/material';
 import type { FolderResource } from '@perses-dev/client';
-import type { TableColumnConfig } from '@perses-dev/components';
-import { Table } from '@perses-dev/components';
+import type { TableColumnConfig, TableProps } from '@perses-dev/components';
+import { Table, useLocalStorage } from '@perses-dev/components';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddFolderOutlineIcon from 'mdi-material-ui/FolderPlusOutline';
@@ -84,7 +84,16 @@ export const TAGS_COLUMN: TableColumnConfig<DashboardTreeTableRow> = {
   },
 };
 
+// Expanded folders, stored per project so the folders a user opened are still open when they come back to it. One
+// key per project, so a list open in another tab (which holds its own copy) cannot overwrite another project's folders.
+const EXPANDED_FOLDERS_KEY_PREFIX = 'PERSES_DASHBOARD_LIST_EXPANDED_FOLDERS';
+
+type ExpandedState = NonNullable<TableProps<DashboardTreeTableRow>['expanded']>;
+
+const NO_EXPANDED_FOLDERS: ExpandedState = {};
+
 export interface DashboardTreeTableProps {
+  projectName: string;
   folderList: FolderResource[];
   dashboardsMap: Map<string, Map<string, DashboardListRow>>;
   handleRenameButtonClick: (project: string, name: string) => () => void;
@@ -99,6 +108,7 @@ export interface DashboardTreeTableProps {
 }
 
 function DashboardTreeList({
+  projectName,
   folderList,
   dashboardsMap,
   handleDeleteButtonClick,
@@ -129,6 +139,11 @@ function DashboardTreeList({
 
   const [sorting, setSorting] = useState([{ id: 'name', desc: false }]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultRowsPerPage });
+  // The storage key is only read on mount, so the parent remounts this list when the project changes.
+  const [expanded, setExpanded] = useLocalStorage<ExpandedState>(
+    `${EXPANDED_FOLDERS_KEY_PREFIX}:${projectName}`,
+    NO_EXPANDED_FOLDERS,
+  );
 
   const sortStringColumn = useCallback(
     (accessorKey: 'project' | 'displayName') =>
@@ -343,6 +358,8 @@ function DashboardTreeList({
       onSortingChange={setSorting}
       pagination={pagination}
       onPaginationChange={setPagination}
+      expanded={expanded}
+      onExpandedChange={setExpanded}
       getSubRows={(row: DashboardTreeTableRow): DashboardTreeTableRow[] | undefined => row.children}
       hiddenColumns={['project', 'version']}
       tableToolbarConfig={{
