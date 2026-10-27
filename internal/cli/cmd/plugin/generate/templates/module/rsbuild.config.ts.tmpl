@@ -1,6 +1,7 @@
 import type { ModuleFederationOptions } from '@module-federation/rsbuild-plugin';
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
+import type { ReactCompilerOptions } from '@rsbuild/plugin-react';
 import { pluginReact } from '@rsbuild/plugin-react';
 
 import packageJson from './package.json' with { type: 'json' };
@@ -10,6 +11,10 @@ const version = process.env.NODE_ENV === 'development' ? undefined : packageJson
 export const assetPrefix = `/plugins/${name}/`;
 const publicPath = version ? `/plugins/${name}~${version}/` : assetPrefix;
 const globalName = version ? `${name}_${version}`.replace(/[^a-zA-Z0-9_$]/g, '_') : name;
+
+// Perses runs on React 18, so the compiled output relies on the `react-compiler-runtime` package.
+// Keep the target in sync with `.swcrc`.
+const reactCompilerOptions: ReactCompilerOptions = { target: '18' };
 
 // Expose the components that will be used in the UI, either Perses UI or embedded.
 const exposedModules: ModuleFederationOptions['exposes'] = [
@@ -45,7 +50,7 @@ export default defineConfig({
     },
   },
   plugins: [
-    pluginReact(),
+    pluginReact({ reactCompiler: reactCompilerOptions }),
     pluginModuleFederation({
       name,
       // Each installed version needs its own federation container.
