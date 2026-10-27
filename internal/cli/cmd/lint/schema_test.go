@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	apiCue "github.com/perses/perses/internal/api/cue"
@@ -85,6 +86,11 @@ func newTestDashboard(plugin map[string]any) map[string]any {
 			},
 		},
 	}
+}
+
+// withOSPaths uses the path separator of the OS in the positions of the expected CUE errors (e.g. .\dashboard.json on Windows).
+func withOSPaths(expected string) string {
+	return strings.ReplaceAll(expected, "    ./", "    ."+string(filepath.Separator))
 }
 
 func toJSON(t *testing.T, object any) string {
@@ -222,7 +228,7 @@ spec:
 				assert.NoError(t, err)
 				return
 			}
-			assert.EqualError(t, err, test.expected)
+			assert.EqualError(t, err, withOSPaths(test.expected))
 		})
 	}
 }
@@ -300,8 +306,8 @@ spec:
 			Title:           "misspelled field",
 			Args:            []string{"-f", misspelled, "--schema", schemaPath},
 			IsErrorExpected: true,
-			ExpectedMessage: `invalid dashboard "demo": #Dashboard.spec.durration: field not allowed:
-    ./misspelled.json:1:102`,
+			ExpectedMessage: withOSPaths(`invalid dashboard "demo": #Dashboard.spec.durration: field not allowed:
+    ./misspelled.json:1:102`),
 		},
 		{
 			Title:           "schema and online are mutually exclusive",
