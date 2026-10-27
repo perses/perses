@@ -19,13 +19,14 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/cuecontext"
+	cueErrors "cuelang.org/go/cue/errors"
 	cueJSON "cuelang.org/go/encoding/json"
 	cueYAML "cuelang.org/go/encoding/yaml"
-	apiCue "github.com/perses/perses/internal/api/cue"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -112,8 +113,19 @@ func (s *dashboardSchema) validate(file string, data []byte, isJSON bool) error 
 		}
 		if err := s.definition.Unify(resource).Validate(cue.Concrete(true)); err != nil {
 			name, _ := resource.LookupPath(cue.ParsePath("metadata.name")).String()
-			return fmt.Errorf("invalid dashboard %q: %w", name, apiCue.FormatErrors(err))
+			// The positions point to the file of the user and to the schema. The errors are not simplified yet,
+			// see https://github.com/perses/perses/issues/4655.
+			return fmt.Errorf("invalid dashboard %q: %s", name, strings.TrimSpace(cueErrors.Details(err, &cueErrors.Config{Cwd: cwd()})))
 		}
 	}
 	return nil
+}
+
+// cwd returns the current directory, so the positions in the CUE errors are relative to it.
+func cwd() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		return ""
+	}
+	return dir
 }

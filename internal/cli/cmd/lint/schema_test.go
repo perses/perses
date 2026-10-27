@@ -96,6 +96,8 @@ func toJSON(t *testing.T, object any) string {
 
 func TestDashboardSchemaValidate(t *testing.T) {
 	dir := t.TempDir()
+	// The positions in the CUE errors are relative to the current directory.
+	t.Chdir(dir)
 	sch, err := loadDashboardSchema(writeFile(t, dir, "schema.cue", testSchema))
 	require.NoError(t, err)
 
@@ -117,34 +119,57 @@ func TestDashboardSchemaValidate(t *testing.T) {
 			title:    "misspelled field outside the plugins",
 			fileName: "dashboard.json",
 			content:  toJSON(t, misspelled),
-			expected: `invalid dashboard "demo": spec.durration: field not allowed`,
+			expected: `invalid dashboard "demo": #Dashboard.spec.durration: field not allowed:
+    ./dashboard.json:1:92`,
 		},
 		{
 			title:    "invalid value in a plugin",
 			fileName: "dashboard.json",
 			content:  toJSON(t, newTestDashboard(map[string]any{"kind": "Chart", "spec": map[string]any{"unit": "ops"}})),
-			expected: `invalid dashboard "demo": spec.panels.cpu.spec.plugin: 5 errors in empty disjunction:
-spec.panels.cpu.spec.plugin.kind: conflicting values "Markdown" and "Chart"
-spec.panels.cpu.spec.plugin.spec.unit: 3 errors in empty disjunction:
-spec.panels.cpu.spec.plugin.spec.unit: conflicting values "bytes" and "ops"
-spec.panels.cpu.spec.plugin.spec.unit: conflicting values "percent" and "ops"
-spec.panels.cpu.spec.plugin.spec.unit: conflicting values "seconds" and "ops"`,
+			expected: `invalid dashboard "demo": #Dashboard.spec.panels.cpu.spec.plugin: 5 errors in empty disjunction:
+#Dashboard.spec.panels.cpu.spec.plugin.kind: conflicting values "Markdown" and "Chart":
+    ./dashboard.json:1:148
+    ./schema.cue:9:8
+    ./schema.cue:29:12
+#Dashboard.spec.panels.cpu.spec.plugin.spec.unit: 3 errors in empty disjunction:
+#Dashboard.spec.panels.cpu.spec.plugin.spec.unit: conflicting values "bytes" and "ops":
+    ./dashboard.json:1:171
+    ./schema.cue:5:10
+    ./schema.cue:27:12
+#Dashboard.spec.panels.cpu.spec.plugin.spec.unit: conflicting values "percent" and "ops":
+    ./dashboard.json:1:171
+    ./schema.cue:5:32
+    ./schema.cue:27:12
+#Dashboard.spec.panels.cpu.spec.plugin.spec.unit: conflicting values "seconds" and "ops":
+    ./dashboard.json:1:171
+    ./schema.cue:5:20
+    ./schema.cue:27:12`,
 		},
 		{
 			title:    "unknown field in a plugin",
 			fileName: "dashboard.json",
 			content:  toJSON(t, newTestDashboard(map[string]any{"kind": "Markdown", "spec": map[string]any{"txt": "x"}})),
-			expected: `invalid dashboard "demo": spec.panels.cpu.spec.plugin: 2 errors in empty disjunction:
-spec.panels.cpu.spec.plugin.kind: conflicting values "Chart" and "Markdown"
-spec.panels.cpu.spec.plugin.spec.txt: field not allowed`,
+			expected: `invalid dashboard "demo": #Dashboard.spec.panels.cpu.spec.plugin: 2 errors in empty disjunction:
+#Dashboard.spec.panels.cpu.spec.plugin.kind: conflicting values "Chart" and "Markdown":
+    ./dashboard.json:1:148
+    ./schema.cue:3:8
+    ./schema.cue:26:12
+#Dashboard.spec.panels.cpu.spec.plugin.spec.txt: field not allowed:
+    ./dashboard.json:1:168`,
 		},
 		{
 			title:    "unknown plugin",
 			fileName: "dashboard.json",
 			content:  toJSON(t, newTestDashboard(map[string]any{"kind": "Gauge", "spec": map[string]any{}})),
-			expected: `invalid dashboard "demo": spec.panels.cpu.spec.plugin: 2 errors in empty disjunction:
-spec.panels.cpu.spec.plugin.kind: conflicting values "Chart" and "Gauge"
-spec.panels.cpu.spec.plugin.kind: conflicting values "Markdown" and "Gauge"`,
+			expected: `invalid dashboard "demo": #Dashboard.spec.panels.cpu.spec.plugin: 2 errors in empty disjunction:
+#Dashboard.spec.panels.cpu.spec.plugin.kind: conflicting values "Chart" and "Gauge":
+    ./dashboard.json:1:148
+    ./schema.cue:3:8
+    ./schema.cue:26:12
+#Dashboard.spec.panels.cpu.spec.plugin.kind: conflicting values "Markdown" and "Gauge":
+    ./dashboard.json:1:148
+    ./schema.cue:9:8
+    ./schema.cue:29:12`,
 		},
 		{
 			title:    "list of resources in a JSON file",
@@ -153,7 +178,8 @@ spec.panels.cpu.spec.plugin.kind: conflicting values "Markdown" and "Gauge"`,
 				map[string]any{"kind": "Project", "metadata": map[string]any{"name": "perses"}},
 				misspelled,
 			}),
-			expected: `invalid dashboard "demo": spec.durration: field not allowed`,
+			expected: `invalid dashboard "demo": #Dashboard.spec.durration: field not allowed:
+    ./resources.json:1:141`,
 		},
 		{
 			title:    "several YAML documents with a numeric panel key",
@@ -177,9 +203,13 @@ spec:
           spec:
             txt: x
 `,
-			expected: `invalid dashboard "demo": spec.panels."0".spec.plugin: 2 errors in empty disjunction:
-spec.panels."0".spec.plugin.kind: conflicting values "Chart" and "Markdown"
-spec.panels."0".spec.plugin.spec.txt: field not allowed`,
+			expected: `invalid dashboard "demo": #Dashboard.spec.panels."0".spec.plugin: 2 errors in empty disjunction:
+#Dashboard.spec.panels."0".spec.plugin.kind: conflicting values "Chart" and "Markdown":
+    ./resources.yaml:16:17
+    ./schema.cue:3:8
+    ./schema.cue:26:12
+#Dashboard.spec.panels."0".spec.plugin.spec.txt: field not allowed:
+    ./resources.yaml:18:13`,
 		},
 	}
 	for _, test := range testSuites {
@@ -210,6 +240,8 @@ func TestLintCMDWithSchema(t *testing.T) {
 	data, err := apiCue.Marshal(value)
 	require.NoError(t, err)
 	dir := t.TempDir()
+	// The positions in the CUE errors are relative to the current directory.
+	t.Chdir(dir)
 	schemaPath := writeFile(t, dir, "schema.cue", string(data))
 	valid := writeFile(t, dir, "valid.json", `{"kind":"Dashboard","metadata":{"name":"demo","project":"perses"},"spec":{"display":{"name":"demo"},"duration":"6h","layouts":[],"panels":{}}}`)
 	misspelled := writeFile(t, dir, "misspelled.json", `{"kind":"Dashboard","metadata":{"name":"demo","project":"perses"},"spec":{"display":{"name":"demo"},"durration":"6h","layouts":[],"panels":{}}}`)
@@ -268,7 +300,8 @@ spec:
 			Title:           "misspelled field",
 			Args:            []string{"-f", misspelled, "--schema", schemaPath},
 			IsErrorExpected: true,
-			ExpectedMessage: `invalid dashboard "demo": spec.durration: field not allowed`,
+			ExpectedMessage: `invalid dashboard "demo": #Dashboard.spec.durration: field not allowed:
+    ./misspelled.json:1:102`,
 		},
 		{
 			Title:           "schema and online are mutually exclusive",
@@ -288,6 +321,8 @@ spec:
 // TestLintCMDWithSchemaConsistency verifies the consistency checks that don't depend on the plugin schemas still run with --schema.
 func TestLintCMDWithSchemaConsistency(t *testing.T) {
 	dir := t.TempDir()
+	// The positions in the CUE errors are relative to the current directory.
+	t.Chdir(dir)
 	schemaPath := writeFile(t, dir, "schema.cue", `
 #Dashboard: {
 	kind: "Dashboard"
