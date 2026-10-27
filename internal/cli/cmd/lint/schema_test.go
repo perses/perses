@@ -14,6 +14,7 @@
 package lint
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -21,6 +22,7 @@ import (
 
 	apiCue "github.com/perses/perses/internal/api/cue"
 	"github.com/perses/perses/internal/api/plugin/schema"
+	"github.com/perses/perses/internal/cli/file"
 	cmdTest "github.com/perses/perses/internal/cli/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -85,35 +87,43 @@ func newTestDashboard(plugin map[string]any) map[string]any {
 	}
 }
 
+func toJSON(t *testing.T, object any) string {
+	t.Helper()
+	data, err := json.Marshal(object)
+	require.NoError(t, err)
+	return string(data)
+}
+
 func TestDashboardSchemaValidate(t *testing.T) {
-	sch, err := loadDashboardSchema(writeFile(t, t.TempDir(), "schema.cue", testSchema))
+	dir := t.TempDir()
+	sch, err := loadDashboardSchema(writeFile(t, dir, "schema.cue", testSchema))
 	require.NoError(t, err)
 
 	misspelled := newTestDashboard(map[string]any{"kind": "Markdown", "spec": map[string]any{"text": "x"}})
 	misspelled["spec"].(map[string]any)["durration"] = "6h"
 
-	// The YAML decoder returns a map[any]any when a key is an unquoted number.
-	numericKey := newTestDashboard(map[string]any{"kind": "Chart", "spec": map[string]any{"unit": "ops"}})
-	numericKey["spec"].(map[string]any)["panels"] = map[any]any{0: numericKey["spec"].(map[string]any)["panels"].(map[string]any)["cpu"]}
-
 	testSuites := []struct {
-		title     string
-		dashboard map[string]any
-		expected  string
+		title    string
+		fileName string
+		content  string
+		expected string
 	}{
 		{
-			title:     "valid dashboard",
-			dashboard: newTestDashboard(map[string]any{"kind": "Chart", "spec": map[string]any{"unit": "bytes"}}),
+			title:    "valid dashboard",
+			fileName: "dashboard.json",
+			content:  toJSON(t, newTestDashboard(map[string]any{"kind": "Chart", "spec": map[string]any{"unit": "bytes"}})),
 		},
 		{
-			title:     "misspelled field outside the plugins",
-			dashboard: misspelled,
-			expected:  "spec.durration: field not allowed",
+			title:    "misspelled field outside the plugins",
+			fileName: "dashboard.json",
+			content:  toJSON(t, misspelled),
+			expected: `invalid dashboard "demo": spec.durration: field not allowed`,
 		},
 		{
-			title:     "invalid value in a plugin",
-			dashboard: newTestDashboard(map[string]any{"kind": "Chart", "spec": map[string]any{"unit": "ops"}}),
-			expected: `spec.panels.cpu.spec.plugin: 5 errors in empty disjunction:
+			title:    "invalid value in a plugin",
+			fileName: "dashboard.json",
+			content:  toJSON(t, newTestDashboard(map[string]any{"kind": "Chart", "spec": map[string]any{"unit": "ops"}})),
+			expected: `invalid dashboard "demo": spec.panels.cpu.spec.plugin: 5 errors in empty disjunction:
 spec.panels.cpu.spec.plugin.kind: conflicting values "Markdown" and "Chart"
 spec.panels.cpu.spec.plugin.spec.unit: 3 errors in empty disjunction:
 spec.panels.cpu.spec.plugin.spec.unit: conflicting values "bytes" and "ops"
@@ -121,40 +131,68 @@ spec.panels.cpu.spec.plugin.spec.unit: conflicting values "percent" and "ops"
 spec.panels.cpu.spec.plugin.spec.unit: conflicting values "seconds" and "ops"`,
 		},
 		{
-			title:     "unknown field in a plugin",
-			dashboard: newTestDashboard(map[string]any{"kind": "Markdown", "spec": map[string]any{"txt": "x"}}),
-			expected: `spec.panels.cpu.spec.plugin: 2 errors in empty disjunction:
+			title:    "unknown field in a plugin",
+			fileName: "dashboard.json",
+			content:  toJSON(t, newTestDashboard(map[string]any{"kind": "Markdown", "spec": map[string]any{"txt": "x"}})),
+			expected: `invalid dashboard "demo": spec.panels.cpu.spec.plugin: 2 errors in empty disjunction:
 spec.panels.cpu.spec.plugin.kind: conflicting values "Chart" and "Markdown"
 spec.panels.cpu.spec.plugin.spec.txt: field not allowed`,
 		},
 		{
-			title:     "unknown plugin",
-			dashboard: newTestDashboard(map[string]any{"kind": "Gauge", "spec": map[string]any{}}),
-			expected: `spec.panels.cpu.spec.plugin: 2 errors in empty disjunction:
+			title:    "unknown plugin",
+			fileName: "dashboard.json",
+			content:  toJSON(t, newTestDashboard(map[string]any{"kind": "Gauge", "spec": map[string]any{}})),
+			expected: `invalid dashboard "demo": spec.panels.cpu.spec.plugin: 2 errors in empty disjunction:
 spec.panels.cpu.spec.plugin.kind: conflicting values "Chart" and "Gauge"
 spec.panels.cpu.spec.plugin.kind: conflicting values "Markdown" and "Gauge"`,
 		},
 		{
-			title:     "invalid plugin under a numeric YAML key",
-			dashboard: numericKey,
-			expected: `spec.panels."0".spec.plugin: 5 errors in empty disjunction:
-spec.panels."0".spec.plugin.kind: conflicting values "Markdown" and "Chart"
-spec.panels."0".spec.plugin.spec.unit: 3 errors in empty disjunction:
-spec.panels."0".spec.plugin.spec.unit: conflicting values "bytes" and "ops"
-spec.panels."0".spec.plugin.spec.unit: conflicting values "percent" and "ops"
-spec.panels."0".spec.plugin.spec.unit: conflicting values "seconds" and "ops"`,
+			title:    "list of resources in a JSON file",
+			fileName: "resources.json",
+			content: toJSON(t, []any{
+				map[string]any{"kind": "Project", "metadata": map[string]any{"name": "perses"}},
+				misspelled,
+			}),
+			expected: `invalid dashboard "demo": spec.durration: field not allowed`,
+		},
+		{
+			title:    "several YAML documents with a numeric panel key",
+			fileName: "resources.yaml",
+			content: `kind: Project
+metadata:
+  name: perses
+---
+kind: Dashboard
+metadata:
+  name: demo
+  project: perses
+spec:
+  duration: 1h
+  panels:
+    0:
+      kind: Panel
+      spec:
+        plugin:
+          kind: Markdown
+          spec:
+            txt: x
+`,
+			expected: `invalid dashboard "demo": spec.panels."0".spec.plugin: 2 errors in empty disjunction:
+spec.panels."0".spec.plugin.kind: conflicting values "Chart" and "Markdown"
+spec.panels."0".spec.plugin.spec.txt: field not allowed`,
 		},
 	}
 	for _, test := range testSuites {
 		t.Run(test.title, func(t *testing.T) {
-			err := sch.validate(test.dashboard)
+			path := writeFile(t, dir, test.fileName, test.content)
+			data, isJSON, err := file.Read(path)
+			require.NoError(t, err)
+			err = sch.validate(path, data, isJSON)
 			if len(test.expected) == 0 {
 				assert.NoError(t, err)
 				return
 			}
-			if assert.Error(t, err) {
-				assert.Equal(t, test.expected, err.Error())
-			}
+			assert.EqualError(t, err, test.expected)
 		})
 	}
 }

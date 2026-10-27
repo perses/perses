@@ -99,23 +99,38 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
-	var entities []modelAPI.Entity
-	// The raw objects are kept for the validation against the dashboard schema, as the entities lose the unknown fields.
-	var objects []map[string]any
+	var files []string
 	if len(o.File) > 0 {
+		files = []string{o.File}
+	} else if len(o.Directory) > 0 {
 		var err error
-		entities, objects, err = file.UnmarshalEntitiesAndObjectsFromFile(o.File)
+		files, err = file.ListFiles(o.Directory)
 		if err != nil {
 			return err
 		}
-	} else if len(o.Directory) > 0 {
-		var errorList []error
-		entities, objects, errorList = file.UnmarshalEntitiesAndObjectsFromDirectory(o.Directory)
-		if len(errorList) > 0 {
-			return errorList[0]
-		}
 	}
-	if validateErr := o.validate(entities, objects); validateErr != nil {
+	var entities []modelAPI.Entity
+	for _, f := range files {
+		// The file is read only once, as it can be the standard input.
+		data, isJSON, err := file.Read(f)
+		if err != nil {
+			return err
+		}
+		fileEntities, err := file.UnmarshalEntitiesFromData(f, data, isJSON)
+		if err != nil {
+			return err
+		}
+		// The dashboards are validated against the complete schema with the content of the file,
+		// as the entities lose the unknown fields and get the default values.
+		// It is done before the other checks, as the checks of DashboardSpec expect valid variables.
+		if o.dashboardSch != nil {
+			if err := o.dashboardSch.validate(f, data, isJSON); err != nil {
+				return err
+			}
+		}
+		entities = append(entities, fileEntities...)
+	}
+	if validateErr := o.validate(entities); validateErr != nil {
 		return validateErr
 	}
 	return output.HandleString(o.writer, "your resources look good")
@@ -129,14 +144,14 @@ func (o *option) SetErrWriter(errWriter io.Writer) {
 	o.errWriter = errWriter
 }
 
-func (o *option) validate(objects []modelAPI.Entity, rawObjects []map[string]any) error {
+func (o *option) validate(objects []modelAPI.Entity) error {
 	if o.sch == nil && !o.online && o.dashboardSch == nil {
 		return nil
 	}
 	// When linting offline, the configuration of the server is unknown.
 	// So the server-dependent checks (like the maximum timeout of the datasource proxy) are skipped by passing a nil proxy config.
 	// They are done by the server when using the online mode.
-	for i, object := range objects {
+	for _, object := range objects {
 		switch entity := object.(type) {
 		case *modelV1.Dashboard:
 			if err := validate.DashboardWithCustomRules(entity, o.customRules); err != nil {
@@ -147,13 +162,6 @@ func (o *option) validate(objects []modelAPI.Entity, rawObjects []map[string]any
 					return err
 				}
 			} else {
-				// The complete dashboard schema is checked with the raw object, as the Go struct silently drops the unknown fields.
-				// It is checked first, as the checks of DashboardSpec expect valid variables.
-				if o.dashboardSch != nil {
-					if err := o.dashboardSch.validate(rawObjects[i]); err != nil {
-						return fmt.Errorf("invalid dashboard %q: %w", entity.Metadata.Name, err)
-					}
-				}
 				if err := validate.DashboardSpec(entity.Spec, o.sch, nil); err != nil {
 					return fmt.Errorf("unexpected error in dashboard %q: %w", entity.Metadata.Name, err)
 				}

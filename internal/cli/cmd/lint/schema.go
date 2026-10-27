@@ -14,23 +14,22 @@
 package lint
 
 import (
-	"encoding/json"
+	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"os"
-	"strings"
 
 	"cuelang.org/go/cue"
+	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/cuecontext"
-	cueErrors "cuelang.org/go/cue/errors"
 	cueJSON "cuelang.org/go/encoding/json"
+	cueYAML "cuelang.org/go/encoding/yaml"
+	apiCue "github.com/perses/perses/internal/api/cue"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 const dashboardDefinition = "#Dashboard"
-
-type dashboardSchema struct {
-	ctx        *cue.Context
-	definition cue.Value
-}
 
 // loadDashboardSchema loads the complete dashboard schema, as served by the endpoint /api/v1/schemas/dashboards.
 func loadDashboardSchema(path string) (*dashboardSchema, error) {
@@ -50,80 +49,71 @@ func loadDashboardSchema(path string) (*dashboardSchema, error) {
 	return &dashboardSchema{ctx: ctx, definition: definition}, nil
 }
 
-// validate validates the raw dashboard against the definition #Dashboard.
+// decodeResources decodes the content of a file with the CUE decoders, so the values are exactly the ones written in the file.
+// Like in the package internal/cli/file, a JSON file or each document of a YAML file contains a resource or a list of resources.
+// The empty YAML documents are decoded as null, so they are skipped like any resource that is not a dashboard.
+func decodeResources(ctx *cue.Context, file string, data []byte, isJSON bool) ([]cue.Value, error) {
+	var exprs []ast.Expr
+	if isJSON {
+		expr, err := cueJSON.Extract(file, data)
+		if err != nil {
+			return nil, err
+		}
+		exprs = append(exprs, expr)
+	} else {
+		decoder := cueYAML.NewDecoder(file, bytes.NewReader(data))
+		for {
+			expr, err := decoder.Extract()
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			if err != nil {
+				return nil, err
+			}
+			exprs = append(exprs, expr)
+		}
+	}
+	var resources []cue.Value
+	for _, expr := range exprs {
+		value := ctx.BuildExpr(expr)
+		if value.Err() != nil {
+			return nil, value.Err()
+		}
+		if value.Kind() != cue.ListKind {
+			resources = append(resources, value)
+			continue
+		}
+		iter, err := value.List()
+		if err != nil {
+			return nil, err
+		}
+		for iter.Next() {
+			resources = append(resources, iter.Value())
+		}
+	}
+	return resources, nil
+}
+
+type dashboardSchema struct {
+	ctx        *cue.Context
+	definition cue.Value
+}
+
+// validate validates the dashboards of the file against the definition #Dashboard.
 // It is the equivalent of "cue vet -d '#Dashboard' schema.cue dashboard.json".
-// The raw object is used instead of the Go struct, because the latter silently drops the unknown fields.
-func (s *dashboardSchema) validate(object map[string]any) error {
-	object = normalize(object).(map[string]any)
-	if err := s.validateObject(s.definition, object); err != nil {
-		return formatErrors(err)
+func (s *dashboardSchema) validate(file string, data []byte, isJSON bool) error {
+	resources, err := decodeResources(s.ctx, file, data, isJSON)
+	if err != nil {
+		return err
+	}
+	for _, resource := range resources {
+		if kind, _ := resource.LookupPath(cue.ParsePath("kind")).String(); kind != string(modelV1.KindDashboard) {
+			continue
+		}
+		if err := s.definition.Unify(resource).Validate(cue.Concrete(true)); err != nil {
+			name, _ := resource.LookupPath(cue.ParsePath("metadata.name")).String()
+			return fmt.Errorf("invalid dashboard %q: %w", name, apiCue.FormatErrors(err))
+		}
 	}
 	return nil
-}
-
-// formatErrors lists every CUE error on its own line, like "cue vet" does, but without the positions:
-// they refer to the object re-encoded in JSON, not to the file of the user.
-func formatErrors(err error) error {
-	var messages []string
-	for _, e := range cueErrors.Errors(err) {
-		path := e.Path()
-		// The path starts with the name of the definition validated (e.g. #Dashboard), which is not part of the object.
-		if len(path) > 0 && strings.HasPrefix(path[0], "#") {
-			path = path[1:]
-		}
-		format, args := e.Msg()
-		msg := fmt.Sprintf(format, args...)
-		if len(path) > 0 {
-			msg = strings.Join(path, ".") + ": " + msg
-		}
-		messages = append(messages, msg)
-	}
-	if len(messages) == 0 {
-		return err
-	}
-	return fmt.Errorf("%s", strings.Join(messages, "\n"))
-}
-
-func (s *dashboardSchema) validateObject(definition cue.Value, object any) error {
-	// Encoding the object as JSON first keeps the integers as integers, which matters for the CUE constraints.
-	data, err := json.Marshal(object)
-	if err != nil {
-		return err
-	}
-	expr, err := cueJSON.Extract("dashboard", data)
-	if err != nil {
-		return err
-	}
-	value := s.ctx.BuildExpr(expr)
-	if value.Err() != nil {
-		return value.Err()
-	}
-	return definition.Unify(value).Validate(cue.Concrete(true))
-}
-
-// normalize converts the YAML mappings decoded as map[any]any (e.g. when a key is an unquoted number)
-// into string-keyed maps, so the object can be encoded as JSON and browsed by lookup.
-func normalize(value any) any {
-	switch v := value.(type) {
-	case map[string]any:
-		result := make(map[string]any, len(v))
-		for key, item := range v {
-			result[key] = normalize(item)
-		}
-		return result
-	case map[any]any:
-		result := make(map[string]any, len(v))
-		for key, item := range v {
-			result[fmt.Sprint(key)] = normalize(item)
-		}
-		return result
-	case []any:
-		result := make([]any, len(v))
-		for i, item := range v {
-			result[i] = normalize(item)
-		}
-		return result
-	default:
-		return value
-	}
 }

@@ -41,7 +41,7 @@ func Exists(filePath string) (bool, error) {
 }
 
 func Unmarshal(file string, obj any) error {
-	data, isJSON, err := readAndDetect(file)
+	data, isJSON, err := Read(file)
 	if err != nil {
 		return err
 	}
@@ -77,31 +77,21 @@ func UnmarshalEntities(file string, dir string) ([]modelAPI.Entity, error) {
 }
 
 func UnmarshalEntitiesFromDirectory(dir string) ([]modelAPI.Entity, []error) {
-	entities, _, errors := UnmarshalEntitiesAndObjectsFromDirectory(dir)
-	return entities, errors
-}
-
-// UnmarshalEntitiesAndObjectsFromDirectory is like UnmarshalEntitiesFromDirectory,
-// but it also returns the raw object decoded for each entity, at the same index.
-// The raw objects keep the fields unknown by the Go structs, which is useful to validate the resources against a CUE schema.
-func UnmarshalEntitiesAndObjectsFromDirectory(dir string) ([]modelAPI.Entity, []map[string]any, []error) {
-	files, err := visit(dir)
+	files, err := ListFiles(dir)
 	if err != nil {
-		return nil, nil, []error{err}
+		return nil, []error{err}
 	}
 	var entities []modelAPI.Entity
-	var objects []map[string]any
 	var errors []error
 	for _, f := range files {
-		es, objs, unmarshalErr := UnmarshalEntitiesAndObjectsFromFile(f)
+		es, unmarshalErr := UnmarshalEntitiesFromFile(f)
 		if unmarshalErr != nil {
 			errors = append(errors, unmarshalErr)
 			continue
 		}
 		entities = append(entities, es...)
-		objects = append(objects, objs...)
 	}
-	return entities, objects, errors
+	return entities, errors
 }
 
 func UnmarshalEntitiesFromFile(file string) ([]modelAPI.Entity, error) {
@@ -109,18 +99,17 @@ func UnmarshalEntitiesFromFile(file string) ([]modelAPI.Entity, error) {
 	return u.unmarshal()
 }
 
-// UnmarshalEntitiesAndObjectsFromFile is like UnmarshalEntitiesFromFile,
-// but it also returns the raw object decoded for each entity, at the same index.
-func UnmarshalEntitiesAndObjectsFromFile(file string) ([]modelAPI.Entity, []map[string]any, error) {
+// UnmarshalEntitiesFromData extracts the Perses resources from the content of a file, as returned by Read.
+func UnmarshalEntitiesFromData(file string, data []byte, isJSON bool) ([]modelAPI.Entity, error) {
 	u := &unmarshaller{file: file}
-	entities, err := u.unmarshal()
-	if err != nil {
-		return nil, nil, err
+	if err := u.decode(data, isJSON); err != nil {
+		return nil, err
 	}
-	return entities, u.objects, nil
+	return u.unmarshalEntities()
 }
 
-func visit(dir string) ([]string, error) {
+// ListFiles returns the JSON and YAML files found in the directory and its subdirectories.
+func ListFiles(dir string) ([]string, error) {
 	var files []string
 	err := filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
@@ -194,19 +183,22 @@ func (u *unmarshaller) unmarshal() ([]modelAPI.Entity, error) {
 }
 
 func (u *unmarshaller) read() error {
-	data, isJSON, err := readAndDetect(u.file)
+	data, isJSON, err := Read(u.file)
 	if err != nil {
 		return err
 	}
+	return u.decode(data, isJSON)
+}
+
+func (u *unmarshaller) decode(data []byte, isJSON bool) error {
 	u.isJSON = isJSON
 
 	var objects []map[string]any
 	var object map[string]any
 
 	if u.isJSON {
-		// The numbers are kept as json.Number, so the raw objects hold the exact values written in the file.
-		if jsonErr := unmarshalJSONWithNumbers(data, &objects); jsonErr != nil {
-			if jsonErr = unmarshalJSONWithNumbers(data, &object); jsonErr != nil {
+		if jsonErr := json.Unmarshal(data, &objects); jsonErr != nil {
+			if jsonErr = json.Unmarshal(data, &object); jsonErr != nil {
 				return newReadFileErr(u.file, jsonErr)
 			}
 			objects = append(objects, object)
@@ -219,18 +211,6 @@ func (u *unmarshaller) read() error {
 		objects = decodedObjects
 	}
 	u.objects = objects
-	return nil
-}
-
-func unmarshalJSONWithNumbers(data []byte, obj any) error {
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.UseNumber()
-	if err := decoder.Decode(obj); err != nil {
-		return err
-	}
-	if decoder.More() {
-		return fmt.Errorf("unexpected data after the JSON value")
-	}
 	return nil
 }
 
