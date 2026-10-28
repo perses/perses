@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { MatchingInterval, MatchingResult } from '@nexucis/kvsearch';
-import type { DashboardResource, Resource } from '@perses-dev/client';
+import type { DashboardResource, Resource, StatusError } from '@perses-dev/client';
 
 export interface ResourceListProps {
   query: string;
@@ -45,6 +45,8 @@ export interface SearchListProps {
   // Number of dashboards and datasources per project, displayed next to the project results.
   dashboardCounts?: Map<string, number>;
   datasourceCounts?: Map<string, number>;
+  error?: StatusError | null;
+  errorTitle?: string;
 }
 
 export interface SearchItemProps {

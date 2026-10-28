@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Alert, AlertTitle, Box, Button, Stack, Typography } from '@mui/material';
 import type { KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsearch';
 import { KVSearch } from '@nexucis/kvsearch';
 import type { DatasourceResource, GlobalDatasourceResource, ProjectResource, Resource } from '@perses-dev/client';
@@ -80,10 +80,11 @@ const STATIC_SX = {
     marginLeft: 0.5,
   },
   resourceIcon: { marginRight: 0.5 },
+  alert: { margin: 1 },
 };
 
 export function SearchList(props: SearchListProps): ReactElement | null {
-  const { list, query, handleClose, isResource, dashboardCounts, datasourceCounts } = props;
+  const { list, query, handleClose, isResource, dashboardCounts, datasourceCounts, error, errorTitle } = props;
   const [pagination, setPagination] = useState<PaginationState>({ list, query, size: SIZE_LIST });
   const currentSizeList = pagination.list === list && pagination.query === query ? pagination.size : SIZE_LIST;
   const kvSearch = useMemo(() => new KVSearch<Resource>(kvSearchConfig), []);
@@ -98,12 +99,22 @@ export function SearchList(props: SearchListProps): ReactElement | null {
   }, [filteredList]);
 
   useEffect(() => {
-    isResource?.(!!filteredList.length);
-  }, [filteredList.length, isResource]);
+    // An error is displayed in place of the results, so it should not be reported as "No records found".
+    isResource?.(!!error || !!filteredList.length);
+  }, [error, filteredList.length, isResource]);
 
   const handleSeeMore = useCallback(() => {
     setPagination({ list, query, size: currentSizeList + SIZE_LIST });
   }, [list, query, currentSizeList]);
+
+  if (error) {
+    return (
+      <Alert severity="error" sx={STATIC_SX.alert}>
+        <AlertTitle>{errorTitle}</AlertTitle>
+        {error.message}
+      </Alert>
+    );
+  }
 
   if (!filteredList.length) return null;
 

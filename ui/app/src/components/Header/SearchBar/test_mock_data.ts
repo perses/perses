@@ -26,8 +26,8 @@ export const MOCK_CLIENT_CONFIG: ConfigModel = {
   database: {},
   datasource: {
     disable_local: true,
-    global: { disable: true },
-    project: { disable: true },
+    global: { disable: false },
+    project: { disable: false },
   },
   ephemeral_dashboard: {
     cleanup_interval: '30m',

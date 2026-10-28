@@ -11,12 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { UserFriendlyError } from '@perses-dev/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 
+import { useHasPermission } from '../../../context/Authorization';
+import type * as Authorization from '../../../context/Authorization';
 import { ConfigContextProvider } from '../../../context/Config';
 import { useConfig } from '../../../model/config-client';
 import type * as ConfigClient from '../../../model/config-client';
@@ -42,6 +45,11 @@ import {
   MOCK_CLIENT_CONFIG,
   PROJECT_RESOURCE,
 } from './test_mock_data';
+
+vi.mock('../../../context/Authorization', async (importOriginal) => {
+  const actual = await importOriginal<typeof Authorization>();
+  return { ...actual, useHasPermission: vi.fn() };
+});
 
 vi.mock('../../../model/config-client', async (importOriginal) => {
   const actual = await importOriginal<typeof ConfigClient>();
@@ -88,7 +96,11 @@ const SearchBar = (): ReactElement => {
 };
 
 describe('SearchBar', () => {
+  let rerenderSearchBar: () => void;
+
   beforeEach(() => {
+    vi.mocked(useHasPermission).mockReturnValue(true);
+
     vi.mocked(useConfig).mockReturnValue({ data: MOCK_CLIENT_CONFIG, isLoading: false } as ReturnType<
       typeof useConfig
     >);
@@ -125,7 +137,8 @@ describe('SearchBar', () => {
       isSuccess: true,
     } as ReturnType<typeof useProjectList>);
 
-    render(<SearchBar />);
+    const { rerender } = render(<SearchBar />);
+    rerenderSearchBar = (): void => rerender(<SearchBar />);
   });
   describe('search controls', () => {
     test('search controls should be available', () => {
@@ -321,6 +334,79 @@ describe('SearchBar', () => {
       expect(screen.getByTestId(`${GLOBAL_DATASOURCE_RESOURCE_TEST_IDS.dsName}-GDS1`)).toBeInTheDocument();
       expect(useDashboardList).not.toHaveBeenCalled();
       expect(useDatasourceList).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('error handling', () => {
+    it('should display the error instead of "no records found" when a list fails to load', () => {
+      vi.mocked(useProjectList).mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        isError: true,
+        error: new UserFriendlyError('internal server error', 500),
+      } as ReturnType<typeof useProjectList>);
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'XYZ' } });
+
+      expect(screen.getByText('Failed to load projects')).toBeInTheDocument();
+      expect(screen.getByText('internal server error')).toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_IDS.noRecordContainer)).not.toBeInTheDocument();
+    });
+
+    it('should display the dashboard error once', () => {
+      const error = new UserFriendlyError('database unavailable', 500);
+      vi.mocked(useDashboardList).mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        isError: true,
+        error,
+      } as ReturnType<typeof useDashboardList>);
+      vi.mocked(useImportantDashboardList).mockReturnValue({ data: [], isLoading: false, error });
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'DASH' } });
+
+      expect(screen.getByText('Failed to load dashboards')).toBeInTheDocument();
+      expect(screen.getAllByText('database unavailable')).toHaveLength(1);
+    });
+  });
+
+  describe('unavailable resources', () => {
+    it('should not search global datasources without the global read permission', () => {
+      vi.mocked(useHasPermission).mockImplementation((_action, _project, scope) => scope !== 'GlobalDatasource');
+      vi.mocked(useGlobalDatasourceList).mockClear();
+      rerenderSearchBar();
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'GDS' } });
+
+      expect(screen.getByRole('button', { name: 'Global Datasources' })).toHaveAttribute('aria-disabled', 'true');
+      expect(screen.getByLabelText("You don't have permission to read global datasources")).toBeInTheDocument();
+      expect(useGlobalDatasourceList).not.toHaveBeenCalled();
+    });
+
+    it('should not search datasources when they are disabled', () => {
+      vi.mocked(useConfig).mockReturnValue({
+        data: {
+          ...MOCK_CLIENT_CONFIG,
+          datasource: { ...MOCK_CLIENT_CONFIG.datasource, global: { disable: true }, project: { disable: true } },
+        },
+        isLoading: false,
+      } as ReturnType<typeof useConfig>);
+      vi.mocked(useGlobalDatasourceList).mockClear();
+      vi.mocked(useDatasourceList).mockClear();
+      rerenderSearchBar();
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'DS' } });
+
+      expect(screen.getByRole('button', { name: 'Global Datasources' })).toHaveAttribute('aria-disabled', 'true');
+      expect(screen.getByRole('button', { name: 'Datasources' })).toHaveAttribute('aria-disabled', 'true');
+      expect(screen.getByLabelText('Global datasources are disabled in the server configuration')).toBeInTheDocument();
+      expect(screen.getByLabelText('Project datasources are disabled in the server configuration')).toBeInTheDocument();
+      expect(useGlobalDatasourceList).not.toHaveBeenCalled();
+      expect(vi.mocked(useDatasourceList).mock.calls.every(([options]) => options?.enabled === false)).toBe(true);
     });
   });
 });

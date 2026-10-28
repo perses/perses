@@ -14,6 +14,7 @@
 import { useCallback, useMemo } from 'react';
 import type { ReactElement } from 'react';
 
+import { useIsProjectDatasourceEnabled } from '../../../context/Config';
 import { useDashboardList } from '../../../model/dashboard-client';
 import { useDatasourceList } from '../../../model/datasource-client';
 import { useProjectList } from '../../../model/project-client';
@@ -30,9 +31,10 @@ function countByProject(resources: Array<{ metadata: { project: string } }> | un
 
 export function SearchProjectList(props: ResourceListProps): ReactElement | null {
   const projectsQueryResult = useProjectList({ refetchOnMount: false });
+  const isProjectDatasourceEnabled = useIsProjectDatasourceEnabled();
   // Dashboards and datasources are only needed to display the counts next to each project.
   const { data: dashboardList } = useDashboardList({ metadataOnly: true, staleTime: Infinity });
-  const { data: datasourceList } = useDatasourceList({ staleTime: Infinity });
+  const { data: datasourceList } = useDatasourceList({ staleTime: Infinity, enabled: isProjectDatasourceEnabled });
   const dashboardCounts = useMemo(() => countByProject(dashboardList), [dashboardList]);
   const datasourceCounts = useMemo(() => countByProject(datasourceList), [datasourceList]);
   const { query, handleClose, isResources } = props;
@@ -44,6 +46,8 @@ export function SearchProjectList(props: ResourceListProps): ReactElement | null
   return (
     <SearchList
       list={projectsQueryResult.data ?? []}
+      error={projectsQueryResult.error}
+      errorTitle="Failed to load projects"
       query={query}
       handleClose={handleClose}
       isResource={handleIsResource}

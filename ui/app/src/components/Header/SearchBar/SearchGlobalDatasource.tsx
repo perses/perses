@@ -28,6 +28,8 @@ export function SearchGlobalDatasource(props: ResourceListProps): ReactElement |
   return (
     <SearchList
       list={globalDatasourceQueryResult.data ?? []}
+      error={globalDatasourceQueryResult.error}
+      errorTitle="Failed to load global datasources"
       query={query}
       handleClose={handleClose}
       isResource={handleIsResource}
