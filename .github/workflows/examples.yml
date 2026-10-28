@@ -1,19 +1,20 @@
 name: examples
 # The examples install the published Perses packages without a lockfile, so they don't depend on the code of a pull
-# request. Only run them when they change, and on a schedule to detect breaking upstream releases.
+# request. Only run them when they change, or when a `package.json` changes to check that dependency upgrades keep
+# React 18 and React 19 compatibility.
 on:
   push:
     branches:
       - main
     paths:
       - "examples/**"
+      - "**/package.json"
       - ".github/workflows/examples.yml"
   pull_request:
     paths:
       - "examples/**"
+      - "**/package.json"
       - ".github/workflows/examples.yml"
-  schedule:
-    - cron: "0 6 * * 1" # Every Monday at 06:00 UTC
   workflow_dispatch:
 
 concurrency:
