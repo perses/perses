@@ -32,7 +32,8 @@ func (e *Search) Verify() error {
 		e.CheckLatestUpdateInterval = common.Duration(defaultCacheInterval)
 	}
 	if e.IndexKeys.Dashboard == nil {
-		e.IndexKeys.Dashboard = []string{"metadata.name", "spec.display.name"}
+		// The display name comes first, as the search returns the first matching field and the display name is the one displayed.
+		e.IndexKeys.Dashboard = []string{"spec.display.name", "metadata.name", "metadata.tags"}
 	}
 	return nil
 }

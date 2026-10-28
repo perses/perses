@@ -1270,5 +1270,5 @@ excluded_chars: <list of strings> # Optional
 # We are using gjson to find the value of the key in the resource. So you can use any valid gjson path to index the value you want.
 # Syntax is available here: https://github.com/tidwall/gjson/blob/master/SYNTAX.md
 index_keys:
-  dashboard: <list of strings | default = ["metadata.name", "spec.display.name"]> # Optional
+  dashboard: <list of strings | default = ["spec.display.name", "metadata.name", "metadata.tags"]> # Optional
 ```
