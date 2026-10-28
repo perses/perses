@@ -33,6 +33,13 @@ func TestValidateLinkURL(t *testing.T) {
 		"#panel-1",
 		"",
 		"mailto:perses@example.com",
+		"tel:+33100000000",
+		"sms:+33100000000",
+		"slack://channel?team=T123&id=C123",
+		"msteams:/l/channel/123",
+		"vscode://file/home/perses/main.go",
+		"vscode-insiders://file/home/perses/main.go",
+		"zoommtg://zoom.us/join?confno=123",
 		// The scheme is provided by a variable, it is verified by the UI once interpolated.
 		"$target",
 		"${target}/path",
@@ -60,6 +67,7 @@ func TestValidateLinkURL(t *testing.T) {
 		"file:///etc/passwd",
 		"blob:https://perses.dev/uuid",
 		"ftp://perses.dev",
+		"ssh://perses.dev",
 	}
 	for _, url := range invalidURLs {
 		t.Run(url, func(t *testing.T) {
@@ -93,7 +101,7 @@ func TestDashboardSpecLinks(t *testing.T) {
 			spec: dashboard.Spec{
 				Links: []dashboard.Link{{URL: "https://perses.dev"}, {URL: "javascript:alert(document.domain)"}},
 			},
-			expectedErr: `invalid URL of the dashboard link 1: the scheme "javascript" is not allowed, only relative URLs and the http, https and mailto schemes are allowed`,
+			expectedErr: `invalid URL of the dashboard link #2: the scheme "javascript" is not allowed, only relative URLs and the following schemes are allowed: http, https, mailto, tel, sms, slack, msteams, vscode, vscode-insiders, zoommtg`,
 		},
 		{
 			title: "javascript URL in a panel link",
@@ -103,7 +111,7 @@ func TestDashboardSpecLinks(t *testing.T) {
 					"b": panelWithLinks(dashboard.Link{URL: "/explore"}, dashboard.Link{URL: "javascript:alert(document.domain)"}),
 				},
 			},
-			expectedErr: `invalid URL of the link 1 of the panel "b": the scheme "javascript" is not allowed, only relative URLs and the http, https and mailto schemes are allowed`,
+			expectedErr: `invalid URL of the link #2 of the panel "b": the scheme "javascript" is not allowed, only relative URLs and the following schemes are allowed: http, https, mailto, tel, sms, slack, msteams, vscode, vscode-insiders, zoommtg`,
 		},
 	}
 	for _, test := range testSuites {

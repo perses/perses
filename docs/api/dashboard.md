@@ -195,7 +195,8 @@ Links can be defined at the dashboard level (`spec.links`) or on individual pane
 name: <string> # Optional
 
 # Target URL of the link.
-# It must be a relative URL or use the http, https or mailto scheme. Any other scheme (e.g. javascript:) is rejected.
+# It must be a relative URL or use one of the following schemes: http, https, mailto, tel, sms, slack, msteams, vscode,
+# vscode-insiders, zoommtg. Any other scheme (e.g. javascript:) is rejected.
 # When the URL contains variables, the URL obtained after the interpolation must follow the same rule, otherwise the link is displayed but cannot be followed.
 url: <string>
 

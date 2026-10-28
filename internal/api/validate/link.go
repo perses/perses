@@ -28,10 +28,20 @@ var linkURLSchemeRegexp = regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+.\-]*):`)
 
 // allowedLinkURLSchemes are the schemes a link can use. Any other scheme (javascript, data, vbscript, ...) could
 // execute a script in the Perses origin when the link is followed.
-var allowedLinkURLSchemes = map[string]bool{
-	"http":   true,
-	"https":  true,
-	"mailto": true,
+// Besides the web and communication schemes, it includes the deep links of applications commonly used from dashboards,
+// which are handed off to the operating system.
+// Keep it aligned with the list of the UI (components/src/utils/url.ts in perses/shared).
+var allowedLinkURLSchemes = []string{
+	"http",
+	"https",
+	"mailto",
+	"tel",
+	"sms",
+	"slack",
+	"msteams",
+	"vscode",
+	"vscode-insiders",
+	"zoommtg",
 }
 
 // browserIgnoredURLChars are the characters removed from a URL by the browsers before parsing it.
@@ -50,8 +60,8 @@ func validateLinkURL(rawURL string) error {
 	if matches == nil {
 		return nil
 	}
-	if !allowedLinkURLSchemes[strings.ToLower(matches[1])] {
-		return fmt.Errorf("the scheme %q is not allowed, only relative URLs and the http, https and mailto schemes are allowed", matches[1])
+	if !slices.Contains(allowedLinkURLSchemes, strings.ToLower(matches[1])) {
+		return fmt.Errorf("the scheme %q is not allowed, only relative URLs and the following schemes are allowed: %s", matches[1], strings.Join(allowedLinkURLSchemes, ", "))
 	}
 	return nil
 }
@@ -59,7 +69,7 @@ func validateLinkURL(rawURL string) error {
 func validateLinks(spec dashboard.Spec) error {
 	for i, link := range spec.Links {
 		if err := validateLinkURL(link.URL); err != nil {
-			return fmt.Errorf("invalid URL of the dashboard link %d: %w", i, err)
+			return fmt.Errorf("invalid URL of the dashboard link #%d: %w", i+1, err)
 		}
 	}
 	for _, panelName := range slices.Sorted(maps.Keys(spec.Panels)) {
@@ -69,7 +79,7 @@ func validateLinks(spec dashboard.Spec) error {
 		}
 		for i, link := range panel.Spec.Links {
 			if err := validateLinkURL(link.URL); err != nil {
-				return fmt.Errorf("invalid URL of the link %d of the panel %q: %w", i, panelName, err)
+				return fmt.Errorf("invalid URL of the link #%d of the panel %q: %w", i+1, panelName, err)
 			}
 		}
 	}
