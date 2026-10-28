@@ -15,12 +15,15 @@ package migrate
 
 import (
 	"encoding/json"
+	"fmt"
+	"strings"
 
 	"github.com/perses/spec/go/dashboard/variable"
 )
 
 const (
-	grafanaPanelRowType = "row"
+	grafanaPanelRowType      = "row"
+	grafanaDashboardAPIGroup = "dashboard.grafana.app/"
 )
 
 type GridPosition struct {
@@ -237,6 +240,12 @@ type SimplifiedDashboard struct {
 }
 
 func (d *SimplifiedDashboard) UnmarshalJSON(data []byte) error {
+	var header struct {
+		APIVersion string `json:"apiVersion"`
+	}
+	if err := json.Unmarshal(data, &header); err == nil && strings.HasPrefix(header.APIVersion, grafanaDashboardAPIGroup) {
+		return fmt.Errorf("the Grafana dashboard schema %q is not supported, please export the dashboard using the classic JSON model", header.APIVersion)
+	}
 	tmp := &SimplifiedDashboard{}
 	type plain SimplifiedDashboard
 	if err := json.Unmarshal(data, (*plain)(tmp)); err != nil {

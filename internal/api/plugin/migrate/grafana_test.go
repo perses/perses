@@ -113,3 +113,14 @@ func TestSimplifiedDashboardUnmarshal(t *testing.T) {
 		})
 	}
 }
+
+func TestSimplifiedDashboardUnmarshalGrafanaV2(t *testing.T) {
+	data := `{
+  "apiVersion": "dashboard.grafana.app/v2beta1",
+  "kind": "Dashboard",
+  "metadata": {"name": "test"},
+  "spec": {"title": "Test Dashboard", "elements": {}, "layout": {}}
+}`
+	err := json.Unmarshal([]byte(data), &SimplifiedDashboard{})
+	assert.EqualError(t, err, `the Grafana dashboard schema "dashboard.grafana.app/v2beta1" is not supported, please export the dashboard using the classic JSON model`)
+}
