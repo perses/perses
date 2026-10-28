@@ -1,7 +1,7 @@
 import type { ModuleFederationOptions } from '@module-federation/rsbuild-plugin';
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
-import type { ReactCompilerOptions } from '@rsbuild/plugin-react';
+import type { PluginReactOptions, ReactCompilerOptions } from '@rsbuild/plugin-react';
 import { pluginReact } from '@rsbuild/plugin-react';
 
 import packageJson from './package.json' with { type: 'json' };
@@ -12,9 +12,14 @@ export const assetPrefix = `/plugins/${name}/`;
 const publicPath = version ? `/plugins/${name}~${version}/` : assetPrefix;
 const globalName = version ? `${name}_${version}`.replace(/[^a-zA-Z0-9_$]/g, '_') : name;
 
-// Perses runs on React 18, so the compiled output relies on the `react-compiler-runtime` package.
-// Keep the target in sync with `.swcrc`.
+// Plugins must run on React 18 and 19 hosts, so the compiled output targets React 18 and relies on the
+// `react-compiler-runtime` package. Keep the target in sync with `.swcrc`.
 const reactCompilerOptions: ReactCompilerOptions = { target: '18' };
+
+// Always compile JSX to `react/jsx-runtime`, even in dev mode, so the plugin uses the host's shared JSX runtime. The
+// default dev transform imports `react/jsx-dev-runtime`, which the host doesn't share: the plugin would bundle its own
+// React 18 dev runtime, which crashes on a React 19 host. Fast Refresh is not affected.
+const swcReactOptions: PluginReactOptions['swcReactOptions'] = { development: false };
 
 // Expose the components that will be used in the UI, either Perses UI or embedded.
 const exposedModules: ModuleFederationOptions['exposes'] = [
@@ -50,7 +55,7 @@ export default defineConfig({
     },
   },
   plugins: [
-    pluginReact({ reactCompiler: reactCompilerOptions }),
+    pluginReact({ reactCompiler: reactCompilerOptions, swcReactOptions }),
     pluginModuleFederation({
       name,
       // Each installed version needs its own federation container.
@@ -58,6 +63,8 @@ export default defineConfig({
       exposes: exposedModules,
       shared: {
         react: { requiredVersion: packageJson.peerDependencies.react, singleton: true },
+        // Use the host's JSX runtime: a bundled React 18 runtime crashes on a React 19 host.
+        'react/jsx-runtime': { requiredVersion: packageJson.peerDependencies.react, singleton: true },
         'react-dom': { requiredVersion: packageJson.peerDependencies['react-dom'], singleton: true },
         echarts: { singleton: true },
         'date-fns': { singleton: true },

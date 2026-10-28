@@ -14,20 +14,18 @@
 import type { Theme } from '@mui/material';
 import { alpha, Divider, Stack, useTheme } from '@mui/material';
 import Bitbucket from 'mdi-material-ui/Bitbucket';
-import Gitlab from 'mdi-material-ui/Gitlab';
-import type { ComponentClass, ReactElement, ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { useMemo } from 'react';
 import * as React from 'react';
-import type { SpecificSocialLoginButtonProps } from 'react-social-login-buttons';
 import {
   AmazonLoginButton,
   AppleLoginButton,
   BufferLoginButton,
   createButton,
-  createSvgIcon,
   DiscordLoginButton,
   FacebookLoginButton,
   GithubLoginButton,
+  GitlabLoginButton,
   GoogleLoginButton,
   InstagramLoginButton,
   LinkedInLoginButton,
@@ -51,7 +49,13 @@ import { useDarkMode } from '../../context/DarkMode';
 import { buildRedirectQueryString, useRedirectQueryParam } from '../../model/auth/auth-client';
 import { useIsLaptopSize } from '../../utils/browser-size';
 
-type SocialLoginButton = ComponentClass<SpecificSocialLoginButtonProps>;
+type SocialLoginButton = ReturnType<typeof createButton>;
+type SocialIconProps = { size: string | number; color: string };
+
+function BitbucketIcon({ size, color }: SocialIconProps): ReactElement {
+  return <Bitbucket sx={{ fontSize: size, color }} />;
+}
+
 type SocialButtonFactory = (theme: Theme) => SocialLoginButton;
 
 // Default button. Will match all remaining providers.
@@ -90,18 +94,11 @@ const SOCIAL_BUTTONS_MAPPING: Record<string, SocialButtonFactory> = {
   twitter: () => TwitterLoginButton,
   yahoo: () => YahooLoginButton,
   zalo: () => ZaloLoginButton,
+  gitlab: () => GitlabLoginButton,
   // Not (yet?) managed by the lib.
-  gitlab: () =>
-    createButton({
-      icon: createSvgIcon(Gitlab),
-      iconFormat: (name) => `fa fa-${name}`,
-      style: { background: '#fc6d26' },
-      activeStyle: { background: '#d55a1c' },
-    }),
   bitbucket: () =>
     createButton({
-      icon: createSvgIcon(Bitbucket),
-      iconFormat: (name) => `fa fa-${name}`,
+      icon: BitbucketIcon,
       style: { background: '#0C66E4' },
       activeStyle: { background: '#0055CC' },
     }),
@@ -197,7 +194,6 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
               iconSize="20px"
               size="32px"
               key={provider.path}
-              fullWidth={true}
               style={{ fontSize: '1em' }}
               onClick={() => {
                 window.location.href = `${PERSES_APP_CONFIG.api_prefix}/api/auth/providers/${provider.path}/login?${buildRedirectQueryString(path)}`;
