@@ -12,40 +12,25 @@
 // limitations under the License.
 
 import { Alert, AlertTitle, Box, Button, Stack, Typography } from '@mui/material';
-import type { KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsearch';
-import { KVSearch } from '@nexucis/kvsearch';
+import type { KVSearchResult } from '@nexucis/kvsearch';
 import type { DatasourceResource, GlobalDatasourceResource, ProjectResource, Resource } from '@perses-dev/client';
 import { isProjectMetadata } from '@perses-dev/client';
 import type { ReactElement } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
-import { getTagDisplayValues } from './model';
+import { ALL_RESOURCE_TYPES_TITLES, getTagDisplayValues } from './model';
 import type { HighlightedDashboardResource, SearchItem, SearchListProps } from './model';
 import { SearchDashboardItem } from './SearchDashboardItem';
 import { SearchDatasourceItem } from './SearchDatasourceItem';
 import { SearchGlobalDatasourceItem } from './SearchGlobalDatasourceItem';
 import { SearchProjectItem } from './SearchProjectItem';
 
-const kvSearchConfig: KVSearchConfiguration = {
-  indexedKeys: [
-    ['metadata', 'name'],
-    ['metadata', 'tags'],
-    ['spec', 'display', 'name'],
-  ],
-  shouldSort: true,
-  includeMatches: true,
-  shouldRender: false,
-  excludedChars: [' '],
-  findAllMatches: true,
-};
-
 const SIZE_LIST = 10;
 
 type SearchMatch = NonNullable<KVSearchResult<SearchItem>['matched']>[number];
 
 interface PaginationState {
-  list: SearchItem[];
-  query: string;
+  results: Array<KVSearchResult<SearchItem>>;
   size: number;
 }
 
@@ -84,33 +69,23 @@ const STATIC_SX = {
 };
 
 export function SearchList(props: SearchListProps): ReactElement | null {
-  const { list, query, handleClose, isResource, dashboardCounts, datasourceCounts, error, errorTitle } = props;
-  const [pagination, setPagination] = useState<PaginationState>({ list, query, size: SIZE_LIST });
-  const currentSizeList = pagination.list === list && pagination.query === query ? pagination.size : SIZE_LIST;
-  const kvSearch = useMemo(() => new KVSearch<Resource>(kvSearchConfig), []);
-
-  const filteredList: Array<KVSearchResult<SearchItem>> = useMemo(() => {
-    return query ? kvSearch.filter(query, list) : [];
-  }, [kvSearch, list, query]);
+  const { type, results: filteredList, error, handleClose, dashboardCounts, datasourceCounts } = props;
+  const [pagination, setPagination] = useState<PaginationState>({ results: filteredList, size: SIZE_LIST });
+  const currentSizeList = pagination.results === filteredList ? pagination.size : SIZE_LIST;
 
   const originalKind = useMemo(() => {
     if (!filteredList.length) return undefined;
     return filteredList[0]?.original.kind;
   }, [filteredList]);
 
-  useEffect(() => {
-    // An error is displayed in place of the results, so it should not be reported as "No records found".
-    isResource?.(!!error || !!filteredList.length);
-  }, [error, filteredList.length, isResource]);
-
   const handleSeeMore = useCallback(() => {
-    setPagination({ list, query, size: currentSizeList + SIZE_LIST });
-  }, [list, query, currentSizeList]);
+    setPagination({ results: filteredList, size: currentSizeList + SIZE_LIST });
+  }, [filteredList, currentSizeList]);
 
   if (error) {
     return (
       <Alert severity="error" sx={STATIC_SX.alert}>
-        <AlertTitle>{errorTitle}</AlertTitle>
+        <AlertTitle>{`Failed to load ${ALL_RESOURCE_TYPES_TITLES[type].toLowerCase()}`}</AlertTitle>
         {error.message}
       </Alert>
     );
