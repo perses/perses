@@ -15,9 +15,10 @@ application.
 # Example: https://react.dev/learn/build-a-react-app-from-scratch
 
 # Install Perses dependencies (React 18 and React 19+ are both supported)
-npm i --save @perses-dev/client @perses-dev/spec @perses-dev/components \
-  @perses-dev/plugin-system @perses-dev/timeseries-chart-plugin \
-  @perses-dev/prometheus-plugin @perses-dev/dashboards \
+# React 19 requires the v0.56 Perses packages: until v0.56.0 is released, install the versions below instead of `latest`.
+npm i --save @perses-dev/client@0.56.0-beta.0 @perses-dev/spec @perses-dev/components@0.56.0-beta.0 \
+  @perses-dev/plugin-system@0.56.0-beta.0 @perses-dev/timeseries-chart-plugin@0.15.0-beta.0 \
+  @perses-dev/prometheus-plugin@0.60.0-beta.0 @perses-dev/dashboards@0.56.0-beta.0 \
   @tanstack/react-query \
   @mui/material @mui/system \
   @emotion/styled @hookform/resolvers \

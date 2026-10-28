@@ -14,7 +14,6 @@
 import type { Theme } from '@mui/material';
 import { alpha, Divider, Stack, useTheme } from '@mui/material';
 import Bitbucket from 'mdi-material-ui/Bitbucket';
-import Gitlab from 'mdi-material-ui/Gitlab';
 import type { ReactElement, ReactNode } from 'react';
 import { useMemo } from 'react';
 import * as React from 'react';
@@ -26,6 +25,7 @@ import {
   DiscordLoginButton,
   FacebookLoginButton,
   GithubLoginButton,
+  GitlabLoginButton,
   GoogleLoginButton,
   InstagramLoginButton,
   LinkedInLoginButton,
@@ -51,10 +51,6 @@ import { useIsLaptopSize } from '../../utils/browser-size';
 
 type SocialLoginButton = ReturnType<typeof createButton>;
 type SocialIconProps = { size: string | number; color: string };
-
-function GitlabIcon({ size, color }: SocialIconProps): ReactElement {
-  return <Gitlab sx={{ fontSize: size, color }} />;
-}
 
 function BitbucketIcon({ size, color }: SocialIconProps): ReactElement {
   return <Bitbucket sx={{ fontSize: size, color }} />;
@@ -98,13 +94,8 @@ const SOCIAL_BUTTONS_MAPPING: Record<string, SocialButtonFactory> = {
   twitter: () => TwitterLoginButton,
   yahoo: () => YahooLoginButton,
   zalo: () => ZaloLoginButton,
+  gitlab: () => GitlabLoginButton,
   // Not (yet?) managed by the lib.
-  gitlab: () =>
-    createButton({
-      icon: GitlabIcon,
-      style: { background: '#fc6d26' },
-      activeStyle: { background: '#d55a1c' },
-    }),
   bitbucket: () =>
     createButton({
       icon: BitbucketIcon,
