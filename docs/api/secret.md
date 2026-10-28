@@ -61,7 +61,8 @@ passwordFile: <filename> # Optional
 ```yaml
 type: <string> | default = "Bearer" # Optional
 
-# The HTTP credentials like a Bearer token
+# The HTTP credentials like a Bearer token.
+# One of credentials or credentialsFile is required, and they are mutually exclusive.
 credentials: <string> # Optional
 credentialsFile: <filename> # Optional
 ```
