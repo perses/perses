@@ -18,7 +18,7 @@ import { formatForDisplay, OPEN_SEARCH_EVENT } from '@perses-dev/dashboards';
 import Close from 'mdi-material-ui/Close';
 import EmoticonSadOutline from 'mdi-material-ui/EmoticonSadOutline';
 import Magnify from 'mdi-material-ui/Magnify';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useRef, useState } from 'react';
 import type { ChangeEvent, MouseEvent, ReactElement } from 'react';
 
 import { useIsMobileSize } from '../../../utils/browser-size';
@@ -110,8 +110,11 @@ export function SearchBar(): ReactElement {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const { filters, activeTypes, toggleType } = useResourceTypeFilters();
-  const { sections, dashboardCounts, datasourceCounts } = useSearchResults(query, activeTypes, open);
-  const hasQuery = query.trim().length > 0;
+  // Searching is deferred to keep the text field responsive while the results are filtered and rendered.
+  // Everything displaying the results relies on the deferred query, so they stay consistent with each other.
+  const searchQuery = useDeferredValue(query);
+  const { sections, dashboardCounts, datasourceCounts } = useSearchResults(searchQuery, activeTypes, open);
+  const hasQuery = searchQuery.trim().length > 0;
   const isAnySectionLoading = sections.some((section) => section.isLoading);
   // An error is displayed in place of the results, so it should not lead to "No records found".
   const hasAnyResult = sections.some(({ results, error }) => results.length > 0 || !!error);
@@ -240,7 +243,7 @@ export function SearchBar(): ReactElement {
               sx={STATIC_SX.noRecords}
             >
               <EmoticonSadOutline fontSize="medium" />
-              <Typography>No records found for {query}</Typography>
+              <Typography>No records found for {searchQuery}</Typography>
             </Box>
           )}
           <SearchBarFilters filters={filters} onToggle={toggleType} />
