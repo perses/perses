@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, Typography } from '@mui/material';
+import { Stack } from '@mui/material';
 import type { SxProps, Theme } from '@mui/material';
 import type { ProjectResource } from '@perses-dev/client';
 import ArchiveIcon from 'mdi-material-ui/Archive';
@@ -21,6 +21,8 @@ import type { ReactElement } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { ProjectRoute } from '../../../model/route';
+import { HighlightedMatch } from './HighlightedMatch';
+import { getDisplayNameMatch } from './model';
 import type { SearchItemProps } from './model';
 import { SearchRow } from './SearchRow';
 
@@ -60,9 +62,10 @@ export interface SearchProjectItemProps extends SearchItemProps {
 
 export const SearchProjectItem = (props: SearchProjectItemProps): ReactElement => {
   const {
+    matchingResult,
     resource: {
-      metadata: { name },
       spec,
+      metadata: { name },
     },
     handleClose,
     dashboardCount,
@@ -71,8 +74,7 @@ export const SearchProjectItem = (props: SearchProjectItemProps): ReactElement =
 
   const projectURL = `${ProjectRoute}/${name}`;
 
-  // const { data: datasourceList } = useDatasourceList({ project: name, staleTime: Infinity });
-  // const { data: dashboardList } = useDashboardList({ project: name, staleTime: Infinity });
+  const { value, intervals } = getDisplayNameMatch(name, spec?.display?.name, matchingResult);
 
   return (
     <SearchRow>
@@ -85,9 +87,12 @@ export const SearchProjectItem = (props: SearchProjectItemProps): ReactElement =
         direction="row"
       >
         <ArchiveIcon fontSize="small" />
-        <Typography data-testid={`${PROJECT_DATA_TEST_IDS.projectName}-${name}`} sx={STATIC_SX.name}>
-          {spec?.display?.name || name}
-        </Typography>
+        <HighlightedMatch
+          value={value}
+          intervals={intervals}
+          dataTestId={`${PROJECT_DATA_TEST_IDS.projectName}-${name}`}
+          sx={STATIC_SX.name}
+        />
       </Stack>
       <Stack sx={STATIC_SX.right} direction="row">
         <Stack

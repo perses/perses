@@ -20,6 +20,8 @@ import type { ReactElement } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { AdminRoute } from '../../../model/route';
+import { HighlightedMatch } from './HighlightedMatch';
+import { getDisplayNameMatch } from './model';
 import type { SearchItemProps } from './model';
 import { SearchRow } from './SearchRow';
 
@@ -64,6 +66,7 @@ export interface SearchGlobalDatasourceItemProps extends SearchItemProps {
 
 export const SearchGlobalDatasourceItem = (props: SearchGlobalDatasourceItemProps): ReactElement => {
   const {
+    matchingResult,
     resource: {
       metadata: { name },
       spec,
@@ -87,6 +90,8 @@ export const SearchGlobalDatasourceItem = (props: SearchGlobalDatasourceItemProp
     }
   }
 
+  const { value, intervals } = getDisplayNameMatch(name, spec.display?.name, matchingResult);
+
   return (
     <SearchRow>
       <Stack
@@ -99,7 +104,7 @@ export const SearchGlobalDatasourceItem = (props: SearchGlobalDatasourceItemProp
         data-testid={`${GLOBAL_DATASOURCE_RESOURCE_TEST_IDS.dsName}-${spec.display?.name || name}`}
       >
         <DatabaseIcon fontSize="small" />
-        <Typography sx={STATIC_SX.name}>{spec.display?.name || name}</Typography>
+        <HighlightedMatch value={value} intervals={intervals} sx={STATIC_SX.name} />
       </Stack>
       <Stack sx={STATIC_SX.right} color="inherit" direction="row">
         <Chip sx={STATIC_SX.chip} label={dataSourceKind} />
