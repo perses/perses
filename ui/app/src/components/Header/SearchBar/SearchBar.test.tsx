@@ -292,4 +292,35 @@ describe('SearchBar', () => {
       expect(noRecords).toBeInTheDocument();
     });
   });
+
+  describe('project counts', () => {
+    it('should display the number of dashboards and datasources of a project', () => {
+      vi.mocked(useProjectList).mockReturnValue({
+        data: [{ kind: 'Project', metadata: { name: 'P1' } }],
+        isLoading: false,
+        isSuccess: true,
+      } as ReturnType<typeof useProjectList>);
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'P1' } });
+
+      expect(screen.getByLabelText('2 dashboards in P1')).toBeInTheDocument();
+      expect(screen.getByLabelText('2 datasources in P1')).toBeInTheDocument();
+    });
+
+    it('should not fetch dashboards and datasources when only global datasources are searched', () => {
+      vi.mocked(useDashboardList).mockClear();
+      vi.mocked(useDatasourceList).mockClear();
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      for (const name of ['Dashboards', 'Projects', 'Datasources']) {
+        fireEvent.click(screen.getByRole('button', { name }));
+      }
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'GDS' } });
+
+      expect(screen.getByTestId(`${GLOBAL_DATASOURCE_RESOURCE_TEST_IDS.dsName}-GDS1`)).toBeInTheDocument();
+      expect(useDashboardList).not.toHaveBeenCalled();
+      expect(useDatasourceList).not.toHaveBeenCalled();
+    });
+  });
 });
