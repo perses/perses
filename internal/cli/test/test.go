@@ -15,14 +15,19 @@ package test
 
 import (
 	"bytes"
+	"context"
 	"os"
+	"path/filepath"
 	"regexp"
 	"testing"
 
+	"github.com/mholt/archives"
+	"github.com/perses/perses/internal/api/archive"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type Suite struct {
@@ -73,4 +78,28 @@ func ExecuteSuiteTest(t *testing.T, newCMD func() *cobra.Command, suites []Suite
 			_ = os.Remove(configFilePath)
 		})
 	}
+}
+
+// ArchivePlugins creates a tar.gz archive for each plugin folder found in pluginFolder.
+// The archives are stored in a temporary folder that is returned, so it can be used as a plugin path containing only archives.
+func ArchivePlugins(t *testing.T, pluginFolder string) string {
+	archiveFolder := t.TempDir()
+	plugins, err := os.ReadDir(pluginFolder)
+	require.NoError(t, err)
+	for _, plugin := range plugins {
+		if !plugin.IsDir() {
+			continue
+		}
+		pluginFiles, readErr := os.ReadDir(filepath.Join(pluginFolder, plugin.Name()))
+		require.NoError(t, readErr)
+		// The plugin files are stored at the root of the archive.
+		list := make(map[string]string)
+		for _, f := range pluginFiles {
+			list[filepath.Join(pluginFolder, plugin.Name(), f.Name())] = f.Name()
+		}
+		files, filesErr := archives.FilesFromDisk(context.Background(), nil, list)
+		require.NoError(t, filesErr)
+		require.NoError(t, archive.Build(filepath.Join(archiveFolder, plugin.Name()), archive.TARgz, files))
+	}
+	return archiveFolder
 }

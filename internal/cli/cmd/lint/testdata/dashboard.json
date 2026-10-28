@@ -1,0 +1,27 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "lint",
+    "project": "perses"
+  },
+  "spec": {
+    "duration": "1h",
+    "panels": {
+      "foo": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Foo"
+          },
+          "plugin": {
+            "kind": "FooChart",
+            "spec": {
+              "field": "bar"
+            }
+          }
+        }
+      }
+    },
+    "layouts": []
+  }
+}
