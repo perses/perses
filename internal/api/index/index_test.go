@@ -72,8 +72,8 @@ func TestClientAdd(t *testing.T) {
 						},
 						displayName: "mydashboard",
 						fields: []indexedField{
-							{path: "metadata.name", value: "mydashboard"},
-							{path: "metadata.project", value: "myproject"},
+							{key: "metadata.name", path: []string{"metadata", "name"}, value: "mydashboard"},
+							{key: "metadata.project", path: []string{"metadata", "project"}, value: "myproject"},
 						},
 						matcher: &matcher{},
 					},
@@ -108,9 +108,9 @@ func TestClientAdd(t *testing.T) {
 						},
 						displayName: "My Fancy Dashboard",
 						fields: []indexedField{
-							{path: "metadata.name", value: "mydashboard"},
-							{path: "metadata.project", value: "myproject"},
-							{path: "spec.display.name", value: "My Fancy Dashboard"},
+							{key: "metadata.name", path: []string{"metadata", "name"}, value: "mydashboard"},
+							{key: "metadata.project", path: []string{"metadata", "project"}, value: "myproject"},
+							{key: "spec.display.name", path: []string{"spec", "display", "name"}, value: "My Fancy Dashboard"},
 						},
 						matcher: &matcher{},
 					},
@@ -141,7 +141,7 @@ func TestClientAdd(t *testing.T) {
 						},
 						displayName: "mydashboard",
 						fields: []indexedField{
-							{path: "metadata.name", value: "mydashboard"},
+							{key: "metadata.name", path: []string{"metadata", "name"}, value: "mydashboard"},
 						},
 						matcher: &matcher{},
 					},
@@ -209,8 +209,8 @@ func TestClientAdd(t *testing.T) {
 						},
 						displayName: "mydashboard",
 						fields: []indexedField{
-							{path: "spec.panels.@dig:display.name", value: "simple line chart"},
-							{path: "spec.panels.@dig:display.name", value: "another line chart"},
+							{key: "spec.panels.@dig:display.name", path: []string{"spec", "panels", "MyPanel", "spec", "display", "name"}, value: "simple line chart"},
+							{key: "spec.panels.@dig:display.name", path: []string{"spec", "panels", "MyOtherPanel", "spec", "display", "name"}, value: "another line chart"},
 						},
 						matcher: &matcher{},
 					},
@@ -357,30 +357,34 @@ func TestClientSearch_authorizationDisabled(t *testing.T) {
 	}
 }
 
-func TestClientSearch_returnsPathOfMatchingField(t *testing.T) {
+func TestClientSearch_returnsKeyAndPathOfMatchingField(t *testing.T) {
 	testsCases := []struct {
 		title            string
 		text             string
 		expectedOriginal string
-		expectedPath     string
+		expectedKey      string
+		expectedPath     []string
 	}{
 		{
 			title:            "match on the display name",
 			text:             "fancy",
 			expectedOriginal: "My Fancy Dashboard",
-			expectedPath:     "spec.display.name",
+			expectedKey:      "spec.display.name",
+			expectedPath:     []string{"spec", "display", "name"},
 		},
 		{
 			title:            "match on the name",
 			text:             "mydash",
 			expectedOriginal: "mydashboard",
-			expectedPath:     "metadata.name",
+			expectedKey:      "metadata.name",
+			expectedPath:     []string{"metadata", "name"},
 		},
 		{
 			title:            "match on a tag",
 			text:             "production",
 			expectedOriginal: "production",
-			expectedPath:     "metadata.tags",
+			expectedKey:      "metadata.tags",
+			expectedPath:     []string{"metadata", "tags", "1"},
 		},
 	}
 	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name", "spec.display.name", "metadata.tags"}}}, newDisabledAuthz(t), nil).(*client)
@@ -396,6 +400,7 @@ func TestClientSearch_returnsPathOfMatchingField(t *testing.T) {
 			require.NoError(t, err)
 			require.Len(t, results, 1)
 			assert.Equal(t, tc.expectedOriginal, results[0].Original)
+			assert.Equal(t, tc.expectedKey, results[0].Key)
 			assert.Equal(t, tc.expectedPath, results[0].Path)
 		})
 	}
