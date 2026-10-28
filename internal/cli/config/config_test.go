@@ -18,6 +18,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -60,4 +62,49 @@ func TestWriteFromScratchReturnsMkdirError(t *testing.T) {
 	err := WriteFromScratch(&Config{})
 	assert.Error(t, err)
 	assertMkdirError(t, err)
+}
+
+// initWithLogs runs Init on the given path and returns the log entries emitted
+// at the info level, so that a test can check what the user would see with the
+// default log level. The standard logger is restored once the test is done.
+func initWithLogs(t *testing.T, filePath string) []*logrus.Entry {
+	t.Helper()
+	previous := Global
+	logger := logrus.StandardLogger()
+	previousLevel := logger.GetLevel()
+	previousHooks := logger.ReplaceHooks(make(logrus.LevelHooks))
+	t.Cleanup(func() {
+		logger.ReplaceHooks(previousHooks)
+		logger.SetLevel(previousLevel)
+		Global = previous
+	})
+	logger.SetLevel(logrus.InfoLevel)
+	hook := test.NewLocal(logger)
+	Init(filePath)
+	return hook.AllEntries()
+}
+
+func TestInitWithoutConfigFile(t *testing.T) {
+	filePath := filepath.Join(t.TempDir(), "config.json")
+	entries := initWithLogs(t, filePath)
+	assert.Empty(t, entries)
+	assert.Equal(t, &Config{filePath: filePath, Dac: Dac{OutputFolder: DefaultOutputFolder}}, Global)
+}
+
+func TestInitWithUnreadableConfigFile(t *testing.T) {
+	filePath := filepath.Join(t.TempDir(), "config.json")
+	assert.NoError(t, os.WriteFile(filePath, []byte("{"), 0600))
+	entries := initWithLogs(t, filePath)
+	// the config is ignored, but the user must be told why
+	if assert.Len(t, entries, 1) {
+		assert.Equal(t, logrus.WarnLevel, entries[0].Level)
+		assert.Contains(t, entries[0].Message, filePath)
+		assert.Error(t, entries[0].Data[logrus.ErrorKey].(error))
+	}
+	assert.Equal(t, &Config{filePath: filePath, Dac: Dac{OutputFolder: DefaultOutputFolder}}, Global)
+}
+
+func TestReadConfigNotExist(t *testing.T) {
+	_, err := readConfig(filepath.Join(t.TempDir(), "config.json"))
+	assert.ErrorIs(t, err, os.ErrNotExist)
 }
