@@ -195,6 +195,8 @@ Links can be defined at the dashboard level (`spec.links`) or on individual pane
 name: <string> # Optional
 
 # Target URL of the link.
+# It must be a relative URL or use the http, https or mailto scheme. Any other scheme (e.g. javascript:) is rejected.
+# When the URL contains variables, the URL obtained after the interpolation must follow the same rule, otherwise the link is displayed but cannot be followed.
 url: <string>
 
 # Text displayed when hovering over the link.
