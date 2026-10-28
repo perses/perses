@@ -32,6 +32,7 @@ import { useProjectList } from '../../model/project-client';
 import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { buildGlobalVariableDefinition } from '../../utils/variables';
+import { EXPLORE_TABS } from './explore-tabs';
 
 function ExploreView(): ReactElement {
   return <HelperExploreView />;
@@ -183,6 +184,7 @@ function HelperExploreView(): ReactElement {
             projectName={projectName}
             externalVariableDefinitions={externalVariableDefinitions}
             exploreTitleComponent={exploreTitleComponent}
+            tabs={EXPLORE_TABS}
           />
         </ErrorBoundary>
       </PluginRegistry>
