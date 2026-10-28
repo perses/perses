@@ -15,6 +15,7 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/user"
@@ -39,7 +40,12 @@ func Init(configPath string) {
 	var err error
 	Global, err = readConfig(configPath)
 	if err != nil {
-		logrus.WithError(err).Debug("unable to read the config")
+		if errors.Is(err, os.ErrNotExist) {
+			logrus.WithError(err).Debug("unable to read the config")
+		} else {
+			// The file exists but cannot be used: tell the user instead of silently behaving as if there was no config.
+			logrus.WithError(err).Warnf("unable to read the config file %q, it is ignored", configPath)
+		}
 		Global = &Config{}
 	} else {
 		err = Global.init()
@@ -131,7 +137,7 @@ func getRootFolder() string {
 // If there is no error during the read, it returns the result in the struct ArgosCLIConfig
 func readConfig(filePath string) (*Config, error) {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		return nil, fmt.Errorf("file %q doesn't exist", filePath)
+		return nil, fmt.Errorf("file %q doesn't exist: %w", filePath, os.ErrNotExist)
 	} else if err != nil {
 		return nil, err
 	}
