@@ -106,10 +106,6 @@ database: <Database config> # Optional
 # Dashboard configuration
 dashboard: <Dashboard config> # Optional
 
-# The configuration to access the CUE schemas
-# This config is deprecated. It will be removed in the future. Please remove it from your config. 
-schemas: <Schemas config> # Optional
-
 # If provided, Perses server will look to the different folders configured and populate the database based on what it is found
 # Be careful: the data coming from the provisioning folder will totally override what exists in the database.
 provisioning: <Provisioning config> # Optional
@@ -119,10 +115,6 @@ datasource: <Datasource config> # Optional
 
 # This configuration allows to fine tune the variable feature
 variable: <Variable config> # Optional
-
-# The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
-# This config is deprecated. Please use the config ephemeral_dashboard instead.
-ephemeral_dashboards_cleanup_interval: <duration> # Optional
 
 # The config for the ephemeral dashboard feature. This is the way to activate the feature.
 ephemeral_dashboard: < EphemeralDashboard config > # Optional
@@ -427,13 +419,6 @@ tls_config: <TLS config> # Optional
 ```yaml
 # Authorization provider
 provider: <Authorization providers> # Optional
-
-# DEPRECATED: use provider.native.check_latest_update_interval instead.
-check_latest_update_interval: <duration> # Optional
-
-# DEPRECATED: use provider.native.guest_permissions instead.
-guest_permissions:
-  - <Permissions> # Optional
 ```
 
 ##### Authorization Providers
@@ -654,28 +639,6 @@ max_open_conns: <int> # Optional
 
 # Maximum number of connections in the idle connection pool. A value <= 0 keeps the Go default (2).
 max_idle_conns: <int> # Optional
-```
-
-### Schemas config
-
-!!! warning
-    This config is deprecated. It will be removed in the future. Please remove it from your config.
-
-```yaml
-# Path to the Cue schemas of the panels
-panels_path: <path> | default = "schemas/panels" # Optional
-
-# Path to the Cue schemas of the queries
-queries_path: <path> | default = "schemas/queries" # Optional
-
-# Path to the Cue schemas of the datasources
-datasources_path: <path> | default = "schemas/datasources" # Optional
-
-# Path to the Cue schemas of the variables
-variables_path: <path> | default = "schemas/variables" # Optional
-
-# The refresh interval of the cue schemas regardless their paths
-interval: <duration> | default = 1h # Optional
 ```
 
 ### TLS config
@@ -1234,11 +1197,6 @@ dashboard: <string> # Optional
 # The path to the folder containing the plugins
 # The default value depends if Perses is running in a container or not.
 path: <path> | default = ("plugins" | "/etc/perses/plugins") # Optional
-
-# The path to the folder containing the plugins archive. 
-# When Perses is starting, it will extract the content of the archive in the folder specified in the `folder` attribute.
-# DEPRECATED: use `archive_paths` instead to specify multiple folders for the archived plugins.
-archive_path: <path> | default = ("plugins-archive" | "/etc/perses/plugins-archive") # Optional
 
 # The list of paths to the directories containing the archived plugins. It allows to specify multiple directories for the archived plugins.
 # When Perses is starting, it will extract any archive found in the folders specified in this attribute in the folder specified in the `path` attribute.

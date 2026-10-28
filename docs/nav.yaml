@@ -79,6 +79,7 @@
             - Plugins: /docs/plugins/
     - Perses CLI (percli): cli.md
     - Upgrade Guide:
+        - v0.56.0: upgrade/v0.56.0.md
         - v0.55.0: upgrade/v0.55.0.md
         - v0.54.0: upgrade/v0.54.0.md
         - v0.53.0: upgrade/v0.53.0.md

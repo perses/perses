@@ -303,8 +303,10 @@ func TestUnmarshalJSONConfig(t *testing.T) {
   },
   "plugin": {
     "path": "plugins",
-    "archive_path": "plugins-archive"
-	},
+    "archive_paths": [
+      "plugins-archive"
+    ]
+  },
   "provisioning": {
     "folders": [
       "dev/data"
@@ -396,8 +398,8 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 					},
 				},
 				Plugin: Plugin{
-					Path:        "plugins",
-					ArchivePath: "plugins-archive",
+					Path:         "plugins",
+					ArchivePaths: []string{"plugins-archive"},
 				},
 				Provisioning: ProvisioningConfig{
 					Folders: []string{
@@ -495,7 +497,8 @@ ephemeral_dashboard:
 
 plugin:
   path: "custom/plugins"
-  archive_path: "custom/plugins/archive"
+  archive_paths:
+    - "custom/plugins/archive"
 `,
 			result: Config{
 				Security: Security{
