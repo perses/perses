@@ -19,7 +19,7 @@ npm i --save @perses-dev/client @perses-dev/spec @perses-dev/components \
   @perses-dev/plugin-system @perses-dev/timeseries-chart-plugin \
   @perses-dev/prometheus-plugin @perses-dev/dashboards \
   @tanstack/react-query \
-  @mui/material \
+  @mui/material @mui/system \
   @emotion/styled @hookform/resolvers \
   react@19 react-dom@19 # or react@18 react-dom@18
 ```
