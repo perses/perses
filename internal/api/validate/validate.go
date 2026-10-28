@@ -23,6 +23,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/utils"
 	"github.com/perses/spec/go/dashboard"
+	specDatasource "github.com/perses/spec/go/datasource"
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	"github.com/perses/spec/go/plugin"
 )
@@ -66,9 +67,13 @@ func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schema.Sc
 	return nil
 }
 
+// Variable validates the variable. The plugin schema check is skipped when sch is nil.
 func Variable(entity modelV1.VariableInterface, sch schema.Schema) error {
 	if err := validateVariableName(entity.GetMetadata().GetName()); err != nil {
 		return err
+	}
+	if sch == nil {
+		return nil
 	}
 	return sch.ValidateGlobalVariable(entity.GetVarSpec())
 }
@@ -125,6 +130,9 @@ func validateDatasourcePlugin(plugin plugin.Plugin, name string, sch schema.Sche
 	if err := validateHTTPProxyTimeout(proxyConfig, name, proxyCfg); err != nil {
 		return err
 	}
+	if sch == nil {
+		return nil
+	}
 	return sch.ValidateDatasource(plugin, name)
 }
 
@@ -161,19 +169,28 @@ func validateDashboardSpec(spec dashboard.Spec, sch schema.Schema, proxyCfg *con
 			return err
 		}
 	}
-	if len(spec.Datasources) > 0 {
-		defaultDts := make(map[string]bool)
-		for dtsName, dtsSpec := range spec.Datasources {
-			if err := validateDatasourcePlugin(dtsSpec.Plugin, dtsName, sch, proxyCfg); err != nil {
-				return err
-			}
-			if dtsSpec.Default {
-				if defaultDts[dtsSpec.Plugin.Kind] {
-					return fmt.Errorf("%s can not be defined as default datasource: there is already a default defined for kind %q", dtsName, dtsSpec.Plugin.Kind)
-				}
-				defaultDts[dtsSpec.Plugin.Kind] = true
-			}
+	for dtsName, dtsSpec := range spec.Datasources {
+		if dtsSpec == nil {
+			continue
 		}
+		if err := validateDatasourcePlugin(dtsSpec.Plugin, dtsName, sch, proxyCfg); err != nil {
+			return err
+		}
+	}
+	return validateUnicityOfDefaultLocalDTS(spec.Datasources)
+}
+
+func validateUnicityOfDefaultLocalDTS(datasources map[string]*specDatasource.Spec) error {
+	defaultDts := make(map[string]bool)
+	for dtsName, dtsSpec := range datasources {
+		// A local datasource can be null in a dashboard (e.g. `"datasources": {"a": null}`).
+		if dtsSpec == nil || !dtsSpec.Default {
+			continue
+		}
+		if defaultDts[dtsSpec.Plugin.Kind] {
+			return fmt.Errorf("%s can not be defined as default datasource: there is already a default defined for kind %q", dtsName, dtsSpec.Plugin.Kind)
+		}
+		defaultDts[dtsSpec.Plugin.Kind] = true
 	}
 	return nil
 }
