@@ -18,6 +18,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -60,4 +61,38 @@ func TestWriteFromScratchReturnsMkdirError(t *testing.T) {
 	err := WriteFromScratch(&Config{})
 	assert.Error(t, err)
 	assertMkdirError(t, err)
+}
+
+// setWritableFilePath points Global at a config file in a fresh temporary
+// directory so that Write can create it.
+func setWritableFilePath(t *testing.T) string {
+	t.Helper()
+	previous := Global
+	t.Cleanup(func() {
+		Global = previous
+	})
+	filePath := filepath.Join(t.TempDir(), "config.json")
+	Global = &Config{}
+	Global.SetFilePath(filePath)
+	return filePath
+}
+
+func TestSetTokens(t *testing.T) {
+	filePath := setWritableFilePath(t)
+	assert.NoError(t, SetTokens("access", "refresh"))
+	cfg, err := readConfig(filePath)
+	assert.NoError(t, err)
+	assert.Equal(t, secret.NewBearerToken("access"), cfg.RestClientConfig.Authorization)
+	assert.Equal(t, "refresh", cfg.RefreshToken)
+}
+
+func TestSetTokensEmptyAccessToken(t *testing.T) {
+	filePath := setWritableFilePath(t)
+	assert.NoError(t, SetTokens("access", "refresh"))
+	// the stored tokens must be left untouched when the new access token is empty
+	assert.EqualError(t, SetTokens("", "new-refresh"), "unable to save the tokens: the access token is empty")
+	cfg, err := readConfig(filePath)
+	assert.NoError(t, err)
+	assert.Equal(t, secret.NewBearerToken("access"), cfg.RestClientConfig.Authorization)
+	assert.Equal(t, "refresh", cfg.RefreshToken)
 }
