@@ -14,7 +14,7 @@
 import { fetchJson } from '@perses-dev/client';
 import type { ProjectMetadata, StatusError } from '@perses-dev/client';
 import { useQuery } from '@tanstack/react-query';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 
 import { HTTPHeader, HTTPMethodGET } from './http';
 import buildURL from './url-builder';
@@ -22,16 +22,26 @@ import buildURL from './url-builder';
 export interface SearchProjectResource {
   metadata: ProjectMetadata;
   displayName: string;
+  // The following fields are only set when a search query is provided.
+  // original is the value of the indexed field matching the query, and intervals are the positions of the matching characters in it.
+  original?: string;
+  intervals?: Array<{ from: number; to: number }>;
+  // The higher the score, the better the match.
+  score?: number;
 }
+
+type SearchDashboardsOptions = Omit<UseQueryOptions<SearchProjectResource[], StatusError>, 'queryKey' | 'queryFn'>;
 
 export function useSearchDashboards(
   project?: string,
   searchQuery?: string,
+  options?: SearchDashboardsOptions,
 ): UseQueryResult<SearchProjectResource[], StatusError> {
   return useQuery<SearchProjectResource[], StatusError>({
     // The queryKey contains the key dashboards and not simply the resource `search/dashboards` to ensure it is invalidated when a dashboard is created or deleted
     queryKey: ['dashboards', '__INTERNAL_SEARCH_KEY__', project, searchQuery],
     queryFn: () => searchDashboards(project, searchQuery),
+    ...options,
   });
 }
 
