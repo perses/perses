@@ -90,7 +90,13 @@ func newTestDashboard(plugin map[string]any) map[string]any {
 
 // withOSPaths uses the path separator of the OS in the positions of the expected CUE errors (e.g. .\dashboard.json on Windows).
 func withOSPaths(expected string) string {
-	return strings.ReplaceAll(expected, "    ./", "    ."+string(filepath.Separator))
+	lines := strings.Split(expected, "\n")
+	for i, line := range lines {
+		if strings.HasPrefix(line, "    ./") {
+			lines[i] = filepath.FromSlash(line)
+		}
+	}
+	return strings.Join(lines, "\n")
 }
 
 func toJSON(t *testing.T, object any) string {
@@ -297,7 +303,7 @@ spec:
 			Title:           "variable with an invalid name",
 			Args:            []string{"-f", invalidVariable, "--schema", schemaPath},
 			IsErrorExpected: true,
-			ExpectedMessage: "1 invalid resource(s) found:\n- GlobalVariable \"123\" (file \"" + invalidVariable + "\"): variable name '123' is not valid",
+			ExpectedMessage: fmt.Sprintf("1 invalid resource(s) found:\n- GlobalVariable \"123\" (file %q): variable name '123' is not valid", invalidVariable),
 		},
 		{
 			Title:           "valid dashboard",
@@ -313,7 +319,7 @@ spec:
 			Title:           "misspelled field",
 			Args:            []string{"-f", misspelled, "--schema", schemaPath},
 			IsErrorExpected: true,
-			ExpectedMessage: "1 invalid resource(s) found:\n- Dashboard \"perses/demo\" (file \"" + misspelled + "\"): " +
+			ExpectedMessage: fmt.Sprintf("1 invalid resource(s) found:\n- Dashboard \"perses/demo\" (file %q): ", misspelled) +
 				withOSPaths(`#Dashboard.spec.durration: field not allowed:
     ./misspelled.json:1:102`),
 		},
@@ -322,9 +328,9 @@ spec:
 			Args:            []string{"-d", invalidDir, "--schema", schemaPath},
 			IsErrorExpected: true,
 			ExpectedMessage: "2 invalid resource(s) found:\n" +
-				"- Dashboard \"perses/first\" (file \"" + filepath.Join(invalidDir, "first.json") + "\"): " +
+				fmt.Sprintf("- Dashboard \"perses/first\" (file %q): ", filepath.Join(invalidDir, "first.json")) +
 				withOSPaths("#Dashboard.spec.durration: field not allowed:\n    ./invalid/first.json:1:104") + "\n" +
-				"- Dashboard \"perses/second\" (file \"" + filepath.Join(invalidDir, "second.json") + "\"): " +
+				fmt.Sprintf("- Dashboard \"perses/second\" (file %q): ", filepath.Join(invalidDir, "second.json")) +
 				withOSPaths("#Dashboard.spec.dispaly: field not allowed:\n    ./invalid/second.json:1:78"),
 		},
 		{
