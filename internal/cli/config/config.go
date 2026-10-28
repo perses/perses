@@ -152,6 +152,9 @@ func SetProject(project string) error {
 }
 
 func SetTokens(accessToken, refreshToken string) error {
+	if len(accessToken) == 0 {
+		return fmt.Errorf("unable to save the tokens: the access token is empty")
+	}
 	return Write(&Config{
 		RestClientConfig: config.RestConfigClient{Authorization: secret.NewBearerToken(accessToken)},
 		RefreshToken:     refreshToken,
