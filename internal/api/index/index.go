@@ -140,23 +140,35 @@ type searchHit struct {
 	match  FieldMatch
 }
 
-// match returns the result of the first field matching the text. keys are the indexed keys of the fields.
+// match returns the result of the field matching the text with the best score. keys are the indexed keys of the fields.
+// In case of equal scores, the first field is kept, so the order of the index keys gives the priority between the fields.
 func (idx *index[T]) match(text string, keys []indexedKey) *SearchResult {
+	var best FieldMatch
+	var bestField indexedField
+	found := false
 	for _, field := range idx.fields {
 		match, ok := idx.matcher.match(text, field.value(idx.data))
-		if !ok {
+		if !ok || (found && match.Score <= best.Score) {
 			continue
 		}
-		match.Key = keys[field.keyIndex()].key
-		match.Path = field.path(idx.data, keys)
-		hit := &searchHit{
-			result: SearchResult{Metadata: idx.metadata, DisplayName: idx.displayName},
-			match:  match,
+		best, bestField, found = match, field, true
+		if best.Score == perfectMatchScore {
+			// No other field can get a better score.
+			break
 		}
-		hit.result.FieldMatch = &hit.match
-		return &hit.result
 	}
-	return nil
+	if !found {
+		return nil
+	}
+	// The key and the path are only decoded for the best field.
+	best.Key = keys[bestField.keyIndex()].key
+	best.Path = bestField.path(idx.data, keys)
+	hit := &searchHit{
+		result: SearchResult{Metadata: idx.metadata, DisplayName: idx.displayName},
+		match:  best,
+	}
+	hit.result.FieldMatch = &hit.match
+	return &hit.result
 }
 
 // indexedKey is a key to index, split into steps to determine the path of the values.
