@@ -77,4 +77,3 @@ jobs:
           nvmrc_path: "./ui/.nvmrc"
       - name: install, type-check and build the example
         run: cd ./examples && ./test.sh ${{ matrix.example }}
-
