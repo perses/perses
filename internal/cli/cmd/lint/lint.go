@@ -52,8 +52,8 @@ func (o *option) Complete(args []string) error {
 	}
 	if len(o.pluginPath) > 0 {
 		pl := plugin.New(apiConfig.Plugin{
-			ArchivePath: o.pluginPath,
-			Path:        o.pluginPath,
+			ArchivePaths: []string{o.pluginPath},
+			Path:         o.pluginPath,
 		})
 		if err := pl.UnzipArchives(); err != nil {
 			return err
