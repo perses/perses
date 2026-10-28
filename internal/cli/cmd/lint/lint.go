@@ -14,6 +14,7 @@
 package lint
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"strconv"
@@ -204,36 +205,44 @@ func (o *option) readFile(f string) ([]sourcedEntity, []*lintError, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	entities, errs, err := file.UnmarshalEntitiesFromDataCollectingErrors(f, data, isJSON)
+	resources, err := file.UnmarshalResourcesFromData(f, data, isJSON)
 	if err != nil {
 		return nil, nil, err
 	}
-	var lintErrors []*lintError
-	for _, decodeErr := range errs {
-		lintErrors = append(lintErrors, &lintError{file: f, err: decodeErr})
-	}
 	// The dashboards are validated against the complete schema with the content of the file,
 	// as the entities lose the unknown fields and get the default values.
-	// The dashboards not matching the schema skip the other checks, as the checks of DashboardSpec expect valid variables.
-	invalid := map[string]bool{}
+	invalidDashboards := map[int]invalidDashboard{}
 	if o.dashboardSch != nil {
-		invalidDashboards, schemaErr := o.dashboardSch.validate(f, data, isJSON)
+		dashboards, schemaErr := o.dashboardSch.validate(f, data, isJSON)
 		if schemaErr != nil {
 			return nil, nil, schemaErr
 		}
-		for _, dash := range invalidDashboards {
-			invalid[dash.project+"/"+dash.name] = true
-			lintErrors = append(lintErrors, &lintError{kind: string(modelV1.KindDashboard), project: dash.project, name: dash.name, file: f, err: dash.err})
+		for _, dash := range dashboards {
+			invalidDashboards[dash.index] = dash
 		}
 	}
-	var result []sourcedEntity
-	for _, entity := range entities {
-		if dash, ok := entity.(*modelV1.Dashboard); ok && invalid[dash.Metadata.Project+"/"+dash.Metadata.Name] {
+	var entities []sourcedEntity
+	var lintErrors []*lintError
+	for _, resource := range resources {
+		if dash, ok := invalidDashboards[resource.Index]; ok {
+			// A dashboard not matching the schema skips the other checks, as the checks of DashboardSpec expect valid variables.
+			// It is reported once, with the decoding error if any.
+			lintErrors = append(lintErrors, &lintError{
+				kind:    string(modelV1.KindDashboard),
+				project: dash.project,
+				name:    dash.name,
+				file:    f,
+				err:     errors.Join(dash.err, resource.Err),
+			})
 			continue
 		}
-		result = append(result, sourcedEntity{entity: entity, file: f})
+		if resource.Err != nil {
+			lintErrors = append(lintErrors, &lintError{file: f, err: resource.Err})
+			continue
+		}
+		entities = append(entities, sourcedEntity{entity: resource.Entity, file: f})
 	}
-	return result, lintErrors, nil
+	return entities, lintErrors, nil
 }
 
 func (o *option) SetWriter(writer io.Writer) {

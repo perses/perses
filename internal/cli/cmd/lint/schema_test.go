@@ -380,6 +380,11 @@ func TestLintCMDWithSchemaConsistency(t *testing.T) {
 	}
 	oneDefault := writeFile(t, dir, "one-default.json", dashboardWithDatasources(false))
 	twoDefaults := writeFile(t, dir, "two-defaults.json", dashboardWithDatasources(true))
+	// The first dashboard doesn't match the schema, and the second one has the same name but fails the consistency checks.
+	sameName := writeFile(t, dir, "same-name.json", `[{"kind":"Dashboard","metadata":{"name":"demo","project":"perses"},"spec":{"display":{"name":"demo"},"durration":"6h","layouts":[],"panels":{}}},`+dashboardWithDatasources(true)+`]`)
+	noSpec := writeFile(t, dir, "no-spec.json", `{"kind":"Dashboard","metadata":{"name":"demo","project":"perses"}}`)
+	// The item that is not an object doesn't prevent the other resources from being checked.
+	nonObject := writeFile(t, dir, "non-object.json", `[`+dashboardWithDatasources(false)+`,42,`+dashboardWithDatasources(true)+`]`)
 
 	cmdTest.ExecuteSuiteTest(t, NewCMD, []cmdTest.Suite{
 		{
@@ -392,6 +397,29 @@ func TestLintCMDWithSchemaConsistency(t *testing.T) {
 			Args:                 []string{"-f", twoDefaults, "--schema", schemaPath},
 			IsErrorExpected:      true,
 			ExpectedRegexMessage: `^1 invalid resource\(s\) found:\n- Dashboard "perses/demo" \(file "[^"]+"\): [ab] can not be defined as default datasource: there is already a default defined for kind "PrometheusDatasource"$`,
+		},
+		{
+			Title:           "only the dashboard not matching the schema skips the consistency checks",
+			Args:            []string{"-f", sameName, "--schema", schemaPath},
+			IsErrorExpected: true,
+			ExpectedRegexMessage: `^2 invalid resource\(s\) found:\n` +
+				`- Dashboard "perses/demo" \(file "[^"]+"\): #Dashboard\.spec\.durration: field not allowed:\n(.+\n)+` +
+				`- Dashboard "perses/demo" \(file "[^"]+"\): [ab] can not be defined as default datasource: there is already a default defined for kind "PrometheusDatasource"$`,
+		},
+		{
+			Title:           "a dashboard without spec is reported once",
+			Args:            []string{"-f", noSpec, "--schema", schemaPath},
+			IsErrorExpected: true,
+			ExpectedRegexMessage: `^1 invalid resource\(s\) found:\n` +
+				`- Dashboard "perses/demo" \(file "[^"]+"\): (.+\n)+objects\[0\]: cannot extract Dashboard, unmarshalling error: spec cannot be empty$`,
+		},
+		{
+			Title:           "the resources around an item that is not an object are checked",
+			Args:            []string{"-f", nonObject, "--schema", schemaPath},
+			IsErrorExpected: true,
+			ExpectedRegexMessage: `^2 invalid resource\(s\) found:\n` +
+				`- objects\[1\] from file "[^"]+" must be an object, got float64\n` +
+				`- Dashboard "perses/demo" \(file "[^"]+"\): [ab] can not be defined as default datasource: there is already a default defined for kind "PrometheusDatasource"$`,
 		},
 	})
 }

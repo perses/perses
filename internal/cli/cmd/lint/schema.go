@@ -52,7 +52,8 @@ func loadDashboardSchema(path string) (*dashboardSchema, error) {
 
 // decodeResources decodes the content of a file with the CUE decoders, so the values are exactly the ones written in the file.
 // Like in the package internal/cli/file, a JSON file or each document of a YAML file contains a resource or a list of resources.
-// The empty YAML documents are decoded as null, so they are skipped like any resource that is not a dashboard.
+// The empty YAML documents are decoded as null, and they are skipped, so the position of each resource is the same as
+// the index of file.Resource.
 func decodeResources(ctx *cue.Context, file string, data []byte, isJSON bool) ([]cue.Value, error) {
 	var exprs []ast.Expr
 	if isJSON {
@@ -79,6 +80,9 @@ func decodeResources(ctx *cue.Context, file string, data []byte, isJSON bool) ([
 		value := ctx.BuildExpr(expr)
 		if value.Err() != nil {
 			return nil, value.Err()
+		}
+		if value.Kind() == cue.NullKind {
+			continue
 		}
 		if value.Kind() != cue.ListKind {
 			resources = append(resources, value)
@@ -111,6 +115,8 @@ type dashboardSchema struct {
 
 // invalidDashboard is a dashboard of a file that doesn't match the complete dashboard schema.
 type invalidDashboard struct {
+	// index is the position of the dashboard in the file, as the index of file.Resource.
+	index   int
 	project string
 	name    string
 	err     error
@@ -125,7 +131,7 @@ func (s *dashboardSchema) validate(file string, data []byte, isJSON bool) ([]inv
 		return nil, err
 	}
 	var invalidDashboards []invalidDashboard
-	for _, resource := range resources {
+	for i, resource := range resources {
 		if kind, _ := resource.LookupPath(cue.ParsePath("kind")).String(); kind != string(modelV1.KindDashboard) {
 			continue
 		}
@@ -133,6 +139,7 @@ func (s *dashboardSchema) validate(file string, data []byte, isJSON bool) ([]inv
 			project, _ := resource.LookupPath(cue.ParsePath("metadata.project")).String()
 			name, _ := resource.LookupPath(cue.ParsePath("metadata.name")).String()
 			invalidDashboards = append(invalidDashboards, invalidDashboard{
+				index:   i,
 				project: project,
 				name:    name,
 				// The positions point to the file of the user and to the schema. The errors are not simplified yet,

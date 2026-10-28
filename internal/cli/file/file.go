@@ -109,32 +109,84 @@ func UnmarshalEntitiesFromData(file string, data []byte, isJSON bool) ([]modelAP
 	return u.unmarshalEntities()
 }
 
-// UnmarshalEntitiesFromDataCollectingErrors is like UnmarshalEntitiesFromData, but it doesn't stop at the first resource
-// that cannot be decoded. It returns every resource successfully decoded, and one error per resource that cannot be decoded.
-// The last error is set when the whole content cannot be decoded.
-func UnmarshalEntitiesFromDataCollectingErrors(file string, data []byte, isJSON bool) ([]modelAPI.Entity, []error, error) {
-	u := &unmarshaller{file: file}
-	if err := u.decode(data, isJSON); err != nil {
-		return nil, nil, err
+// Resource is a resource of a file, as returned by UnmarshalResourcesFromData.
+type Resource struct {
+	// Index is the position of the resource in the file, the lists being flattened and the empty YAML documents skipped.
+	Index int
+	// Entity is the decoded resource. It is nil when Err is set.
+	Entity modelAPI.Entity
+	// Err is set when the resource cannot be decoded.
+	Err error
+}
+
+// UnmarshalResourcesFromData is like UnmarshalEntitiesFromData, but it doesn't stop at the first resource that cannot be decoded.
+// It returns every resource of the content with its position, and an error for each resource that cannot be decoded.
+// The error is set only when the whole content cannot be decoded, like a syntax error or an empty file.
+func UnmarshalResourcesFromData(file string, data []byte, isJSON bool) ([]Resource, error) {
+	items, err := decodeItems(data, isJSON)
+	if err != nil {
+		return nil, newReadFileErr(file, err)
 	}
-	if len(u.objects) == 0 {
-		return nil, nil, fmt.Errorf("unable to unmarshall data from the file %q, data is empty", u.file)
+	if len(items) == 0 {
+		return nil, fmt.Errorf("unable to unmarshall data from the file %q, data is empty", file)
 	}
-	var entities []modelAPI.Entity
-	var errs []error
-	for i, object := range u.objects {
-		entity, err := u.unmarshalObject(i, object)
-		if err != nil {
-			// Keep the index, so the failures of the resources of the same file can be told apart.
-			if index := fmt.Sprintf("objects[%d]", i); !strings.Contains(err.Error(), index) {
-				err = fmt.Errorf("%s: %w", index, err)
-			}
-			errs = append(errs, err)
+	u := &unmarshaller{file: file, isJSON: isJSON}
+	resources := make([]Resource, 0, len(items))
+	for i, item := range items {
+		object, ok := item.(map[string]any)
+		if !ok {
+			resources = append(resources, Resource{Index: i, Err: fmt.Errorf("objects[%d] from file %q must be an object, got %T", i, file, item)})
 			continue
 		}
-		entities = append(entities, entity)
+		entity, unmarshalErr := u.unmarshalObject(i, object)
+		if unmarshalErr != nil {
+			// Keep the index, so the failures of the resources of the same file can be told apart.
+			if index := fmt.Sprintf("objects[%d]", i); !strings.Contains(unmarshalErr.Error(), index) {
+				unmarshalErr = fmt.Errorf("%s: %w", index, unmarshalErr)
+			}
+			resources = append(resources, Resource{Index: i, Err: unmarshalErr})
+			continue
+		}
+		resources = append(resources, Resource{Index: i, Entity: entity})
 	}
-	return entities, errs, nil
+	return resources, nil
+}
+
+// decodeItems decodes a JSON content or every document of a YAML content, each containing a resource or a list of resources.
+// It returns the items, whatever their type, so an invalid item can be reported without discarding the others.
+func decodeItems(data []byte, isJSON bool) ([]any, error) {
+	var documents []any
+	if isJSON {
+		var document any
+		if err := json.Unmarshal(data, &document); err != nil {
+			return nil, err
+		}
+		documents = append(documents, document)
+	} else {
+		decoder := yaml.NewDecoder(bytes.NewReader(data))
+		for {
+			var document any
+			if err := decoder.Decode(&document); err != nil {
+				if errors.Is(err, io.EOF) {
+					break
+				}
+				return nil, err
+			}
+			documents = append(documents, document)
+		}
+	}
+	var items []any
+	for _, document := range documents {
+		switch doc := document.(type) {
+		case nil:
+			// Empty YAML documents (e.g. consecutive '---') are ignored.
+		case []any:
+			items = append(items, doc...)
+		default:
+			items = append(items, doc)
+		}
+	}
+	return items, nil
 }
 
 // List returns the JSON and YAML files found in the directory and its subdirectories.
