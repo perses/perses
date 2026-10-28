@@ -188,7 +188,7 @@ func TestPluginGenerateKeepsExistingGoMod(t *testing.T) {
 		},
 	})
 
-	content, err := os.ReadFile(goModPath)
+	content, err := os.ReadFile(goModPath) //nolint:gosec // goModPath is inside t.TempDir
 	require.NoError(t, err)
 	assert.Equal(t, customGoMod, string(content))
 }
@@ -224,11 +224,11 @@ func TestPluginGenerateFailsBeforeWritingWithEmptyRegistry(t *testing.T) {
 	// An existing module without a go.mod and with an empty registry.
 	require.NoError(t, os.Remove(filepath.Join(dir, "go.mod")))
 	packageJSONPath := filepath.Join(dir, "package.json")
-	packageJSON, err := os.ReadFile(packageJSONPath)
+	packageJSON, err := os.ReadFile(packageJSONPath) //nolint:gosec // packageJSONPath is inside t.TempDir
 	require.NoError(t, err)
 	emptyRegistry := strings.Replace(string(packageJSON), `"registry": "my-plugin-org"`, `"registry": ""`, 1)
 	require.NotEqual(t, string(packageJSON), emptyRegistry, "the registry must be present in the generated package.json")
-	require.NoError(t, os.WriteFile(packageJSONPath, []byte(emptyRegistry), 0o600))
+	require.NoError(t, os.WriteFile(packageJSONPath, []byte(emptyRegistry), 0o600)) //nolint:gosec // packageJSONPath is inside t.TempDir
 
 	cmdTest.ExecuteSuiteTest(t, NewCMD, []cmdTest.Suite{
 		{
