@@ -14,12 +14,15 @@
 package lint
 
 import (
+	"path/filepath"
 	"testing"
 
 	cmdTest "github.com/perses/perses/internal/cli/test"
+	"github.com/perses/perses/internal/test"
 )
 
 func TestLintCMD(t *testing.T) {
+	pluginFolder := filepath.Join(test.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata", "plugins")
 	testSuite := []cmdTest.Suite{
 		{
 			Title:           "empty args",
@@ -49,6 +52,13 @@ func TestLintCMD(t *testing.T) {
 		{
 			Title:           "lint multiples different resources",
 			Args:            []string{"-f", "../../test/sample_resources/multiple_resources.json"},
+			IsErrorExpected: false,
+			ExpectedMessage: `your resources look good
+`,
+		},
+		{
+			Title:           "lint a dashboard with the plugin archives",
+			Args:            []string{"-f", "testdata/dashboard.json", "--plugin.path", cmdTest.ArchivePlugins(t, pluginFolder)},
 			IsErrorExpected: false,
 			ExpectedMessage: `your resources look good
 `,

@@ -37,8 +37,9 @@ touch without expanding the task into unrelated cleanup.
   for dynamic values passed across memoized boundaries. Do not add memoization blindly or omit dependencies.
 - Memoize React context values when they contain objects or functions whose identity would otherwise change each render.
 - Avoid array-index keys when a stable domain identifier exists.
-- Treat React Compiler, React Doctor, and `react-perf` diagnostics as design feedback. Compiler and Doctor rules are
-  enforced as errors. Fix diagnostics rather than disabling rules or increasing the repository warning ceiling.
+- Treat React Compiler and React Doctor diagnostics as design feedback. Compiler and Doctor rules are enforced as
+  errors. Fix diagnostics rather than disabling rules or increasing the repository warning ceiling. The `react-perf`
+  Oxlint plugin is not enabled because the React Compiler already memoizes the props it checks.
 
 ## Components, state, and accessibility
 

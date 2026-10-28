@@ -62,30 +62,38 @@ func (d *dao) StreamRaw(query databaseModel.Query, ch chan<- json.RawMessage) er
 }
 func (d *dao) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
 	ch := make(chan json.RawMessage)
-	var err error
+	// StreamRaw closes ch in a defer, before the goroutine stores the returned error.
+	errc := make(chan error, 1)
 	go func() {
-		err = d.StreamRaw(query, ch)
+		errc <- d.StreamRaw(query, ch)
 	}()
 	result := make([]json.RawMessage, 0)
 	for data := range ch {
 		result = append(result, data)
 	}
-	return result, err
+	if err := <-errc; err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 func (d *dao) RawMetadataQuery(query databaseModel.Query, kind modelV1.Kind) ([]json.RawMessage, error) {
 	ch := make(chan json.RawMessage)
-	var err error
+	// StreamRaw closes ch in a defer, before the goroutine stores the returned error.
+	errc := make(chan error, 1)
 	go func() {
 		// Using the StreamRaw method to get the raw data in a stream will reduce the cost of memory allocation
 		// and improve performance when the number of resources is large.
-		err = d.StreamRaw(query, ch)
+		errc <- d.StreamRaw(query, ch)
 	}()
 	result := make([]json.RawMessage, 0)
 	for raw := range ch {
 		metadata := gjson.GetBytes(raw, "metadata").String()
 		result = append(result, fmt.Appendf(nil, `{"kind":"%s","metadata":%s,"spec":{}}`, kind, metadata))
 	}
-	return result, err
+	if err := <-errc; err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 func (d *dao) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
 	return d.client.Delete(kind, metadata)
@@ -110,67 +118,17 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 		}
 	} else if conf.SQL != nil {
 		c := conf.SQL
-		// Start from the driver's default config (via NewConfig) rather than a bare
-		// struct literal, so that sane defaults such as CheckConnLiveness=true,
-		// AllowNativePasswords=true, Loc=time.UTC and MaxAllowedPacket are preserved
-		// unless explicitly overridden.
-		mysqlConfig := mysql.NewConfig()
-		mysqlConfig.User = string(c.User)
-		mysqlConfig.Passwd = string(c.Password)
-		mysqlConfig.Net = c.Net
-		mysqlConfig.Addr = string(c.Addr)
-		mysqlConfig.DBName = c.DBName
-		if c.Collation != "" {
-			mysqlConfig.Collation = c.Collation
-		}
-		if c.Loc != nil {
-			mysqlConfig.Loc = c.Loc
-		}
-		if c.MaxAllowedPacket != 0 {
-			mysqlConfig.MaxAllowedPacket = c.MaxAllowedPacket
-		}
-		mysqlConfig.ServerPubKey = c.ServerPubKey
-		mysqlConfig.Timeout = time.Duration(c.Timeout)
-		mysqlConfig.ReadTimeout = time.Duration(c.ReadTimeout)
-		mysqlConfig.WriteTimeout = time.Duration(c.WriteTimeout)
-		mysqlConfig.AllowAllFiles = c.AllowAllFiles
-		mysqlConfig.AllowCleartextPasswords = c.AllowCleartextPasswords
-		mysqlConfig.AllowFallbackToPlaintext = c.AllowFallbackToPlaintext
-		mysqlConfig.AllowOldPasswords = c.AllowOldPasswords
-		mysqlConfig.ClientFoundRows = c.ClientFoundRows
-		mysqlConfig.ColumnsWithAlias = c.ColumnsWithAlias
-		mysqlConfig.InterpolateParams = c.InterpolateParams
-		mysqlConfig.MultiStatements = c.MultiStatements
-		mysqlConfig.ParseTime = c.ParseTime
-		mysqlConfig.RejectReadOnly = c.RejectReadOnly
-		// AllowNativePasswords and CheckConnLiveness default to true via NewConfig.
-		// Only override them when the user explicitly set a value in the config.
-		if c.AllowNativePasswords != nil {
-			mysqlConfig.AllowNativePasswords = *c.AllowNativePasswords
-		}
-		if c.CheckConnLiveness != nil {
-			mysqlConfig.CheckConnLiveness = *c.CheckConnLiveness
-		}
-
-		// (OPTIONAL) Configure TLS
-		if c.TLSConfig != nil {
-			tlsConfig, parseErr := c.TLSConfig.BuildTLSConfig()
-			if parseErr != nil {
-				logrus.WithError(parseErr).Error("Failed to parse TLS from configuration")
-				return nil, parseErr
-			}
-			tlsConfigName := "perses-tls"
-			if err := mysql.RegisterTLSConfig(tlsConfigName, tlsConfig); err != nil {
-				logrus.WithError(err).Error("Failed to register TLS configuration for mysql connection")
-				return nil, err
-			}
-			mysqlConfig.TLSConfig = tlsConfigName
-		}
-
-		db, err := sql.Open("mysql", mysqlConfig.FormatDSN())
+		mysqlConfig, err := buildMySQLConfig(c)
 		if err != nil {
 			return nil, err
 		}
+		// Use a connector rather than a DSN: the round trip FormatDSN -> ParseDSN can alter the config
+		// (e.g. a username containing a colon is split between the username and the password).
+		connector, err := mysql.NewConnector(mysqlConfig)
+		if err != nil {
+			return nil, fmt.Errorf("invalid MySQL configuration: %w", err)
+		}
+		db := sql.OpenDB(connector)
 		// Configure the connection pool. Retiring connections before the server's
 		// wait_timeout prevents stale connections from being reused, which is the
 		// main cause of intermittent health check ping failures.
@@ -191,4 +149,61 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 		return nil, fmt.Errorf("no dao defined")
 	}
 	return &dao{client: client}, nil
+}
+
+func buildMySQLConfig(c *config.SQL) (*mysql.Config, error) {
+	// Start from the driver's default config (via NewConfig) rather than a bare
+	// struct literal, so that sane defaults such as CheckConnLiveness=true,
+	// AllowNativePasswords=true, Loc=time.UTC and MaxAllowedPacket are preserved
+	// unless explicitly overridden.
+	mysqlConfig := mysql.NewConfig()
+	mysqlConfig.User = string(c.User)
+	mysqlConfig.Passwd = string(c.Password)
+	mysqlConfig.Net = c.Net
+	mysqlConfig.Addr = string(c.Addr)
+	mysqlConfig.DBName = c.DBName
+	if c.Collation != "" {
+		mysqlConfig.Collation = c.Collation
+	}
+	if c.Loc != nil {
+		mysqlConfig.Loc = c.Loc
+	}
+	if c.MaxAllowedPacket != 0 {
+		mysqlConfig.MaxAllowedPacket = c.MaxAllowedPacket
+	}
+	mysqlConfig.ServerPubKey = c.ServerPubKey
+	mysqlConfig.Timeout = time.Duration(c.Timeout)
+	mysqlConfig.ReadTimeout = time.Duration(c.ReadTimeout)
+	mysqlConfig.WriteTimeout = time.Duration(c.WriteTimeout)
+	mysqlConfig.AllowAllFiles = c.AllowAllFiles
+	mysqlConfig.AllowCleartextPasswords = c.AllowCleartextPasswords
+	mysqlConfig.AllowFallbackToPlaintext = c.AllowFallbackToPlaintext
+	mysqlConfig.AllowOldPasswords = c.AllowOldPasswords
+	mysqlConfig.ClientFoundRows = c.ClientFoundRows
+	mysqlConfig.ColumnsWithAlias = c.ColumnsWithAlias
+	mysqlConfig.InterpolateParams = c.InterpolateParams
+	mysqlConfig.MultiStatements = c.MultiStatements
+	mysqlConfig.ParseTime = c.ParseTime
+	mysqlConfig.RejectReadOnly = c.RejectReadOnly
+	// AllowNativePasswords and CheckConnLiveness default to true via NewConfig.
+	// Only override them when the user explicitly set a value in the config.
+	if c.AllowNativePasswords != nil {
+		mysqlConfig.AllowNativePasswords = *c.AllowNativePasswords
+	}
+	if c.CheckConnLiveness != nil {
+		mysqlConfig.CheckConnLiveness = *c.CheckConnLiveness
+	}
+
+	// (OPTIONAL) Configure TLS
+	// The TLS config is set on the connection config directly, so there is no need to register it
+	// in the global registry of the driver.
+	if c.TLSConfig != nil {
+		tlsConfig, err := c.TLSConfig.BuildTLSConfig()
+		if err != nil {
+			logrus.WithError(err).Error("Failed to parse TLS from configuration")
+			return nil, err
+		}
+		mysqlConfig.TLS = tlsConfig
+	}
+	return mysqlConfig, nil
 }

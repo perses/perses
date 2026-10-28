@@ -5,11 +5,11 @@ go 1.27.2
 replace github.com/perses/perses => ../../ // Use current version
 
 require (
-	github.com/perses/perses v0.54.0
-	github.com/perses/plugins/staticlistvariable v0.9.0
-	github.com/perses/plugins/table v0.13.0
-	github.com/perses/plugins/timeserieschart v0.13.0
-	github.com/perses/spec v0.3.0-rc.1
+	github.com/perses/perses v0.55.0-rc.1
+	github.com/perses/plugins/staticlistvariable v0.10.0
+	github.com/perses/plugins/table v0.14.0
+	github.com/perses/plugins/timeserieschart v0.14.0
+	github.com/perses/spec v0.3.0
 	github.com/stretchr/testify v1.12.1
 )
 
@@ -29,7 +29,7 @@ require (
 	github.com/prometheus/client_model v0.6.3 // indirect
 	github.com/prometheus/common v0.72.1 // indirect
 	github.com/prometheus/procfs v0.22.0 // indirect
-	github.com/zitadel/oidc/v3 v3.51.14 // indirect
+	github.com/zitadel/oidc/v3 v3.51.16 // indirect
 	github.com/zitadel/schema v1.3.2 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect

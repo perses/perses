@@ -56,6 +56,12 @@ func TestMigrateCMD(t *testing.T) {
 			ExpectedMessage: string(test.YAMLMarshalStrict(dashboard)) + "\n",
 		},
 		{
+			Title:           "migrate with the plugin archives",
+			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "native", "--plugin.path", cmdTest.ArchivePlugins(t, filepath.Join(testDataFolder, "plugins"))},
+			IsErrorExpected: false,
+			ExpectedMessage: string(test.YAMLMarshalStrict(dashboard)) + "\n",
+		},
+		{
 			Title:           "migrate with custom resource format",
 			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "custom-resource", "--plugin.path", filepath.Join(testDataFolder, "plugins")},
 			IsErrorExpected: false,

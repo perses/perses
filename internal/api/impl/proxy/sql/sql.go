@@ -518,6 +518,12 @@ func writeJSONResponse(c echo.Context, rows *sql.Rows, datasourceName, projectNa
 		}
 		rowsData = append(rowsData, row)
 	}
+	// Next returns false as well when the database fails while sending the rows (e.g. on a division by zero).
+	// The rows read until then are not the complete result, so they must not be returned.
+	if err = rows.Err(); err != nil {
+		logrus.WithError(err).WithFields(logFields).Error("unable to read the rows of the query result")
+		return apiinterface.InternalError
+	}
 
 	// Build response using a proper struct
 	response := SQLResponse{
