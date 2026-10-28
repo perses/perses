@@ -13,6 +13,7 @@
 
 import type { DashboardResource } from '@perses-dev/client';
 import { parse } from 'yaml';
+
 import { getDashboardType } from './dashboard-type';
 
 export type Dashboard = GrafanaDashboard | PersesDashboard | undefined;

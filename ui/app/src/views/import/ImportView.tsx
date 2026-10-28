@@ -20,9 +20,9 @@ import { useState } from 'react';
 
 import { useIsMobileSize } from '../../utils/browser-size';
 import GrafanaFlow from './GrafanaFlow';
-import PersesFlow from './PersesFlow';
 import type { Dashboard } from './parse-dashboard';
 import { parseDashboard } from './parse-dashboard';
+import PersesFlow from './PersesFlow';
 
 function ImportView(): ReactElement {
   const [dashboard, setDashboard] = useState<Dashboard>();
