@@ -51,8 +51,8 @@ func TestDashboardSpec(t *testing.T) {
 	projectPath := testUtils.GetRepositoryPath()
 
 	pl := plugin.New(config.Plugin{
-		Path:        filepath.Join(projectPath, config.DefaultPluginPath),
-		ArchivePath: filepath.Join(projectPath, config.DefaultArchivePluginPath),
+		Path:         filepath.Join(projectPath, config.DefaultPluginPath),
+		ArchivePaths: []string{filepath.Join(projectPath, config.DefaultArchivePluginPath)},
 	})
 	if err := pl.UnzipArchives(); err != nil {
 		t.Fatalf("failed to unzip archives: %s", err)
@@ -110,8 +110,8 @@ func TestDatasource(t *testing.T) {
 	projectPath := testUtils.GetRepositoryPath()
 
 	pl := plugin.New(config.Plugin{
-		Path:        filepath.Join(projectPath, config.DefaultPluginPath),
-		ArchivePath: filepath.Join(projectPath, config.DefaultArchivePluginPath),
+		Path:         filepath.Join(projectPath, config.DefaultPluginPath),
+		ArchivePaths: []string{filepath.Join(projectPath, config.DefaultArchivePluginPath)},
 	})
 	if err := pl.UnzipArchives(); err != nil {
 		t.Fatalf("failed to unzip archives: %s", err)

@@ -3,15 +3,17 @@ security:
   encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
   enable_auth: true
   authorization:
-    guest_permissions:
-      - actions:
-          - read
-        scopes:
-          - "*"
-      - actions:
-          - create
-        scopes:
-          - Project
+    provider:
+      native:
+        guest_permissions:
+          - actions:
+              - read
+            scopes:
+              - "*"
+          - actions:
+              - create
+            scopes:
+              - Project
   authentication:
     providers:
       enable_native: true
@@ -27,13 +29,6 @@ database:
 provisioning:
   folders:
     - "dev/data"
-
-schemas:
-  panels_path: "cue/schemas/panels"
-  queries_path: "cue/schemas/queries"
-  datasources_path: "cue/schemas/datasources"
-  variables_path: "cue/schemas/variables"
-  interval: "5m"
 
 ephemeral_dashboard:
   enable: true
