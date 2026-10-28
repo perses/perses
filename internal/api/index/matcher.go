@@ -46,6 +46,10 @@ type SearchResult struct {
 	// The original string that matches the query.
 	// It can be empty if the query is empty.
 	Original string `json:"original,omitempty"`
+	// Path is the index key (as configured in the search config) of the field matching the query.
+	// For example, "metadata.tags" when the query matches one of the tags of the resource.
+	// It can be empty if the query is empty.
+	Path string `json:"path,omitempty"`
 	// The list of intervals that match the query.
 	// It can be empty if the query is empty.
 	Intervals []MatchingInterval `json:"intervals,omitempty"`

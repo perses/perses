@@ -71,9 +71,9 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "mydashboard",
-						fields: []string{
-							"mydashboard",
-							"myproject",
+						fields: []indexedField{
+							{path: "metadata.name", value: "mydashboard"},
+							{path: "metadata.project", value: "myproject"},
 						},
 						matcher: &matcher{},
 					},
@@ -107,10 +107,10 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "My Fancy Dashboard",
-						fields: []string{
-							"mydashboard",
-							"myproject",
-							"My Fancy Dashboard",
+						fields: []indexedField{
+							{path: "metadata.name", value: "mydashboard"},
+							{path: "metadata.project", value: "myproject"},
+							{path: "spec.display.name", value: "My Fancy Dashboard"},
 						},
 						matcher: &matcher{},
 					},
@@ -140,8 +140,8 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "mydashboard",
-						fields: []string{
-							"mydashboard",
+						fields: []indexedField{
+							{path: "metadata.name", value: "mydashboard"},
 						},
 						matcher: &matcher{},
 					},
@@ -208,9 +208,9 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "mydashboard",
-						fields: []string{
-							"simple line chart",
-							"another line chart",
+						fields: []indexedField{
+							{path: "spec.panels.@dig:display.name", value: "simple line chart"},
+							{path: "spec.panels.@dig:display.name", value: "another line chart"},
 						},
 						matcher: &matcher{},
 					},
@@ -353,6 +353,50 @@ func TestClientSearch_authorizationDisabled(t *testing.T) {
 				names = append(names, r.Original)
 			}
 			assert.ElementsMatch(t, tc.expectedNames, names)
+		})
+	}
+}
+
+func TestClientSearch_returnsPathOfMatchingField(t *testing.T) {
+	testsCases := []struct {
+		title            string
+		text             string
+		expectedOriginal string
+		expectedPath     string
+	}{
+		{
+			title:            "match on the display name",
+			text:             "fancy",
+			expectedOriginal: "My Fancy Dashboard",
+			expectedPath:     "spec.display.name",
+		},
+		{
+			title:            "match on the name",
+			text:             "mydash",
+			expectedOriginal: "mydashboard",
+			expectedPath:     "metadata.name",
+		},
+		{
+			title:            "match on a tag",
+			text:             "production",
+			expectedOriginal: "production",
+			expectedPath:     "metadata.tags",
+		},
+	}
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name", "spec.display.name", "metadata.tags"}}}, newDisabledAuthz(t), nil).(*client)
+	require.NoError(t, c.add(json.RawMessage(`{
+		"kind": "Dashboard",
+		"metadata": {"name": "mydashboard", "project": "myproject", "tags": ["kubernetes", "production"]},
+		"spec": {"display": {"name": "My Fancy Dashboard"}}
+	}`)))
+
+	for _, tc := range testsCases {
+		t.Run(tc.title, func(t *testing.T) {
+			results, err := c.Search(nil, v1.KindDashboard, "", tc.text)
+			require.NoError(t, err)
+			require.Len(t, results, 1)
+			assert.Equal(t, tc.expectedOriginal, results[0].Original)
+			assert.Equal(t, tc.expectedPath, results[0].Path)
 		})
 	}
 }

@@ -70,23 +70,32 @@ func (r rawDocument) getRawMetadata() string {
 	return gjson.GetBytes(r, "metadata").Raw
 }
 
+// indexedField is a value extracted from a document when it is indexed.
+type indexedField struct {
+	// path is the index key (as configured in the search config) the value has been extracted from.
+	// It shares the memory of the configured key, so storing it doesn't copy the string.
+	path  string
+	value string
+}
+
 type index[T api.Metadata] struct {
 	metadata T
 	// displayName is the string that will be used for the search display.
 	displayName string
-	// fields is the list of string that has been collected when the index is created.
+	// fields is the list of values that has been collected when the index is created, with the path they come from.
 	// It is used to know which fields are available for search.
-	fields []string
+	fields []indexedField
 	// matcher is the search engine that will be used to search through the fields.
 	matcher *matcher
 }
 
 func (idx *index[T]) match(text string) *SearchResult {
 	for _, field := range idx.fields {
-		result := idx.matcher.match(text, field)
+		result := idx.matcher.match(text, field.value)
 		if result != nil {
 			result.Metadata = idx.metadata
 			result.DisplayName = idx.displayName
+			result.Path = field.path
 			return result
 		}
 	}
@@ -124,19 +133,20 @@ type projectIndexer struct {
 	mutex sync.RWMutex
 }
 
-func recursiveDeepExtractFields(fs []gjson.Result, fields *[]string) {
+// recursiveDeepExtractFields extracts the scalar values of the given results, with the index key they come from.
+func recursiveDeepExtractFields(fs []gjson.Result, path string, fields *[]indexedField) {
 	for _, f := range fs {
 		if !f.Exists() {
 			continue
 		}
 		if f.IsArray() {
-			recursiveDeepExtractFields(f.Array(), fields)
+			recursiveDeepExtractFields(f.Array(), path, fields)
 		} else if f.IsObject() {
 			for _, v := range f.Map() {
-				recursiveDeepExtractFields([]gjson.Result{v}, fields)
+				recursiveDeepExtractFields([]gjson.Result{v}, path, fields)
 			}
 		} else {
-			*fields = append(*fields, f.String())
+			*fields = append(*fields, indexedField{path: path, value: f.String()})
 		}
 	}
 }
@@ -152,10 +162,10 @@ func (c *projectIndexer) add(raw json.RawMessage) error {
 // We are treating the raw JSON instead of the struct because then we can index anything; and we don't need to deal with the Go struct.
 func (c *projectIndexer) addTo(dst map[string]map[string]index[*v1.ProjectMetadata], raw json.RawMessage) error {
 	customRaw := rawDocument(raw)
-	var fields []string
+	var fields []indexedField
 	for _, k := range c.indexedKeys {
 		fs := customRaw.getFields(k)
-		recursiveDeepExtractFields(fs, &fields)
+		recursiveDeepExtractFields(fs, k, &fields)
 	}
 
 	displayName := customRaw.getDisplayName()
