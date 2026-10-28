@@ -77,7 +77,7 @@ func UnmarshalEntities(file string, dir string) ([]modelAPI.Entity, error) {
 }
 
 func UnmarshalEntitiesFromDirectory(dir string) ([]modelAPI.Entity, []error) {
-	files, err := ListFiles(dir)
+	files, err := List(dir)
 	if err != nil {
 		return nil, []error{err}
 	}
@@ -108,8 +108,8 @@ func UnmarshalEntitiesFromData(file string, data []byte, isJSON bool) ([]modelAP
 	return u.unmarshalEntities()
 }
 
-// ListFiles returns the JSON and YAML files found in the directory and its subdirectories.
-func ListFiles(dir string) ([]string, error) {
+// List returns the JSON and YAML files found in the directory and its subdirectories.
+func List(dir string) ([]string, error) {
 	var files []string
 	err := filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {

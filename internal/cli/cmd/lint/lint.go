@@ -104,7 +104,7 @@ func (o *option) Execute() error {
 		files = []string{o.File}
 	} else if len(o.Directory) > 0 {
 		var err error
-		files, err = file.ListFiles(o.Directory)
+		files, err = file.List(o.Directory)
 		if err != nil {
 			return err
 		}

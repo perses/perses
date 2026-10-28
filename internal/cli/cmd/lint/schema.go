@@ -95,6 +95,15 @@ func decodeResources(ctx *cue.Context, file string, data []byte, isJSON bool) ([
 	return resources, nil
 }
 
+// cwd returns the current directory, so the positions in the CUE errors are relative to it.
+func cwd() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		return ""
+	}
+	return dir
+}
+
 type dashboardSchema struct {
 	ctx        *cue.Context
 	definition cue.Value
@@ -119,13 +128,4 @@ func (s *dashboardSchema) validate(file string, data []byte, isJSON bool) error 
 		}
 	}
 	return nil
-}
-
-// cwd returns the current directory, so the positions in the CUE errors are relative to it.
-func cwd() string {
-	dir, err := os.Getwd()
-	if err != nil {
-		return ""
-	}
-	return dir
 }
