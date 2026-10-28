@@ -19,11 +19,11 @@ import (
 
 	"github.com/perses/common/config"
 	"github.com/perses/spec/go/common"
-	"github.com/sirupsen/logrus"
 )
 
 const (
 	defaultEphemeralDashboardsCleanupInterval = 24 * time.Hour
+	defaultInterval                           = 1 * time.Hour
 )
 
 type EphemeralDashboard struct {
@@ -51,10 +51,6 @@ type Config struct {
 	Security Security `json:"security,omitempty" yaml:"security,omitempty"`
 	// Database contains the different configuration depending on the database you want to use
 	Database Database `json:"database,omitempty" yaml:"database,omitempty"`
-	// Schemas contain the configuration to get access to the CUE schemas
-	// DEPRECATED.
-	// Please remove it from your config.
-	Schemas *Schemas `json:"schemas,omitempty" yaml:"schemas,omitempty"`
 	// Dashboard contains the configuration for the dashboard feature.
 	Dashboard DashboardConfig `json:"dashboard,omitempty" yaml:"dashboard,omitempty"`
 	// Provisioning contains the provisioning config that can be used if you want to provide default resources.
@@ -63,10 +59,6 @@ type Config struct {
 	Datasource DatasourceConfig `json:"datasource,omitempty" yaml:"datasource,omitempty"`
 	// Variable contains the configuration for the variable.
 	Variable VariableConfig `json:"variable,omitempty" yaml:"variable,omitempty"`
-	// EphemeralDashboardsCleanupInterval is the interval at which the ephemeral dashboards are cleaned up
-	// DEPRECATED.
-	// Please use the config EphemeralDashboard instead.
-	EphemeralDashboardsCleanupInterval common.Duration `json:"ephemeral_dashboards_cleanup_interval,omitempty" yaml:"ephemeral_dashboards_cleanup_interval,omitempty"`
 	// EphemeralDashboard contains the config about the ephemeral dashboard feature
 	EphemeralDashboard EphemeralDashboard `json:"ephemeral_dashboard,omitempty" yaml:"ephemeral_dashboard,omitempty"`
 	// Frontend contains any config that will be used by the frontend itself.
@@ -78,17 +70,6 @@ type Config struct {
 }
 
 func (c *Config) Verify() error {
-	if c.EphemeralDashboardsCleanupInterval > 0 {
-		logrus.Warn("'ephemeral_dashboards_cleanup_interval' is deprecated. Please use the config 'ephemeral_dashboard' instead")
-		// This is to avoid an immediate breaking change. This code will be removed for the version v0.49.0
-		c.EphemeralDashboard = EphemeralDashboard{
-			Enable:          true,
-			CleanupInterval: c.EphemeralDashboardsCleanupInterval,
-		}
-	}
-	if c.Schemas != nil {
-		logrus.Warn("'schemas' is deprecated. Please remove it from your config")
-	}
 	if len(c.APIPrefix) > 0 && !strings.HasPrefix(c.APIPrefix, "/") {
 		c.APIPrefix = "/" + c.APIPrefix
 	}

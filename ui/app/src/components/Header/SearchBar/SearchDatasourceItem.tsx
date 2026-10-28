@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Chip, Stack, Typography } from '@mui/material';
+import { Chip, Stack } from '@mui/material';
 import type { SxProps, Theme } from '@mui/material';
 import { isProjectMetadata } from '@perses-dev/client';
 import type { DatasourceResource } from '@perses-dev/client';
@@ -20,6 +20,8 @@ import type { ReactElement } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { ProjectRoute } from '../../../model/route';
+import { HighlightedMatch } from './HighlightedMatch';
+import { getDisplayNameMatch } from './model';
 import type { SearchItemProps } from './model';
 import { SearchRow } from './SearchRow';
 
@@ -70,6 +72,7 @@ export interface SearchDatasourceItemProps extends SearchItemProps {
 export const SearchDatasourceItem = (props: SearchDatasourceItemProps): ReactElement => {
   const {
     resource,
+    matchingResult,
     resource: {
       metadata: { name, project },
       spec,
@@ -84,6 +87,8 @@ export const SearchDatasourceItem = (props: SearchDatasourceItemProps): ReactEle
   const adminDatasourceUrl = `${ProjectRoute}/${isProjectMetadata(resource.metadata) ? project : ''}/datasources`;
   const projectUrl = `${ProjectRoute}/${project}`;
 
+  const { value, intervals } = getDisplayNameMatch(name, spec.display?.name, matchingResult);
+
   return (
     <SearchRow>
       <Stack
@@ -95,9 +100,12 @@ export const SearchDatasourceItem = (props: SearchDatasourceItemProps): ReactEle
         direction="row"
       >
         <DatabaseIcon fontSize="small" />
-        <Typography data-testid={`${DATASOURCE_TEST_IDS.dsName}-${spec.display?.name || name}`} sx={STATIC_SX.name}>
-          {spec.display?.name || name}
-        </Typography>
+        <HighlightedMatch
+          sx={STATIC_SX.name}
+          value={value}
+          intervals={intervals}
+          dataTestId={`${DATASOURCE_TEST_IDS.dsName}-${spec.display?.name || name}`}
+        />
       </Stack>
       <Stack direction="row" sx={STATIC_SX.right}>
         <Chip label={dataSourceKind} size="small" sx={STATIC_SX.chip} />
