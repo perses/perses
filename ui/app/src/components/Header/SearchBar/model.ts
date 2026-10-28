@@ -34,10 +34,11 @@ export type SearchItem = Resource;
 export interface SearchResultSection {
   type: ResourceType;
   results: Array<KVSearchResult<SearchItem>>;
+  isLoading: boolean;
   error: StatusError | null;
 }
 
-export interface SearchListProps extends SearchResultSection {
+export interface SearchListProps extends Omit<SearchResultSection, 'isLoading'> {
   handleClose: () => void;
   // Number of dashboards and datasources per project, displayed next to the project results.
   dashboardCounts?: Map<string, number>;

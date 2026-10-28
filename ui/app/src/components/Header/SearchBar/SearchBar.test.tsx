@@ -302,6 +302,29 @@ describe('SearchBar', () => {
       const noRecords = screen.getByTestId(TEST_IDS.noRecordContainer);
       expect(noRecords).toBeInTheDocument();
     });
+
+    it('should not show no records found while a list is loading', () => {
+      vi.mocked(useProjectList).mockReturnValue({
+        data: undefined,
+        isLoading: true,
+      } as ReturnType<typeof useProjectList>);
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'XYZ' } });
+
+      expect(screen.queryByTestId(TEST_IDS.noRecordContainer)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('section title', () => {
+    it('should title each section with its resource type and number of results', () => {
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'GDS' } });
+
+      expect(
+        screen.getByRole('heading', { name: `Global Datasources (${GLOBAL_DATASOURCE_RESOURCE.length})` }),
+      ).toBeInTheDocument();
+    });
   });
 
   describe('project counts', () => {

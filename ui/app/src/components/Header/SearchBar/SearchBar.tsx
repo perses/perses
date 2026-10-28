@@ -112,6 +112,7 @@ export function SearchBar(): ReactElement {
   const { filters, activeTypes, toggleType } = useResourceTypeFilters();
   const { sections, dashboardCounts, datasourceCounts } = useSearchResults(query, activeTypes, open);
   const hasQuery = query.trim().length > 0;
+  const isAnySectionLoading = sections.some((section) => section.isLoading);
   // An error is displayed in place of the results, so it should not lead to "No records found".
   const hasAnyResult = sections.some(({ results, error }) => results.length > 0 || !!error);
 
@@ -232,7 +233,7 @@ export function SearchBar(): ReactElement {
               },
             }}
           />
-          {hasQuery && !hasAnyResult && (
+          {hasQuery && !isAnySectionLoading && !hasAnyResult && (
             <Box
               data-testid={SEARCH_BAR_DATA_TEST_ID.noRecordContainer}
               className="noRecordsFoundWrapper"

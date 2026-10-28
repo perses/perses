@@ -16,7 +16,7 @@ import type { KVSearchResult } from '@nexucis/kvsearch';
 import type { DatasourceResource, GlobalDatasourceResource, ProjectResource, Resource } from '@perses-dev/client';
 import { isProjectMetadata } from '@perses-dev/client';
 import type { ReactElement } from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { ALL_RESOURCE_TYPES_TITLES, getTagDisplayValues } from './model';
 import type { HighlightedDashboardResource, SearchItem, SearchListProps } from './model';
@@ -73,11 +73,6 @@ export function SearchList(props: SearchListProps): ReactElement | null {
   const [pagination, setPagination] = useState<PaginationState>({ results: filteredList, size: SIZE_LIST });
   const currentSizeList = pagination.results === filteredList ? pagination.size : SIZE_LIST;
 
-  const originalKind = useMemo(() => {
-    if (!filteredList.length) return undefined;
-    return filteredList[0]?.original.kind;
-  }, [filteredList]);
-
   const handleSeeMore = useCallback(() => {
     setPagination({ results: filteredList, size: currentSizeList + SIZE_LIST });
   }, [filteredList, currentSizeList]);
@@ -96,10 +91,10 @@ export function SearchList(props: SearchListProps): ReactElement | null {
   return (
     <Box sx={STATIC_SX.flexColumn}>
       <Box sx={STATIC_SX.flexRow}>
-        <Typography variant="h3">{`${filteredList[0]?.original.kind}s (${filteredList.length})`}</Typography>
+        <Typography variant="h3">{`${ALL_RESOURCE_TYPES_TITLES[type]} (${filteredList.length})`}</Typography>
       </Box>
       <Stack display="flex" direction="column">
-        {originalKind === 'Dashboard' &&
+        {type === 'dashboards' &&
           filteredList.slice(0, currentSizeList).map((search) => {
             const matchedTags = getMatchingTagValues(search.matched);
             const tagsDisplayValue = getTagDisplayValues(search.original.metadata.tags, matchedTags);
@@ -113,7 +108,7 @@ export function SearchList(props: SearchListProps): ReactElement | null {
               />
             );
           })}
-        {originalKind === 'Datasource' &&
+        {type === 'datasources' &&
           filteredList.slice(0, currentSizeList).map((search) => {
             return (
               <SearchDatasourceItem
@@ -124,7 +119,7 @@ export function SearchList(props: SearchListProps): ReactElement | null {
               />
             );
           })}
-        {originalKind === 'Project' &&
+        {type === 'projects' &&
           filteredList.slice(0, currentSizeList).map((search) => {
             return (
               <SearchProjectItem
@@ -137,7 +132,7 @@ export function SearchList(props: SearchListProps): ReactElement | null {
               />
             );
           })}
-        {originalKind === 'GlobalDatasource' &&
+        {type === 'globalDatasources' &&
           filteredList.slice(0, currentSizeList).map((search) => {
             return (
               <SearchGlobalDatasourceItem

@@ -109,10 +109,15 @@ export function useSearchResults(query: string, activeTypes: Set<ResourceType>, 
   const datasourceCounts = useMemo(() => countByProject(datasources.data), [datasources.data]);
 
   const sections: SearchResultSection[] = [
-    { type: 'dashboards', results: dashboardResults, error: dashboards.error },
-    { type: 'projects', results: projectResults, error: projects.error },
-    { type: 'globalDatasources', results: globalDatasourceResults, error: globalDatasources.error },
-    { type: 'datasources', results: datasourceResults, error: datasources.error },
+    { type: 'dashboards', results: dashboardResults, isLoading: dashboards.isLoading, error: dashboards.error },
+    { type: 'projects', results: projectResults, isLoading: projects.isLoading, error: projects.error },
+    {
+      type: 'globalDatasources',
+      results: globalDatasourceResults,
+      isLoading: globalDatasources.isLoading,
+      error: globalDatasources.error,
+    },
+    { type: 'datasources', results: datasourceResults, isLoading: datasources.isLoading, error: datasources.error },
   ];
 
   return { sections: sections.filter(({ type }) => isActive(type)), dashboardCounts, datasourceCounts };
