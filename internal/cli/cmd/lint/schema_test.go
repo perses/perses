@@ -223,12 +223,15 @@ spec:
 			path := writeFile(t, dir, test.fileName, test.content)
 			data, isJSON, err := file.Read(path)
 			require.NoError(t, err)
-			err = sch.validate(path, data, isJSON)
+			invalidDashboards, err := sch.validate(path, data, isJSON)
+			require.NoError(t, err)
 			if len(test.expected) == 0 {
-				assert.NoError(t, err)
+				assert.Empty(t, invalidDashboards)
 				return
 			}
-			assert.EqualError(t, err, withOSPaths(test.expected))
+			require.Len(t, invalidDashboards, 1)
+			got := fmt.Sprintf("invalid dashboard %q: %s", invalidDashboards[0].name, invalidDashboards[0].err)
+			assert.Equal(t, withOSPaths(test.expected), got)
 		})
 	}
 }
@@ -250,6 +253,10 @@ func TestLintCMDWithSchema(t *testing.T) {
 	t.Chdir(dir)
 	schemaPath := writeFile(t, dir, "schema.cue", string(data))
 	valid := writeFile(t, dir, "valid.json", `{"kind":"Dashboard","metadata":{"name":"demo","project":"perses"},"spec":{"display":{"name":"demo"},"duration":"6h","layouts":[],"panels":{}}}`)
+	invalidDir := filepath.Join(dir, "invalid")
+	require.NoError(t, os.Mkdir(invalidDir, 0o700))
+	writeFile(t, invalidDir, "first.json", `{"kind":"Dashboard","metadata":{"name":"first","project":"perses"},"spec":{"display":{"name":"first"},"durration":"6h","layouts":[],"panels":{}}}`)
+	writeFile(t, invalidDir, "second.json", `{"kind":"Dashboard","metadata":{"name":"second","project":"perses"},"spec":{"dispaly":{"name":"second"},"duration":"6h","layouts":[],"panels":{}}}`)
 	misspelled := writeFile(t, dir, "misspelled.json", `{"kind":"Dashboard","metadata":{"name":"demo","project":"perses"},"spec":{"display":{"name":"demo"},"durration":"6h","layouts":[],"panels":{}}}`)
 	// The panel key is an unquoted number, which the YAML decoder doesn't decode as a string key.
 	numericKey := writeFile(t, dir, "numeric-key.yaml", `kind: Dashboard
@@ -290,7 +297,7 @@ spec:
 			Title:           "variable with an invalid name",
 			Args:            []string{"-f", invalidVariable, "--schema", schemaPath},
 			IsErrorExpected: true,
-			ExpectedMessage: "variable name '123' is not valid",
+			ExpectedMessage: "1 invalid resource(s) found:\n- GlobalVariable \"123\" (file \"" + invalidVariable + "\"): variable name '123' is not valid",
 		},
 		{
 			Title:           "valid dashboard",
@@ -306,8 +313,19 @@ spec:
 			Title:           "misspelled field",
 			Args:            []string{"-f", misspelled, "--schema", schemaPath},
 			IsErrorExpected: true,
-			ExpectedMessage: withOSPaths(`invalid dashboard "demo": #Dashboard.spec.durration: field not allowed:
+			ExpectedMessage: "1 invalid resource(s) found:\n- Dashboard \"perses/demo\" (file \"" + misspelled + "\"): " +
+				withOSPaths(`#Dashboard.spec.durration: field not allowed:
     ./misspelled.json:1:102`),
+		},
+		{
+			Title:           "every invalid dashboard of a directory is reported",
+			Args:            []string{"-d", invalidDir, "--schema", schemaPath},
+			IsErrorExpected: true,
+			ExpectedMessage: "2 invalid resource(s) found:\n" +
+				"- Dashboard \"perses/first\" (file \"" + filepath.Join(invalidDir, "first.json") + "\"): " +
+				withOSPaths("#Dashboard.spec.durration: field not allowed:\n    ./invalid/first.json:1:104") + "\n" +
+				"- Dashboard \"perses/second\" (file \"" + filepath.Join(invalidDir, "second.json") + "\"): " +
+				withOSPaths("#Dashboard.spec.dispaly: field not allowed:\n    ./invalid/second.json:1:78"),
 		},
 		{
 			Title:           "schema and online are mutually exclusive",
@@ -367,7 +385,7 @@ func TestLintCMDWithSchemaConsistency(t *testing.T) {
 			Title:                "two default datasources of the same kind",
 			Args:                 []string{"-f", twoDefaults, "--schema", schemaPath},
 			IsErrorExpected:      true,
-			ExpectedRegexMessage: `^unexpected error in dashboard "demo": [ab] can not be defined as default datasource: there is already a default defined for kind "PrometheusDatasource"$`,
+			ExpectedRegexMessage: `^1 invalid resource\(s\) found:\n- Dashboard "perses/demo" \(file "[^"]+"\): [ab] can not be defined as default datasource: there is already a default defined for kind "PrometheusDatasource"$`,
 		},
 	})
 }

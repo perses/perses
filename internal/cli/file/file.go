@@ -22,6 +22,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -106,6 +107,34 @@ func UnmarshalEntitiesFromData(file string, data []byte, isJSON bool) ([]modelAP
 		return nil, err
 	}
 	return u.unmarshalEntities()
+}
+
+// UnmarshalEntitiesFromDataCollectingErrors is like UnmarshalEntitiesFromData, but it doesn't stop at the first resource
+// that cannot be decoded. It returns every resource successfully decoded, and one error per resource that cannot be decoded.
+// The last error is set when the whole content cannot be decoded.
+func UnmarshalEntitiesFromDataCollectingErrors(file string, data []byte, isJSON bool) ([]modelAPI.Entity, []error, error) {
+	u := &unmarshaller{file: file}
+	if err := u.decode(data, isJSON); err != nil {
+		return nil, nil, err
+	}
+	if len(u.objects) == 0 {
+		return nil, nil, fmt.Errorf("unable to unmarshall data from the file %q, data is empty", u.file)
+	}
+	var entities []modelAPI.Entity
+	var errs []error
+	for i, object := range u.objects {
+		entity, err := u.unmarshalObject(i, object)
+		if err != nil {
+			// Keep the index, so the failures of the resources of the same file can be told apart.
+			if index := fmt.Sprintf("objects[%d]", i); !strings.Contains(err.Error(), index) {
+				err = fmt.Errorf("%s: %w", index, err)
+			}
+			errs = append(errs, err)
+			continue
+		}
+		entities = append(entities, entity)
+	}
+	return entities, errs, nil
 }
 
 // List returns the JSON and YAML files found in the directory and its subdirectories.
@@ -257,36 +286,44 @@ func (u *unmarshaller) unmarshalEntities() ([]modelAPI.Entity, error) {
 	}
 	var result []modelAPI.Entity
 	for i, object := range u.objects {
-		if _, ok := object["kind"]; !ok {
-			return nil, fmt.Errorf("objects[%d] from file %q unable to find 'kind' field", i, u.file)
-		}
-		kind := modelV1.Kind(fmt.Sprintf("%v", object["kind"]))
-		// We create the service associated to the current resource.
-		// It will be used to unmarshal the resource with the accurate struct.
-		entity, err := modelV1.GetStruct(kind)
+		entity, err := u.unmarshalObject(i, object)
 		if err != nil {
-			logrus.WithError(err).Debugf("unable to get the struct")
-			return nil, fmt.Errorf("resource %q from file %q not supported by the command", kind, u.file)
-		}
-		// Let's marshal the resource, so we can finally unmarshal it with an accurate struct.
-		var data []byte
-		var marshalErr error
-		if u.isJSON {
-			data, marshalErr = json.Marshal(object)
-		} else {
-			data, marshalErr = yaml.Marshal(object)
-		}
-		if marshalErr != nil {
-			return nil, fmt.Errorf("cannot extract %s, marshalling error: %s", kind, marshalErr)
-		}
-		// Then let's use the service to unmarshal the resource.
-		unmarshalErr := u.unmarshalEntity(data, entity)
-		if unmarshalErr != nil {
-			return nil, fmt.Errorf("cannot extract %s, unmarshalling error: %s", kind, unmarshalErr)
+			return nil, err
 		}
 		result = append(result, entity)
 	}
 	return result, nil
+}
+
+func (u *unmarshaller) unmarshalObject(i int, object map[string]any) (modelAPI.Entity, error) {
+	if _, ok := object["kind"]; !ok {
+		return nil, fmt.Errorf("objects[%d] from file %q unable to find 'kind' field", i, u.file)
+	}
+	kind := modelV1.Kind(fmt.Sprintf("%v", object["kind"]))
+	// We create the service associated to the current resource.
+	// It will be used to unmarshal the resource with the accurate struct.
+	entity, err := modelV1.GetStruct(kind)
+	if err != nil {
+		logrus.WithError(err).Debugf("unable to get the struct")
+		return nil, fmt.Errorf("resource %q from file %q not supported by the command", kind, u.file)
+	}
+	// Let's marshal the resource, so we can finally unmarshal it with an accurate struct.
+	var data []byte
+	var marshalErr error
+	if u.isJSON {
+		data, marshalErr = json.Marshal(object)
+	} else {
+		data, marshalErr = yaml.Marshal(object)
+	}
+	if marshalErr != nil {
+		return nil, fmt.Errorf("cannot extract %s, marshalling error: %s", kind, marshalErr)
+	}
+	// Then let's use the service to unmarshal the resource.
+	unmarshalErr := u.unmarshalEntity(data, entity)
+	if unmarshalErr != nil {
+		return nil, fmt.Errorf("cannot extract %s, unmarshalling error: %s", kind, unmarshalErr)
+	}
+	return entity, nil
 }
 
 func (u *unmarshaller) unmarshalEntity(data []byte, entity modelAPI.Entity) error {

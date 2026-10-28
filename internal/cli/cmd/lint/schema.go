@@ -109,23 +109,37 @@ type dashboardSchema struct {
 	definition cue.Value
 }
 
-// validate validates the dashboards of the file against the definition #Dashboard.
+// invalidDashboard is a dashboard of a file that doesn't match the complete dashboard schema.
+type invalidDashboard struct {
+	project string
+	name    string
+	err     error
+}
+
+// validate validates the dashboards of the file against the definition #Dashboard, and returns every invalid dashboard.
 // It is the equivalent of "cue vet -d '#Dashboard' schema.cue dashboard.json".
-func (s *dashboardSchema) validate(file string, data []byte, isJSON bool) error {
+// The error is set when the content of the file cannot be decoded.
+func (s *dashboardSchema) validate(file string, data []byte, isJSON bool) ([]invalidDashboard, error) {
 	resources, err := decodeResources(s.ctx, file, data, isJSON)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	var invalidDashboards []invalidDashboard
 	for _, resource := range resources {
 		if kind, _ := resource.LookupPath(cue.ParsePath("kind")).String(); kind != string(modelV1.KindDashboard) {
 			continue
 		}
 		if err := s.definition.Unify(resource).Validate(cue.Concrete(true)); err != nil {
+			project, _ := resource.LookupPath(cue.ParsePath("metadata.project")).String()
 			name, _ := resource.LookupPath(cue.ParsePath("metadata.name")).String()
-			// The positions point to the file of the user and to the schema. The errors are not simplified yet,
-			// see https://github.com/perses/perses/issues/4655.
-			return fmt.Errorf("invalid dashboard %q: %s", name, strings.TrimSpace(cueErrors.Details(err, &cueErrors.Config{Cwd: cwd()})))
+			invalidDashboards = append(invalidDashboards, invalidDashboard{
+				project: project,
+				name:    name,
+				// The positions point to the file of the user and to the schema. The errors are not simplified yet,
+				// see https://github.com/perses/perses/issues/4655.
+				err: errors.New(strings.TrimSpace(cueErrors.Details(err, &cueErrors.Config{Cwd: cwd()}))),
+			})
 		}
 	}
-	return nil
+	return invalidDashboards, nil
 }

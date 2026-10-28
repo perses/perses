@@ -16,6 +16,7 @@ package file
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -154,5 +155,47 @@ error-message-testing
 				}
 			}
 		})
+	}
+}
+
+func TestUnmarshalEntitiesFromDataCollectingErrors(t *testing.T) {
+	content := `kind: Project
+metadata:
+  name: first-project
+---
+metadata:
+  name: no-kind
+---
+kind: Dashboard
+metadata:
+  name: empty
+  project: first-project
+---
+kind: Project
+metadata:
+  name: second-project
+`
+	entities, errs, err := UnmarshalEntitiesFromDataCollectingErrors("resources.yaml", []byte(content), false)
+	if err != nil {
+		t.Fatalf("unexpected file error: %v", err)
+	}
+	if len(entities) != 2 {
+		t.Fatalf("expected 2 entities, got %d", len(entities))
+	}
+	for i, name := range []string{"first-project", "second-project"} {
+		if entities[i].GetMetadata().GetName() != name {
+			t.Errorf("entities[%d]: expected name %q, got %q", i, name, entities[i].GetMetadata().GetName())
+		}
+	}
+	if len(errs) != 2 {
+		t.Fatalf("expected 2 resource errors, got %d: %v", len(errs), errs)
+	}
+	for i, index := range []string{"objects[1]", "objects[2]"} {
+		if !strings.Contains(errs[i].Error(), index) {
+			t.Errorf("errs[%d]: expected %q in %q", i, index, errs[i])
+		}
+	}
+	if _, _, fileErr := UnmarshalEntitiesFromDataCollectingErrors("broken.json", []byte(`{not json`), true); fileErr == nil {
+		t.Error("expected a file error for invalid JSON")
 	}
 }
