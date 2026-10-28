@@ -194,10 +194,7 @@ export function useDeleteProjectMutation(): UseMutationResult<ProjectResource, S
  * Used to merge the results of multiple queries.
  * It is returning the first result being loading or in error. Otherwise, it returns the first result.
  *
- * It's based on the following statement found in tanstack/query documentation
- * https://tanstack.com/query/v4/docs/framework/react/guides/queries#query-basics
- * " For most queries, it's usually sufficient to check for the isLoading state, then the isError state, then finally,
- *   assume that the data is available and render the successful state. "
+ * Pending queries have no data yet, including disabled queries waiting for a dependency.
  *
  * The first + others params is just a trick to ensure that we have at least one query result to process.
  * Consider it as a list with at least one element.
@@ -206,7 +203,7 @@ export function useDeleteProjectMutation(): UseMutationResult<ProjectResource, S
  */
 function mergeQueryResults(first: UseQueryResult, ...others: UseQueryResult[]): UseQueryResult {
   for (const result of [first, ...others]) {
-    if (result.isLoading || result.isError) {
+    if (result.isPending || result.isError) {
       return result;
     }
   }

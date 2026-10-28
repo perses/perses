@@ -22,7 +22,7 @@ import buildURL from './url-builder';
 const resource = 'plugins';
 
 export function usePlugins(
-  options?: UseQueryOptions<PluginModuleResource[], StatusError>,
+  options?: Omit<UseQueryOptions<PluginModuleResource[], StatusError>, 'queryKey' | 'queryFn'>,
 ): UseQueryResult<PluginModuleResource[], StatusError> {
   return useQuery<PluginModuleResource[], StatusError>({
     queryKey: ['plugins'],
