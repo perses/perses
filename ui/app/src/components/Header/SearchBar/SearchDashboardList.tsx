@@ -11,15 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert, Box } from '@mui/material';
 import { useCallback, useMemo } from 'react';
 import type { ReactElement } from 'react';
 
 import { useDashboardList, useImportantDashboardList } from '../../../model/dashboard-client';
 import type { HighlightedDashboardResource, ResourceListProps } from './model';
 import { SearchList } from './SearchList';
-
-const STATIC_SX = { alertWrapper: { margin: 1 } };
 
 export const SearchDashboardList = (props: ResourceListProps): ReactElement | null => {
   const {
@@ -58,18 +55,14 @@ export const SearchDashboardList = (props: ResourceListProps): ReactElement | nu
     });
   }, [importantDashboards, dashboardList]);
 
-  if (dashboardListError || importantDashboardsError)
-    return (
-      <Box sx={STATIC_SX.alertWrapper}>
-        <Alert severity="error">
-          <p>Failed to load dashboards! Error:</p>
-          {importantDashboardsError?.message && <p>{importantDashboardsError.message}</p>}
-          {dashboardListError?.message && <p>{dashboardListError.message}</p>}
-        </Alert>
-      </Box>
-    );
-
   return dashboardListLoading || importantDashboardsLoading ? null : (
-    <SearchList list={list} query={query} handleClose={handleClose} isResource={handleIsResource} />
+    <SearchList
+      list={list}
+      error={dashboardListError ?? importantDashboardsError}
+      errorTitle="Failed to load dashboards"
+      query={query}
+      handleClose={handleClose}
+      isResource={handleIsResource}
+    />
   );
 };

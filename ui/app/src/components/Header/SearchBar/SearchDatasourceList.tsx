@@ -28,6 +28,8 @@ export function SearchDatasourceList(props: ResourceListProps): ReactElement | n
   return (
     <SearchList
       list={datasourceQueryResult.data ?? []}
+      error={datasourceQueryResult.error}
+      errorTitle="Failed to load datasources"
       query={query}
       handleClose={handleClose}
       isResource={handleIsResource}

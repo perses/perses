@@ -22,9 +22,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChangeEvent, MouseEvent, ReactElement } from 'react';
 
 import { useIsMobileSize } from '../../../utils/browser-size';
-import { ALL_RESOURCE_TYPES } from './model';
 import type { ResourceType } from './model';
-import { SearchBarFilters } from './SearchBarFilters';
+import { SearchBarFilters, useResourceTypeFilters } from './SearchBarFilters';
 import { SearchDashboardList } from './SearchDashboardList';
 import { SearchDatasourceList } from './SearchDatasourceList';
 import { SearchGlobalDatasource } from './SearchGlobalDatasource';
@@ -113,9 +112,7 @@ export function SearchBar(): ReactElement {
 
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [filters, setFilters] = useState<Set<ResourceType>>(() => {
-    return new Set(ALL_RESOURCE_TYPES);
-  });
+  const { filters, activeTypes, toggleType } = useResourceTypeFilters();
 
   const [hasResource, setHasResource] = useState<Record<ResourceType, boolean>>({
     dashboards: false,
@@ -140,7 +137,7 @@ export function SearchBar(): ReactElement {
     setHasResource((prev) => (prev[type] === available ? prev : { ...prev, [type]: available }));
   }, []);
 
-  const hasAnyResource = Array.from(filters).some((type) => hasResource[type]);
+  const hasAnyResource = Array.from(activeTypes).some((type) => hasResource[type]);
   const handleOpen = useCallback((): void => setOpen(true), []);
   useHandleShortCut(handleOpen);
 
@@ -256,23 +253,23 @@ export function SearchBar(): ReactElement {
               <Typography>No records found for {query}</Typography>
             </Box>
           )}
-          <SearchBarFilters filters={filters} setFilters={setFilters} />
+          <SearchBarFilters filters={filters} onToggle={toggleType} />
           {query.trim().length > 0 && (
             <Stack className="searchItemsWrapper" direction="column" sx={STATIC_SX.searchItemsWrapper}>
-              {filters.has('dashboards') && (
+              {activeTypes.has('dashboards') && (
                 <SearchDashboardList query={query} handleClose={handleClose} isResources={handleIsResourceAvailable} />
               )}
-              {filters.has('projects') && (
+              {activeTypes.has('projects') && (
                 <SearchProjectList query={query} handleClose={handleClose} isResources={handleIsResourceAvailable} />
               )}
-              {filters.has('globalDatasources') && (
+              {activeTypes.has('globalDatasources') && (
                 <SearchGlobalDatasource
                   query={query}
                   handleClose={handleClose}
                   isResources={handleIsResourceAvailable}
                 />
               )}
-              {filters.has('datasources') && (
+              {activeTypes.has('datasources') && (
                 <SearchDatasourceList query={query} handleClose={handleClose} isResources={handleIsResourceAvailable} />
               )}
             </Stack>
