@@ -48,7 +48,7 @@ func TestSortResults(t *testing.T) {
 	}{
 		{
 			title: "not sorted when the order is empty",
-			order: "",
+			order: SortOrderNone,
 			results: []*SearchResult{
 				newSortTestResult("p", "zookeeper", "Zookeeper", 10),
 				newSortTestResult("p", "node", "Node Exporter", 20),
@@ -58,7 +58,7 @@ func TestSortResults(t *testing.T) {
 		},
 		{
 			title: "ascending score, then alphabetical",
-			order: SortAsc,
+			order: SortOrderAsc,
 			results: []*SearchResult{
 				newSortTestResult("p", "zookeeper", "Zookeeper", 10),
 				newSortTestResult("p", "node", "Node Exporter", 20),
@@ -68,7 +68,7 @@ func TestSortResults(t *testing.T) {
 		},
 		{
 			title: "descending score, then still alphabetical",
-			order: SortDesc,
+			order: SortOrderDesc,
 			results: []*SearchResult{
 				newSortTestResult("p", "zookeeper", "Zookeeper", 10),
 				newSortTestResult("p", "node", "Node Exporter", 20),
@@ -78,7 +78,7 @@ func TestSortResults(t *testing.T) {
 		},
 		{
 			title: "alphabetical order is case-insensitive",
-			order: SortDesc,
+			order: SortOrderDesc,
 			results: []*SearchResult{
 				newSortTestResult("p", "b", "beta", 0),
 				newSortTestResult("p", "a", "Alpha", 0),
@@ -88,7 +88,7 @@ func TestSortResults(t *testing.T) {
 		},
 		{
 			title: "perfect matches come first in descending order",
-			order: SortDesc,
+			order: SortOrderDesc,
 			results: []*SearchResult{
 				newSortTestResult("p", "nodeexporter", "nodeexporter", 16),
 				newSortTestResult("p", "node", "node", perfectMatchScore),
@@ -110,7 +110,7 @@ func TestSortResults_sameScoreAndDisplayName(t *testing.T) {
 		newSortTestResult("project-a", "overview-2", "Overview", 5),
 		newSortTestResult("project-a", "overview-1", "Overview", 5),
 	}
-	SortResults(results, SortDesc)
+	SortResults(results, SortOrderDesc)
 
 	var keys []string
 	for _, r := range results {
@@ -121,10 +121,26 @@ func TestSortResults_sameScoreAndDisplayName(t *testing.T) {
 }
 
 func TestSortOrderValidate(t *testing.T) {
-	for _, order := range []SortOrder{"", SortAsc, SortDesc} {
-		assert.NoError(t, order.Validate(), order)
+	testsCases := []struct {
+		title       string
+		order       SortOrder
+		expectedErr bool
+	}{
+		{title: "none", order: SortOrderNone},
+		{title: "ascending", order: SortOrderAsc},
+		{title: "descending", order: SortOrderDesc},
+		{title: "upper case", order: "ASC", expectedErr: true},
+		{title: "full word", order: "ascending", expectedErr: true},
+		{title: "unknown", order: "score", expectedErr: true},
 	}
-	for _, order := range []SortOrder{"ASC", "ascending", "score"} {
-		assert.Error(t, order.Validate(), order)
+	for _, tc := range testsCases {
+		t.Run(tc.title, func(t *testing.T) {
+			err := tc.order.Validate()
+			if tc.expectedErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
 	}
 }
