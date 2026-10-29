@@ -55,6 +55,12 @@ function countByProject(resources: Array<{ metadata: { project: string } }> | un
   return counts;
 }
 
+// isLoading is false while cached data is refetched, e.g. after an invalidation. isFetching is checked too,
+// so that "No records found" is not displayed before the latest data is received.
+function isPending(query: { isLoading: boolean; isFetching: boolean }): boolean {
+  return query.isLoading || query.isFetching;
+}
+
 function useFilteredList(query: string, list: SearchItem[] | undefined): Array<KVSearchResult<SearchItem>> {
   return useMemo(() => (list ? kvSearch.filter(query, list) : []), [query, list]);
 }
@@ -68,6 +74,8 @@ function useFilteredList(query: string, list: SearchItem[] | undefined): Array<K
 export function useSearchResults(query: string, activeTypes: Set<ResourceType>, enabled: boolean): SearchResults {
   const isSearching = enabled && query.trim().length > 0;
   const isActive = (type: ResourceType): boolean => isSearching && activeTypes.has(type);
+  const isDashboardsActive = isActive('dashboards');
+  const isProjectsActive = isActive('projects');
   const isProjectDatasourceEnabled = useIsProjectDatasourceEnabled();
   const importantDashboardGroups = useImportantDashboardGroups();
   const shouldNormalizeResourceNames = useShouldNormalizeResourceNames();
@@ -76,48 +84,59 @@ export function useSearchResults(query: string, activeTypes: Set<ResourceType>, 
   const dashboards = useDashboardList({
     metadataOnly: true,
     staleTime: Infinity,
-    enabled: isActive('dashboards') || isActive('projects'),
+    enabled: isDashboardsActive || isProjectsActive,
   });
-  const projects = useProjectList({ staleTime: Infinity, enabled: isActive('projects') });
+  const projects = useProjectList({ staleTime: Infinity, enabled: isProjectsActive });
   const globalDatasources = useGlobalDatasourceList({ staleTime: Infinity, enabled: isActive('globalDatasources') });
   const datasources = useDatasourceList({
     staleTime: Infinity,
-    enabled: isActive('datasources') || (isActive('projects') && isProjectDatasourceEnabled),
+    enabled: isActive('datasources') || (isProjectsActive && isProjectDatasourceEnabled),
   });
 
-  const highlightedDashboards = useMemo((): HighlightedDashboardResource[] => {
+  // The lists are shared with other pages (e.g. the home page loads the dashboards), and the search bar is always
+  // mounted: they are only processed when they are searched.
+  const highlightedDashboards = useMemo((): HighlightedDashboardResource[] | undefined => {
+    if (!isDashboardsActive || !dashboards.data) {
+      return undefined;
+    }
     const importantDashboardKeys = new Set(
-      resolveImportantDashboardList(dashboards.data ?? [], importantDashboardGroups, shouldNormalizeResourceNames).map(
+      resolveImportantDashboardList(dashboards.data, importantDashboardGroups, shouldNormalizeResourceNames).map(
         ({ metadata }) => `${metadata.project}/${metadata.name}`,
       ),
     );
-    return (dashboards.data ?? []).map((dashboard) => ({
+    return dashboards.data.map((dashboard) => ({
       ...dashboard,
       highlight: importantDashboardKeys.has(`${dashboard.metadata.project}/${dashboard.metadata.name}`),
     }));
-  }, [dashboards.data, importantDashboardGroups, shouldNormalizeResourceNames]);
+  }, [isDashboardsActive, dashboards.data, importantDashboardGroups, shouldNormalizeResourceNames]);
 
-  const dashboardResults = useFilteredList(query, isActive('dashboards') ? highlightedDashboards : undefined);
-  const projectResults = useFilteredList(query, isActive('projects') ? projects.data : undefined);
+  const dashboardResults = useFilteredList(query, highlightedDashboards);
+  const projectResults = useFilteredList(query, isProjectsActive ? projects.data : undefined);
   const globalDatasourceResults = useFilteredList(
     query,
     isActive('globalDatasources') ? globalDatasources.data : undefined,
   );
   const datasourceResults = useFilteredList(query, isActive('datasources') ? datasources.data : undefined);
 
-  const dashboardCounts = useMemo(() => countByProject(dashboards.data), [dashboards.data]);
-  const datasourceCounts = useMemo(() => countByProject(datasources.data), [datasources.data]);
+  const dashboardCounts = useMemo(
+    () => countByProject(isProjectsActive ? dashboards.data : undefined),
+    [isProjectsActive, dashboards.data],
+  );
+  const datasourceCounts = useMemo(
+    () => countByProject(isProjectsActive ? datasources.data : undefined),
+    [isProjectsActive, datasources.data],
+  );
 
   const sections: SearchResultSection[] = [
-    { type: 'dashboards', results: dashboardResults, isLoading: dashboards.isLoading, error: dashboards.error },
-    { type: 'projects', results: projectResults, isLoading: projects.isLoading, error: projects.error },
+    { type: 'dashboards', results: dashboardResults, isLoading: isPending(dashboards), error: dashboards.error },
+    { type: 'projects', results: projectResults, isLoading: isPending(projects), error: projects.error },
     {
       type: 'globalDatasources',
       results: globalDatasourceResults,
-      isLoading: globalDatasources.isLoading,
+      isLoading: isPending(globalDatasources),
       error: globalDatasources.error,
     },
-    { type: 'datasources', results: datasourceResults, isLoading: datasources.isLoading, error: datasources.error },
+    { type: 'datasources', results: datasourceResults, isLoading: isPending(datasources), error: datasources.error },
   ];
 
   return { sections: sections.filter(({ type }) => isActive(type)), dashboardCounts, datasourceCounts };

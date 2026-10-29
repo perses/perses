@@ -23,7 +23,7 @@ import type * as Authorization from '../../../context/Authorization';
 import { ConfigContextProvider } from '../../../context/Config';
 import { useConfig } from '../../../model/config-client';
 import type * as ConfigClient from '../../../model/config-client';
-import { useDashboardList } from '../../../model/dashboard-client';
+import { resolveImportantDashboardList, useDashboardList } from '../../../model/dashboard-client';
 import type * as DashboardClient from '../../../model/dashboard-client';
 import type * as DatasourceClient from '../../../model/datasource-client';
 import { useDatasourceList } from '../../../model/datasource-client';
@@ -58,7 +58,11 @@ vi.mock('../../../model/config-client', async (importOriginal) => {
 
 vi.mock('../../../model/dashboard-client', async (importOriginal) => {
   const actual = await importOriginal<typeof DashboardClient>();
-  return { ...actual, useDashboardList: vi.fn() };
+  return {
+    ...actual,
+    useDashboardList: vi.fn(),
+    resolveImportantDashboardList: vi.fn(actual.resolveImportantDashboardList),
+  };
 });
 
 vi.mock('../../../model/datasource-client', async (importOriginal) => {
@@ -313,6 +317,32 @@ describe('SearchBar', () => {
       fireEvent.change(screen.getByRole('textbox'), { target: { value: 'XYZ' } });
 
       expect(screen.queryByTestId(TEST_IDS.noRecordContainer)).not.toBeInTheDocument();
+    });
+
+    it('should not show no records found while a list is refetched', () => {
+      // e.g. after a dashboard has been created, the cached list is refetched when the search is opened.
+      vi.mocked(useDashboardList).mockReturnValue({
+        data: DASHBOARDS_RESOURCES,
+        isLoading: false,
+        isFetching: true,
+      } as ReturnType<typeof useDashboardList>);
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'XYZ' } });
+
+      expect(screen.queryByTestId(TEST_IDS.noRecordContainer)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('closed search', () => {
+    it('should not process the dashboards loaded by other pages while the search is closed', () => {
+      vi.mocked(resolveImportantDashboardList).mockClear();
+      rerenderSearchBar();
+      expect(resolveImportantDashboardList).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'DASH' } });
+      expect(resolveImportantDashboardList).toHaveBeenCalled();
     });
   });
 
