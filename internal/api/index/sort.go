@@ -26,18 +26,22 @@ import (
 type SortOrder string
 
 const (
-	// SortAsc sorts the results from the lowest to the highest score.
-	SortAsc SortOrder = "asc"
-	// SortDesc sorts the results from the highest to the lowest score, i.e. the best matches first.
-	SortDesc SortOrder = "desc"
+	// SortOrderNone keeps the results in the order they are found.
+	SortOrderNone SortOrder = ""
+	// SortOrderAsc sorts the results from the lowest to the highest score.
+	SortOrderAsc SortOrder = "asc"
+	// SortOrderDesc sorts the results from the highest to the lowest score, i.e. the best matches first.
+	SortOrderDesc SortOrder = "desc"
 )
 
+// Validate returns an error when the sort order is not one of the supported values.
+// It is used to validate the value provided by the user in the query parameter.
 func (s SortOrder) Validate() error {
 	switch s {
-	case "", SortAsc, SortDesc:
+	case SortOrderNone, SortOrderAsc, SortOrderDesc:
 		return nil
 	default:
-		return fmt.Errorf("invalid sort order %q, it must be either %q or %q", s, SortAsc, SortDesc)
+		return fmt.Errorf("invalid sort order %q, it must be either %q or %q", s, SortOrderAsc, SortOrderDesc)
 	}
 }
 
@@ -53,7 +57,7 @@ type sortKey struct {
 // The results with the same score are sorted alphabetically by display name (case-insensitive), whatever the order,
 // then by project and name so that the order is always the same.
 func SortResults(results []*SearchResult, order SortOrder) {
-	if order == "" || len(results) < 2 {
+	if order == SortOrderNone || len(results) < 2 {
 		return
 	}
 	keys := make([]sortKey, len(results))
@@ -67,7 +71,7 @@ func SortResults(results []*SearchResult, order SortOrder) {
 	}
 	slices.SortFunc(keys, func(a, b sortKey) int {
 		var c int
-		if order == SortDesc {
+		if order == SortOrderDesc {
 			c = cmp.Compare(b.result.Score, a.result.Score)
 		} else {
 			c = cmp.Compare(a.result.Score, b.result.Score)
