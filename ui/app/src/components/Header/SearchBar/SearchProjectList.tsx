@@ -11,15 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { ReactElement } from 'react';
 
+import { useDashboardList } from '../../../model/dashboard-client';
+import { useDatasourceList } from '../../../model/datasource-client';
 import { useProjectList } from '../../../model/project-client';
 import type { ResourceListProps } from './model';
 import { SearchList } from './SearchList';
 
+function countByProject(resources: Array<{ metadata: { project: string } }> | undefined): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const { metadata } of resources ?? []) {
+    counts.set(metadata.project, (counts.get(metadata.project) ?? 0) + 1);
+  }
+  return counts;
+}
+
 export function SearchProjectList(props: ResourceListProps): ReactElement | null {
   const projectsQueryResult = useProjectList({ refetchOnMount: false });
+  // Dashboards and datasources are only needed to display the counts next to each project.
+  const { data: dashboardList } = useDashboardList({ metadataOnly: true, staleTime: Infinity });
+  const { data: datasourceList } = useDatasourceList({ staleTime: Infinity });
+  const dashboardCounts = useMemo(() => countByProject(dashboardList), [dashboardList]);
+  const datasourceCounts = useMemo(() => countByProject(datasourceList), [datasourceList]);
   const { query, handleClose, isResources } = props;
   const handleIsResource = useCallback(
     (isAvailable: boolean): void => isResources?.('projects', isAvailable),
@@ -32,6 +47,8 @@ export function SearchProjectList(props: ResourceListProps): ReactElement | null
       query={query}
       handleClose={handleClose}
       isResource={handleIsResource}
+      dashboardCounts={dashboardCounts}
+      datasourceCounts={datasourceCounts}
     />
   );
 }

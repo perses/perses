@@ -42,6 +42,9 @@ export interface SearchListProps {
   query: string;
   handleClose: () => void;
   isResource?: (isAvailable: boolean) => void;
+  // Number of dashboards and datasources per project, displayed next to the project results.
+  dashboardCounts?: Map<string, number>;
+  datasourceCounts?: Map<string, number>;
 }
 
 export interface SearchItemProps {

@@ -19,8 +19,6 @@ import { isProjectMetadata } from '@perses-dev/client';
 import type { ReactElement } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useDashboardList } from '../../../model/dashboard-client';
-import { useDatasourceList } from '../../../model/datasource-client';
 import { getTagDisplayValues } from './model';
 import type { HighlightedDashboardResource, SearchItem, SearchListProps } from './model';
 import { SearchDashboardItem } from './SearchDashboardItem';
@@ -85,31 +83,10 @@ const STATIC_SX = {
 };
 
 export function SearchList(props: SearchListProps): ReactElement | null {
-  const { list, query, handleClose, isResource } = props;
+  const { list, query, handleClose, isResource, dashboardCounts, datasourceCounts } = props;
   const [pagination, setPagination] = useState<PaginationState>({ list, query, size: SIZE_LIST });
   const currentSizeList = pagination.list === list && pagination.query === query ? pagination.size : SIZE_LIST;
   const kvSearch = useMemo(() => new KVSearch<Resource>(kvSearchConfig), []);
-
-  const { data: dataSourceList } = useDatasourceList({ staleTime: Infinity });
-  const { data: dashboardList } = useDashboardList({ metadataOnly: true, staleTime: Infinity });
-
-  const datasourceCounts = useMemo((): Map<string, number> => {
-    const map = new Map<string, number>();
-    for (const ds of dataSourceList ?? []) {
-      const project = ds.metadata.project;
-      map.set(project, (map.get(project) ?? 0) + 1);
-    }
-    return map;
-  }, [dataSourceList]);
-
-  const dashboardCount = useMemo((): Map<string, number> => {
-    const map = new Map<string, number>();
-    for (const dashboard of dashboardList ?? []) {
-      const project = dashboard.metadata.project;
-      map.set(project, (map.get(project) ?? 0) + 1);
-    }
-    return map;
-  }, [dashboardList]);
 
   const filteredList: Array<KVSearchResult<SearchItem>> = useMemo(() => {
     return query ? kvSearch.filter(query, list) : [];
@@ -169,8 +146,8 @@ export function SearchList(props: SearchListProps): ReactElement | null {
                 handleClose={handleClose}
                 key={`${buildBoxSearchKey(search.original)}`}
                 resource={search.original as ProjectResource}
-                datasourceCount={datasourceCounts.get((search.original as ProjectResource).metadata.name) ?? 0}
-                dashboardCount={dashboardCount.get((search.original as ProjectResource).metadata.name) ?? 0}
+                datasourceCount={datasourceCounts?.get((search.original as ProjectResource).metadata.name) ?? 0}
+                dashboardCount={dashboardCounts?.get((search.original as ProjectResource).metadata.name) ?? 0}
               />
             );
           })}
