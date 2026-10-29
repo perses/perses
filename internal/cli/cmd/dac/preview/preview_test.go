@@ -200,6 +200,32 @@ func TestPreviewCMD(t *testing.T) {
 			ExpectedMessage: `[{"project":"perses","dashboard":"Demo","preview":"http://localhost:8080/projects/perses/ephemeraldashboards/Demo","current":"http://localhost:8080/projects/perses/dashboards/Demo"},{"project":"perses","dashboard":"Benchmark","preview":"http://localhost:8080/projects/perses/ephemeraldashboards/Benchmark","current":"http://localhost:8080/projects/perses/dashboards/Benchmark"},{"project":"testing","dashboard":"PanelGroups","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/PanelGroups","current":"http://localhost:8080/projects/testing/dashboards/PanelGroups"},{"project":"testing","dashboard":"Panels","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/Panels","current":"http://localhost:8080/projects/testing/dashboards/Panels"},{"project":"testing","dashboard":"Variables","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/Variables","current":"http://localhost:8080/projects/testing/dashboards/Variables"},{"project":"testing","dashboard":"MarkdownPanel","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/MarkdownPanel","current":"http://localhost:8080/projects/testing/dashboards/MarkdownPanel"},{"project":"testing","dashboard":"TimeSeriesChartPanel","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/TimeSeriesChartPanel","current":"http://localhost:8080/projects/testing/dashboards/TimeSeriesChartPanel"},{"project":"testing","dashboard":"GaugeChartPanel","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/GaugeChartPanel","current":"http://localhost:8080/projects/testing/dashboards/GaugeChartPanel"},{"project":"testing","dashboard":"StatChartPanel","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/StatChartPanel","current":"http://localhost:8080/projects/testing/dashboards/StatChartPanel"},{"project":"testing","dashboard":"DuplicatePanels","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/DuplicatePanels","current":"http://localhost:8080/projects/testing/dashboards/DuplicatePanels"},{"project":"testing","dashboard":"EditJson","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/EditJson","current":"http://localhost:8080/projects/testing/dashboards/EditJson"},{"project":"testing","dashboard":"Defaults","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/Defaults","current":"http://localhost:8080/projects/testing/dashboards/Defaults"},{"project":"testing","dashboard":"TimeSeriesChartLegends","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/TimeSeriesChartLegends","current":"http://localhost:8080/projects/testing/dashboards/TimeSeriesChartLegends"},{"project":"testing","dashboard":"table","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/table","current":"http://localhost:8080/projects/testing/dashboards/table"},{"project":"perses","dashboard":"NodeExporter","preview":"http://localhost:8080/projects/perses/ephemeraldashboards/NodeExporter","current":"http://localhost:8080/projects/perses/dashboards/NodeExporter"},{"project":"testing","dashboard":"tracing","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/tracing","current":"http://localhost:8080/projects/testing/dashboards/tracing"},{"project":"perses","dashboard":"ThreeSignals","preview":"http://localhost:8080/projects/perses/ephemeraldashboards/ThreeSignals","current":"http://localhost:8080/projects/perses/dashboards/ThreeSignals"}]
 `,
 		},
+		{
+			Title:           "preview a dashboard without project in the project of the config",
+			Args:            []string{"-f", "../../../test/sample_resources/dashboard_without_project.json"},
+			APIClient:       fakeapi.New(),
+			Config:          config.Config{Project: "perses"},
+			IsErrorExpected: false,
+			ExpectedMessage: `- project: perses
+  dashboard: node_exporter
+  preview: http://localhost:8080/projects/perses/ephemeraldashboards/node_exporter
+  current: http://localhost:8080/projects/perses/dashboards/node_exporter
+
+`,
+		},
+		{
+			Title:           "preview a dashboard without project in the project of the flag",
+			Args:            []string{"-f", "../../../test/sample_resources/dashboard_without_project.json", "--project", "testing"},
+			APIClient:       fakeapi.New(),
+			Config:          config.Config{Project: "perses"},
+			IsErrorExpected: false,
+			ExpectedMessage: `- project: testing
+  dashboard: node_exporter
+  preview: http://localhost:8080/projects/testing/ephemeraldashboards/node_exporter
+  current: http://localhost:8080/projects/testing/dashboards/node_exporter
+
+`,
+		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
 }
