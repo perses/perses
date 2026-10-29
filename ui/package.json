@@ -59,5 +59,8 @@
     "typescript": "7.0.2",
     "vitest": "^4.1.11"
   },
-  "packageManager": "npm@11.17.0"
+  "packageManager": "npm@11.17.0",
+  "overrides": {
+    "@tanstack/react-query": "^5.105.0"
+  }
 }

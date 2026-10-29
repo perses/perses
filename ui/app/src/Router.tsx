@@ -13,7 +13,7 @@
 
 import { SnackbarProvider } from '@perses-dev/components';
 import { HotkeysProvider } from '@perses-dev/dashboards';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { keepPreviousData, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 import { lazy, Suspense } from 'react';
 import { CookiesProvider } from 'react-cookie';
@@ -75,7 +75,7 @@ const queryClient = new QueryClient({
       // This sets the default to 0 retries.
       // If needed, the number of retries can be overridden in individual useQuery calls.
       retry: 0,
-      keepPreviousData: true,
+      placeholderData: keepPreviousData,
     },
   },
 });
