@@ -381,9 +381,49 @@ describe('SearchBar', () => {
       fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
       fireEvent.change(screen.getByRole('textbox'), { target: { value: 'GDS' } });
 
-      expect(screen.getByRole('button', { name: 'Global Datasources' })).toHaveAttribute('aria-disabled', 'true');
-      expect(screen.getByLabelText("You don't have permission to read global datasources")).toBeInTheDocument();
+      const chip = screen.getByRole('button', { name: 'Global Datasources' });
+      expect(chip).toHaveAttribute('aria-disabled', 'true');
+      expect(chip).toHaveAccessibleDescription("You don't have permission to read global datasources");
       expect(useGlobalDatasourceList).not.toHaveBeenCalled();
+    });
+
+    it('should let keyboard users focus an unavailable filter to display its explanation', () => {
+      vi.mocked(useHasPermission).mockImplementation((_action, _project, scope) => scope !== 'GlobalDatasource');
+      rerenderSearchBar();
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      const chip = screen.getByRole('button', { name: 'Global Datasources' });
+
+      // The chip must be reachable with the Tab key, not only focusable programmatically.
+      expect(chip.tabIndex).toBe(0);
+      chip.focus();
+      expect(chip).toHaveFocus();
+      fireEvent.click(chip);
+      expect(chip).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    it('should search every available type when none of the selected types is available anymore', () => {
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      for (const name of ['Dashboards', 'Projects', 'Datasources']) {
+        fireEvent.click(screen.getByRole('button', { name }));
+      }
+      expect(screen.getByRole('button', { name: 'Global Datasources' })).toHaveAttribute('aria-pressed', 'true');
+
+      // The permission to read the global datasources is removed while only them are selected.
+      vi.mocked(useHasPermission).mockImplementation((_action, _project, scope) => scope !== 'GlobalDatasource');
+      rerenderSearchBar();
+
+      for (const name of ['Dashboards', 'Projects', 'Datasources']) {
+        expect(screen.getByRole('button', { name })).toHaveAttribute('aria-pressed', 'true');
+      }
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'DASH' } });
+      expect(screen.getByTestId(`${DASHBOARD_ITEM_DATA_TEST_IDS.dashboardRowName}-DASH1`)).toBeInTheDocument();
+
+      // Deselecting a type only deselects this one.
+      fireEvent.click(screen.getByRole('button', { name: 'Dashboards' }));
+      expect(screen.getByRole('button', { name: 'Dashboards' })).toHaveAttribute('aria-pressed', 'false');
+      expect(screen.getByRole('button', { name: 'Projects' })).toHaveAttribute('aria-pressed', 'true');
+      expect(screen.getByRole('button', { name: 'Datasources' })).toHaveAttribute('aria-pressed', 'true');
     });
 
     it('should not search datasources when they are disabled', () => {
@@ -401,10 +441,16 @@ describe('SearchBar', () => {
       fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
       fireEvent.change(screen.getByRole('textbox'), { target: { value: 'DS' } });
 
-      expect(screen.getByRole('button', { name: 'Global Datasources' })).toHaveAttribute('aria-disabled', 'true');
-      expect(screen.getByRole('button', { name: 'Datasources' })).toHaveAttribute('aria-disabled', 'true');
-      expect(screen.getByLabelText('Global datasources are disabled in the server configuration')).toBeInTheDocument();
-      expect(screen.getByLabelText('Project datasources are disabled in the server configuration')).toBeInTheDocument();
+      const globalDatasourcesChip = screen.getByRole('button', { name: 'Global Datasources' });
+      const datasourcesChip = screen.getByRole('button', { name: 'Datasources' });
+      expect(globalDatasourcesChip).toHaveAttribute('aria-disabled', 'true');
+      expect(globalDatasourcesChip).toHaveAccessibleDescription(
+        'Global datasources are disabled in the server configuration',
+      );
+      expect(datasourcesChip).toHaveAttribute('aria-disabled', 'true');
+      expect(datasourcesChip).toHaveAccessibleDescription(
+        'Project datasources are disabled in the server configuration',
+      );
       expect(useGlobalDatasourceList).not.toHaveBeenCalled();
       expect(vi.mocked(useDatasourceList).mock.calls.every(([options]) => options?.enabled === false)).toBe(true);
     });

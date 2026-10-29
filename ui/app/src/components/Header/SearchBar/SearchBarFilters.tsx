@@ -59,6 +59,20 @@ const STATIC_SX = {
       color: 'inherit',
     },
   },
+  unavailableFilter: {
+    height: 34,
+    borderRadius: '18px',
+    cursor: 'not-allowed',
+    color: 'text.disabled',
+    borderColor: 'divider',
+    '& .MuiChip-icon': {
+      color: 'inherit',
+    },
+    // Same focus style as the other filters, as the chip root removes the outline.
+    '&:focus-visible': {
+      backgroundColor: 'action.focus',
+    },
+  },
   labelWrapper: {
     flexShrink: 0,
     minHeight: 34,
@@ -117,9 +131,15 @@ export function useResourceTypeFilters(): ResourceTypeFilters {
     if (!isProjectDatasourceEnabled) {
       disabledReasons.datasources = 'Project datasources are disabled in the server configuration';
     }
+    // The selected types can all become unavailable, e.g. when the permissions change.
+    // In that case, every available type is searched rather than none.
+    const hasAvailableSelectedType = ALL_RESOURCE_TYPES.some(
+      (type) => !disabledReasons[type] && selectedTypes.has(type),
+    );
     return ALL_RESOURCE_TYPES.map((type) => {
       const disabledReason = disabledReasons[type];
-      return { type, disabledReason, active: !disabledReason && selectedTypes.has(type) };
+      const active = !disabledReason && (selectedTypes.has(type) || !hasAvailableSelectedType);
+      return { type, disabledReason, active };
     });
   }, [isGlobalDatasourceEnabled, canReadGlobalDatasources, isProjectDatasourceEnabled, selectedTypes]);
 
@@ -127,13 +147,17 @@ export function useResourceTypeFilters(): ResourceTypeFilters {
 
   const toggleType = useCallback(
     (type: ResourceType): void => {
+      const isActive = activeTypes.has(type);
       // At least one resource type must remain active.
-      if (activeTypes.has(type) && activeTypes.size === 1) {
+      if (isActive && activeTypes.size === 1) {
         return;
       }
       setSelectedTypes((prev) => {
-        const next = new Set(prev);
-        if (!next.delete(type)) {
+        // The active types are added first, as they differ from the selected ones when none of them is available.
+        const next = new Set([...prev, ...activeTypes]);
+        if (isActive) {
+          next.delete(type);
+        } else {
           next.add(type);
         }
         return next;
@@ -163,12 +187,29 @@ export const SearchBarFilters = (props: SearchBarFiltersProps): ReactElement => 
       </Stack>
       <Stack direction="row" spacing={1} sx={STATIC_SX.filtersWrapper} flexWrap="wrap" gap={1}>
         {filters.map(({ type, active, disabledReason }) => {
-          const chip = (
+          if (disabledReason) {
+            // A disabled chip can't receive the focus, so keyboard users couldn't display the tooltip.
+            // The unavailable filters are rendered as non-clickable chips, using a native button marked as disabled instead.
+            return (
+              <Tooltip key={type} title={disabledReason} describeChild>
+                <Chip
+                  component="button"
+                  type="button"
+                  aria-disabled
+                  aria-pressed={false}
+                  icon={RESOURCE_ICON[type]}
+                  label={ALL_RESOURCE_TYPES_TITLES[type]}
+                  variant="outlined"
+                  sx={STATIC_SX.unavailableFilter}
+                />
+              </Tooltip>
+            );
+          }
+          return (
             <Chip
               aria-pressed={active}
               key={type}
               icon={RESOURCE_ICON[type]}
-              disabled={!!disabledReason}
               // oxlint-disable-next-line react-perf/jsx-no-new-function-as-prop
               onClick={(): void => onToggle(type)}
               label={
@@ -181,14 +222,6 @@ export const SearchBarFilters = (props: SearchBarFiltersProps): ReactElement => 
               variant="outlined"
               sx={active ? STATIC_SX.activeFilter : STATIC_SX.deactivateFilter}
             />
-          );
-          // A disabled chip doesn't fire the mouse events the tooltip relies on, hence the wrapper.
-          return disabledReason ? (
-            <Tooltip key={type} title={disabledReason}>
-              <span>{chip}</span>
-            </Tooltip>
-          ) : (
-            chip
           );
         })}
       </Stack>
