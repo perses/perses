@@ -102,6 +102,7 @@
         - Migrate: api/migrate.md
         - Metrics: api/metrics.md
         - Plugins: api/plugins.md
+        - Search: api/search.md
         - Validate: api/validate.md
     - Embedding Perses Panels: embedding-panels.md
     - UI package architecture: ui-package-architecture.md

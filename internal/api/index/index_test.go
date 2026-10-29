@@ -228,6 +228,17 @@ func TestClientAdd(t *testing.T) {
 	}
 }
 
+func TestClientAdd_unsupportedKeyOnlyReturnsTheKey(t *testing.T) {
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.tags|@reverse"}}}, newDisabledAuthz(t), nil).(*client)
+	require.NoError(t, c.add([]byte(pathTestDocument)))
+
+	fields := c.dashboards.idx["myproject"]["mydashboard"].fields
+	assert.ElementsMatch(t, []indexedField{
+		{key: "metadata.tags|@reverse", value: "kubernetes"},
+		{key: "metadata.tags|@reverse", value: "production"},
+	}, fields)
+}
+
 func Test_client_add_multipleProjectsAreIndexedSeparately(t *testing.T) {
 	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name"}}}, newDisabledAuthz(t), nil).(*client)
 

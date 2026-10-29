@@ -99,7 +99,8 @@ func (idx *index[T]) match(text string) *SearchResult {
 			result.Metadata = idx.metadata
 			result.DisplayName = idx.displayName
 			result.Key = field.key
-			result.Path = field.path
+			// The path is copied, so that the result doesn't share the memory of the index.
+			result.Path = slices.Clone(field.path)
 			return result
 		}
 	}
@@ -116,9 +117,9 @@ type indexedKey struct {
 func newProjectIndexer(indexedKeys []string, scope role.Scope, authz authorization.Authorization, matcher *matcher) *projectIndexer {
 	keys := make([]indexedKey, 0, len(indexedKeys))
 	for _, k := range indexedKeys {
-		steps, ok := compileKey(k)
-		if !ok {
-			logrus.Warnf("the path of the values indexed with the key %q can't be determined, the search results will only contain the key", k)
+		steps, err := compileKey(k)
+		if err != nil {
+			logrus.WithError(err).Warnf("the path of the values indexed with the key %q can't be determined, the search results will only contain the key", k)
 		}
 		keys = append(keys, indexedKey{key: k, steps: steps})
 	}
