@@ -31,6 +31,9 @@ import { useGlobalDatasourceList } from '../../../model/global-datasource-client
 import type * as GlobalDatasourceClient from '../../../model/global-datasource-client';
 import type * as ProjectClient from '../../../model/project-client';
 import { useProjectList } from '../../../model/project-client';
+import type * as SearchClient from '../../../model/search-client';
+import { useSearchDashboards } from '../../../model/search-client';
+import type { SearchProjectResource } from '../../../model/search-client';
 import { ALL_RESOURCE_TYPES_TITLES } from './model';
 import { SEARCH_BAR_DATA_TEST_ID as TEST_IDS, SearchBar as SearchBarInput } from './SearchBar';
 import { DASHBOARD_ITEM_DATA_TEST_IDS } from './SearchDashboardItem';
@@ -80,6 +83,32 @@ vi.mock('../../../model/project-client', async (importOriginal) => {
   return { ...actual, useProjectList: vi.fn() };
 });
 
+vi.mock('../../../model/search-client', async (importOriginal) => {
+  const actual = await importOriginal<typeof SearchClient>();
+  return { ...actual, useSearchDashboards: vi.fn() };
+});
+
+// Mocks the search API: returns the dashboards whose name contains the query.
+const searchDashboards = (query: string): SearchProjectResource[] =>
+  DASHBOARDS_RESOURCES.filter(({ metadata }) => metadata.name.toLowerCase().includes(query.toLowerCase())).map(
+    ({ metadata }) => ({ metadata, displayName: metadata.name, original: metadata.name, intervals: [], score: 1 }),
+  );
+
+const mockSearchDashboardsResults = (data: SearchProjectResource[]): void => {
+  vi.mocked(useSearchDashboards).mockReturnValue({
+    data,
+    isLoading: false,
+    isFetching: false,
+    error: null,
+  } as unknown as ReturnType<typeof useSearchDashboards>);
+};
+
+// The hooks are always called: a list is only fetched when its hook is called with `enabled: true`.
+const expectNeverFetched = (hook: unknown): void => {
+  const { calls } = vi.mocked(hook as (...args: unknown[]) => unknown).mock;
+  expect(calls.flat()).not.toContainEqual(expect.objectContaining({ enabled: true }));
+};
+
 const SearchBar = (): ReactElement => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -97,11 +126,6 @@ const SearchBar = (): ReactElement => {
       </QueryClientProvider>
     </MemoryRouter>
   );
-};
-
-// The hooks are always called: a list is only fetched when its hook is called with `enabled: true`.
-const expectNeverFetched = (hook: unknown): void => {
-  expect(hook).not.toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
 };
 
 describe('SearchBar', () => {
@@ -138,6 +162,16 @@ describe('SearchBar', () => {
       isLoading: false,
       isSuccess: true,
     } as ReturnType<typeof useProjectList>);
+
+    vi.mocked(useSearchDashboards).mockImplementation(
+      (_project, query) =>
+        ({
+          data: searchDashboards(query ?? ''),
+          isLoading: false,
+          isFetching: false,
+          error: null,
+        }) as unknown as ReturnType<typeof useSearchDashboards>,
+    );
 
     const { rerender } = render(<SearchBar />);
     rerenderSearchBar = (): void => rerender(<SearchBar />);
@@ -319,13 +353,14 @@ describe('SearchBar', () => {
       expect(screen.queryByTestId(TEST_IDS.noRecordContainer)).not.toBeInTheDocument();
     });
 
-    it('should not show no records found while a list is refetched', () => {
-      // e.g. after a dashboard has been created, the cached list is refetched when the search is opened.
-      vi.mocked(useDashboardList).mockReturnValue({
-        data: DASHBOARDS_RESOURCES,
+    it('should not show no records found while a search is refetched', () => {
+      // e.g. after a dashboard has been created, the cached results are refetched when the search is opened.
+      vi.mocked(useSearchDashboards).mockReturnValue({
+        data: [],
         isLoading: false,
         isFetching: true,
-      } as ReturnType<typeof useDashboardList>);
+        error: null,
+      } as unknown as ReturnType<typeof useSearchDashboards>);
 
       fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
       fireEvent.change(screen.getByRole('textbox'), { target: { value: 'XYZ' } });
@@ -373,6 +408,7 @@ describe('SearchBar', () => {
     });
 
     it('should not fetch dashboards and datasources when only global datasources are searched', () => {
+      vi.mocked(useSearchDashboards).mockClear();
       vi.mocked(useDashboardList).mockClear();
       vi.mocked(useDatasourceList).mockClear();
 
@@ -383,25 +419,81 @@ describe('SearchBar', () => {
       fireEvent.change(screen.getByRole('textbox'), { target: { value: 'GDS' } });
 
       expect(screen.getByTestId(`${GLOBAL_DATASOURCE_RESOURCE_TEST_IDS.dsName}-GDS1`)).toBeInTheDocument();
+      expectNeverFetched(useSearchDashboards);
       expectNeverFetched(useDashboardList);
       expectNeverFetched(useDatasourceList);
     });
   });
 
   describe('fetching', () => {
+    const hooks = [useSearchDashboards, useDashboardList, useProjectList, useGlobalDatasourceList, useDatasourceList];
+
     it('should not fetch anything until a query is typed', () => {
-      for (const hook of [useDashboardList, useProjectList, useGlobalDatasourceList, useDatasourceList]) {
+      for (const hook of hooks) {
         vi.mocked(hook).mockClear();
       }
       rerenderSearchBar();
       fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
 
-      for (const hook of [useDashboardList, useProjectList, useGlobalDatasourceList, useDatasourceList]) {
+      for (const hook of hooks) {
         expectNeverFetched(hook);
       }
 
       fireEvent.change(screen.getByRole('textbox'), { target: { value: 'DASH' } });
-      expect(useDashboardList).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
+      expect(useSearchDashboards).toHaveBeenCalledWith(undefined, 'DASH', expect.objectContaining({ enabled: true }));
+    });
+  });
+
+  describe('dashboard search', () => {
+    it('should display the display name of the dashboards', () => {
+      mockSearchDashboardsResults([
+        {
+          metadata: { name: 'node-exporter', project: 'P1' },
+          displayName: 'Node Exporter Full',
+          original: 'Node Exporter Full',
+          intervals: [{ from: 0, to: 3 }],
+          score: 16,
+        },
+      ]);
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'node' } });
+
+      expect(screen.getByTestId(`${DASHBOARD_ITEM_DATA_TEST_IDS.dashboardRowName}-node-exporter`)).toHaveTextContent(
+        'Node Exporter Full',
+      );
+    });
+
+    it('should sort the dashboards by score', () => {
+      mockSearchDashboardsResults([
+        { metadata: { name: 'low', project: 'P1' }, displayName: 'low', original: 'low', score: 1 },
+        { metadata: { name: 'high', project: 'P1' }, displayName: 'high', original: 'high', score: 10 },
+      ]);
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'o' } });
+
+      const rows = screen.getAllByTestId(new RegExp(`^${DASHBOARD_ITEM_DATA_TEST_IDS.dashboardRowName}-`));
+      expect(rows.map((row) => row.textContent)).toEqual(['high', 'low']);
+    });
+
+    it('should display first the tag matching the query', () => {
+      mockSearchDashboardsResults([
+        {
+          metadata: { name: 'DASH1', project: 'P1', tags: ['alpha', 'beta', 'gamma', 'delta', 'prod'] },
+          displayName: 'DASH1',
+          original: 'prod',
+          intervals: [{ from: 0, to: 3 }],
+          score: 16,
+        },
+      ]);
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'prod' } });
+
+      // Only the first 3 tags are visible, the matching tag being displayed first.
+      expect(screen.getByText('prod')).toBeInTheDocument();
+      expect(screen.queryByText('gamma')).not.toBeInTheDocument();
     });
   });
 
@@ -422,14 +514,13 @@ describe('SearchBar', () => {
       expect(screen.queryByTestId(TEST_IDS.noRecordContainer)).not.toBeInTheDocument();
     });
 
-    it('should display the dashboard error once', () => {
-      const error = new UserFriendlyError('database unavailable', 500);
-      vi.mocked(useDashboardList).mockReturnValue({
+    it('should display the error of the dashboard search', () => {
+      vi.mocked(useSearchDashboards).mockReturnValue({
         data: undefined,
         isLoading: false,
-        isError: true,
-        error,
-      } as ReturnType<typeof useDashboardList>);
+        isFetching: false,
+        error: new UserFriendlyError('database unavailable', 500),
+      } as unknown as ReturnType<typeof useSearchDashboards>);
 
       fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
       fireEvent.change(screen.getByRole('textbox'), { target: { value: 'DASH' } });
