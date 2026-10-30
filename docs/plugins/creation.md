@@ -186,7 +186,7 @@ Build your plugin using the `percli plugin build` command. This will create an a
 
 There are two main types of integrations:
 
-- **Install in a Perses server**: After creating a plugin you can install it in a Perses server, so its available in the Perses UI. When running from Perses UI the plugin is loaded using [module federation](https://rspack.dev/guide/features/module-federation).
+- **Install in a Perses server**: After creating a plugin you can install it in a Perses server, so its available in the Perses UI. When running from Perses UI the plugin is loaded using [module federation](https://rspack.rs/guide/advanced/module-federation).
 - **Embed in a React application**: You can also embed a plugin and parts of the Perses UI in your own React application. This is useful if you want to create a custom dashboard or application that uses Perses plugins. See the [Embedding documentation](../embedding-panels.md) for more details.
 
 ## Examples

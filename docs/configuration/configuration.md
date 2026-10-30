@@ -503,7 +503,7 @@ allow_headers: <string[]> | default = [] # Optional
 allow_credentials: <boolean> | default = false # Optional
 
 # Configure the value of Access-Control-Expose-Headers response header.
-# See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Header
+# See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers
 expose_headers: <string[]> | default = [] # Optional
 
 # Configure how long (in seconds) the results of a preflight request can be cached.
