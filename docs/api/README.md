@@ -57,6 +57,7 @@ Generic placeholders are defined as follows:
 - Other:
     - [Migrate](./migrate.md)
     - [Plugins](./plugins.md)
+    - [Search](./search.md)
     - [Validate](./validate.md)
 
 
