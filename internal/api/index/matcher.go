@@ -66,6 +66,8 @@ type SearchResult struct {
 type Query struct {
 	Project string `query:"project"`
 	Query   string `query:"query"`
+	// Sorted is the order of the results based on their score: asc or desc. When empty, the results are not sorted.
+	Sorted SortOrder `query:"sorted"`
 }
 
 // perfectMatchScore is the score of a perfect match. No other match can get a higher score.

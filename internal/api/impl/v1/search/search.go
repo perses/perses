@@ -45,6 +45,9 @@ func (e *endpoint) Dashboard(ctx echo.Context) error {
 	if err := ctx.Bind(q); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
+	if err := q.Sorted.Validate(); err != nil {
+		return apiInterface.HandleBadRequestError(err.Error())
+	}
 	var result []*index.SearchResult
 	var err error
 	if q.Query == "" {
@@ -55,5 +58,6 @@ func (e *endpoint) Dashboard(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
+	index.SortResults(result, q.Sorted)
 	return ctx.JSON(http.StatusOK, result)
 }
