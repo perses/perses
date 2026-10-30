@@ -1,0 +1,14 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "node_exporter"
+  },
+  "spec": {
+    "display": {
+      "name": "Node Exporter"
+    },
+    "duration": "1h",
+    "panels": {},
+    "layouts": []
+  }
+}
