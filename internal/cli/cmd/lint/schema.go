@@ -52,7 +52,8 @@ func loadDashboardSchema(path string) (*dashboardSchema, error) {
 
 // decodeResources decodes the content of a file with the CUE decoders, so the values are exactly the ones written in the file.
 // Like in the package internal/cli/file, a JSON file or each document of a YAML file contains a resource or a list of resources.
-// The empty YAML documents are decoded as null, so they are skipped like any resource that is not a dashboard.
+// The empty YAML documents are decoded as null, and they are skipped, so the position of each resource is the same as
+// the index of file.Resource.
 func decodeResources(ctx *cue.Context, file string, data []byte, isJSON bool) ([]cue.Value, error) {
 	var exprs []ast.Expr
 	if isJSON {
@@ -79,6 +80,9 @@ func decodeResources(ctx *cue.Context, file string, data []byte, isJSON bool) ([
 		value := ctx.BuildExpr(expr)
 		if value.Err() != nil {
 			return nil, value.Err()
+		}
+		if value.Kind() == cue.NullKind {
+			continue
 		}
 		if value.Kind() != cue.ListKind {
 			resources = append(resources, value)
@@ -109,23 +113,40 @@ type dashboardSchema struct {
 	definition cue.Value
 }
 
-// validate validates the dashboards of the file against the definition #Dashboard.
+// invalidDashboard is a dashboard of a file that doesn't match the complete dashboard schema.
+type invalidDashboard struct {
+	// index is the position of the dashboard in the file, as the index of file.Resource.
+	index   int
+	project string
+	name    string
+	err     error
+}
+
+// validate validates the dashboards of the file against the definition #Dashboard, and returns every invalid dashboard.
 // It is the equivalent of "cue vet -d '#Dashboard' schema.cue dashboard.json".
-func (s *dashboardSchema) validate(file string, data []byte, isJSON bool) error {
+// The error is set when the content of the file cannot be decoded.
+func (s *dashboardSchema) validate(file string, data []byte, isJSON bool) ([]invalidDashboard, error) {
 	resources, err := decodeResources(s.ctx, file, data, isJSON)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	for _, resource := range resources {
+	var invalidDashboards []invalidDashboard
+	for i, resource := range resources {
 		if kind, _ := resource.LookupPath(cue.ParsePath("kind")).String(); kind != string(modelV1.KindDashboard) {
 			continue
 		}
 		if err := s.definition.Unify(resource).Validate(cue.Concrete(true)); err != nil {
+			project, _ := resource.LookupPath(cue.ParsePath("metadata.project")).String()
 			name, _ := resource.LookupPath(cue.ParsePath("metadata.name")).String()
-			// The positions point to the file of the user and to the schema. The errors are not simplified yet,
-			// see https://github.com/perses/perses/issues/4655.
-			return fmt.Errorf("invalid dashboard %q: %s", name, strings.TrimSpace(cueErrors.Details(err, &cueErrors.Config{Cwd: cwd()})))
+			invalidDashboards = append(invalidDashboards, invalidDashboard{
+				index:   i,
+				project: project,
+				name:    name,
+				// The positions point to the file of the user and to the schema. The errors are not simplified yet,
+				// see https://github.com/perses/perses/issues/4655.
+				err: errors.New(strings.TrimSpace(cueErrors.Details(err, &cueErrors.Config{Cwd: cwd()}))),
+			})
 		}
 	}
-	return nil
+	return invalidDashboards, nil
 }
