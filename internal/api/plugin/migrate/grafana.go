@@ -34,11 +34,14 @@ type GridPosition struct {
 }
 
 type GrafanaLink struct {
-	Title       string `json:"title"`
-	URL         string `json:"url"`
-	TargetBlank bool   `json:"targetBlank"`
-	IncludeVars bool   `json:"includeVars"`
-	Tooltip     string `json:"tooltip"`
+	Title       string   `json:"title"`
+	Type        string   `json:"type"`
+	URL         string   `json:"url"`
+	Tags        []string `json:"tags"`
+	TargetBlank bool     `json:"targetBlank"`
+	IncludeVars bool     `json:"includeVars"`
+	KeepTime    bool     `json:"keepTime"`
+	Tooltip     string   `json:"tooltip"`
 }
 
 type Panel struct {
