@@ -36,6 +36,7 @@ import (
 	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 )
@@ -197,11 +198,13 @@ func (h *Proxy) Serve(c echo.Context) error {
 	// The response is served under the Perses origin: the headers that would apply to it are removed or overridden.
 	reverseProxy.ModifyResponse = secureResponse
 	// use a dedicated HTTP transport to avoid any TLS encryption issues
-	var transportErr error
-	reverseProxy.Transport, transportErr = h.getTransport()
+	transport, transportErr := h.getTransport()
 	if transportErr != nil {
 		return transportErr
 	}
+	// Create a span for the request sent to the datasource and propagate the trace context to it.
+	// When the tracing is disabled, the request is sent unchanged (including the trace headers received by Perses).
+	reverseProxy.Transport = otelhttp.NewTransport(transport)
 	// Reverse proxy request.
 	reverseProxy.ServeHTTP(res, req)
 	// Return any error handled during proxying request.

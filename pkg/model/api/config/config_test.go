@@ -99,7 +99,8 @@ func TestJSONMarshalConfig(t *testing.T) {
   },
   "search": {
     "index_keys": {}
-  }
+  },
+  "tracing": {}
 }`,
 		},
 		{
@@ -200,7 +201,8 @@ func TestJSONMarshalConfig(t *testing.T) {
         "spec.display.name"
       ]
     }
-  }
+  },
+  "tracing": {}
 }`,
 		},
 	}

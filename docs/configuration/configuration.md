@@ -127,6 +127,9 @@ plugin: <Plugin config> # Optional
 
 # The configuration of the search feature. You can customize the search engine used and the indexation of the resources.
 search: <Search config> # Optional
+
+# The configuration to export the traces of the Perses server with the OpenTelemetry protocol (OTLP).
+tracing: <Tracing config> # Optional
 ```
 
 ### Security config
@@ -1272,3 +1275,31 @@ excluded_chars: <list of strings> # Optional
 index_keys:
   dashboard: <list of strings | default = ["metadata.name", "spec.display.name"]> # Optional
 ```
+
+### Tracing config
+
+When enabled, Perses creates a span for each HTTP request it receives, and for each request it sends to a datasource
+through the proxy. The spans are exported with OTLP over gRPC, for example to an OpenTelemetry Collector.
+
+The trace context is read from and propagated with the W3C `traceparent` and `baggage` headers, so a request coming
+from a traced application (like a portal embedding Perses panels) and its queries to the datasource are part of the same
+trace.
+
+```yaml
+# Enable the export of the traces.
+enable: <boolean> | default = false # Optional
+
+# The address (host:port) of the OTLP gRPC receiver. Required when the tracing is enabled.
+endpoint: <string> # Optional
+
+# Disable TLS when connecting to the endpoint.
+insecure: <boolean> | default = false # Optional
+
+# The fraction (between 0 and 1) of the traces started by Perses that are sampled.
+# A request received as part of a sampled trace is always traced, whatever this ratio.
+# With the default value, Perses only traces the requests that are part of a sampled trace.
+sampling_ratio: <float> | default = 0 # Optional
+```
+
+The standard environment variables `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` can be used to change the name
+of the service (`perses` by default) or to add attributes to the resource, like the namespace of the service.
