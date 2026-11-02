@@ -149,6 +149,9 @@ func validateDashboardSpec(spec dashboard.Spec, sch schema.Schema, proxyCfg *con
 	if err := validateVariableNames(spec.Variables); err != nil {
 		return err
 	}
+	if err := validateLinks(spec); err != nil {
+		return err
+	}
 
 	if sch != nil {
 		if err := sch.ValidateDashboardVariables(spec.Variables); err != nil {
