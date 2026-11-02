@@ -7,12 +7,15 @@ links to relative URLs and an allowlist of schemes (`http`, `https`, `mailto`, `
 `vscode`, `vscode-insiders`, `zoommtg`). Dashboards using another scheme in a link are rejected the next time they are
 saved, and such links are displayed but can no longer be followed. We recommend upgrading.
 
-It also comes with the latest patch releases of the shared libraries (v0.55.1) and of the plugins.
+It also upgrades Go to 1.27.3 and the Go dependencies with security fixes, and comes with the latest patch releases of
+the shared libraries (v0.55.1) and of the plugins.
 
 ### Core & UI
 
 - [SECURITY] Reject dashboard and panel links with a disallowed URL scheme (#4696)
 - [SECURITY] UI: only follow dashboard, panel and table data links using an allowed URL scheme (perses/shared#424)
+- [SECURITY] Upgrade Go to 1.27.3 (security fixes to `crypto/x509`) (#4697)
+- [SECURITY] Upgrade the Go dependencies with security and bug fixes, including `golang.org/x/net` v0.62.0 (HTTP/2 and html fixes), the OpenTelemetry SDK v1.46.0 and `labstack/echo` v4.16.2 (#4697)
 - [BUGFIX] OIDC/OAuth login: keep api_prefix in the redirect path when the rd query param is set (#4695)
 - [BUGFIX] percli whoami: accept the Kubernetes login (#4678)
 - [BUGFIX] percli: report an unreadable config file instead of silently ignoring it (#4692)
