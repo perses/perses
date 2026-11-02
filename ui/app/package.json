@@ -33,7 +33,7 @@
     "dompurify": "^3.4.16",
     "i18next": "^26.4.2",
     "i18next-http-backend": "^4.0.2",
-    "immer": "^10.1.1",
+    "immer": "^11.2.9",
     "lodash": "^4.17.21",
     "marked": "^15.0.7",
     "mdi-material-ui": "^7.9.2",
