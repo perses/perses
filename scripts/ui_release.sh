@@ -92,10 +92,12 @@ function removeSnapshot() {
   tagName=$(getBranchSnapshotName $branch)
 
   echo "Removing snapshot for tag ${tagName}"
-  for workspace in ${publish_workspaces}; do
-    cd "${workspace}"
-    pnpm dist-tag remove "@perses-dev/${workspace}" "${tagName}"
-    cd ../
+  for workspace in ${workspaces}; do
+    # Private packages are never published, so they cannot have a snapshot tag.
+    if [ "$(jq -r '.private // false' < "${workspace}"/package.json)" == "true" ]; then
+      continue
+    fi
+    pnpm dist-tag remove "$(jq -r '.name' < "${workspace}"/package.json)" "${tagName}"
   done
 }
 

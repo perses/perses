@@ -27,6 +27,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/perses/common/async"
+	"github.com/perses/perses/internal/cli/packagemanager"
 	"github.com/sirupsen/logrus"
 )
 
@@ -82,7 +83,8 @@ func newDevServer(pluginName, pluginPath, rsbuildScriptName string, writer, errW
 	streamErrWriter := newPrefixedStream(pluginName, errWriter, c)
 	portCapturingWriter := newPortCapturingWriter(streamWriter, portChan)
 
-	cmd := exec.Command("pnpm", rsbuildScriptName) //nolint:gosec
+	pm := packagemanager.Detect(pluginPath)
+	cmd := exec.Command(string(pm.Name), pm.RunArgs(rsbuildScriptName)...) //nolint:gosec
 	cmd.Stdout = portCapturingWriter
 	cmd.Stderr = streamErrWriter
 	cmd.Dir = pluginPath

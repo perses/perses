@@ -20,17 +20,19 @@ import (
 	"path/filepath"
 
 	"github.com/perses/perses/internal/cli/file"
+	"github.com/perses/perses/internal/cli/packagemanager"
 )
 
-func (o *option) executePNPMSteps() error {
-	if err := o.executePNPMInstall(); err != nil {
+func (o *option) executeFrontendSteps() error {
+	pm := packagemanager.Detect(o.cfg.FrontendPath)
+	if err := o.executeFrontendInstall(pm); err != nil {
 		return err
 	}
-	return o.executePNPMBuild()
+	return o.executeFrontendBuild(pm)
 }
 
-func (o *option) executePNPMInstall() error {
-	if o.skipPNPMInstall {
+func (o *option) executeFrontendInstall(pm packagemanager.PackageManager) error {
+	if o.skipFrontendInstall {
 		return nil
 	}
 	exist, err := file.Exists(filepath.Join(o.cfg.FrontendPath, "node_modules"))
@@ -38,12 +40,12 @@ func (o *option) executePNPMInstall() error {
 		return fmt.Errorf("unable to check if node_modules exists: %w", err)
 	}
 	if exist {
-		// If the node_modules folder already exists, we do not need to run `pnpm install --frozen-lockfile`
+		// If the node_modules folder already exists, we do not need to install the dependencies
 		return nil
 	}
-	// If the node_modules folder does not exist, perhaps it is in the root folder because this is a pnpm workspace / monorepo.
+	// If the node_modules folder does not exist, perhaps it is in the root folder because this is a workspace / monorepo.
 	// We check if the node_modules folder exists in the root folder.
-	// If it does not exist, we will run `pnpm install --frozen-lockfile` to install the dependencies
+	// If it does not exist, we will install the dependencies with the detected package manager.
 	// If it exists, we assume that the dependencies are already installed, and we do not need to do it.
 	rootFolder := filepath.Dir(o.cfg.FrontendPath)
 	if rootFolder == "." || rootFolder == "" {
@@ -56,34 +58,32 @@ func (o *option) executePNPMInstall() error {
 	if exist {
 		return nil
 	}
-	// Then run `pnpm install --frozen-lockfile` to install the dependencies
-	cmd := exec.Command("pnpm", "install", "--frozen-lockfile")
-	cmd.Dir = o.cfg.FrontendPath
-	// to get a more comprehensive error message, we need to capture the stdout & stderr.
-	var stdoutBuffer bytes.Buffer
-	cmd.Stdout = &stdoutBuffer
-	var stderrBuffer bytes.Buffer
-	cmd.Stderr = &stderrBuffer
-	cmd.Dir = o.cfg.FrontendPath
-	if execErr := cmd.Run(); execErr != nil {
-		return fmt.Errorf("unable to install the frontend dependencies: %w, stdout: %s, stderr: %s", execErr, stdoutBuffer.String(), stderrBuffer.String())
+	if err := runPackageManager(pm, o.cfg.FrontendPath, pm.InstallArgs()...); err != nil {
+		return fmt.Errorf("unable to install the frontend dependencies with %s: %w", pm, err)
 	}
 	return nil
 }
 
-func (o *option) executePNPMBuild() error {
-	if o.skipPNPMBuild {
+func (o *option) executeFrontendBuild(pm packagemanager.PackageManager) error {
+	if o.skipFrontendBuild {
 		return nil
 	}
-	cmd := exec.Command("pnpm", "build")
+	if err := runPackageManager(pm, o.cfg.FrontendPath, pm.RunArgs("build")...); err != nil {
+		return fmt.Errorf("unable to build the frontend with %s: %w", pm, err)
+	}
+	return nil
+}
+
+func runPackageManager(pm packagemanager.PackageManager, dir string, args ...string) error {
+	cmd := exec.Command(string(pm.Name), args...) //nolint:gosec
+	cmd.Dir = dir
 	// to get a more comprehensive error message, we need to capture the stdout & stderr.
 	var stdoutBuffer bytes.Buffer
 	cmd.Stdout = &stdoutBuffer
 	var stderrBuffer bytes.Buffer
 	cmd.Stderr = &stderrBuffer
-	cmd.Dir = o.cfg.FrontendPath
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("unable to build the frontend: %w, stdout: %s, stderr: %s", err, stdoutBuffer.String(), stderrBuffer.String())
+		return fmt.Errorf("%w, stdout: %s, stderr: %s", err, stdoutBuffer.String(), stderrBuffer.String())
 	}
 	return nil
 }

@@ -12,10 +12,8 @@ for example in "${examples[@]}";
 do
   pushd "$example"
 
-  pnpm install --no-frozen-lockfile 2>&1 | tee out.log
-  if grep -q ERR_PNPM_ out.log; then
-    exit 1
-  fi
+  # Fail on peer dependency conflicts (pnpm only warns about them by default)
+  pnpm install --no-frozen-lockfile --strict-peer-dependencies
   pnpm run type-check
   pnpm run build
 
