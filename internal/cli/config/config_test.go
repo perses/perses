@@ -14,6 +14,7 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -22,6 +23,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // setUnwritableFilePath points Global at a config file whose parent directory
@@ -97,11 +99,12 @@ func TestInitWithUnreadableConfigFile(t *testing.T) {
 	assert.NoError(t, os.WriteFile(filePath, []byte("{"), 0600))
 	entries := initWithLogs(t, filePath)
 	// the config is ignored, but the user must be told why
-	if assert.Len(t, entries, 1) {
-		assert.Equal(t, logrus.WarnLevel, entries[0].Level)
-		assert.Contains(t, entries[0].Message, filePath)
-		assert.Error(t, entries[0].Data[logrus.ErrorKey].(error))
-	}
+	require.Len(t, entries, 1)
+	assert.Equal(t, logrus.WarnLevel, entries[0].Level)
+	// The path is checked as a structured field rather than in the message, as the message would escape the
+	// backslashes of a Windows path.
+	assert.Equal(t, filePath, entries[0].Data["file"])
+	assert.IsType(t, &json.SyntaxError{}, entries[0].Data[logrus.ErrorKey])
 	assert.Equal(t, &Config{filePath: filePath, Dac: Dac{OutputFolder: DefaultOutputFolder}}, Global)
 }
 

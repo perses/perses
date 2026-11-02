@@ -44,7 +44,7 @@ func Init(configPath string) {
 			logrus.WithError(err).Debug("unable to read the config")
 		} else {
 			// The file exists but cannot be used: tell the user instead of silently behaving as if there was no config.
-			logrus.WithError(err).Warnf("unable to read the config file %q, it is ignored", configPath)
+			logrus.WithError(err).WithField("file", configPath).Warn("unable to read the config file, it is ignored")
 		}
 		Global = &Config{}
 	} else {
