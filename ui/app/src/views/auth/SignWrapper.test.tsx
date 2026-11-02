@@ -17,6 +17,15 @@ import { fireEvent, render, screen } from '@testing-library/react';
 
 import { SignWrapper } from './SignWrapper';
 
+const { mockUseQueryParam } = vi.hoisted(() => ({
+  mockUseQueryParam: vi.fn(),
+}));
+
+vi.mock('use-query-params', async (importOriginal) => ({
+  ...(await importOriginal()),
+  useQueryParam: mockUseQueryParam,
+}));
+
 vi.mock('../../config', () => ({
   PERSES_APP_CONFIG: { api_prefix: '/perses' },
 }));
@@ -48,31 +57,42 @@ vi.mock('../../context/Config', () => ({
   useIsNativeAuthnProviderEnabled: (): boolean => false,
 }));
 
-vi.mock('../../model/auth/auth-client', () => ({
-  // Mirrors the real implementation's `absolute` param closely enough to exercise SignWrapper's usage of it:
-  // when there is no `rd` query param, the absolute (browser-redirect-bound) path falls back to `api_prefix`.
-  useRedirectQueryParam: (absolute?: boolean): string => (absolute ? '/perses' : '/'),
-  buildRedirectQueryString: (path: string): string => `rd=${encodeURIComponent(path)}`,
-}));
+function signInWithKeycloak(): void {
+  const theme = createTheme();
+  render(
+    <ThemeProvider theme={theme}>
+      <SignWrapper>{null}</SignWrapper>
+    </ThemeProvider>,
+  );
+
+  fireEvent.click(screen.getByText('Sign in with Keycloak'));
+}
 
 describe('SignWrapper', () => {
-  it('prefixes the OIDC login redirect with the configured api_prefix', () => {
+  beforeEach(() => {
     Object.defineProperty(window, 'location', {
       value: { href: '' },
       writable: true,
     });
+  });
 
-    const theme = createTheme();
-    render(
-      <ThemeProvider theme={theme}>
-        <SignWrapper>{null}</SignWrapper>
-      </ThemeProvider>,
-    );
+  // rd must carry the absolute path (including api_prefix), since the backend's OIDC redirect is a raw
+  // browser navigation that doesn't go through React Router's basename resolution.
+  it('prefixes the OIDC login redirect with the configured api_prefix', () => {
+    mockUseQueryParam.mockReturnValue([undefined]);
 
-    fireEvent.click(screen.getByText('Sign in with Keycloak'));
+    signInWithKeycloak();
 
-    // rd must carry the absolute path (including api_prefix), since the backend's OIDC redirect is a raw
-    // browser navigation that doesn't go through React Router's basename resolution.
     expect(window.location.href).toEqual('/perses/api/auth/providers/oidc/keycloak/login?rd=%2Fperses');
+  });
+
+  it('prefixes the router-relative rd query param with the configured api_prefix', () => {
+    mockUseQueryParam.mockReturnValue(['/explore?explorer=Prometheus-PrometheusExplorer']);
+
+    signInWithKeycloak();
+
+    expect(window.location.href).toEqual(
+      '/perses/api/auth/providers/oidc/keycloak/login?rd=%2Fperses%2Fexplore%3Fexplorer%3DPrometheus-PrometheusExplorer',
+    );
   });
 });
