@@ -48,7 +48,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	persesFrontend := ui.NewPersesFrontend(conf, dependencyManager.Service().GetPlugin())
 	runner := app.NewRunner().WithDefaultHTTPServerAndPrometheusRegisterer(utils.MetricNamespace, registry, registry).SetBanner(banner)
 	// The tracing middleware must be registered before the error handling one, to record the status code of the errors.
-	if err := setupTracing(runner, conf.Tracing); err != nil {
+	if err := setupOpenTelemetry(runner, conf.OpenTelemetry); err != nil {
 		return nil, nil, err
 	}
 

@@ -100,7 +100,7 @@ func TestJSONMarshalConfig(t *testing.T) {
   "search": {
     "index_keys": {}
   },
-  "tracing": {}
+  "opentelemetry": {}
 }`,
 		},
 		{
@@ -202,7 +202,7 @@ func TestJSONMarshalConfig(t *testing.T) {
       ]
     }
   },
-  "tracing": {}
+  "opentelemetry": {}
 }`,
 		},
 	}
