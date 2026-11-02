@@ -14,6 +14,8 @@
 package native
 
 import (
+	"slices"
+
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/sirupsen/logrus"
@@ -55,6 +57,8 @@ type projectRoleKey struct {
 type bindingUsers struct {
 	// existingUsers contains the name of every existing user, to ignore the subjects that are not existing users.
 	existingUsers map[string]struct{}
+	// sortedUserNames contains the name of every existing user, sorted, to expand the wildcard subject deterministically.
+	sortedUserNames []string
 	// users is the buffer returned by "of", containing the users of the binding being processed.
 	// It is reused from one binding to the next to avoid an allocation per binding:
 	// the caller must not keep it after the next call.
@@ -63,10 +67,13 @@ type bindingUsers struct {
 
 func newBindingUsers(users []*v1.User) *bindingUsers {
 	existingUsers := make(map[string]struct{}, len(users))
+	sortedUserNames := make([]string, 0, len(users))
 	for _, usr := range users {
 		existingUsers[usr.Metadata.Name] = struct{}{}
+		sortedUserNames = append(sortedUserNames, usr.Metadata.Name)
 	}
-	return &bindingUsers{existingUsers: existingUsers}
+	slices.Sort(sortedUserNames)
+	return &bindingUsers{existingUsers: existingUsers, sortedUserNames: sortedUserNames}
 }
 
 // of returns the existing users that are subjects of the given binding, in the order of the subjects.
@@ -78,16 +85,35 @@ func (b *bindingUsers) of(spec v1.RoleBindingSpec) []string {
 	// in the same backing array, so no new slice is allocated once the buffer is large enough.
 	// This is why the returned slice is only valid until the next call.
 	b.users = b.users[:0]
+	wildcard := false
 	for _, subject := range spec.Subjects {
 		// The unmarshalling of a binding only accepts user subjects for now: this check is kept so that the other
 		// kinds of subjects that could be added later (e.g. teams) are never taken for users.
 		if subject.Kind != v1.KindUser {
 			continue
 		}
+		if subject.Name == v1.WildcardUser {
+			wildcard = true
+			continue
+		}
 		if _, exists := b.existingUsers[subject.Name]; !exists {
 			continue
 		}
 		b.users = append(b.users, subject.Name)
+	}
+	if !wildcard {
+		return b.users
+	}
+	// The wildcard subject refers to all existing users: add the ones that are not already listed explicitly.
+	alreadyListed := make(map[string]struct{}, len(b.users)+len(b.sortedUserNames))
+	for _, usr := range b.users {
+		alreadyListed[usr] = struct{}{}
+	}
+	for _, usr := range b.sortedUserNames {
+		if _, exists := alreadyListed[usr]; exists {
+			continue
+		}
+		b.users = append(b.users, usr)
 	}
 	return b.users
 }

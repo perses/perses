@@ -185,6 +185,39 @@ func TestBuildUsersPermissions(t *testing.T) {
 	assert.Equal(t, []v1Role.Permission{testReadAllPermission, testEditPermission, testReadAllPermission}, permissionValues(permissions["carol"]["p1"]))
 }
 
+func TestBuildUsersPermissionsWithWildcardUser(t *testing.T) {
+	silenceTestLogs(t)
+	dataset := &testDataset{
+		users: []*v1.User{
+			{Metadata: v1.Metadata{Name: "alice"}},
+			{Metadata: v1.Metadata{Name: "bob"}},
+			{Metadata: v1.Metadata{Name: "carol"}},
+		},
+		globalRoles: []*v1.GlobalRole{
+			testGlobalRole("viewer", testReadAllPermission),
+		},
+		roles: []*v1.Role{
+			testRole("p1", "editor", testEditPermission),
+		},
+		globalRoleBindings: []*v1.GlobalRoleBinding{
+			asReadFromDatabase(testGlobalRoleBinding("everyone", "viewer", userSubjects(v1.WildcardUser)...)),
+		},
+		roleBindings: []*v1.RoleBinding{
+			// alice is listed both explicitly and through the wildcard: she must get the permission only once.
+			asReadFromDatabase(testRoleBinding("p1", "editors", "editor", userSubjects("alice", v1.WildcardUser)...)),
+		},
+	}
+
+	permissions := dataset.buildUsersPermissions()
+
+	// Every existing user gets the permissions of the global role, and no other user is added.
+	assert.Len(t, permissions, 3)
+	for _, username := range []string{"alice", "bob", "carol"} {
+		assert.Equal(t, []v1Role.Permission{testReadAllPermission}, permissionValues(permissions[username][v1.WildcardProject]), username)
+		assert.Equal(t, []v1Role.Permission{testEditPermission}, permissionValues(permissions[username]["p1"]), username)
+	}
+}
+
 func TestBuildUsersPermissionsMatchesPreviousAlgorithm(t *testing.T) {
 	silenceTestLogs(t)
 	datasets := map[string]*testDataset{

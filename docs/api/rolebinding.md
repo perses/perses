@@ -53,6 +53,8 @@ subjects:
 kind: <string>
 
 # The name of the subject (metadata.name)
+# Use "*" to refer to all users, including the ones that don't exist yet
+# (e.g. users created on their first login through an OIDC provider).
 name: <string>
 ```
 

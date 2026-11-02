@@ -6,6 +6,8 @@ package v1
 
 #WildcardProject: "*"
 
+#WildcardUser: "*"
+
 #NativeProvider: {
 	password?: string @go(Password)
 
