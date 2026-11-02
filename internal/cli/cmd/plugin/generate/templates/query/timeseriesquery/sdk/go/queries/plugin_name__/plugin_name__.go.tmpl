@@ -1,0 +1,76 @@
+// Package {{ .PluginGoPackage }} provides the Dashboard-as-Code builder for the {{ .PluginPascalName }} query plugin.
+package {{ .PluginGoPackage }}
+
+import (
+	"github.com/perses/perses/go-sdk/datasource"
+	"github.com/perses/perses/go-sdk/query"
+	"github.com/perses/spec/go/plugin"
+)
+
+const PluginKind = "{{ .PluginPascalName }}"
+
+// DatasourceKind is the kind of the datasource the query runs against. Keep it in sync with
+// schemas/queries/{{ .PluginName }}/query.cue.
+const DatasourceKind = "YourDatasourceKind"
+
+// PluginSpec follows the spec in schemas/queries/{{ .PluginName }}/query.cue.
+type PluginSpec struct {
+	Datasource *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	Query      string               `json:"query" yaml:"query"`
+}
+
+type Option func(plugin *Builder) error
+
+type Builder struct {
+	PluginSpec `json:",inline" yaml:",inline"`
+}
+
+func create(expr string, options ...Option) (Builder, error) {
+	builder := &Builder{
+		PluginSpec: PluginSpec{},
+	}
+
+	defaults := []Option{
+		Expr(expr),
+	}
+
+	for _, opt := range append(defaults, options...) {
+		if err := opt(builder); err != nil {
+			return *builder, err
+		}
+	}
+
+	return *builder, nil
+}
+
+// {{ .PluginPascalName }} creates a {{ .PluginPascalName }} time series query.
+func {{ .PluginPascalName }}(expr string, options ...Option) query.Option {
+	plg, err := create(expr, options...)
+	return query.Option{
+		Kind: plugin.KindTimeSeriesQuery,
+		Plugin: plugin.Plugin{
+			Kind: PluginKind,
+			Spec: plg.PluginSpec,
+		},
+		Error: err,
+	}
+}
+
+func Expr(expr string) Option {
+	return func(builder *Builder) error {
+		builder.Query = expr
+		return nil
+	}
+}
+
+// Datasource selects the datasource of kind DatasourceKind to run the query against.
+func Datasource(name string) Option {
+	return func(builder *Builder) error {
+		selector, err := datasource.NewSelector(DatasourceKind, name)
+		if err != nil {
+			return err
+		}
+		builder.Datasource = selector
+		return nil
+	}
+}

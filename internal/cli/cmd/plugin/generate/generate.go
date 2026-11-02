@@ -34,8 +34,21 @@ import (
 	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/module"
 	pluginSpec "github.com/perses/spec/go/plugin"
+	"github.com/prometheus/common/version"
 	"github.com/spf13/cobra"
 )
+
+// persesModulePath is the Go module that provides the Dashboard-as-Code builders used by the generated Go SDK.
+const persesModulePath = "github.com/perses/perses"
+
+// goRunner runs the go command with the given arguments in dir and returns its combined output.
+type goRunner func(ctx context.Context, dir string, args ...string) ([]byte, error)
+
+func runGo(ctx context.Context, dir string, args ...string) ([]byte, error) {
+	cmd := exec.CommandContext(ctx, "go", args...) //nolint:gosec // the arguments are passed straight to exec, no shell is involved
+	cmd.Dir = dir
+	return cmd.CombinedOutput()
+}
 
 type generateOptions struct {
 	persesCMD.Option
@@ -49,6 +62,7 @@ type generateOptions struct {
 	outputDir         string
 	// goModuleMissing is true when the output directory has no go.mod yet, so one has to be created.
 	goModuleMissing bool
+	runGo           goRunner
 	ctx             context.Context
 	writer          io.Writer
 	errWriter       io.Writer
@@ -106,16 +120,16 @@ func (o *generateOptions) Validate() error {
 
 	o.outputDir = destDir
 
-	if err := o.checkGoModuleRequirements(); err != nil {
-		return err
-	}
-
 	if o.pluginName == "" || o.pluginType == "" {
 		return fmt.Errorf("plugin.name and plugin.type are required")
 	}
 
 	if !slices.Contains(availablePluginTypes, o.pluginType) {
 		return fmt.Errorf("plugin.type %q is not valid, possible values are: %s", o.pluginType, availablePluginTypes)
+	}
+
+	if err := o.checkGoModuleRequirements(); err != nil {
+		return err
 	}
 
 	o.pluginName = GetKebabCase(o.pluginName)
@@ -278,6 +292,7 @@ func (o *generateOptions) Execute() error {
 		"ModuleOrg":                GetKebabCase(o.pluginModuleOrg),
 		"PluginName":               GetKebabCase(o.pluginName),
 		"PluginPascalName":         o.pluginPascalName,
+		"PluginGoPackage":          GetGoPackageName(o.pluginName),
 		"ExposedModules":           exposedModules,
 		"PersesPlugins":            persesPlugins,
 		"PersesPanelPlugins":       persesPanelPlugins,
@@ -314,6 +329,7 @@ func (o *generateOptions) Execute() error {
 	allTemplateFiles := append(append(moduleTemplateFiles, blocksTemplateFiles...), pluginTypeTemplateFiles...)
 
 	var createdPaths []string
+	generatedGoSources := false
 
 	for _, relTemplatePath := range allTemplateFiles {
 		outputRelativePath := strings.TrimSuffix(relTemplatePath, tmplExt)
@@ -345,9 +361,12 @@ func (o *generateOptions) Execute() error {
 		}
 
 		createdPaths = append(createdPaths, outputRelativePath)
+		if filepath.Ext(outputRelativePath) == ".go" {
+			generatedGoSources = true
+		}
 	}
 
-	goModPaths, err := o.ensureGoModule(goModulePath)
+	goModPaths, err := o.ensureGoModule(goModulePath, generatedGoSources)
 	if err != nil {
 		return err
 	}
@@ -370,8 +389,17 @@ func (o *generateOptions) successMessage(isModuleGeneration bool, createdPaths [
 	return msg
 }
 
-// checkGoModuleRequirements records whether the output directory needs a go.mod and, if so, checks that the go binary
-// is available. It runs before anything is written, so the command doesn't leave a half-generated module behind.
+// pluginTypesWithGoSDK are the plugin types whose templates include a Go SDK for Dashboard-as-Code.
+var pluginTypesWithGoSDK = []pluginSpec.Kind{
+	pluginSpec.KindDatasource,
+	pluginSpec.KindTimeSeriesQuery,
+	pluginSpec.KindAnnotation,
+	pluginSpec.KindPanel,
+}
+
+// checkGoModuleRequirements records whether the output directory needs a go.mod and, if it does or the plugin type
+// generates a Go SDK, checks that the go binary is available. It runs before anything is written, so the command
+// doesn't leave a half-generated module behind.
 func (o *generateOptions) checkGoModuleRequirements() error {
 	goModExists, err := file.Exists(filepath.Join(o.outputDir, "go.mod"))
 	if err != nil {
@@ -379,12 +407,12 @@ func (o *generateOptions) checkGoModuleRequirements() error {
 	}
 
 	o.goModuleMissing = !goModExists
-	if !o.goModuleMissing {
+	if !o.goModuleMissing && !slices.Contains(pluginTypesWithGoSDK, o.pluginType) {
 		return nil
 	}
 
 	if _, err := exec.LookPath("go"); err != nil {
-		return fmt.Errorf("the go binary is required to initialize the Go module but was not found in PATH: %w", err)
+		return fmt.Errorf("the go binary is required to initialize the Go module and resolve the Go SDK dependencies but was not found in PATH: %w", err)
 	}
 
 	return nil
@@ -408,10 +436,22 @@ func (o *generateOptions) goModulePath() (string, error) {
 	return fmt.Sprintf("github.com/%s/%s", org, name), nil
 }
 
-// ensureGoModule initializes the Go module with `go mod init` and `go mod tidy` when the output directory
-// doesn't have a go.mod yet. An existing go.mod is left untouched. It returns the relative paths of the created files.
-func (o *generateOptions) ensureGoModule(modulePath string) ([]string, error) {
-	if !o.goModuleMissing {
+// persesModuleVersion returns the version of the perses module that matches the Go SDK templates of this percli
+// build, or "latest" for a development build that has no version.
+func persesModuleVersion() string {
+	if version.Version == "" {
+		return "latest"
+	}
+	return "v" + strings.TrimPrefix(version.Version, "v")
+}
+
+// ensureGoModule initializes the Go module with `go mod init` when the output directory doesn't have a go.mod yet.
+// When Go sources were generated, it requires the perses module at the version of this percli build, since a plain
+// `go mod tidy` would resolve the latest version, which may not match the templates, and then runs `go mod tidy`
+// for the new imports. Otherwise, a new go.mod is tidied and an existing one is left untouched. It returns the
+// relative paths of the created files.
+func (o *generateOptions) ensureGoModule(modulePath string, generatedGoSources bool) ([]string, error) {
+	if !o.goModuleMissing && !generatedGoSources {
 		return nil, nil
 	}
 
@@ -419,24 +459,40 @@ func (o *generateOptions) ensureGoModule(modulePath string) ([]string, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
+	run := o.runGo
+	if run == nil {
+		run = runGo
+	}
 
-	for _, args := range [][]string{
-		{"mod", "init", modulePath},
-		{"mod", "tidy"},
-	} {
-		cmd := exec.CommandContext(ctx, "go", args...) //nolint:gosec // the arguments are passed straight to exec, no shell is involved
-		cmd.Dir = o.outputDir
-		if out, err := cmd.CombinedOutput(); err != nil {
+	goSumExisted, err := file.Exists(filepath.Join(o.outputDir, "go.sum"))
+	if err != nil {
+		return nil, fmt.Errorf("could not check for the go.sum under %q: %w", o.outputDir, err)
+	}
+
+	var commands [][]string
+	if o.goModuleMissing {
+		commands = append(commands, []string{"mod", "init", modulePath})
+	}
+	if generatedGoSources {
+		commands = append(commands, []string{"get", persesModulePath + "@" + persesModuleVersion()})
+	}
+	commands = append(commands, []string{"mod", "tidy"})
+
+	for _, args := range commands {
+		if out, err := run(ctx, o.outputDir, args...); err != nil {
 			return nil, fmt.Errorf("`go %s` failed under %q: %w\n%s", strings.Join(args, " "), o.outputDir, err, out)
 		}
 	}
 
-	created := []string{"go.mod"}
+	var created []string
+	if o.goModuleMissing {
+		created = append(created, "go.mod")
+	}
 	goSumExists, err := file.Exists(filepath.Join(o.outputDir, "go.sum"))
 	if err != nil {
 		return nil, fmt.Errorf("could not check for the go.sum under %q: %w", o.outputDir, err)
 	}
-	if goSumExists {
+	if goSumExists && !goSumExisted {
 		created = append(created, "go.sum")
 	}
 	return created, nil
@@ -451,7 +507,11 @@ func (o *generateOptions) SetErrWriter(errWriter io.Writer) {
 }
 
 func NewCMD() *cobra.Command {
-	o := &generateOptions{}
+	return newCMD(runGo)
+}
+
+func newCMD(run goRunner) *cobra.Command {
+	o := &generateOptions{runGo: run}
 	cmd := &cobra.Command{
 		Use:   "generate [<output-directory>]",
 		Short: "Generate a plugin module or plugin type",
