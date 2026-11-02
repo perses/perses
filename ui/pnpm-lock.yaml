@@ -201,6 +201,9 @@ importers:
       cross-fetch:
         specifier: ^4.1.0
         version: 4.1.0
+      terser-webpack-plugin:
+        specifier: ^5.4.0
+        version: 5.4.0(@swc/core@1.15.33)(esbuild@0.28.1)(webpack@5.105.1(@swc/core@1.15.33)(esbuild@0.28.1))
 
   e2e:
     dependencies:

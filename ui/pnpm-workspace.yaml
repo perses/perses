@@ -3,8 +3,6 @@ packages:
   - e2e
   - internal-utils
 
-nodeLinker: hoisted
-
 allowBuilds:
   '@swc/core': true
   core-js: false

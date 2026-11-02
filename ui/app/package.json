@@ -55,6 +55,7 @@
     "@rspack/core": "^2.2.9",
     "@rspack/dev-server": "^2.1.0",
     "@rspack/plugin-react-refresh": "^2.0.0",
-    "cross-fetch": "^4.1.0"
+    "cross-fetch": "^4.1.0",
+    "terser-webpack-plugin": "^5.4.0"
   }
 }
