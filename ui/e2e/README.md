@@ -1,6 +1,6 @@
 # End-to-end tests
 
-This package contains end-to-end tests for Perses written using [Playwright](https://playwright.dev/).
+This package contains end-to-end tests for Perses using [Playwright](https://playwright.dev/).
 
 ## Directory structure
 
@@ -21,10 +21,10 @@ Tests are run during local development using the configuration in `local.playwri
 
 - Start the backend server from the project root and disable authentication: `./scripts/api_backend_dev.sh --e2e`.
 - Change to the `ui` directory.
-- Start the UI server: `npm start`
+- Start the UI server: `pnpm start`
   - Important to ensure libraries are built since e2e imports from other Perses packages
-- Run the end-to-end tests from the command line: `npm run e2e`
-- (Optional) Run the end-to-end tests in debug mode to walk through a test step by step to debug issues: `npm run e2e:debug`.
+- Run the end-to-end tests from the command line: `pnpm e2e`
+- (Optional) Run the end-to-end tests in debug mode to walk through a test step by step to debug issues: `pnpm e2e:debug`.
 - (Optional) Install [Playwright VS Code extension](https://playwright.dev/docs/getting-started-vscode). This extension has a lot of helpful tools for running tests, debugging, and creating selectors. Select `local.playwright.config.ts` as the profile to use when running locally.
 
 ### Locally with UI
@@ -32,14 +32,14 @@ Tests are run during local development using the configuration in `local.playwri
 Example for running a single test with UI:
 
 - `./scripts/api_backend_dev.sh --e2e`
-- `cd ui; npm start`
-- `cd ui/e2e; npx playwright test --config=src/config/local.playwright.config.ts --ui src/tests/statChartPanel.spec.ts`
+- `cd ui; pnpm start`
+- `cd ui/e2e; pnpm exec playwright test --config=src/config/local.playwright.config.ts --ui src/tests/statChartPanel.spec.ts`
 
 ### In CI
 
 Tests are automatically run in CI using the workflow configured in `e2e.yml` with the configuration in `ci.playwright.config.ts`. In this case, Playwright automatically starts up and waits for the development servers.
 
-You can test the CI configuration locally by running `npm run e2e:ci`.
+You can test the CI configuration locally by running `pnpm e2e:ci`.
 
 ## Writing tests
 

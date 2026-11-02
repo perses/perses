@@ -8,10 +8,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
-      - uses: ./.github/perses-ci/actions/setup_environment
+      - uses: pnpm/setup@v2.1.0
         with:
-          enable_npm: true
-          nvmrc_path: "./ui/.nvmrc"
+          working-directory: ./ui
+          install: false
+          cache: true
       - name: Remove npm snapshot tag
         run: ./scripts/ui_release.sh --remove-snapshot "${{ github.event.ref }}"
         env:

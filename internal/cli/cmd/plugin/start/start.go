@@ -443,7 +443,7 @@ The command is used to start a plugin in development mode.
 That means you can run the plugin in your local environment and see the effect of your changes in real time directly in the Perses UI.
 The command will discover which port is exposed, the exact name of the plugin and the absolute path required for the schemas.
 
-Once these information are collected, the command will execute the npm script defined in "package.json" that contains the command "rsbuild dev" to start any plugin dev server.
+Once these information are collected, the command will execute the pnpm script defined in "package.json" that contains the command "rsbuild dev" to start any plugin dev server.
 When they are all ready, it will send the config to the Perses remote server.
 
 When Perses is receiving the dev config, it will contact every dev server listed to load the plugin and ensure the plugin is available in the UI.`,

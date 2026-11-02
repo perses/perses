@@ -46,19 +46,19 @@ and official plugin implementations belong in `perses/plugins`. Do not recreate 
 
 ## Validation
 
-Use Go 1.27.x, Node.js from `ui/.nvmrc`, and npm from `ui/package.json`.
+Use Go 1.27.x, Node.js from `ui/.nvmrc`, and pnpm from `ui/package.json`.
 
 For UI changes, run from `ui/`:
 
 ```sh
-npm ci
-npm run lint
-npm run format:check
-npm run type-check
-npm run test
+pnpm install --frozen-lockfile
+pnpm run lint
+pnpm run format:check
+pnpm run type-check
+pnpm run test
 ```
 
-Start with a focused workspace command while iterating, such as `npm run test -w app -- <test-pattern>`. Run Playwright
+Start with a focused workspace command while iterating, such as `pnpm --filter @perses-dev/app test <test-pattern>`. Run Playwright
 tests for changed critical flows, page objects, or E2E fixtures.
 
 For Go or CUE changes, select the checks relevant to the affected layer:

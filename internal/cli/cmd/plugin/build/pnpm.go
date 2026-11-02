@@ -22,15 +22,15 @@ import (
 	"github.com/perses/perses/internal/cli/file"
 )
 
-func (o *option) executeNPMSteps() error {
-	if err := o.executeNPMInstall(); err != nil {
+func (o *option) executePNPMSteps() error {
+	if err := o.executePNPMInstall(); err != nil {
 		return err
 	}
-	return o.executeNPMBuild()
+	return o.executePNPMBuild()
 }
 
-func (o *option) executeNPMInstall() error {
-	if o.skipNPMInstall {
+func (o *option) executePNPMInstall() error {
+	if o.skipPNPMInstall {
 		return nil
 	}
 	exist, err := file.Exists(filepath.Join(o.cfg.FrontendPath, "node_modules"))
@@ -38,12 +38,12 @@ func (o *option) executeNPMInstall() error {
 		return fmt.Errorf("unable to check if node_modules exists: %w", err)
 	}
 	if exist {
-		// If the node_modules folder already exists, we do not need to run `npm ci`
+		// If the node_modules folder already exists, we do not need to run `pnpm install --frozen-lockfile`
 		return nil
 	}
-	// If the node_modules folder does not exist, perhaps it is in the root folder because this is a npm workspace / monorepo.
+	// If the node_modules folder does not exist, perhaps it is in the root folder because this is a pnpm workspace / monorepo.
 	// We check if the node_modules folder exists in the root folder.
-	// If it does not exist, we will run `npm ci` to install the dependencies
+	// If it does not exist, we will run `pnpm install --frozen-lockfile` to install the dependencies
 	// If it exists, we assume that the dependencies are already installed, and we do not need to do it.
 	rootFolder := filepath.Dir(o.cfg.FrontendPath)
 	if rootFolder == "." || rootFolder == "" {
@@ -56,8 +56,8 @@ func (o *option) executeNPMInstall() error {
 	if exist {
 		return nil
 	}
-	// Then run `npm ci` to install the dependencies
-	cmd := exec.Command("npm", "ci")
+	// Then run `pnpm install --frozen-lockfile` to install the dependencies
+	cmd := exec.Command("pnpm", "install", "--frozen-lockfile")
 	cmd.Dir = o.cfg.FrontendPath
 	// to get a more comprehensive error message, we need to capture the stdout & stderr.
 	var stdoutBuffer bytes.Buffer
@@ -71,11 +71,11 @@ func (o *option) executeNPMInstall() error {
 	return nil
 }
 
-func (o *option) executeNPMBuild() error {
-	if o.skipNPMBuild {
+func (o *option) executePNPMBuild() error {
+	if o.skipPNPMBuild {
 		return nil
 	}
-	cmd := exec.Command("npm", "run", "build")
+	cmd := exec.Command("pnpm", "build")
 	// to get a more comprehensive error message, we need to capture the stdout & stderr.
 	var stdoutBuffer bytes.Buffer
 	cmd.Stdout = &stdoutBuffer

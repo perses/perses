@@ -19,7 +19,7 @@ export USER_TOKEN="$(kubectl --kubeconfig=./dev/kubernetes/local/kind-admin crea
 caddy run --config ./dev/kubernetes/Caddyfile --adapter caddyfile
 ```
 
-4. Start the frontend app development server running npm run start from ui/app. More details in the UI Readme. Then load http://localhost:3000 in your browser and use Perses using k8s authorization.
+4. Start the frontend app development server running pnpm start from ui/app. More details in the UI Readme. Then load http://localhost:3000 in your browser and use Perses using k8s authorization.
 
 ## Debugging
 

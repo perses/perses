@@ -25,7 +25,7 @@ const (
 )
 
 type PluginConfig struct {
-	// DistPath is the path to the folder containing the files built by npm
+	// DistPath is the path to the folder containing the files built by pnpm
 	DistPath string `json:"dist_path" yaml:"dist_path"`
 	// FrontendPath is the path to the folder containing the package.json file
 	FrontendPath string `json:"frontend_path" yaml:"frontend_path"`

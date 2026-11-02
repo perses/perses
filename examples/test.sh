@@ -12,12 +12,12 @@ for example in "${examples[@]}";
 do
   pushd "$example"
 
-  npm install |& tee out.log
-  if grep -q ERESOLVE out.log; then
+  pnpm install --no-frozen-lockfile 2>&1 | tee out.log
+  if grep -q ERR_PNPM_ out.log; then
     exit 1
   fi
-  npm run type-check
-  npm run build
+  pnpm run type-check
+  pnpm run build
 
   popd
 done
