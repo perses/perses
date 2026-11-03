@@ -213,7 +213,6 @@ func TestBuildCache(t *testing.T) {
 	permissions := c.permissions
 
 	assert.Empty(t, c.allUsersPermissions, "no binding uses the wildcard subject")
-	assert.Nil(t, c.existingUsers, "the existing users are only kept when a binding uses the wildcard subject")
 
 	assert.Len(t, permissions, 3, "only alice, bob and carol get permissions")
 	assert.NotContains(t, permissions, "dave", "dave is only bound through a subject that is not a user")
@@ -242,7 +241,6 @@ func TestBuildCacheWithWildcardUser(t *testing.T) {
 	assert.Len(t, c.allUsersPermissions, 2, "the binding to an unknown role and the subject that is not a user are ignored")
 	assert.Equal(t, []v1Role.Permission{testCreateProjectPermission}, permissionValues(c.allUsersPermissions[v1.WildcardProject]))
 	assert.Equal(t, []v1Role.Permission{testReadAllPermission}, permissionValues(c.allUsersPermissions["p1"]))
-	assert.Equal(t, map[string]struct{}{"alice": {}, "bob": {}, "carol": {}}, c.existingUsers)
 
 	// Only the users listed by name in a binding without the wildcard subject get their own permissions.
 	assert.Len(t, c.permissions, 2)

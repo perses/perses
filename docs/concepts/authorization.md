@@ -93,7 +93,7 @@ spec:
 
 ### Granting a role to every user
 
-Use the wildcard `*` as the name of a `User` subject to grant a role to every user known by Perses, including the users
+Use the wildcard `*` as the name of a `User` subject to grant a role to every authenticated user, including the users
 created after the binding (for example, at their first login through an OAuth/OIDC provider). It is useful to open a
 project to all users without listing them.
 
@@ -117,9 +117,9 @@ also uses the wildcard gets the permissions of the role only once.
 Anyone who can manage the role bindings of a project, like its owners, can open it to every user this way. Make sure the
 role bound to the wildcard only grants the permissions you want to give to everybody.
 
-A `GlobalRoleBinding` using the wildcard grants a `GlobalRole` to every user. Unlike the `guest_permissions` of the
-[native authorization provider](../configuration/configuration.md#native-provider), it is managed through the API and
-can be changed without restarting Perses.
+A `GlobalRoleBinding` using the wildcard grants a `GlobalRole` to every authenticated user, like the `guest_permissions`
+of the [native authorization provider](../configuration/configuration.md#native-provider). Unlike them, it is managed
+through the API and can be changed without restarting Perses.
 
 ### RoleBinding and GlobalRoleBinding update restriction
 

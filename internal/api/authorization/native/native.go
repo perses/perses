@@ -265,8 +265,8 @@ func (n *native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, 
 		}
 	}
 	projects := projectsWithPermission(c.permissions[username], requestAction, requestScope)
-	if allUsersPermissions := c.allUsersPermissionsOf(username); len(allUsersPermissions) > 0 {
-		projects = mergeProjects(projects, projectsWithPermission(allUsersPermissions, requestAction, requestScope))
+	if len(c.allUsersPermissions) > 0 {
+		projects = mergeProjects(projects, projectsWithPermission(c.allUsersPermissions, requestAction, requestScope))
 	}
 	return projects, nil
 }
@@ -368,7 +368,7 @@ func (n *native) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permissi
 	for project, projectPermissions := range c.permissions[username] {
 		userPermissions[project] = append(userPermissions[project], projectPermissions...)
 	}
-	for project, projectPermissions := range c.allUsersPermissionsOf(username) {
+	for project, projectPermissions := range c.allUsersPermissions {
 		userPermissions[project] = append(userPermissions[project], projectPermissions...)
 	}
 	// Merge claim-based permissions

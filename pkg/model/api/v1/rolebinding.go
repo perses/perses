@@ -22,7 +22,7 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 )
 
-// WildcardUser is the name of a User subject that refers to every user known by Perses, including the users created
+// WildcardUser is the name of a User subject that refers to every authenticated user, including the users created
 // after the role binding (for example, at their first login through an OAuth/OIDC provider).
 // It cannot collide with the name of a user, as "*" is not a valid resource name.
 const WildcardUser = "*"
