@@ -1079,6 +1079,10 @@ enable: <bool> | default = false # Optional
 
 # The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
 cleanup_interval: <duration> | default = 1d # Optional
+
+# The maximum time to live a user can set on an ephemeral dashboard. A request with a greater TTL is rejected.
+# When not set, there is no limit.
+max_ttl: <duration> # Optional
 ```
 
 ### Frontend config
