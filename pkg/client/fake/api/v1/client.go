@@ -60,3 +60,7 @@ func (c *client) Plugin() v1.PluginInterface {
 func (c *client) Project() v1.ProjectInterface {
 	return &project{}
 }
+
+func (c *client) Schema() v1.SchemaInterface {
+	return &schema{}
+}

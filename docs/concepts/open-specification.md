@@ -9,9 +9,9 @@ This open specification is described in detail in the [Dashboard Specification d
 
 This open specification is currently implemented in the following languages:
 
-- [Golang](https://go.dev/) available in [pkg/model/api/v1/dashboard.go](https://github.com/perses/perses/blob/main/pkg/model/api/v1/dashboard.go#L93-L104)
-- [Cuelang](https://cuelang.org/) available in [cue/common/api/v1/dashboard.cue](https://github.com/perses/perses/blob/main/cue/model/api/v1/dashboard_patch.cue#L38-L50)
-- [Typescript](https://www.typescriptlang.org/) available in [ui/core/src/model/dashboard.ts](https://github.com/perses/perses/blob/main/ui/core/src/model/dashboard.ts#L28-L35) via the npm package [@perses-dev/core](https://www.npmjs.com/package/@perses-dev/core)
+- [Golang](https://go.dev/) available in [pkg/model/api/v1/dashboard.go](https://github.com/perses/perses/blob/main/pkg/model/api/v1/dashboard.go#L26-L30)
+- [Cuelang](https://cuelang.org/) available in [cue/model/api/v1/dashboard_patch.cue](https://github.com/perses/perses/blob/main/cue/model/api/v1/dashboard_patch.cue#L28-L32)
+- [Typescript](https://www.typescriptlang.org/) available in [client/src/model/dashboard.ts](https://github.com/perses/shared/blob/main/client/src/model/dashboard.ts#L19-L23) via the npm package [@perses-dev/client](https://www.npmjs.com/package/@perses-dev/client)
 
 !!! warning
     We aim also to be backward compatible as much as possible. This means that when we release a new version of Perses, we try to ensure that dashboards created with previous versions are still compatible with the new version.

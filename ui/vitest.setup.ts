@@ -13,7 +13,22 @@
 
 import * as v8 from 'node:v8';
 
+import { vi } from 'vitest';
+// oxlint-disable-next-line import/no-unassigned-import
+import '@testing-library/jest-dom/vitest';
+
 // jsdom does not implement structuredClone; polyfill it with the Node.js built-in.
 if (typeof globalThis.structuredClone === 'undefined') {
   globalThis.structuredClone = <T>(val: T): T => v8.deserialize(v8.serialize(val)) as T;
 }
+
+class ResizeObserverMock {
+  // oxlint-disable-next-line typescript/explicit-function-return-type
+  observe() {}
+  // oxlint-disable-next-line typescript/explicit-function-return-type
+  unobserve() {}
+  // oxlint-disable-next-line typescript/explicit-function-return-type
+  disconnect() {}
+}
+
+vi.stubGlobal('ResizeObserver', ResizeObserverMock);

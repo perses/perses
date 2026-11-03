@@ -99,6 +99,15 @@ Note for the release shepherd:
   ```bash
   make bump-version
   ```
+- When cutting the final release (`v<X.Y>.0` or a patch release), make sure no prerelease (`alpha`, `beta`, `rc`) version
+  of the shared packages, the plugins or the specification remains pinned: point the plugins to their final versions in
+  `scripts/plugin/plugin.yaml`, the `@perses-dev/*` dependencies to their final versions, and the examples and the
+  embedding documentation back to `latest`. The following command must print nothing:
+
+  ```bash
+  grep -rnE -- '-(alpha|beta|rc)\.[0-9]+' scripts/plugin/plugin.yaml ui/app/package.json ui/e2e/package.json \
+    internal/cli/cmd/plugin/generate/templates/module/package.json.tmpl examples/*/package.json docs/embedding-panels.md
+  ```
 - Push the branch to GitHub and create a pull request with the release branch as the base. This gives others the
   opportunity to chime in on the release, in general, and on the addition to the changelog, in particular.
   - It's also helpful to drop a link to the release PR in #perses-dev on Matrix to get extra visibility.
@@ -166,3 +175,20 @@ and trust me you want to be able to find back the commit that has been tagged in
 
 Once you have finally reached the final release (congratulation btw!), you will have to find someone to manage the next
 release cycle and set the date of the next release.
+
+## Patch release
+
+As part of the release cycle, we are willing to provide patch releases for at least the next month after the final
+release. This is to address any critical issues, security vulnerabilities, or bugs that might be discovered after the
+release.
+
+After this period, we will not provide any patch release for the previous version. If you are using an older version of
+Perses, we recommend you to upgrade to the latest version.
+
+Note:
+
+1. The patch release will be cut from the release branch of the version you want to patch. So if you want to patch
+   v0.55, you will have to use the branch `release/v0.55` to cut the patch release.
+
+2. You will probably have to cut a patch release for the shared components as well. So if you are cutting a patch
+   release for v0.55, you will have to cut a patch release for the shared components v0.55 as well.

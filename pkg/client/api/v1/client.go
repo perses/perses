@@ -35,6 +35,7 @@ type ClientInterface interface {
 	Project() ProjectInterface
 	Role(project string) RoleInterface
 	RoleBinding(project string) RoleBindingInterface
+	Schema() SchemaInterface
 	Secret(project string) SecretInterface
 	User() UserInterface
 	Variable(project string) VariableInterface
@@ -109,6 +110,10 @@ func (c *client) Role(project string) RoleInterface {
 
 func (c *client) RoleBinding(project string) RoleBindingInterface {
 	return newRoleBinding(c.restClient, project)
+}
+
+func (c *client) Schema() SchemaInterface {
+	return newSchema(c.restClient)
 }
 
 func (c *client) Secret(project string) SecretInterface {

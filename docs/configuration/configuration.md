@@ -71,7 +71,7 @@ PERSES_PROVISIONING_FOLDERS_0="/path/to/the/folder"
 Another example, to configure the name of the globaldatasource discovery, the environment variable would be:
 
 ```bash
-PERSES_GLOBAL_DATASOURCE_DISCOVERY_0_DISCOVERY_NAME="my-discovery"
+PERSES_DATASOURCE_GLOBAL_DISCOVERY_0_NAME="my-discovery"
 ```
 
 ### Definition
@@ -87,7 +87,7 @@ Generic placeholders are defined as follows:
 * `<int>`: an integer value
 * `<secret>`: a regular string that is a secret, such as a password
 * `<string>`: a regular string
-* `<kind>`: a string that can take the values `Dashboard`, `Datasource`, `Folder`, `GlobalDatasource`, `GlobalRole`, `GlobalRoleBinding`, `GlobalVariable`, `GlobalSecret`, `Project`, `Role`, `RoleBinding`, `User` or `Variable` (not case-sensitive)
+* `<kind>`: a string that can take the values `Dashboard`, `Datasource`, `EphemeralDashboard`, `Folder`, `GlobalDatasource`, `GlobalRole`, `GlobalRoleBinding`, `GlobalVariable`, `GlobalSecret`, `Project`, `Role`, `RoleBinding`, `Secret`, `User` or `Variable` (not case-sensitive)
 
 ```yaml
 # Use it in case you want to prefix the API path.
@@ -106,10 +106,6 @@ database: <Database config> # Optional
 # Dashboard configuration
 dashboard: <Dashboard config> # Optional
 
-# The configuration to access the CUE schemas
-# This config is deprecated. It will be removed in the future. Please remove it from your config. 
-schemas: <Schemas config> # Optional
-
 # If provided, Perses server will look to the different folders configured and populate the database based on what it is found
 # Be careful: the data coming from the provisioning folder will totally override what exists in the database.
 provisioning: <Provisioning config> # Optional
@@ -119,10 +115,6 @@ datasource: <Datasource config> # Optional
 
 # This configuration allows to fine tune the variable feature
 variable: <Variable config> # Optional
-
-# The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
-# This config is deprecated. Please use the config ephemeral_dashboard instead.
-ephemeral_dashboards_cleanup_interval: <duration> # Optional
 
 # The config for the ephemeral dashboard feature. This is the way to activate the feature.
 ephemeral_dashboard: < EphemeralDashboard config > # Optional
@@ -302,9 +294,13 @@ logout:
   # A config option to use a different query parameter for the redirect uri on logout. Some providers (e.g. Cognito) require this.
   logout_redirect_param_name: <string> | default = post_logout_redirect_uri # Optional
 
-  # Name of the userinfo property to use as the "login" of the user.
-  # If not set, or not present in the userinfo response, it falls back to the email, then to the subject.
-  custom_login_property: < enum | possibleValue = 'name' | 'given_name' | 'family_name' | 'middle_name' | 'nickname' | 'preferred_username' | 'email' > # Optional
+# Name of the userinfo property to use as the "login" of the user.
+# If not set, or not present in the userinfo response, it falls back to the email, then to the subject.
+custom_login_property: < enum | possibleValue = 'name' | 'given_name' | 'family_name' | 'middle_name' | 'nickname' | 'preferred_username' | 'email' > # Optional
+
+# List of the upstream token claims that Perses should persist in its own JWT, and optionally map to Perses roles.
+claims:
+  - <Claim config> # Optional
 ```
 
 ##### OAuth provider
@@ -321,6 +317,9 @@ client_id: <secret>
 
 # The Client Secret of the Perses application into the provider
 client_secret: <secret>
+
+# The path to a file containing the client secret
+client_secret_file: <filename> # Optional
 
 device_code:
   # Allow using a different Client ID for the device code flow
@@ -372,6 +371,27 @@ device_auth_url: <string> # Optional
 # Name of the property to get "login" from user infos API (if not in the default list ["login", "username"] )
 # The login is mandatory to store in the database the name of the user.
 custom_login_property: <string> # Optional
+
+# List of the upstream token claims that Perses should persist in its own JWT, and optionally map to Perses roles.
+claims:
+  - <Claim config> # Optional
+```
+
+###### Claim config
+
+```yaml
+# The name of the claim in the upstream access token (e.g. "roles", "groups").
+claim_name: <string>
+
+# Map the values of the claim to Perses roles.
+mappings:
+  - # The value of the claim to match.
+    claim_value: <string>
+    # The name of the role granted when the claim contains the value.
+    # When project is empty, it refers to a GlobalRole. Otherwise, it refers to a Role of the given project.
+    role_name: <string>
+    # The project of the Role. Leave it empty to refer to a GlobalRole.
+    project: <string> # Optional
 ```
 
 ##### Kubernetes provider
@@ -408,16 +428,16 @@ provider: <Authorization providers> # Optional
 native:
   <Native provider>
 # Kubernetes authorization provider
-kubernetes: <Kubernetes provider> # Optional
+kubernetes: <Kubernetes authorization provider> # Optional
 ```
 
 ##### Native provider
 ```yaml
-# Determines if the native authentication provider is enabled. If security.enable_auth is set to true and no other
-# providers are set then this value will be automatically set to true
+# Determines if the native authorization provider is enabled. If security.enable_auth is set to true and the
+# Kubernetes authorization provider is not enabled, then this value will be automatically set to true
 enable: <boolean> #Optional
 # Time interval that check if the RBAC cache need to be refreshed with db content. Only for SQL database setup.
-check_latest_update_interval: <duration> | default = 30s> # Optional
+check_latest_update_interval: <duration> | default = 30s # Optional
 
 # Default permissions for guest users (logged-in users)
 guest_permissions:
@@ -436,25 +456,24 @@ scopes:
 ```
 
 
-##### Kubernetes provider
+##### Kubernetes authorization provider
 ```yaml
-# Must be the only authentication provider enabled and must be run alongside the kubernetes
-# authorization option enabled
-enabled: <boolean>
+# Must be enabled alongside the Kubernetes authentication provider.
+enable: <boolean>
 # The active user in the kubeconfig should have "create" permissions for the `TokenReview` and 
 # `SubjectAccessReview` resources. If the kubeconfig parameter isn't set, the pods service account token
 #  will be used
 kubeconfig: <string> # Optional
 # query per second (QPS) the k8s client will use with the apiserver
-qps <int> | default 500  # Optional
+qps: <int> | default = 500  # Optional
 # burst QPS the k8s client will use with the apiserver
-burst <int> | default 1000  # Optional
+burst: <int> | default = 1000  # Optional
 # time an authorizer allow response will be cached for
-authorizer_allow_ttl <duration> | default 5m  # Optional
+authorizer_allow_ttl: <duration> | default = 5m  # Optional
 # time an authorizer denied will be cached for
-authorizer_deny_ttl <duration> | default 30s  # Optional
+authorizer_deny_ttl: <duration> | default = 30s  # Optional
 # time an authenticator response will be cached for
-authenticator_ttl <duration> | default 2m  # Optional
+authenticator_ttl: <duration> | default = 2m  # Optional
 ```
 
 #### CORS config
@@ -484,7 +503,7 @@ allow_headers: <string[]> | default = [] # Optional
 allow_credentials: <boolean> | default = false # Optional
 
 # Configure the value of Access-Control-Expose-Headers response header.
-# See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Header
+# See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers
 expose_headers: <string[]> | default = [] # Optional
 
 # Configure how long (in seconds) the results of a preflight request can be cached.
@@ -496,9 +515,10 @@ max_age: <integer> | default = 0 # Optional
 ```yaml
 # Config in case you want to use a file DB.
 # Prefer the SQL config in case you are running multiple Perses instances.
+# When no database is configured, a file DB stored in the folder "./local_db" is used.
 file: <Database file config> # Optional
 
-# The SQL config
+# The SQL config. It cannot be used at the same time as the file config.
 sql: <Database SQL config> # Optional
 ```
 
@@ -506,14 +526,14 @@ sql: <Database SQL config> # Optional
 
 ```yaml
 # The path to the folder containing the database
-folder: <path>
+folder: <filename>
 
 # The file extension and so the file format used when storing and reading data from/to the database
 extension: <string> | default = yaml # Optional
 
 # Whether the database is case-sensitive.
 # Be aware that to reflect this config, metadata.project and metadata.name from the resources managed can be modified before the insertion in the database.
-case_sensitive: <string> | default = false # Optional
+case_sensitive: <boolean> | default = false # Optional
 ```
 
 #### Database SQL config
@@ -549,7 +569,7 @@ addr: <secret> # Optional
 addr_file: <filename> # Optional
 
 # Database name
-db_name: <string> # Optional
+db_name: <string>
 collation: <string> # Optional
 
 # Max packet size allowed
@@ -605,7 +625,7 @@ reject_read_only: <boolean> | default = false # Optional
 
 # Whether the database is case-sensitive.
 # Be aware that to reflect this config, metadata.project and metadata.name from the resources managed can be modified before the insertion in the database.
-case_sensitive: <string> | default = false # Optional
+case_sensitive: <boolean> | default = false # Optional
 
 # Maximum amount of time a connection may be reused. Keep it shorter than the server's wait_timeout
 # to avoid reusing connections the server has already closed.
@@ -619,28 +639,6 @@ max_open_conns: <int> # Optional
 
 # Maximum number of connections in the idle connection pool. A value <= 0 keeps the Go default (2).
 max_idle_conns: <int> # Optional
-```
-
-### Schemas config
-
-!!! warning
-    This config is deprecated. It will be removed in the future. Please remove it from your config.
-
-```yaml
-# Path to the Cue schemas of the panels
-panels_path: <path> | default = "schemas/panels" # Optional
-
-# Path to the Cue schemas of the queries
-queries_path: <path> | default = "schemas/queries" # Optional
-
-# Path to the Cue schemas of the datasources
-datasources_path: <path> | default = "schemas/datasources" # Optional
-
-# Path to the Cue schemas of the variables
-variables_path: <path> | default = "schemas/variables" # Optional
-
-# The refresh interval of the cue schemas regardless their paths
-interval: <duration> | default = 1h # Optional
 ```
 
 ### TLS config
@@ -953,10 +951,12 @@ kubernetes_sd: <KubernetesSD Config> # Optional
 # URL of the HTTP server exposing the global datasource list to retrieve.
 url: <url>
 # The HTTP authorization credentials for the targets.
-# Basic Auth, authorization and oauth are mutually exclusive. Use one of them.
+# Basic Auth, authorization, oauth, native_auth and k8s_auth are mutually exclusive. Use one of them.
 basic_auth: <Basic Auth specification> # Optional
 oauth: <Oauth specification> # Optional
 authorization: <Authorization specification> # Optional
+native_auth: <Native Auth specification> # Optional
+k8s_auth: <K8s Auth specification> # Optional
 
 # Config used to connect to the targets.
 tls_config: <TLS config> # Optional
@@ -967,15 +967,24 @@ headers:
 
 ###### Oauth specification
 
+See the [OAuth](../api/secret.md#oauth-config-specification) specification.
+
+###### Native Auth specification
+
 ```yaml
-# ClientID is the application's ID.
-client_id: <string>
+# The login of a Perses user, used to authenticate against a Perses server with the native authentication.
+login: <string>
 
-# ClientSecret is the application's secret.
-client_secret: <string>
+# The password of the user.
+password: <secret>
+```
 
-# TokenURL is the resource server's token endpoint URL. This is a constant specific to each server.
-token_url: <string>
+###### K8s Auth specification
+
+```yaml
+# The path to the kubeconfig file used to authenticate the requests.
+# If not set, the in-cluster configuration (service account token) is used.
+kubeconfig: <filename> # Optional
 ```
 
 ###### Basic Auth specification
@@ -996,10 +1005,12 @@ datasource_plugin_kind: <string>
 # Leave empty if you are looking for datasource cross-namespace.
 namespace: <string> # Optional
 
-# Configuration when you want to discover the services in Kubernetes
+# Configuration when you want to discover the services in Kubernetes.
+# Exactly one of service_configuration and pod_configuration must be enabled.
 service_configuration: <KubeServiceDiscovery Config> # Optional
 
-# Configuration when you want to discover the pods in Kubernetes
+# Configuration when you want to discover the pods in Kubernetes.
+# Exactly one of service_configuration and pod_configuration must be enabled.
 pod_configuration: <KubePodDiscovery Config> # Optional
 
 # The labels used to filter the list of resource when contacting the Kubernetes API.
@@ -1057,7 +1068,7 @@ container_name: <string> # Optional
 container_port_name: <string> # Optional
   
 # Number of the container port.
-container_port_number: <string> # Optional
+container_port_number: <int32> # Optional
 ```
 
 ### EphemeralDashboard config
@@ -1068,6 +1079,10 @@ enable: <bool> | default = false # Optional
 
 # The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
 cleanup_interval: <duration> | default = 1d # Optional
+
+# The maximum time to live a user can set on an ephemeral dashboard. A request with a greater TTL is rejected.
+# When not set, there is no limit.
+max_ttl: <duration> # Optional
 ```
 
 ### Frontend config
@@ -1113,7 +1128,7 @@ default_user_preferences:
 
 ```yaml
 # The severity of the information to be displayed in the banner. It will change the color of the banner.
-severity: <enum | possibleValue = 'info' | 'warning' | 'error'>
+severity: <enum | possibleValue = 'info' | 'warning' | 'error'> | default = info # Optional
 # The content of the information to be displayed in the banner. It can be html content.
 message: <string>
 ```
@@ -1130,7 +1145,8 @@ enable: <bool> | default = false
 ```yaml
 # The different relative timerange options available in dashboards and explorer
 # Use duration format. The display will be computed automatically. Eg: "5m: will be display "Last 5 minutes"
-options: <duration[]> | default = [ "5m", "15m", "30m", "1h", "6h", "12h", "1d", "1w", "2w" ] # Optional
+# The options are sorted from the shortest to the longest duration.
+options: <duration[]> | default = [ "5m", "15m", "30m", "1h", "6h", "12h", "24h", "7d", "14d" ] # Optional
 # Allow you to disable the custom time range (absolute time range)
 disable_custom:  <bool> | default = false # Optional
 # Allow you to disable the zoom actions (extend or half current time range)
@@ -1185,11 +1201,6 @@ dashboard: <string> # Optional
 # The path to the folder containing the plugins
 # The default value depends if Perses is running in a container or not.
 path: <path> | default = ("plugins" | "/etc/perses/plugins") # Optional
-
-# The path to the folder containing the plugins archive. 
-# When Perses is starting, it will extract the content of the archive in the folder specified in the `folder` attribute.
-# DEPRECATED: use `archive_paths` instead to specify multiple folders for the archived plugins.
-archive_path: <path> | default = ("plugins-archive" | "/etc/perses/plugins-archive") # Optional
 
 # The list of paths to the directories containing the archived plugins. It allows to specify multiple directories for the archived plugins.
 # When Perses is starting, it will extract any archive found in the folders specified in this attribute in the folder specified in the `path` attribute.

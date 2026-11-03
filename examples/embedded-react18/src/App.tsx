@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { DashboardResource, DatasourceApi, DatasourceResource, GlobalDatasourceResource } from '@perses-dev/client';
 import { ChartsProvider, generateChartsTheme, getTheme, SnackbarProvider } from '@perses-dev/components';
 import {
   DataQueriesProvider,
@@ -20,8 +21,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { Box, ThemeProvider } from '@mui/material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { DatasourceStoreProvider, Panel, VariableProvider, DatasourceApi } from '@perses-dev/dashboards';
-import { DashboardResource, GlobalDatasourceResource, DatasourceResource } from '@perses-dev/core';
+import { DatasourceStoreProvider, Panel, VariableProvider } from '@perses-dev/dashboards';
 import * as prometheusPlugin from '@perses-dev/prometheus-plugin';
 import * as timeseriesChartPlugin from '@perses-dev/timeseries-chart-plugin';
 
@@ -68,28 +68,29 @@ export const fakeDashboard = {
   spec: {},
 } as DashboardResource;
 
-function App() {
-  const muiTheme = getTheme('light');
-  const chartsTheme = generateChartsTheme(muiTheme, {});
-  const pluginLoader = dynamicImportPluginLoader([
-    {
-      resource: prometheusPlugin.getPluginModule(),
-      importPlugin: () => Promise.resolve(prometheusPlugin),
-    },
-    {
-      resource: timeseriesChartPlugin.getPluginModule(),
-      importPlugin: () => Promise.resolve(timeseriesChartPlugin),
-    },
-  ]);
+const muiTheme = getTheme('light');
+const chartsTheme = generateChartsTheme(muiTheme, {});
+const pluginLoader = dynamicImportPluginLoader([
+  {
+    resource: prometheusPlugin.getPluginModule(),
+    importPlugin: () => Promise.resolve(prometheusPlugin),
+  },
+  {
+    resource: timeseriesChartPlugin.getPluginModule(),
+    importPlugin: () => Promise.resolve(timeseriesChartPlugin),
+  },
+]);
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        refetchOnWindowFocus: false,
-        retry: 0,
-      },
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 0,
     },
-  });
+  },
+});
+
+function App() {
   return (
     <ThemeProvider theme={muiTheme}>
       <ChartsProvider chartsTheme={chartsTheme}>
@@ -108,8 +109,13 @@ function App() {
                     <DataQueriesProvider
                       definitions={[
                         {
-                          kind: 'PrometheusTimeSeriesQuery',
-                          spec: { query: `up{job="prometheus"}` },
+                          kind: 'TimeSeriesQuery',
+                          spec: {
+                            plugin: {
+                              kind: 'PrometheusTimeSeriesQuery',
+                              spec: { query: 'up{job="prometheus"}' },
+                            },
+                          },
                         },
                       ]}
                     >

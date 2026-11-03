@@ -19,7 +19,7 @@ import type { ReactElement } from 'react';
 import { CRUDAction } from './CRUDAction';
 
 interface CRUDGridActionsCellItemProps {
-  icon: JSX.Element;
+  icon: ReactElement;
   label: string;
   action?: Action;
   scope?: Scope;

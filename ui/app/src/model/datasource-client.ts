@@ -13,7 +13,7 @@
 
 import type { DatasourceResource, StatusError } from '@perses-dev/client';
 import { fetchJson } from '@perses-dev/client';
-import type { UseMutationResult, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import type { QueryClient, UseMutationResult, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
@@ -21,6 +21,17 @@ import { buildQueryKey } from './querykey-builder';
 import buildURL from './url-builder';
 
 export const resource = 'datasources';
+
+/**
+ * Invalidates the list of the datasources of the given project, and the list of the datasources of all the projects.
+ * The key of the latter doesn't start with the key of the former, so it is not invalidated with it.
+ */
+function invalidateDatasourceLists(queryClient: QueryClient, project: string): Promise<[void, void]> {
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: buildQueryKey({ resource, parent: project }) }),
+    queryClient.invalidateQueries({ queryKey: buildQueryKey({ resource }), exact: true }),
+  ]);
+}
 
 type DatasourceListOptions = Omit<UseQueryOptions<DatasourceResource[], StatusError>, 'queryKey' | 'queryFn'> & {
   project?: string;
@@ -119,7 +130,7 @@ export function useCreateDatasourceMutation(
       return createDatasource(datasource);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries({ queryKey: [...queryKey] });
+      return invalidateDatasourceLists(queryClient, project);
     },
   });
 }
@@ -144,7 +155,7 @@ export function useUpdateDatasourceMutation(
     onSuccess: (entity: DatasourceResource) => {
       return Promise.all([
         queryClient.invalidateQueries({ queryKey: [...queryKey, entity.metadata.name] }),
-        queryClient.invalidateQueries({ queryKey }),
+        invalidateDatasourceLists(queryClient, project),
       ]);
     },
   });
@@ -171,7 +182,7 @@ export function useDeleteDatasourceMutation(
     },
     onSuccess: (entity: DatasourceResource) => {
       queryClient.removeQueries({ queryKey: [...queryKey, entity.metadata.name] });
-      return queryClient.invalidateQueries({ queryKey });
+      return invalidateDatasourceLists(queryClient, project);
     },
   });
 }
