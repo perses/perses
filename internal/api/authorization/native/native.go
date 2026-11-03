@@ -290,6 +290,10 @@ func (n *native) GetUserProjects(ctx *echo.Context, requestAction v1Role.Action,
 	}
 	// Like HasPermission, the projects granted by the claims, by name and through the wildcard subject are combined.
 	projects := projectsWithPermission(c.permissions[username], requestAction, requestScope)
+	if slices.Contains(projects, v1.WildcardProject) {
+		// The permission is granted on every project: no need to look at the other projects.
+		return projects, nil
+	}
 	if len(c.allUsersPermissions) > 0 {
 		projects = mergeProjects(projects, projectsWithPermission(c.allUsersPermissions, requestAction, requestScope))
 	}
