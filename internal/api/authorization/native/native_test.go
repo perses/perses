@@ -481,10 +481,17 @@ func TestClaimPermissions(t *testing.T) {
 func TestNativeGetUserProjectsWithWildcardUser(t *testing.T) {
 	silenceTestLogs(t)
 	n := wildcardUserDataset().newNative(t, false)
+	n.claimMappings = map[providerKey][]claimRoleMapping{
+		{kind: testProviderKind, id: testProviderID}: {
+			{claimName: testClaimName, claimValue: "p3-viewers", roleName: "viewer", project: "p3"},
+			{claimName: testClaimName, claimValue: "readers", roleName: "reader"},
+		},
+	}
 
 	testSuites := []struct {
 		title            string
 		user             string
+		claims           map[string][]string
 		reqAction        role.Action
 		reqScope         role.Scope
 		expectedProjects []string
@@ -524,10 +531,26 @@ func TestNativeGetUserProjectsWithWildcardUser(t *testing.T) {
 			reqScope:         role.DashboardScope,
 			expectedProjects: []string{"p1"},
 		},
+		{
+			title:            "projects of the claims merged with the ones of the user and of the wildcard subject",
+			user:             "carol",
+			claims:           map[string][]string{testClaimName: {"p3-viewers"}},
+			reqAction:        role.ReadAction,
+			reqScope:         role.DashboardScope,
+			expectedProjects: []string{"p1", "p2", "p3"},
+		},
+		{
+			title:            "global permission granted through the claims",
+			user:             "carol",
+			claims:           map[string][]string{testClaimName: {"readers"}},
+			reqAction:        role.ReadAction,
+			reqScope:         role.DashboardScope,
+			expectedProjects: []string{v1.WildcardProject},
+		},
 	}
 	for _, test := range testSuites {
 		t.Run(test.title, func(t *testing.T) {
-			projects, err := n.GetUserProjects(newTestContext(test.user, nil), test.reqAction, test.reqScope)
+			projects, err := n.GetUserProjects(newTestContext(test.user, test.claims), test.reqAction, test.reqScope)
 			require.NoError(t, err)
 			assert.ElementsMatch(t, test.expectedProjects, projects)
 		})
