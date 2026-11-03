@@ -53,6 +53,8 @@ subjects:
 kind: <string>
 
 # The name of the subject (metadata.name)
+# For a `User` subject, use "*" to refer to every user known by Perses, including the users created after the role
+# binding (for example, at their first login through an OAuth/OIDC provider).
 name: <string>
 ```
 

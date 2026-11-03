@@ -69,11 +69,14 @@ func newBindingUsers(users []*v1.User) *bindingUsers {
 	return &bindingUsers{existingUsers: existingUsers}
 }
 
-// of returns the existing users that are subjects of the given binding, in the order of the subjects.
+// of returns the existing users that are subjects of the given binding, in the order of the subjects, and whether
+// the binding refers to every user through the wildcard subject (see v1.WildcardUser).
+// When it does, no user is returned: the wildcard subject already covers every existing user, so the users also listed
+// by name must not get the permissions of the role a second time.
 // A user is listed only once in a binding: the duplicated subjects are removed when the binding is unmarshalled
 // (see v1.RoleBindingSpec), which happens when it is read from the database.
 // The returned slice is only valid until the next call.
-func (b *bindingUsers) of(spec v1.RoleBindingSpec) []string {
+func (b *bindingUsers) of(spec v1.RoleBindingSpec) (users []string, isAllUsers bool) {
 	// Empty the buffer but keep its capacity: the users of this binding overwrite the ones of the previous binding
 	// in the same backing array, so no new slice is allocated once the buffer is large enough.
 	// This is why the returned slice is only valid until the next call.
@@ -84,16 +87,20 @@ func (b *bindingUsers) of(spec v1.RoleBindingSpec) []string {
 		if subject.Kind != v1.KindUser {
 			continue
 		}
+		if subject.Name == v1.WildcardUser {
+			return nil, true
+		}
 		if _, exists := b.existingUsers[subject.Name]; !exists {
 			continue
 		}
 		b.users = append(b.users, subject.Name)
 	}
-	return b.users
+	return b.users, false
 }
 
-// buildUsersPermissions computes the permissions of every user from the roles and their bindings:
+// buildCache computes the permissions of every user from the roles and their bindings:
 //   - only the subjects that are existing users get permissions,
+//   - the permissions granted through the wildcard subject are stored once (see cache.allUsersPermissions),
 //   - a binding referencing a role that doesn't exist is ignored,
 //   - the permissions of a user (for a given project) are ordered like the bindings granting them.
 //
@@ -102,9 +109,10 @@ func (b *bindingUsers) of(spec v1.RoleBindingSpec) []string {
 // of the role several times, which doesn't change the authorization decisions, but is visible in the permissions
 // returned by GetPermissions.
 // The roles are indexed, and the subjects of each binding are iterated once, so the complexity is linear
-// in the number of users, roles, binding subjects and permissions granted.
-func buildUsersPermissions(users []*v1.User, globalRoles []*v1.GlobalRole, roles []*v1.Role,
-	globalRoleBindings []*v1.GlobalRoleBinding, roleBindings []*v1.RoleBinding) usersPermissions {
+// in the number of users, roles, binding subjects and permissions granted. In particular, a binding to the wildcard
+// subject costs as much as a binding to a single user, whatever the number of users.
+func buildCache(users []*v1.User, globalRoles []*v1.GlobalRole, roles []*v1.Role,
+	globalRoleBindings []*v1.GlobalRoleBinding, roleBindings []*v1.RoleBinding) *cache {
 	// Index the roles. Like findGlobalRole and findRole, the first role found wins in case of duplicates.
 	globalRolesByName := make(map[string]*v1.GlobalRole, len(globalRoles))
 	for _, globalRole := range globalRoles {
@@ -120,7 +128,11 @@ func buildUsersPermissions(users []*v1.User, globalRoles []*v1.GlobalRole, roles
 		}
 	}
 
-	permissions := make(usersPermissions)
+	c := &cache{
+		permissions: make(usersPermissions),
+		globalRoles: globalRoles,
+		roles:       roles,
+	}
 	subjects := newBindingUsers(users)
 	// For each binding, the role is resolved first: if it doesn't exist, the binding is ignored without iterating
 	// over its subjects.
@@ -130,7 +142,7 @@ func buildUsersPermissions(users []*v1.User, globalRoles []*v1.GlobalRole, roles
 			logrus.Warningf("global role %q listed in the global role binding %q does not exist", globalRoleBinding.Spec.Role, globalRoleBinding.Metadata.Name)
 			continue
 		}
-		permissions.addRolePermissions(subjects.of(globalRoleBinding.Spec), v1.WildcardProject, globalRole.Spec.Permissions)
+		c.grantRolePermissions(subjects, globalRoleBinding.Spec, v1.WildcardProject, globalRole.Spec.Permissions)
 	}
 	for _, roleBinding := range roleBindings {
 		projectRole, exists := rolesByKey[projectRoleKey{project: roleBinding.Metadata.Project, name: roleBinding.Spec.Role}]
@@ -138,37 +150,86 @@ func buildUsersPermissions(users []*v1.User, globalRoles []*v1.GlobalRole, roles
 			logrus.Warningf("role %q listed in the role binding %s/%s does not exist", roleBinding.Spec.Role, roleBinding.Metadata.Project, roleBinding.Metadata.Name)
 			continue
 		}
-		permissions.addRolePermissions(subjects.of(roleBinding.Spec), roleBinding.Metadata.Project, projectRole.Spec.Permissions)
+		c.grantRolePermissions(subjects, roleBinding.Spec, roleBinding.Metadata.Project, projectRole.Spec.Permissions)
 	}
-	return permissions
+	if len(c.allUsersPermissions) > 0 {
+		// The permissions granted through the wildcard subject only apply to the existing users.
+		c.existingUsers = subjects.existingUsers
+	}
+	return c
 }
 
 type cache struct {
+	// permissions contains the permissions granted to each user listed by name in the bindings.
 	permissions usersPermissions
-	globalRoles []*v1.GlobalRole
-	roles       []*v1.Role
+	// allUsersPermissions contains the permissions granted to every existing user through the wildcard subject
+	// (project name or v1.WildcardProject -> permission list).
+	// They are stored once instead of being copied to every user: otherwise, each binding to the wildcard subject
+	// would cost memory and refresh time proportional to the number of users.
+	allUsersPermissions map[string][]*v1Role.Permission
+	// existingUsers contains the name of every existing user. It is only set when allUsersPermissions is not empty.
+	existingUsers map[string]struct{}
+	globalRoles   []*v1.GlobalRole
+	roles         []*v1.Role
 }
 
-func (c *cache) hasPermission(user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
-	usrPermissions, ok := c.permissions[user]
-	if !ok {
-		return false
+// grantRolePermissions grants the permissions of a role to the subjects of a binding, for the given project.
+// It must only be called while the cache is being built, before it is published.
+func (c *cache) grantRolePermissions(subjects *bindingUsers, spec v1.RoleBindingSpec, project string, rolePermissions []v1Role.Permission) {
+	users, isAllUsers := subjects.of(spec)
+	if !isAllUsers {
+		c.permissions.addRolePermissions(users, project, rolePermissions)
+		return
 	}
+	if c.allUsersPermissions == nil {
+		c.allUsersPermissions = make(map[string][]*v1Role.Permission)
+	}
+	for i := range rolePermissions {
+		c.allUsersPermissions[project] = append(c.allUsersPermissions[project], &rolePermissions[i])
+	}
+}
 
-	// Checking global perm first
-	if requestProject != v1.WildcardProject {
-		if globalPermissions, ok := usrPermissions[v1.WildcardProject]; ok {
-			if listHasPermission(globalPermissions, requestAction, requestScope) {
-				return true
-			}
+// allUsersPermissionsOf returns the permissions granted to the given user through the wildcard subject,
+// or nil if the user doesn't exist.
+func (c *cache) allUsersPermissionsOf(user string) map[string][]*v1Role.Permission {
+	if len(c.allUsersPermissions) == 0 {
+		return nil
+	}
+	if _, exists := c.existingUsers[user]; !exists {
+		return nil
+	}
+	return c.allUsersPermissions
+}
+
+// hasPermission checks the permissions granted to the user by the bindings, by name or through the wildcard subject.
+func (c *cache) hasPermission(user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
+	// The permissions granted by name are checked inline rather than through hasPermissionIn: this function is called
+	// on every request, and the additional function call is measurable when no binding uses the wildcard subject.
+	if usrPermissions, ok := c.permissions[user]; ok {
+		// Checking global perm first
+		if requestProject != v1.WildcardProject && listHasPermission(usrPermissions[v1.WildcardProject], requestAction, requestScope) {
+			return true
+		}
+		if listHasPermission(usrPermissions[requestProject], requestAction, requestScope) {
+			return true
 		}
 	}
-
-	projectPermissions, ok := usrPermissions[requestProject]
-	if !ok {
+	if len(c.allUsersPermissions) == 0 {
 		return false
 	}
-	return listHasPermission(projectPermissions, requestAction, requestScope)
+	return hasPermissionIn(c.allUsersPermissionsOf(user), requestAction, requestProject, requestScope)
+}
+
+// hasPermissionIn checks the given permissions (project name or v1.WildcardProject -> permission list).
+func hasPermissionIn(permissions map[string][]*v1Role.Permission, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
+	if len(permissions) == 0 {
+		return false
+	}
+	// Checking global perm first
+	if requestProject != v1.WildcardProject && listHasPermission(permissions[v1.WildcardProject], requestAction, requestScope) {
+		return true
+	}
+	return listHasPermission(permissions[requestProject], requestAction, requestScope)
 }
 
 func listHasPermission(permissions []*v1Role.Permission, requestAction v1Role.Action, requestScope v1Role.Scope) bool {

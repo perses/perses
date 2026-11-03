@@ -22,8 +22,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// referenceUsersPermissions is the previous implementation of buildUsersPermissions, which iterates over every
-// binding for every user. It is kept as a reference to check that the new implementation gives the same result.
+// referenceUsersPermissions is the previous implementation of the users permissions computed by buildCache, which
+// iterates over every binding for every user. It is kept as a reference to check that the new implementation gives
+// the same result.
 func referenceUsersPermissions(users []*v1.User, globalRoles []*v1.GlobalRole, roles []*v1.Role,
 	globalRoleBindings []*v1.GlobalRoleBinding, roleBindings []*v1.RoleBinding) usersPermissions {
 	permissionBuild := make(usersPermissions)
@@ -150,8 +151,44 @@ func edgeCaseDataset() *testDataset {
 	}
 }
 
-func (ds *testDataset) buildUsersPermissions() usersPermissions {
-	return buildUsersPermissions(ds.users, ds.globalRoles, ds.roles, ds.globalRoleBindings, ds.roleBindings)
+func (ds *testDataset) buildCache() *cache {
+	return buildCache(ds.users, ds.globalRoles, ds.roles, ds.globalRoleBindings, ds.roleBindings)
+}
+
+var testCreateProjectPermission = v1Role.Permission{
+	Actions: []v1Role.Action{v1Role.CreateAction},
+	Scopes:  []v1Role.Scope{v1Role.ProjectScope},
+}
+
+// wildcardUserDataset is a hand-written dataset with bindings to the wildcard subject.
+func wildcardUserDataset() *testDataset {
+	return &testDataset{
+		users: []*v1.User{
+			{Metadata: v1.Metadata{Name: "alice"}},
+			{Metadata: v1.Metadata{Name: "bob"}},
+			{Metadata: v1.Metadata{Name: "carol"}},
+		},
+		globalRoles: []*v1.GlobalRole{
+			testGlobalRole("project-creator", testCreateProjectPermission),
+		},
+		roles: []*v1.Role{
+			testRole("p1", "viewer", testReadAllPermission),
+			testRole("p1", "editor", testEditPermission),
+			testRole("p2", "viewer", testReadAllPermission),
+		},
+		globalRoleBindings: []*v1.GlobalRoleBinding{
+			asReadFromDatabase(testGlobalRoleBinding("everyone", "project-creator", userSubjects(v1.WildcardUser)...)),
+		},
+		roleBindings: []*v1.RoleBinding{
+			// alice is listed by name and through the wildcard subject: she must get the permissions of the role once.
+			asReadFromDatabase(testRoleBinding("p1", "everyone", "viewer", userSubjects("alice", v1.WildcardUser)...)),
+			asReadFromDatabase(testRoleBinding("p1", "editors", "editor", userSubjects("bob")...)),
+			asReadFromDatabase(testRoleBinding("p2", "viewers", "viewer", userSubjects("carol")...)),
+			asReadFromDatabase(testRoleBinding("p2", "everyone", "editor", userSubjects(v1.WildcardUser)...)), // the role exists only in p1
+			// A subject that is not a user can't come from the database (rejected by the unmarshalling): defensive case.
+			testRoleBinding("p2", "not-a-user", "viewer", v1.Subject{Kind: v1.KindProject, Name: v1.WildcardUser}),
+		},
+	}
 }
 
 func permissionValues(permissions []*v1Role.Permission) []v1Role.Permission {
@@ -162,9 +199,21 @@ func permissionValues(permissions []*v1Role.Permission) []v1Role.Permission {
 	return values
 }
 
-func TestBuildUsersPermissions(t *testing.T) {
+func permissionValuesByProject(permissions map[string][]*v1Role.Permission) map[string][]v1Role.Permission {
+	values := make(map[string][]v1Role.Permission, len(permissions))
+	for project, projectPermissions := range permissions {
+		values[project] = permissionValues(projectPermissions)
+	}
+	return values
+}
+
+func TestBuildCache(t *testing.T) {
 	silenceTestLogs(t)
-	permissions := edgeCaseDataset().buildUsersPermissions()
+	c := edgeCaseDataset().buildCache()
+	permissions := c.permissions
+
+	assert.Empty(t, c.allUsersPermissions, "no binding uses the wildcard subject")
+	assert.Nil(t, c.existingUsers, "the existing users are only kept when a binding uses the wildcard subject")
 
 	assert.Len(t, permissions, 3, "only alice, bob and carol get permissions")
 	assert.NotContains(t, permissions, "dave", "dave is only bound through a subject that is not a user")
@@ -185,7 +234,24 @@ func TestBuildUsersPermissions(t *testing.T) {
 	assert.Equal(t, []v1Role.Permission{testReadAllPermission, testEditPermission, testReadAllPermission}, permissionValues(permissions["carol"]["p1"]))
 }
 
-func TestBuildUsersPermissionsMatchesPreviousAlgorithm(t *testing.T) {
+func TestBuildCacheWithWildcardUser(t *testing.T) {
+	silenceTestLogs(t)
+	c := wildcardUserDataset().buildCache()
+
+	// The permissions granted through the wildcard subject are stored once, instead of being copied to every user.
+	assert.Len(t, c.allUsersPermissions, 2, "the binding to an unknown role and the subject that is not a user are ignored")
+	assert.Equal(t, []v1Role.Permission{testCreateProjectPermission}, permissionValues(c.allUsersPermissions[v1.WildcardProject]))
+	assert.Equal(t, []v1Role.Permission{testReadAllPermission}, permissionValues(c.allUsersPermissions["p1"]))
+	assert.Equal(t, map[string]struct{}{"alice": {}, "bob": {}, "carol": {}}, c.existingUsers)
+
+	// Only the users listed by name in a binding without the wildcard subject get their own permissions.
+	assert.Len(t, c.permissions, 2)
+	assert.NotContains(t, c.permissions, "alice", "alice is only listed in a binding to the wildcard subject")
+	assert.Equal(t, map[string][]v1Role.Permission{"p1": {testEditPermission}}, permissionValuesByProject(c.permissions["bob"]))
+	assert.Equal(t, map[string][]v1Role.Permission{"p2": {testReadAllPermission}}, permissionValuesByProject(c.permissions["carol"]))
+}
+
+func TestBuildCacheMatchesPreviousAlgorithm(t *testing.T) {
 	silenceTestLogs(t)
 	datasets := map[string]*testDataset{
 		"edge cases": edgeCaseDataset(),
@@ -197,7 +263,7 @@ func TestBuildUsersPermissionsMatchesPreviousAlgorithm(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			expected := referenceUsersPermissions(ds.users, ds.globalRoles, ds.roles, ds.globalRoleBindings, ds.roleBindings)
 			// Same users, projects and permissions, in the same order.
-			assert.Equal(t, expected, ds.buildUsersPermissions())
+			assert.Equal(t, expected, ds.buildCache().permissions)
 		})
 	}
 }
