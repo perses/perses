@@ -318,22 +318,31 @@ func BenchmarkNativeGetUserProjects(b *testing.B) {
 }
 
 // BenchmarkNativeGetUserProjectsWithWildcardUser measures the listing of the projects of a user when some projects are
-// opened to every user through the wildcard subject: they are merged with the projects the user is a member of.
+// opened to every user through the wildcard subject: they are merged with the projects the user is a member of, unless
+// the user already has access to every project (global admin).
 func BenchmarkNativeGetUserProjectsWithWildcardUser(b *testing.B) {
 	silenceTestLogs(b)
 	for _, size := range datasetSizes {
 		for _, projectPercent := range wildcardUserProjectPercents {
 			n := newTestDataset(size).withWildcardUserBindings(projectPercent).newNative(b, false)
-			ctx := newTestContext(testUserName(1), nil)
-			b.Run(fmt.Sprintf("%s,wildcardProjectPercent=%d", size, projectPercent), func(b *testing.B) {
-				if _, err := n.GetUserProjects(ctx, v1Role.ReadAction, v1Role.DashboardScope); err != nil {
-					b.Fatal(err)
-				}
-				b.ReportAllocs()
-				for b.Loop() {
-					_, _ = n.GetUserProjects(ctx, v1Role.ReadAction, v1Role.DashboardScope)
-				}
-			})
+			scenarios := []struct {
+				name string
+				ctx  echo.Context
+			}{
+				{name: "project-member", ctx: newTestContext(testUserName(1), nil)},
+				{name: "global-admin", ctx: newTestContext(testUserName(0), nil)},
+			}
+			for _, sc := range scenarios {
+				b.Run(fmt.Sprintf("%s,wildcardProjectPercent=%d/%s", size, projectPercent, sc.name), func(b *testing.B) {
+					if _, err := n.GetUserProjects(sc.ctx, v1Role.ReadAction, v1Role.DashboardScope); err != nil {
+						b.Fatal(err)
+					}
+					b.ReportAllocs()
+					for b.Loop() {
+						_, _ = n.GetUserProjects(sc.ctx, v1Role.ReadAction, v1Role.DashboardScope)
+					}
+				})
+			}
 		}
 	}
 }
