@@ -71,7 +71,7 @@ func newBindingUsers(users []*v1.User) *bindingUsers {
 
 // of returns the existing users that are subjects of the given binding, in the order of the subjects, and whether
 // the binding refers to every user through the wildcard subject (see v1.WildcardUser).
-// When it does, no user is returned: the wildcard subject already covers every existing user, so the users also listed
+// When it does, no user is returned: the wildcard subject already covers every user, so the users also listed
 // by name must not get the permissions of the role a second time.
 // A user is listed only once in a binding: the duplicated subjects are removed when the binding is unmarshalled
 // (see v1.RoleBindingSpec), which happens when it is read from the database.
@@ -152,25 +152,20 @@ func buildCache(users []*v1.User, globalRoles []*v1.GlobalRole, roles []*v1.Role
 		}
 		c.grantRolePermissions(subjects, roleBinding.Spec, roleBinding.Metadata.Project, projectRole.Spec.Permissions)
 	}
-	if len(c.allUsersPermissions) > 0 {
-		// The permissions granted through the wildcard subject only apply to the existing users.
-		c.existingUsers = subjects.existingUsers
-	}
 	return c
 }
 
 type cache struct {
 	// permissions contains the permissions granted to each user listed by name in the bindings.
 	permissions usersPermissions
-	// allUsersPermissions contains the permissions granted to every existing user through the wildcard subject
-	// (project name or v1.WildcardProject -> permission list).
+	// allUsersPermissions contains the permissions granted to every authenticated user through the wildcard subject
+	// (project name or v1.WildcardProject -> permission list). Like the guest permissions, they don't depend on the
+	// users stored in the database.
 	// They are stored once instead of being copied to every user: otherwise, each binding to the wildcard subject
 	// would cost memory and refresh time proportional to the number of users.
 	allUsersPermissions map[string][]*v1Role.Permission
-	// existingUsers contains the name of every existing user. It is only set when allUsersPermissions is not empty.
-	existingUsers map[string]struct{}
-	globalRoles   []*v1.GlobalRole
-	roles         []*v1.Role
+	globalRoles         []*v1.GlobalRole
+	roles               []*v1.Role
 }
 
 // grantRolePermissions grants the permissions of a role to the subjects of a binding, for the given project.
@@ -189,18 +184,6 @@ func (c *cache) grantRolePermissions(subjects *bindingUsers, spec v1.RoleBinding
 	}
 }
 
-// allUsersPermissionsOf returns the permissions granted to the given user through the wildcard subject,
-// or nil if the user doesn't exist.
-func (c *cache) allUsersPermissionsOf(user string) map[string][]*v1Role.Permission {
-	if len(c.allUsersPermissions) == 0 {
-		return nil
-	}
-	if _, exists := c.existingUsers[user]; !exists {
-		return nil
-	}
-	return c.allUsersPermissions
-}
-
 // hasPermission checks the permissions granted to the user by the bindings, by name or through the wildcard subject.
 func (c *cache) hasPermission(user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
 	// The permissions granted by name are checked inline rather than through hasPermissionIn: this function is called
@@ -217,14 +200,11 @@ func (c *cache) hasPermission(user string, requestAction v1Role.Action, requestP
 	if len(c.allUsersPermissions) == 0 {
 		return false
 	}
-	return hasPermissionIn(c.allUsersPermissionsOf(user), requestAction, requestProject, requestScope)
+	return hasPermissionIn(c.allUsersPermissions, requestAction, requestProject, requestScope)
 }
 
 // hasPermissionIn checks the given permissions (project name or v1.WildcardProject -> permission list).
 func hasPermissionIn(permissions map[string][]*v1Role.Permission, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
-	if len(permissions) == 0 {
-		return false
-	}
 	// Checking global perm first
 	if requestProject != v1.WildcardProject && listHasPermission(permissions[v1.WildcardProject], requestAction, requestScope) {
 		return true
