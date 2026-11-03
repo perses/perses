@@ -15,12 +15,14 @@ package native
 
 import (
 	"fmt"
+	"slices"
 	"testing"
 
 	"github.com/perses/perses/internal/api/crypto"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func generateMockCache(userCount int, projectCountByUser int) cache {
@@ -62,8 +64,19 @@ func smallMockCache() cache {
 	return cache{permissions: permissions}
 }
 
+// wildcardMockCache extends smallMockCache with a permission granted to every existing user through the wildcard subject.
+func wildcardMockCache() cache {
+	c := smallMockCache()
+	c.allUsersPermissions = map[string][]*role.Permission{
+		"project2": {{Actions: []role.Action{role.ReadAction}, Scopes: []role.Scope{role.DashboardScope}}},
+	}
+	c.existingUsers = map[string]struct{}{"user0": {}, "user1": {}, "user2": {}, "user3": {}, "admin": {}}
+	return c
+}
+
 func TestCacheHasPermission(t *testing.T) {
 	smallCache := smallMockCache()
+	wildcardCache := wildcardMockCache()
 
 	testSuites := []struct {
 		title          string
@@ -202,6 +215,61 @@ func TestCacheHasPermission(t *testing.T) {
 			reqProject:     v1.WildcardProject,
 			reqScope:       role.GlobalRoleScope,
 			expectedResult: true,
+		},
+		// Testing the permissions granted to every existing user through the wildcard subject
+		{
+			title:          "user3 has 'read' perm on 'project2' for 'dashboard' scope through the wildcard subject only",
+			cache:          wildcardCache,
+			user:           "user3",
+			reqAction:      role.ReadAction,
+			reqProject:     "project2",
+			reqScope:       role.DashboardScope,
+			expectedResult: true,
+		},
+		{
+			title:          "user3 hasn't 'read' perm on 'project0' for 'dashboard' scope",
+			cache:          wildcardCache,
+			user:           "user3",
+			reqAction:      role.ReadAction,
+			reqProject:     "project0",
+			reqScope:       role.DashboardScope,
+			expectedResult: false,
+		},
+		{
+			title:          "user0 has 'read' perm on 'project2' for 'dashboard' scope through the wildcard subject",
+			cache:          wildcardCache,
+			user:           "user0",
+			reqAction:      role.ReadAction,
+			reqProject:     "project2",
+			reqScope:       role.DashboardScope,
+			expectedResult: true,
+		},
+		{
+			title:          "user0 keeps its 'create' perm on 'project0' for 'dashboard' scope",
+			cache:          wildcardCache,
+			user:           "user0",
+			reqAction:      role.CreateAction,
+			reqProject:     "project0",
+			reqScope:       role.DashboardScope,
+			expectedResult: true,
+		},
+		{
+			title:          "user0 hasn't 'update' perm on 'project2' for 'dashboard' scope",
+			cache:          wildcardCache,
+			user:           "user0",
+			reqAction:      role.UpdateAction,
+			reqProject:     "project2",
+			reqScope:       role.DashboardScope,
+			expectedResult: false,
+		},
+		{
+			title:          "unknown user hasn't 'read' perm on 'project2' for 'dashboard' scope: the wildcard subject only covers existing users",
+			cache:          wildcardCache,
+			user:           "unknown",
+			reqAction:      role.ReadAction,
+			reqProject:     "project2",
+			reqScope:       role.DashboardScope,
+			expectedResult: false,
 		},
 	}
 	for i := range testSuites {
@@ -410,4 +478,243 @@ func TestClaimPermissions(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestNativeGetUserProjectsWithWildcardUser(t *testing.T) {
+	silenceTestLogs(t)
+	n := wildcardUserDataset().newNative(t, false)
+
+	testSuites := []struct {
+		title            string
+		user             string
+		reqAction        role.Action
+		reqScope         role.Scope
+		expectedProjects []string
+	}{
+		{
+			title:            "user listed by name and through the wildcard subject",
+			user:             "alice",
+			reqAction:        role.ReadAction,
+			reqScope:         role.DashboardScope,
+			expectedProjects: []string{"p1"},
+		},
+		{
+			title:            "projects of the user merged with the ones of the wildcard subject",
+			user:             "carol",
+			reqAction:        role.ReadAction,
+			reqScope:         role.DashboardScope,
+			expectedProjects: []string{"p1", "p2"},
+		},
+		{
+			title:            "projects of the user only",
+			user:             "bob",
+			reqAction:        role.UpdateAction,
+			reqScope:         role.DashboardScope,
+			expectedProjects: []string{"p1"},
+		},
+		{
+			title:            "global permission granted through the wildcard subject",
+			user:             "bob",
+			reqAction:        role.CreateAction,
+			reqScope:         role.ProjectScope,
+			expectedProjects: []string{v1.WildcardProject},
+		},
+		{
+			title:            "unknown user gets nothing from the wildcard subject",
+			user:             "ghost",
+			reqAction:        role.ReadAction,
+			reqScope:         role.DashboardScope,
+			expectedProjects: nil,
+		},
+	}
+	for _, test := range testSuites {
+		t.Run(test.title, func(t *testing.T) {
+			projects, err := n.GetUserProjects(newTestContext(test.user, nil), test.reqAction, test.reqScope)
+			require.NoError(t, err)
+			assert.ElementsMatch(t, test.expectedProjects, projects)
+		})
+	}
+}
+
+func TestMergeProjects(t *testing.T) {
+	testSuites := []struct {
+		title         string
+		projects      []string
+		otherProjects []string
+		expected      []string
+	}{
+		{
+			title:    "both lists empty",
+			expected: nil,
+		},
+		{
+			title:    "other list empty",
+			projects: []string{"p1"},
+			expected: []string{"p1"},
+		},
+		{
+			title:         "first list empty",
+			otherProjects: []string{"p1"},
+			expected:      []string{"p1"},
+		},
+		{
+			title:         "wildcard project in the first list",
+			projects:      []string{v1.WildcardProject},
+			otherProjects: []string{"p1"},
+			expected:      []string{v1.WildcardProject},
+		},
+		{
+			title:         "wildcard project in the other list",
+			projects:      []string{"p1"},
+			otherProjects: []string{v1.WildcardProject},
+			expected:      []string{v1.WildcardProject},
+		},
+		{
+			title:         "union without duplicates",
+			projects:      []string{"p1", "p2"},
+			otherProjects: []string{"p2", "p3"},
+			expected:      []string{"p1", "p2", "p3"},
+		},
+	}
+	for _, test := range testSuites {
+		t.Run(test.title, func(t *testing.T) {
+			assert.Equal(t, test.expected, mergeProjects(test.projects, test.otherProjects))
+		})
+	}
+}
+
+func TestNativeHasPermissionWithWildcardUser(t *testing.T) {
+	silenceTestLogs(t)
+	n := wildcardUserDataset().newNative(t, false)
+
+	testSuites := []struct {
+		title          string
+		user           string
+		reqAction      role.Action
+		reqProject     string
+		reqScope       role.Scope
+		expectedResult bool
+	}{
+		{
+			title:          "project permission granted through the wildcard subject",
+			user:           "carol",
+			reqAction:      role.ReadAction,
+			reqProject:     "p1",
+			reqScope:       role.DashboardScope,
+			expectedResult: true,
+		},
+		{
+			title:          "project permission granted by name",
+			user:           "carol",
+			reqAction:      role.ReadAction,
+			reqProject:     "p2",
+			reqScope:       role.DashboardScope,
+			expectedResult: true,
+		},
+		{
+			title:          "binding of the wildcard subject to an unknown role is ignored",
+			user:           "bob",
+			reqAction:      role.UpdateAction,
+			reqProject:     "p2",
+			reqScope:       role.DashboardScope,
+			expectedResult: false,
+		},
+		{
+			title:          "wildcard subject only grants the permissions of its role",
+			user:           "alice",
+			reqAction:      role.UpdateAction,
+			reqProject:     "p1",
+			reqScope:       role.DashboardScope,
+			expectedResult: false,
+		},
+		{
+			title:          "global permission granted through the wildcard subject",
+			user:           "alice",
+			reqAction:      role.CreateAction,
+			reqProject:     v1.WildcardProject,
+			reqScope:       role.ProjectScope,
+			expectedResult: true,
+		},
+		{
+			title:          "unknown user gets no project permission from the wildcard subject",
+			user:           "ghost",
+			reqAction:      role.ReadAction,
+			reqProject:     "p1",
+			reqScope:       role.DashboardScope,
+			expectedResult: false,
+		},
+		{
+			title:          "unknown user gets no global permission from the wildcard subject",
+			user:           "ghost",
+			reqAction:      role.CreateAction,
+			reqProject:     v1.WildcardProject,
+			reqScope:       role.ProjectScope,
+			expectedResult: false,
+		},
+	}
+	for _, test := range testSuites {
+		t.Run(test.title, func(t *testing.T) {
+			assert.Equal(t, test.expectedResult, n.HasPermission(newTestContext(test.user, nil), test.reqAction, test.reqProject, test.reqScope))
+		})
+	}
+}
+
+func TestNativeGetPermissionsWithWildcardUser(t *testing.T) {
+	silenceTestLogs(t)
+	n := wildcardUserDataset().newNative(t, false)
+
+	testSuites := []struct {
+		title               string
+		user                string
+		expectedPermissions map[string][]role.Permission
+	}{
+		{
+			title: "user listed by name and through the wildcard subject gets the permissions of the role once",
+			user:  "alice",
+			expectedPermissions: map[string][]role.Permission{
+				v1.WildcardProject: {testCreateProjectPermission},
+				"p1":               {testReadAllPermission},
+			},
+		},
+		{
+			title: "permissions of the user merged with the ones of the wildcard subject",
+			user:  "bob",
+			expectedPermissions: map[string][]role.Permission{
+				v1.WildcardProject: {testCreateProjectPermission},
+				"p1":               {testEditPermission, testReadAllPermission},
+			},
+		},
+		{
+			title: "unknown user gets nothing from the wildcard subject",
+			user:  "ghost",
+			expectedPermissions: map[string][]role.Permission{
+				v1.WildcardProject: {},
+			},
+		},
+	}
+	for _, test := range testSuites {
+		t.Run(test.title, func(t *testing.T) {
+			permissions, err := n.GetPermissions(newTestContext(test.user, nil))
+			require.NoError(t, err)
+			assert.Equal(t, test.expectedPermissions, permissionValuesByProject(permissions))
+		})
+	}
+}
+
+func TestNativeRefreshPermissionsAndRolesWithWildcardUser(t *testing.T) {
+	silenceTestLogs(t)
+	ds := wildcardUserDataset()
+	n := ds.newNative(t, false)
+	ctx := newTestContext("dave", nil)
+	assert.False(t, n.HasPermission(ctx, role.ReadAction, "p1", role.DashboardScope), "dave doesn't exist yet")
+
+	// dave is created after the binding (e.g. at his first login through an OAuth/OIDC provider), which refreshes the cache.
+	n.userDAO.(*fakeUserDAO).items = append(slices.Clone(ds.users), &v1.User{Metadata: v1.Metadata{Name: "dave"}})
+	require.NoError(t, n.RefreshPermissionsAndRoles())
+	assert.True(t, n.HasPermission(ctx, role.ReadAction, "p1", role.DashboardScope), "dave is covered by the wildcard subject once he exists")
+
+	// dave is deleted: the wildcard subject doesn't grant him anything anymore, even if his token is still valid.
+	n.userDAO.(*fakeUserDAO).items = ds.users
+	require.NoError(t, n.RefreshPermissionsAndRoles())
+	assert.False(t, n.HasPermission(ctx, role.ReadAction, "p1", role.DashboardScope), "dave doesn't exist anymore")
 }

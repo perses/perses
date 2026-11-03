@@ -31,7 +31,8 @@ import (
 //   - the request-time permission checks (HasPermission, GetUserProjects, GetPermissions),
 //   - the claim-based permission resolution (claimPermissions),
 //   - the core matching function (listHasPermission),
-//   - the behavior under concurrent access (with and without concurrent cache refresh).
+//   - the behavior under concurrent access (with and without concurrent cache refresh),
+//   - the bindings to the wildcard subject, granting a role to every user.
 //
 // Run them with:
 //   go test -run '^$' -bench . -benchmem ./internal/api/authorization/native/
@@ -58,6 +59,26 @@ func BenchmarkRefreshPermissionsAndRoles(b *testing.B) {
 				}
 			}
 		})
+	}
+}
+
+// BenchmarkRefreshPermissionsAndRolesWithWildcardUser measures the cache rebuild when projects are opened to every user
+// through the wildcard subject. The permissions granted through the wildcard subject are stored once, so its cost must
+// not depend on the number of users: compare with BenchmarkRefreshPermissionsAndRoles.
+func BenchmarkRefreshPermissionsAndRolesWithWildcardUser(b *testing.B) {
+	silenceTestLogs(b)
+	for _, size := range datasetSizes {
+		for _, projectPercent := range wildcardUserProjectPercents {
+			n := newTestDataset(size).withWildcardUserBindings(projectPercent).newNative(b, false)
+			b.Run(fmt.Sprintf("%s,wildcardProjectPercent=%d", size, projectPercent), func(b *testing.B) {
+				b.ReportAllocs()
+				for b.Loop() {
+					if err := n.RefreshPermissionsAndRoles(); err != nil {
+						b.Fatal(err)
+					}
+				}
+			})
+		}
 	}
 }
 
@@ -234,6 +255,38 @@ func BenchmarkNativeHasPermissionWithGuestPermissions(b *testing.B) {
 	})
 }
 
+// BenchmarkNativeHasPermissionWithWildcardUser measures HasPermission when 10% of the projects are opened to every user
+// through the wildcard subject, for a user who is not a member of the opened project requested.
+func BenchmarkNativeHasPermissionWithWildcardUser(b *testing.B) {
+	silenceTestLogs(b)
+	for _, size := range datasetSizes {
+		n := newTestDataset(size).withWildcardUserBindings(10).newNative(b, false)
+		ctx := newTestContext(testUserName(1), nil)
+		openedProject := testProjectName(size.projectCount - 1)
+		requests := []struct {
+			name     string
+			action   v1Role.Action
+			scope    v1Role.Scope
+			expected bool
+		}{
+			{name: "allowed", action: v1Role.ReadAction, scope: v1Role.DashboardScope, expected: true},
+			// Worst case: the permissions of the user and the ones of the wildcard subject are both checked.
+			{name: "denied", action: v1Role.DeleteAction, scope: v1Role.ProjectScope, expected: false},
+		}
+		for _, req := range requests {
+			b.Run(fmt.Sprintf("%s/%s", size, req.name), func(b *testing.B) {
+				if got := n.HasPermission(ctx, req.action, openedProject, req.scope); got != req.expected {
+					b.Fatalf("unexpected HasPermission result: got %t, expected %t", got, req.expected)
+				}
+				b.ReportAllocs()
+				for b.Loop() {
+					n.HasPermission(ctx, req.action, openedProject, req.scope)
+				}
+			})
+		}
+	}
+}
+
 // BenchmarkNativeGetUserProjects measures the listing of the projects a user can access,
 // used for example when listing resources across all projects.
 func BenchmarkNativeGetUserProjects(b *testing.B) {
@@ -258,6 +311,27 @@ func BenchmarkNativeGetUserProjects(b *testing.B) {
 				b.ReportAllocs()
 				for b.Loop() {
 					_, _ = n.GetUserProjects(sc.ctx, v1Role.ReadAction, v1Role.DashboardScope)
+				}
+			})
+		}
+	}
+}
+
+// BenchmarkNativeGetUserProjectsWithWildcardUser measures the listing of the projects of a user when some projects are
+// opened to every user through the wildcard subject: they are merged with the projects the user is a member of.
+func BenchmarkNativeGetUserProjectsWithWildcardUser(b *testing.B) {
+	silenceTestLogs(b)
+	for _, size := range datasetSizes {
+		for _, projectPercent := range wildcardUserProjectPercents {
+			n := newTestDataset(size).withWildcardUserBindings(projectPercent).newNative(b, false)
+			ctx := newTestContext(testUserName(1), nil)
+			b.Run(fmt.Sprintf("%s,wildcardProjectPercent=%d", size, projectPercent), func(b *testing.B) {
+				if _, err := n.GetUserProjects(ctx, v1Role.ReadAction, v1Role.DashboardScope); err != nil {
+					b.Fatal(err)
+				}
+				b.ReportAllocs()
+				for b.Loop() {
+					_, _ = n.GetUserProjects(ctx, v1Role.ReadAction, v1Role.DashboardScope)
 				}
 			})
 		}
