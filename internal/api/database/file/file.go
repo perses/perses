@@ -154,16 +154,12 @@ func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 
 func (d *DAO) StreamRaw(query databaseModel.Query, ch chan<- json.RawMessage) error {
 	defer close(ch)
-	folder, prefix, isExist, err := d.buildQuery(query)
+	folders, prefix, err := d.buildQuery(query)
 	if err != nil {
 		return fmt.Errorf("unable to build the query: %s", err)
 	}
-	if !isExist {
-		// There is nothing to send to the channel, so we can just stop here and return nil.
-		return nil
-	}
-	var files []string
-	if files, err = d.visit(folder, prefix); err != nil {
+	files, err := d.visitFolders(folders, prefix)
+	if err != nil {
 		return fmt.Errorf("unable to visit files: %s", err)
 	}
 	if len(files) <= 0 {
@@ -216,20 +212,13 @@ func (d *DAO) Query(query databaseModel.Query, slice any) error {
 	if typeParameter.Kind() != reflect.Slice {
 		return fmt.Errorf("slice in parameter is not actually a slice but a %q", typeParameter.Kind())
 	}
-	folder, prefix, isExist, err := d.buildQuery(query)
+	folders, prefix, err := d.buildQuery(query)
 	if err != nil {
 		return fmt.Errorf("unable to build the query: %s", err)
 	}
-	if !isExist {
-		// There is nothing to return. So let's initialize the slice just to avoid returning a nil slice
-		sliceElem = reflect.MakeSlice(typeParameter, 0, 0)
-		// And finally, reset the element of the slice to ensure we didn't disconnect the link between the pointer to the slice and the actual slice
-		result.Elem().Set(sliceElem)
-		return nil
-	}
-	// so now we have the proper folder to looking for and potentially a filter to use
-	var files []string
-	if files, err = d.visit(folder, prefix); err != nil {
+	// so now we have the proper folders to looking for and potentially a filter to use
+	files, err := d.visitFolders(folders, prefix)
+	if err != nil {
 		return err
 	}
 	if len(files) <= 0 {
@@ -285,23 +274,22 @@ func (d *DAO) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
 }
 
 func (d *DAO) DeleteByQuery(query databaseModel.Query) error {
-	folder, prefix, isExist, err := d.buildQuery(query)
+	folders, prefix, err := d.buildQuery(query)
 	if err != nil {
 		return fmt.Errorf("unable to build the query: %s", err)
 	}
-	if !isExist {
-		return nil
-	}
 	if len(prefix) == 0 {
-		return os.RemoveAll(folder)
+		for _, folder := range folders {
+			if removeErr := os.RemoveAll(folder); removeErr != nil {
+				return removeErr
+			}
+		}
+		return nil
 	}
 	// in case there is a prefix file name we need to delete only the files that is matching the prefix and not the folder entirely
-	var files []string
-	if files, err = d.visit(folder, prefix); err != nil {
+	files, err := d.visitFolders(folders, prefix)
+	if err != nil {
 		return err
-	}
-	if len(files) <= 0 {
-		return nil
 	}
 	for _, file := range files {
 		if removeErr := os.Remove(file); removeErr != nil {
@@ -367,6 +355,27 @@ func (d *DAO) yamlToJSON(file string, data []byte) ([]byte, error) {
 	}
 	// For JSON files, we can append directly
 	return data, nil
+}
+
+// visitFolders returns the files of the given folders whose name starts with the prefix.
+// The folders that don't exist are ignored.
+func (d *DAO) visitFolders(folders []string, prefix string) ([]string, error) {
+	var files []string
+	for _, folder := range folders {
+		isExist, err := isFolderExist(folder)
+		if err != nil {
+			return nil, err
+		}
+		if !isExist {
+			continue
+		}
+		folderFiles, err := d.visit(folder, prefix)
+		if err != nil {
+			return nil, err
+		}
+		files = append(files, folderFiles...)
+	}
+	return files, nil
 }
 
 func (d *DAO) visit(rootPath string, prefix string) ([]string, error) {

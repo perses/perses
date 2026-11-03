@@ -21,7 +21,6 @@ import (
 
 	"github.com/brunoga/deep"
 	"github.com/labstack/echo/v4"
-	"github.com/perses/common/async"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -29,6 +28,10 @@ import (
 	"github.com/perses/spec/go/common"
 	"github.com/tidwall/gjson"
 )
+
+// maxProjectsPerListQuery is the maximum number of projects listed with a single request to the database. It keeps the
+// SQL queries, which have one argument per project, to a reasonable size.
+const maxProjectsPerListQuery = 1000
 
 func buildMapFromList[T api.Entity](list []T) map[string]T {
 	result := make(map[string]T)
@@ -107,32 +110,46 @@ func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, param
 		return t.metadataOrFullList(q)
 	}
 
-	result := make([]any, 0, len(projects))
-	asynchronousRequests := make([]async.Future[any], 0, len(projects))
-	for _, project := range projects {
-		asynchronousRequests = append(asynchronousRequests, async.Async(t.asyncMetadataOrFullList(project, q)))
+	// The resources of all the authorized projects are listed with a single request to the database, instead of one
+	// request per project: a user can have access to many projects (for example, the projects opened to every user).
+	// The caller's query is copied, so that it is left untouched.
+	projectsQuery, err := deep.Copy(q)
+	if err != nil {
+		return nil, err
 	}
-	for _, request := range asynchronousRequests {
-		listResult, requestErr := request.Await()
-		if requestErr != nil {
-			return nil, requestErr
+	if len(projects) <= maxProjectsPerListQuery {
+		projectsQuery.SetProjectsQueryParam(projects)
+		return t.metadataOrFullList(projectsQuery)
+	}
+	result := make([]any, 0)
+	for chunk := range slices.Chunk(projects, maxProjectsPerListQuery) {
+		projectsQuery.SetProjectsQueryParam(chunk)
+		list, listErr := t.metadataOrFullList(projectsQuery)
+		if listErr != nil {
+			return nil, listErr
 		}
-		switch typedList := listResult.(type) {
-		case []api.Entity:
-			for _, entity := range typedList {
-				result = append(result, entity)
-			}
-		case []K:
-			for _, entity := range typedList {
-				result = append(result, entity)
-			}
-		case []json.RawMessage:
-			for _, entity := range typedList {
-				result = append(result, entity)
-			}
-		}
+		result = t.appendList(result, list)
 	}
 	return result, nil
+}
+
+// appendList appends the resources of a list returned by metadataOrFullList to the result.
+func (t *toolbox[T, K, V]) appendList(result []any, list any) []any {
+	switch typedList := list.(type) {
+	case []api.Entity:
+		for _, entity := range typedList {
+			result = append(result, entity)
+		}
+	case []K:
+		for _, entity := range typedList {
+			result = append(result, entity)
+		}
+	case []json.RawMessage:
+		for _, entity := range typedList {
+			result = append(result, entity)
+		}
+	}
+	return result
 }
 
 func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(projects []string, query V) (any, error) {
@@ -192,15 +209,4 @@ func (t *toolbox[T, K, V]) metadataOrFullList(query V) (any, error) {
 		return t.service.RawList(query)
 	}
 	return t.service.List(query)
-}
-
-func (t *toolbox[T, K, V]) asyncMetadataOrFullList(project string, query V) func() (any, error) {
-	return func() (any, error) {
-		q, err := deep.Copy(query)
-		if err != nil {
-			return nil, err
-		}
-		q.SetProjectQueryParam(project)
-		return t.metadataOrFullList(q)
-	}
 }

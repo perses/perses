@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	databaseModel "github.com/perses/perses/internal/api/database/model"
+	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -156,6 +157,39 @@ func TestDAO_Query(t *testing.T) {
 	assert.Equal(t, projectEntity.Metadata.Name, result[0].Metadata.Name)
 	assert.Equal(t, projectEntity.Metadata.Name, result2[0].Metadata.Name)
 	removeAllFiles(t)
+}
+
+func TestDAO_QueryAndDeleteSeveralProjects(t *testing.T) {
+	d := newDAO()
+	t.Cleanup(func() { removeAllFiles(t) })
+	for _, projectName := range []string{"p1", "p2", "p3"} {
+		assert.NoError(t, d.Create(&modelV1.Dashboard{
+			Kind: modelV1.KindDashboard,
+			Metadata: modelV1.ProjectMetadata{
+				Metadata:               modelV1.Metadata{Name: "dashboard"},
+				ProjectMetadataWrapper: modelV1.ProjectMetadataWrapper{Project: projectName},
+			},
+		}))
+	}
+	projectsOf := func(rows []json.RawMessage) []string {
+		var projects []string
+		for _, row := range rows {
+			var dashboardRow modelV1.Dashboard
+			assert.NoError(t, json.Unmarshal(row, &dashboardRow))
+			projects = append(projects, dashboardRow.Metadata.Project)
+		}
+		return projects
+	}
+
+	// The projects that don't exist are ignored.
+	var result []json.RawMessage
+	assert.NoError(t, d.Query(&dashboard.Query{Projects: []string{"p1", "p3", "unknown"}}, &result))
+	assert.ElementsMatch(t, []string{"p1", "p3"}, projectsOf(result))
+
+	assert.NoError(t, d.DeleteByQuery(&dashboard.Query{Projects: []string{"p1", "p3", "unknown"}}))
+	result = nil
+	assert.NoError(t, d.Query(&dashboard.Query{}, &result))
+	assert.ElementsMatch(t, []string{"p2"}, projectsOf(result))
 }
 
 func TestDAO_Delete(t *testing.T) {

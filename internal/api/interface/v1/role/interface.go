@@ -29,8 +29,11 @@ type Query struct {
 	NamePrefix string `query:"name"`
 	// Project is the exact name of the project.
 	// The value can come from the path of the URL or from the query parameter
-	Project      string `param:"project" query:"project"`
-	MetadataOnly bool   `query:"metadata_only"`
+	Project string `param:"project" query:"project"`
+	// Projects, when not empty, restricts the list to these projects, in addition to Project. It can't be set by the
+	// HTTP request: the API sets it to list the resources of all the projects a user has access to at once.
+	Projects     []string `json:"-"`
+	MetadataOnly bool     `query:"metadata_only"`
 }
 
 func (q *Query) GetMetadataOnlyQueryParam() bool {
@@ -51,6 +54,10 @@ func (q *Query) GetProjectQueryParam() string {
 
 func (q *Query) SetProjectQueryParam(project string) {
 	q.Project = project
+}
+
+func (q *Query) SetProjectsQueryParam(projects []string) {
+	q.Projects = projects
 }
 
 type DAO interface {
