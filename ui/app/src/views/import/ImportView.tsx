@@ -20,10 +20,9 @@ import type { ChangeEvent, ReactElement } from 'react';
 import { useState } from 'react';
 
 import { useIsMobileSize } from '../../utils/browser-size';
+import { getDashboardType } from './dashboard-type';
 import GrafanaFlow from './GrafanaFlow';
 import PersesFlow from './PersesFlow';
-
-type DashboardType = 'grafana' | 'perses';
 
 type Dashboard = GrafanaDashboard | PersesDashboard | undefined;
 
@@ -41,14 +40,6 @@ function ImportView(): ReactElement {
   const [dashboard, setDashboard] = useState<Dashboard>();
   const isMobileSize = useIsMobileSize();
 
-  const getDashboardType = (dashboard: Record<string, unknown>): DashboardType | undefined => {
-    if ('kind' in dashboard) {
-      return 'perses';
-    }
-
-    return 'grafana';
-  };
-
   const fileUploadOnChange = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
     const files = event.target.files;
     if (files === null) {
@@ -63,13 +54,10 @@ function ImportView(): ReactElement {
   const completeDashboard = (dashboard: string | undefined): void => {
     try {
       const json = JSON.parse(dashboard ?? '{}');
-      const type = getDashboardType(json);
-      if (type !== undefined) {
-        setDashboard({
-          kind: type,
-          data: json,
-        });
-      }
+      setDashboard({
+        kind: getDashboardType(json),
+        data: json,
+      });
     } catch (_) {
       setDashboard(undefined);
     }

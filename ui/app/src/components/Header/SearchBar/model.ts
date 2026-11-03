@@ -11,13 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { DashboardResource, Resource } from '@perses-dev/client';
-
-export interface ResourceListProps {
-  query: string;
-  handleClose: () => void;
-  isResources?: (type: ResourceType, available: boolean) => void;
-}
+import type { KVSearchResult, MatchingInterval, MatchingResult } from '@nexucis/kvsearch';
+import type { DashboardResource, Resource, StatusError } from '@perses-dev/client';
 
 export type ResourceType = 'dashboards' | 'projects' | 'globalDatasources' | 'datasources';
 
@@ -36,13 +31,60 @@ export type HighlightedDashboardResource = DashboardResource & {
 
 export type SearchItem = Resource;
 
-export interface SearchListProps {
-  list: SearchItem[];
-  query: string;
+export interface SearchResultSection {
+  type: ResourceType;
+  results: Array<KVSearchResult<SearchItem>>;
+  isLoading: boolean;
+  error: StatusError | null;
+}
+
+export interface SearchListProps extends Omit<SearchResultSection, 'isLoading'> {
   handleClose: () => void;
-  isResource?: (isAvailable: boolean) => void;
+  // Number of dashboards and datasources per project, displayed next to the project results.
+  dashboardCounts?: Map<string, number>;
+  datasourceCounts?: Map<string, number>;
 }
 
 export interface SearchItemProps {
   handleClose: SearchListProps['handleClose'];
+  matchingResult?: MatchingResult[];
 }
+
+export interface TagsDisplayValue {
+  normalizedMatchingTags: Set<string>;
+  visibleTags: string[];
+  hiddenTagsCount: number;
+  hasAnyTags: boolean;
+}
+
+export const getDisplayNameMatch = (
+  name: string,
+  displayName?: string,
+  matchingResult?: MatchingResult[],
+): { value: string; intervals: MatchingInterval[] } => {
+  const value = displayName || name;
+  const path = displayName ? 'spec.display.name' : 'metadata.name';
+
+  const match = matchingResult?.find((mr) => mr.path.join('.') === path);
+  return {
+    value,
+    intervals: match?.intervals ?? [],
+  };
+};
+
+export const MAX_VISIBLE_RESOURCE_TAGS = 3;
+
+export const getTagDisplayValues = (tags: string[] | undefined, matchingTagValues: string[]): TagsDisplayValue => {
+  const normalizedMatchingTags = new Set(matchingTagValues.map((tag) => tag.toLowerCase()));
+  const uniqueTags = Array.from(new Set(tags ?? []));
+  const matchedTags = uniqueTags.filter((tag) => normalizedMatchingTags.has(tag.toLowerCase()));
+  const unmatchedTags = uniqueTags.filter((tag) => !normalizedMatchingTags.has(tag.toLowerCase()));
+  const orderedTags = [...matchedTags, ...unmatchedTags];
+
+  return {
+    normalizedMatchingTags,
+    visibleTags: orderedTags.slice(0, MAX_VISIBLE_RESOURCE_TAGS),
+    hiddenTagsCount: Math.max(0, orderedTags.length - MAX_VISIBLE_RESOURCE_TAGS),
+    hasAnyTags: orderedTags.length > 0,
+  };
+};

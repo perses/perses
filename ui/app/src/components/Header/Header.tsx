@@ -15,6 +15,7 @@ import { AppBar, Box, Button, Divider, Toolbar } from '@mui/material';
 import Cog from 'mdi-material-ui/Cog';
 import Compass from 'mdi-material-ui/Compass';
 import ShieldStar from 'mdi-material-ui/ShieldStar';
+import type { ReactElement } from 'react';
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
@@ -30,7 +31,7 @@ import { SearchBar } from './SearchBar/SearchBar';
 import { ThemeSwitch } from './ThemeSwitch';
 import { ToolMenu } from './ToolMenu';
 
-export default function Header(): JSX.Element {
+export default function Header(): ReactElement {
   const isLaptopSize = useIsLaptopSize();
   const isMobileSize = useIsMobileSize();
   const isAuthEnabled = useIsAuthEnabled();

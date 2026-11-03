@@ -15,9 +15,7 @@
       {
         "kind": "ListVariable",
         "spec": {
-          "display": {
-            "hidden": false
-          },
+          "display": {},
           "defaultValue": "value1",
           "allowAllValue": false,
           "allowMultiple": false,
@@ -36,9 +34,7 @@
       {
         "kind": "ListVariable",
         "spec": {
-          "display": {
-            "hidden": false
-          },
+          "display": {},
           "defaultValue": "a",
           "allowAllValue": false,
           "allowMultiple": false,

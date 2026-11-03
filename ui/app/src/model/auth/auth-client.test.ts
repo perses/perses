@@ -36,12 +36,40 @@ describe('useRedirectQueryParam', () => {
     mockApiPrefix.current = '';
   });
 
-  it('returns the rd query param when present, regardless of api_prefix or the absolute option', () => {
+  it('returns the rd query param as-is by default, regardless of api_prefix', () => {
     mockApiPrefix.current = '/perses';
+    mockUseQueryParam.mockReturnValue(['/explore?explorer=Prometheus-PrometheusExplorer']);
+
+    const { result } = renderHook(() => useRedirectQueryParam());
+
+    expect(result.current).toEqual('/explore?explorer=Prometheus-PrometheusExplorer');
+  });
+
+  it('prefixes the rd query param with api_prefix when absolute is true and api_prefix is set', () => {
+    mockApiPrefix.current = '/perses';
+    mockUseQueryParam.mockReturnValue(['/explore?explorer=Prometheus-PrometheusExplorer']);
+
+    const { result } = renderHook(() => useRedirectQueryParam(true));
+
+    expect(result.current).toEqual('/perses/explore?explorer=Prometheus-PrometheusExplorer');
+  });
+
+  it('returns the rd query param as-is when absolute is true and api_prefix is empty', () => {
+    mockApiPrefix.current = '';
     mockUseQueryParam.mockReturnValue(['/dashboards/my-dashboard']);
 
-    expect(renderHook(() => useRedirectQueryParam()).result.current).toEqual('/dashboards/my-dashboard');
-    expect(renderHook(() => useRedirectQueryParam(true)).result.current).toEqual('/dashboards/my-dashboard');
+    const { result } = renderHook(() => useRedirectQueryParam(true));
+
+    expect(result.current).toEqual('/dashboards/my-dashboard');
+  });
+
+  it('does not append a trailing slash to api_prefix when absolute is true and the rd query param is "/"', () => {
+    mockApiPrefix.current = '/perses';
+    mockUseQueryParam.mockReturnValue(['/']);
+
+    const { result } = renderHook(() => useRedirectQueryParam(true));
+
+    expect(result.current).toEqual('/perses');
   });
 
   it('falls back to "/" by default when no rd query param is present, regardless of api_prefix', () => {

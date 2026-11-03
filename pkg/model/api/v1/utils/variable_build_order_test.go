@@ -465,6 +465,58 @@ func TestBuildVariableDependencies(t *testing.T) {
 				},
 			},
 		},
+		{
+			title: "variable with field path and format syntax",
+			variables: []dashboard.Variable{
+				{
+					Kind: variable.KindText,
+					Spec: &dashboard.TextVariableSpec{
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
+						},
+						Name: "env",
+					},
+				},
+				{
+					Kind: variable.KindText,
+					Spec: &dashboard.TextVariableSpec{
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
+						},
+						Name: "job",
+					},
+				},
+				{
+					Kind: variable.KindText,
+					Spec: &dashboard.TextVariableSpec{
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
+						},
+						Name: "pod",
+					},
+				},
+				{
+					Kind: variable.KindList,
+					Spec: &dashboard.ListVariableSpec{
+						ListSpec: variable.ListSpec{
+							Plugin: plugin.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]any{
+									"expr":      "label_replace(up{env=~\"${env:regex}\",job=~\"${job.label}\",pod=~\"${pod.label:pipe}\"},\"instance\",\"${1:csv}\",\"instance\",\"(.*)\")",
+									"labelName": "instance",
+								},
+							},
+						},
+						Name: "instance",
+					},
+				},
+			},
+			result: map[string][]string{
+				"instance": {
+					"env", "job", "pod",
+				},
+			},
+		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
@@ -497,6 +549,26 @@ func TestBuildVariableDependenciesError(t *testing.T) {
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr": "sum by($doe, $bar) (rate($foo{label='$bar'}))",
+								},
+							},
+						},
+						Name: "myVariable",
+					},
+				},
+			},
+			err: fmt.Errorf("variable %q is used in the variable %q but not defined", "doe", "myVariable"),
+		},
+		{
+			title: "variable used with a format but not defined",
+			variables: []dashboard.Variable{
+				{
+					Kind: variable.KindList,
+					Spec: &dashboard.ListVariableSpec{
+						ListSpec: variable.ListSpec{
+							Plugin: plugin.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]any{
+									"expr": "up{job=~\"${doe:regex}\"}",
 								},
 							},
 						},
@@ -706,6 +778,38 @@ func TestBuildOrder(t *testing.T) {
 				{Variables: []string{"doe", "foo"}},
 				{Variables: []string{"bar"}},
 				{Variables: []string{"myVariable"}},
+			},
+		},
+		{
+			title: "variable used with a format",
+			variables: []dashboard.Variable{
+				{
+					Kind: variable.KindList,
+					Spec: &dashboard.ListVariableSpec{
+						ListSpec: variable.ListSpec{
+							Plugin: plugin.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]any{
+									"expr": "up{job=~\"${job:regex}\"}",
+								},
+							},
+						},
+						Name: "instance",
+					},
+				},
+				{
+					Kind: variable.KindText,
+					Spec: &dashboard.TextVariableSpec{
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
+						},
+						Name: "job",
+					},
+				},
+			},
+			result: []VariableGroup{
+				{Variables: []string{"job"}},
+				{Variables: []string{"instance"}},
 			},
 		},
 	}

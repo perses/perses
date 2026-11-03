@@ -21,7 +21,8 @@ import (
 	"github.com/perses/perses/internal/cli/read"
 )
 
-func readAndDetect(file string) (data []byte, isJSON bool, err error) {
+// Read reads the file, or the standard input when file is "-", and tells whether its content is JSON (otherwise it is YAML).
+func Read(file string) (data []byte, isJSON bool, err error) {
 	if file == "-" {
 		data, err = read.FromStdout()
 	} else {

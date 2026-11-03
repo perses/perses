@@ -7,8 +7,8 @@
 
 ### Prerequisites
 
-- `percli`, the [CLI of Perses](../cli.md). ⚠️ The version should be at least `v0.54.0`.
-- `cue`, the [CLI of Cuelang](https://cuelang.org/). ⚠️ The version should be at least `v0.15.0`.
+- `percli`, the [CLI of Perses](../cli.md). ⚠️ The version should be at least `v0.55.0`.
+- `cue`, the [CLI of Cuelang](https://cuelang.org/). ⚠️ The version should be at least `v0.17.1`.
 
 ### Repository setup
 
@@ -117,8 +117,8 @@ dashboardBuilder & {
 
 ### Prerequisites
 
-- `percli`, the [CLI of Perses](../cli.md). ⚠️ The version should be at least `v0.54.0`.
-- `go`, the [programming language](https://go.dev/).
+- `percli`, the [CLI of Perses](../cli.md). ⚠️ The version should be at least `v0.55.0`.
+- `go`, the [programming language](https://go.dev/). ⚠️ The version should be at least `v1.27.2`.
 
 ### Repository setup
 

@@ -329,6 +329,15 @@ func (r *Response) Error() error {
 	return nil
 }
 
+// Bytes returns the raw body of the response.
+// Use it when the response is not JSON (e.g. a CUE schema).
+func (r *Response) Bytes() ([]byte, error) {
+	if err := r.Error(); err != nil {
+		return nil, err
+	}
+	return r.body, nil
+}
+
 // Object stores the result into respObj.
 func (r *Response) Object(respObj any) error {
 	err := r.Error()
