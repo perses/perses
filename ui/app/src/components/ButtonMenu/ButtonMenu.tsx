@@ -17,7 +17,7 @@ import type { ReactElement } from 'react';
 import { useState } from 'react';
 
 export interface ButtonMenuProps {
-  children: JSX.Element[];
+  children: ReactElement[];
 }
 
 /**

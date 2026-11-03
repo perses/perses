@@ -35,6 +35,7 @@ Available Commands:
   plugin      Commands related to plugins development
   project     Select the project used by default.
   refresh     refresh the access token when it expires
+  schema      Commands related to the CUE schemas served by the Perses server
   version     Display client version.
   whoami      Display current user used
 
@@ -252,6 +253,22 @@ Dashboard Demo has been deleted
 
 ## Advanced Commands
 
+### Download the dashboard schema
+
+The command `schema get` downloads a CUE schema from the Perses server you are logged in to.
+`dashboards` is the complete dashboard schema, including the schemas of all the plugins loaded by the server.
+It defines `#Dashboard`, which can be used to validate the dashboards offline. To download it:
+
+```bash
+$ percli schema get dashboards --output-file dashboard-schema.cue
+```
+
+The schema matches the version of the server and the plugins it loads, so download it again when the server is upgraded.
+The file starts with comments giving the server URL, its version and the download time.
+
+You can also get the schemas of the plugins with `percli schema get plugins`, or of a single plugin with
+`percli schema get plugins <name> [--version <version>] [--registry <registry>]`.
+
 ### Linter
 
 The CLI provides a command `lint` that is able to validate any data supported by Perses.
@@ -266,6 +283,18 @@ By default, the command doesn't require any remote server. We are providing a fl
 use a remote Perses server for additional validation. For example, when it has to validate a dashboard, it will
 use the endpoint `/api/validate/dashboards`. That can be useful if you want to be sure that your dashboard is compatible
 with the server (because it will match the plugins known by the server instead of the local ones)
+
+You can also validate the dashboards without any remote server, against the complete dashboard schema of a Perses
+server (see [Download the dashboard schema](#download-the-dashboard-schema)):
+
+```bash
+$ percli schema get dashboards --output-file dashboard-schema.cue
+$ percli lint -d ./dashboards --schema dashboard-schema.cue
+```
+
+Unlike the other modes, it also rejects the unknown or misspelled fields outside the plugins (e.g. `durration` instead
+of `duration`), which are otherwise silently ignored. The schema only describes the dashboards: for the other resources
+(datasources, variables), the plugins are not validated, only basic checks are done, like the name of a variable.
 
 ### Migrate from Grafana dashboard to Perses format
 

@@ -14,9 +14,18 @@
 package sqlproxy
 
 import (
+	"context"
+	"database/sql"
+	"database/sql/driver"
 	"encoding/json"
+	"errors"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
+	"github.com/labstack/echo/v4"
+	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -178,4 +187,86 @@ func TestSQLResponseStructs(t *testing.T) {
 		assert.Equal(t, float64(1), response.Rows[0]["id"])
 		assert.Equal(t, "alice@example.com", response.Rows[0]["email"])
 	})
+}
+
+// rowsConnector opens connections whose queries return the given rows of a single column "id",
+// then fail with readErr (when set) instead of reporting the end of the result.
+// It's what the databases do when a row cannot be computed, e.g. on a division by zero.
+type rowsConnector struct {
+	rows    []int64
+	readErr error
+}
+
+func (c rowsConnector) Connect(context.Context) (driver.Conn, error) { return rowsConn(c), nil }
+func (c rowsConnector) Driver() driver.Driver                        { return nil }
+
+type rowsConn rowsConnector
+
+func (c rowsConn) Prepare(string) (driver.Stmt, error) { return nil, errors.New("not implemented") }
+func (c rowsConn) Close() error                        { return nil }
+func (c rowsConn) Begin() (driver.Tx, error)           { return nil, errors.New("not implemented") }
+
+func (c rowsConn) QueryContext(context.Context, string, []driver.NamedValue) (driver.Rows, error) {
+	return &fakeRows{rows: c.rows, readErr: c.readErr}, nil
+}
+
+type fakeRows struct {
+	rows    []int64
+	readErr error
+}
+
+func (r *fakeRows) Columns() []string { return []string{"id"} }
+func (r *fakeRows) Close() error      { return nil }
+
+func (r *fakeRows) Next(dest []driver.Value) error {
+	if len(r.rows) == 0 {
+		if r.readErr != nil {
+			return r.readErr
+		}
+		return io.EOF
+	}
+	dest[0] = r.rows[0]
+	r.rows = r.rows[1:]
+	return nil
+}
+
+func TestWriteJSONResponse(t *testing.T) {
+	for _, test := range []struct {
+		name         string
+		connector    rowsConnector
+		expectedBody string
+		expectedErr  error
+	}{
+		{
+			name:         "all rows read",
+			connector:    rowsConnector{rows: []int64{1, 2}},
+			expectedBody: `{"columns":[{"name":"id","type":""}],"rows":[{"id":1},{"id":2}]}`,
+		},
+		{
+			name:        "error while reading the rows",
+			connector:   rowsConnector{rows: []int64{1, 2}, readErr: errors.New("division by zero")},
+			expectedErr: apiinterface.InternalError,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			db := sql.OpenDB(test.connector)
+			defer func() { _ = db.Close() }()
+			rows, err := db.Query("SELECT id FROM t")
+			require.NoError(t, err)
+			defer func() { _ = rows.Close() }()
+
+			rec := httptest.NewRecorder()
+			c := echo.New().NewContext(httptest.NewRequest(http.MethodPost, "/proxy", nil), rec)
+			err = writeJSONResponse(c, rows, "sql", "perses")
+			if test.expectedErr != nil {
+				// The rows read before the error must not be returned as if they were the complete result.
+				assert.Equal(t, test.expectedErr, err)
+				assert.False(t, c.Response().Committed)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.JSONEq(t, test.expectedBody, rec.Body.String())
+		})
+	}
 }

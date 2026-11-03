@@ -39,6 +39,8 @@ type option struct {
 	writer         io.Writer
 	errWriter      io.Writer
 	pluginPath     string
+	schemaPath     string
+	dashboardSch   *dashboardSchema
 	customRulePath string
 	customRules    []*apiConfig.CustomLintRule
 	online         bool
@@ -52,8 +54,8 @@ func (o *option) Complete(args []string) error {
 	}
 	if len(o.pluginPath) > 0 {
 		pl := plugin.New(apiConfig.Plugin{
-			ArchivePath: o.pluginPath,
-			Path:        o.pluginPath,
+			ArchivePaths: []string{o.pluginPath},
+			Path:         o.pluginPath,
 		})
 		if err := pl.UnzipArchives(); err != nil {
 			return err
@@ -62,6 +64,13 @@ func (o *option) Complete(args []string) error {
 			return err
 		}
 		o.sch = pl.Schema()
+	}
+	if len(o.schemaPath) > 0 {
+		sch, err := loadDashboardSchema(o.schemaPath)
+		if err != nil {
+			return err
+		}
+		o.dashboardSch = sch
 	}
 	if len(o.customRulePath) > 0 {
 		if err := file.Unmarshal(o.customRulePath, &o.customRules); err != nil {
@@ -90,19 +99,36 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
-	var entities []modelAPI.Entity
+	var files []string
 	if len(o.File) > 0 {
+		files = []string{o.File}
+	} else if len(o.Directory) > 0 {
 		var err error
-		entities, err = file.UnmarshalEntitiesFromFile(o.File)
+		files, err = file.List(o.Directory)
 		if err != nil {
 			return err
 		}
-	} else if len(o.Directory) > 0 {
-		var errorList []error
-		entities, errorList = file.UnmarshalEntitiesFromDirectory(o.Directory)
-		if len(errorList) > 0 {
-			return errorList[0]
+	}
+	var entities []modelAPI.Entity
+	for _, f := range files {
+		// The file is read only once, as it can be the standard input.
+		data, isJSON, err := file.Read(f)
+		if err != nil {
+			return err
 		}
+		fileEntities, err := file.UnmarshalEntitiesFromData(f, data, isJSON)
+		if err != nil {
+			return err
+		}
+		// The dashboards are validated against the complete schema with the content of the file,
+		// as the entities lose the unknown fields and get the default values.
+		// It is done before the other checks, as the checks of DashboardSpec expect valid variables.
+		if o.dashboardSch != nil {
+			if err := o.dashboardSch.validate(f, data, isJSON); err != nil {
+				return err
+			}
+		}
+		entities = append(entities, fileEntities...)
 	}
 	if validateErr := o.validate(entities); validateErr != nil {
 		return validateErr
@@ -119,7 +145,7 @@ func (o *option) SetErrWriter(errWriter io.Writer) {
 }
 
 func (o *option) validate(objects []modelAPI.Entity) error {
-	if o.sch == nil && !o.online {
+	if o.sch == nil && !o.online && o.dashboardSch == nil {
 		return nil
 	}
 	// When linting offline, the configuration of the server is unknown.
@@ -197,6 +223,11 @@ cat resources.json | percli lint -f -
 
 # Use a remote server to make additional validation (useful only for the datasources and the dashboards)
 percli lint -f ./resources.json --online
+
+# Validate the dashboards offline against the complete dashboard schema of a Perses server.
+# It also rejects the unknown or misspelled fields.
+percli schema get dashboards --output-file dashboard-schema.cue
+percli lint -d ./dashboards --schema dashboard-schema.cue
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
@@ -208,9 +239,13 @@ percli lint -f ./resources.json --online
 	cmd.Flags().StringVar(&o.customRulePath, "custom-rule.path", "", "Path to the custom rules.")
 	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the Perses plugins.")
 	cmd.Flags().BoolVar(&o.online, "online", false, "When enable, it can request the API to make additional validation")
+	cmd.Flags().StringVar(&o.schemaPath, "schema", "", "Path to the complete dashboard CUE schema, as downloaded with 'percli schema get dashboards'. The dashboards are validated against its definition #Dashboard, without any remote server. The schema doesn't describe the other resources (datasources, variables): their plugins are not validated, only basic checks are done, like the name of a variable.")
 	// When "online" flag is used, the CLI will call the endpoint /validate that will then use the schema from the server.
 	// So no need to use / load the plugins with the CLI.
 	cmd.MarkFlagsMutuallyExclusive("plugin.path", "online")
+	// The dashboard schema already contains the plugin schemas, and it is meant to be used without a remote server.
+	cmd.MarkFlagsMutuallyExclusive("schema", "online")
+	cmd.MarkFlagsMutuallyExclusive("schema", "plugin.path")
 	// When "online" flag is used, the CLI  will use the custom-rule from the server.
 	cmd.MarkFlagsMutuallyExclusive("custom-rule.path", "online")
 	return cmd

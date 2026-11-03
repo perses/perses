@@ -12,13 +12,14 @@
 // limitations under the License.
 
 import { act, cleanup, render, waitFor } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import { StrictMode } from 'react';
 import { createMemoryRouter, Navigate, Outlet, RouterProvider } from 'react-router-dom';
 
 import type { PageTitleHandle } from './PageTitle';
 import { PageTitle } from './PageTitle';
 
-function TitleLayout(): JSX.Element {
+function TitleLayout(): ReactElement {
   return (
     <>
       <PageTitle />

@@ -121,6 +121,9 @@ export default defineConfig({
                   tsx: true,
                 },
                 transform: {
+                  reactCompiler: {
+                    target: '19',
+                  },
                   react: {
                     runtime: 'automatic',
                     development: isDev,

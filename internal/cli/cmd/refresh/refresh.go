@@ -45,15 +45,9 @@ func (o *option) Complete(args []string) error {
 		return err
 	}
 	o.apiClient = apiClient
-
-	apiConfig, err := apiClient.Config()
-	if err != nil {
-		return err
-	}
-	if apiConfig.Security.Authentication.Providers.KubernetesProvider.Enable {
-		o.delegatedAuthn = true
-	}
-
+	// The refresh flow depends on how the user logged in, not on the providers enabled on the server:
+	// the server can enable the Kubernetes provider while the user logged in with another one.
+	o.delegatedAuthn = config.Global.RestClientConfig.K8sAuth != nil
 	return nil
 }
 

@@ -141,10 +141,16 @@ func recursiveDeepExtractFields(fs []gjson.Result, fields *[]string) {
 	}
 }
 
+func (c *projectIndexer) add(raw json.RawMessage) error {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	return c.addTo(c.idx, raw)
+}
+
 // add is adding a new document to the index.
 // The row will be used to find the various field to be indexed depending on the configuration.
 // We are treating the raw JSON instead of the struct because then we can index anything; and we don't need to deal with the Go struct.
-func (c *projectIndexer) add(raw json.RawMessage) error {
+func (c *projectIndexer) addTo(dst map[string]map[string]index[*v1.ProjectMetadata], raw json.RawMessage) error {
 	customRaw := rawDocument(raw)
 	var fields []string
 	for _, k := range c.indexedKeys {
@@ -164,15 +170,19 @@ func (c *projectIndexer) add(raw json.RawMessage) error {
 		displayName: displayName,
 		matcher:     c.matcher,
 	}
-	c.mutex.Lock()
-	projectIdx := c.idx[m.Project]
+	projectIdx := dst[m.Project]
 	if projectIdx == nil {
 		projectIdx = make(map[string]index[*v1.ProjectMetadata])
-		c.idx[m.Project] = projectIdx
+		dst[m.Project] = projectIdx
 	}
 	projectIdx[m.Name] = idx
-	c.mutex.Unlock()
 	return nil
+}
+
+func (c *projectIndexer) swap(next map[string]map[string]index[*v1.ProjectMetadata]) {
+	c.mutex.Lock()
+	c.idx = next
+	c.mutex.Unlock()
 }
 
 func (c *projectIndexer) delete(metadata *v1.ProjectMetadata) {
@@ -346,15 +356,31 @@ func (c *client) List(ctx echo.Context, kind v1.Kind, project string) ([]*Search
 
 func (c *client) Refresh() error {
 	ch := make(chan json.RawMessage)
-	q := &dashboard.Query{}
-	var err error
+	// StreamRaw closes ch in a defer, before the goroutine stores the returned error.
+	errc := make(chan error, 1)
 	go func() {
-		err = c.dao.StreamRaw(q, ch)
+		errc <- c.dao.StreamRaw(&dashboard.Query{}, ch)
 	}()
+	next := make(map[string]map[string]index[*v1.ProjectMetadata])
 	for raw := range ch {
-		if addErr := c.add(raw); addErr != nil {
+		if addErr := c.addToNext(next, raw); addErr != nil {
 			logrus.WithError(addErr).Error("failed to add document to index")
 		}
 	}
-	return err
+	if err := <-errc; err != nil {
+		return err
+	}
+	c.dashboards.swap(next)
+	return nil
+}
+
+func (c *client) addToNext(dst map[string]map[string]index[*v1.ProjectMetadata], raw json.RawMessage) error {
+	kind := v1.Kind(gjson.GetBytes(raw, "kind").String())
+	switch kind {
+	case v1.KindDashboard:
+		return c.dashboards.addTo(dst, raw)
+	default:
+		logrus.Warnf("kind %s is not supported for indexing", kind)
+		return nil
+	}
 }

@@ -17,8 +17,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-
-	"github.com/sirupsen/logrus"
 )
 
 // These constants are actually defined as variables to allow overriding them at build time using the -ldflags option.
@@ -39,10 +37,6 @@ func isFileExists(path string) bool {
 type Plugin struct {
 	// Path is the path to the directory containing the runtime plugins
 	Path string `json:"path,omitempty" yaml:"path,omitempty"`
-	// ArchivePath is the path to the directory containing the archived plugins
-	// When Perses is starting, it will extract the content of the archive in the folder specified in the `folder` attribute.
-	// DEPRECATED: This attribute is deprecated and will be removed in a future version. It is still supported for backward compatibility, but it is recommended to use the `archive_paths` attribute instead.
-	ArchivePath string `json:"archive_path,omitempty" yaml:"archive_path,omitempty"`
 	// ArchivePaths is the list of paths to the directories containing the archived plugins. It allows to specify multiple directories for the archived plugins.
 	// When Perses is starting, it will extract any archive found in the folders specified in this attribute in the folder specified in the `path` attribute.
 	ArchivePaths []string `json:"archive_paths,omitempty" yaml:"archive_paths,omitempty"`
@@ -73,11 +67,6 @@ func (p *Plugin) Verify() error {
 			p.Path = DefaultPluginPath
 		}
 	}
-	if len(p.ArchivePath) > 0 {
-		logrus.Warn("the 'archive_path' attribute is deprecated and will be removed in a future version. Please use the 'archive_paths' attribute instead")
-		p.ArchivePaths = append(p.ArchivePaths, p.ArchivePath)
-		p.ArchivePath = ""
-	}
 	if len(p.ArchivePaths) == 0 {
 		if isFileExists(DefaultArchivePluginPathInContainer) {
 			p.ArchivePaths = append(p.ArchivePaths, DefaultArchivePluginPathInContainer)
@@ -86,7 +75,7 @@ func (p *Plugin) Verify() error {
 		}
 	}
 	if len(p.Enabled) > 0 && len(p.Disabled) > 0 {
-		return fmt.Errorf("the 'activated' and 'deactivated' attributes can not be used at the same time. Please use either one of them")
+		return fmt.Errorf("the 'enabled' and 'disabled' attributes can not be used at the same time. Please use either one of them")
 	}
 	if len(p.Enabled) > 0 {
 		newEnabled := make([]string, 0, len(p.Enabled))

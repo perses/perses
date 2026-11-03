@@ -30,8 +30,7 @@
         "spec": {
           "display": {
             "name": "My Text Box Variable",
-            "description": "This Text box variable should be translated into a TextVariable in Perses, with constant flag set to false",
-            "hidden": false
+            "description": "This Text box variable should be translated into a TextVariable in Perses, with constant flag set to false"
           },
           "value": "<placeholder text>",
           "name": "MyTextBox"
@@ -40,9 +39,7 @@
       {
         "kind": "ListVariable",
         "spec": {
-          "display": {
-            "hidden": false
-          },
+          "display": {},
           "defaultValue": "1",
           "allowAllValue": false,
           "allowMultiple": false,

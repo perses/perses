@@ -41,7 +41,7 @@ func Exists(filePath string) (bool, error) {
 }
 
 func Unmarshal(file string, obj any) error {
-	data, isJSON, err := readAndDetect(file)
+	data, isJSON, err := Read(file)
 	if err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func UnmarshalEntities(file string, dir string) ([]modelAPI.Entity, error) {
 }
 
 func UnmarshalEntitiesFromDirectory(dir string) ([]modelAPI.Entity, []error) {
-	files, err := visit(dir)
+	files, err := List(dir)
 	if err != nil {
 		return nil, []error{err}
 	}
@@ -99,7 +99,17 @@ func UnmarshalEntitiesFromFile(file string) ([]modelAPI.Entity, error) {
 	return u.unmarshal()
 }
 
-func visit(dir string) ([]string, error) {
+// UnmarshalEntitiesFromData extracts the Perses resources from the content of a file, as returned by Read.
+func UnmarshalEntitiesFromData(file string, data []byte, isJSON bool) ([]modelAPI.Entity, error) {
+	u := &unmarshaller{file: file}
+	if err := u.decode(data, isJSON); err != nil {
+		return nil, err
+	}
+	return u.unmarshalEntities()
+}
+
+// List returns the JSON and YAML files found in the directory and its subdirectories.
+func List(dir string) ([]string, error) {
 	var files []string
 	err := filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
@@ -173,10 +183,14 @@ func (u *unmarshaller) unmarshal() ([]modelAPI.Entity, error) {
 }
 
 func (u *unmarshaller) read() error {
-	data, isJSON, err := readAndDetect(u.file)
+	data, isJSON, err := Read(u.file)
 	if err != nil {
 		return err
 	}
+	return u.decode(data, isJSON)
+}
+
+func (u *unmarshaller) decode(data []byte, isJSON bool) error {
 	u.isJSON = isJSON
 
 	var objects []map[string]any

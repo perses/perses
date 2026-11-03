@@ -22,13 +22,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChangeEvent, MouseEvent, ReactElement } from 'react';
 
 import { useIsMobileSize } from '../../../utils/browser-size';
-import { ALL_RESOURCE_TYPES } from './model';
-import type { ResourceType } from './model';
-import { SearchBarFilters } from './SearchBarFilters';
-import { SearchDashboardList } from './SearchDashboardList';
-import { SearchDatasourceList } from './SearchDatasourceList';
-import { SearchGlobalDatasource } from './SearchGlobalDatasource';
-import { SearchProjectList } from './SearchProjectList';
+import { SearchBarFilters, useResourceTypeFilters } from './SearchBarFilters';
+import { SearchList } from './SearchList';
+import { useSearchResults } from './useSearchResults';
 
 const SEARCH_PLACE_HOLDER = 'Search dashboards, projects, datasources...';
 
@@ -113,16 +109,12 @@ export function SearchBar(): ReactElement {
 
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [filters, setFilters] = useState<Set<ResourceType>>(() => {
-    return new Set(ALL_RESOURCE_TYPES);
-  });
-
-  const [hasResource, setHasResource] = useState<Record<ResourceType, boolean>>({
-    dashboards: false,
-    projects: false,
-    globalDatasources: false,
-    datasources: false,
-  });
+  const { filters, activeTypes, toggleType } = useResourceTypeFilters();
+  const { sections, dashboardCounts, datasourceCounts } = useSearchResults(query, activeTypes, open);
+  const hasQuery = query.trim().length > 0;
+  const isAnySectionLoading = sections.some((section) => section.isLoading);
+  // An error is displayed in place of the results, so it should not lead to "No records found".
+  const hasAnyResult = sections.some(({ results, error }) => results.length > 0 || !!error);
 
   const handleClose = useCallback((): void => setOpen(false), []);
 
@@ -136,11 +128,6 @@ export function SearchBar(): ReactElement {
     inputElement?.focus();
   }, []);
 
-  const handleIsResourceAvailable = useCallback((type: ResourceType, available: boolean): void => {
-    setHasResource((prev) => (prev[type] === available ? prev : { ...prev, [type]: available }));
-  }, []);
-
-  const hasAnyResource = Array.from(filters).some((type) => hasResource[type]);
   const handleOpen = useCallback((): void => setOpen(true), []);
   useHandleShortCut(handleOpen);
 
@@ -246,7 +233,7 @@ export function SearchBar(): ReactElement {
               },
             }}
           />
-          {query.trim().length > 0 && !hasAnyResource && (
+          {hasQuery && !isAnySectionLoading && !hasAnyResult && (
             <Box
               data-testid={SEARCH_BAR_DATA_TEST_ID.noRecordContainer}
               className="noRecordsFoundWrapper"
@@ -256,25 +243,20 @@ export function SearchBar(): ReactElement {
               <Typography>No records found for {query}</Typography>
             </Box>
           )}
-          <SearchBarFilters filters={filters} setFilters={setFilters} />
-          {query.trim().length > 0 && (
+          <SearchBarFilters filters={filters} onToggle={toggleType} />
+          {hasQuery && (
             <Stack className="searchItemsWrapper" direction="column" sx={STATIC_SX.searchItemsWrapper}>
-              {filters.has('dashboards') && (
-                <SearchDashboardList query={query} handleClose={handleClose} isResources={handleIsResourceAvailable} />
-              )}
-              {filters.has('projects') && (
-                <SearchProjectList query={query} handleClose={handleClose} isResources={handleIsResourceAvailable} />
-              )}
-              {filters.has('globalDatasources') && (
-                <SearchGlobalDatasource
-                  query={query}
+              {sections.map(({ type, results, error }) => (
+                <SearchList
+                  key={type}
+                  type={type}
+                  results={results}
+                  error={error}
                   handleClose={handleClose}
-                  isResources={handleIsResourceAvailable}
+                  dashboardCounts={dashboardCounts}
+                  datasourceCounts={datasourceCounts}
                 />
-              )}
-              {filters.has('datasources') && (
-                <SearchDatasourceList query={query} handleClose={handleClose} isResources={handleIsResourceAvailable} />
-              )}
+              ))}
             </Stack>
           )}
         </Paper>

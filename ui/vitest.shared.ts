@@ -22,12 +22,6 @@ const uiRoot = fileURLToPath(new URL('.', import.meta.url));
 // Common Vitest configuration shared across packages
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: [
-      // Use polyfill for jsdom environment
-      { find: 'use-resize-observer', replacement: 'use-resize-observer/polyfilled' },
-    ],
-  },
   test: {
     globals: true,
     environment: 'jsdom',

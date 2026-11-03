@@ -14,12 +14,13 @@
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import '@testing-library/jest-dom/vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import { vi } from 'vitest';
 
 import ProfileView from './ProfileView';
 
 vi.mock('@perses-dev/components', () => ({
-  EChart: (): JSX.Element | null => null,
+  EChart: (): ReactElement | null => null,
 }));
 
 vi.mock('../../context/Authorization', () => ({

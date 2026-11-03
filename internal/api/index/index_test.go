@@ -15,10 +15,14 @@ package index
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"testing"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/authorization"
+	databaseModel "github.com/perses/perses/internal/api/database/model"
+	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/role"
@@ -352,3 +356,92 @@ func TestClientSearch_authorizationDisabled(t *testing.T) {
 		})
 	}
 }
+
+func TestRefreshDropsDashboardsMissingFromDatabase(t *testing.T) {
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name"}}}, newDisabledAuthz(t), nil).(*client)
+	keep := dashboardRaw("keep")
+	gone := dashboardRaw("gone")
+	require.NoError(t, c.add(keep))
+	require.NoError(t, c.add(gone))
+	c.dao = &streamDAO{docs: []json.RawMessage{keep}}
+
+	require.NoError(t, c.Refresh())
+
+	assert.ElementsMatch(t, []string{"keep"}, dashboardNames(t, c, "demo"))
+}
+
+func TestRefreshClearsIndexWhenDatabaseIsEmpty(t *testing.T) {
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name"}}}, newDisabledAuthz(t), nil).(*client)
+	require.NoError(t, c.add(dashboardRaw("gone")))
+	c.dao = &streamDAO{}
+
+	require.NoError(t, c.Refresh())
+
+	assert.Empty(t, dashboardNames(t, c, "demo"))
+}
+
+func TestRefreshKeepsIndexWhenStreamFails(t *testing.T) {
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name"}}}, newDisabledAuthz(t), nil).(*client)
+	require.NoError(t, c.add(dashboardRaw("keep")))
+	require.NoError(t, c.add(dashboardRaw("also")))
+	c.dao = &streamDAO{
+		docs: []json.RawMessage{dashboardRaw("partial")},
+		err:  fmt.Errorf("database unavailable"),
+	}
+
+	err := c.Refresh()
+
+	require.EqualError(t, err, "database unavailable")
+	assert.ElementsMatch(t, []string{"keep", "also"}, dashboardNames(t, c, "demo"))
+}
+
+func dashboardRaw(name string) json.RawMessage {
+	return json.RawMessage(fmt.Sprintf(`{"kind":"Dashboard","metadata":{"name":%q,"project":"demo"},"spec":{}}`, name))
+}
+
+func dashboardNames(t *testing.T, c *client, project string) []string {
+	t.Helper()
+	results, err := c.List(nil, v1.KindDashboard, project)
+	require.NoError(t, err)
+	names := make([]string, 0, len(results))
+	for _, result := range results {
+		names = append(names, result.Metadata.GetName())
+	}
+	return names
+}
+
+type streamDAO struct {
+	docs []json.RawMessage
+	err  error
+}
+
+func (d *streamDAO) StreamRaw(_ databaseModel.Query, ch chan<- json.RawMessage) error {
+	defer close(ch)
+	for _, doc := range d.docs {
+		ch <- doc
+	}
+	return d.err
+}
+
+func (d *streamDAO) Close() error                                          { return nil }
+func (d *streamDAO) Init() error                                           { return nil }
+func (d *streamDAO) IsCaseSensitive() bool                                 { return false }
+func (d *streamDAO) Create(modelAPI.Entity) error                          { return nil }
+func (d *streamDAO) Upsert(modelAPI.Entity) error                          { return nil }
+func (d *streamDAO) Get(v1.Kind, modelAPI.Metadata, modelAPI.Entity) error { return nil }
+func (d *streamDAO) Query(databaseModel.Query, any) error                  { return nil }
+func (d *streamDAO) RawQuery(databaseModel.Query) ([]json.RawMessage, error) {
+	return nil, nil
+}
+func (d *streamDAO) RawMetadataQuery(databaseModel.Query, v1.Kind) ([]json.RawMessage, error) {
+	return nil, nil
+}
+func (d *streamDAO) Delete(v1.Kind, modelAPI.Metadata) error        { return nil }
+func (d *streamDAO) DeleteByQuery(databaseModel.Query) error        { return nil }
+func (d *streamDAO) HealthCheck() bool                              { return true }
+func (d *streamDAO) GetLatestUpdateTime([]v1.Kind) (*string, error) { return nil, nil }
+
+var (
+	_ databaseModel.DAO = (*streamDAO)(nil)
+	_ io.Closer         = (*streamDAO)(nil)
+)
