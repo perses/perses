@@ -160,10 +160,10 @@ collapse:
   open: <boolean>
 
 # The grid is only rendered when the selected values of the variable satisfy the operator against the values.
-# =~ and !~ use anchored patterns.
+# matches and notMatches use anchored patterns.
 [ visibility:
   variable: <string>
-  [ operator: <"=" | "!=" | "=~" | "!~"> | default = "=" ]
+  [ operator: <"equals" | "notEquals" | "matches" | "notMatches"> | default = "equals" ]
   value:
     - <string> ]
 ```

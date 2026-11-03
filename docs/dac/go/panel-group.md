@@ -80,8 +80,8 @@ panelgroup.Visibility("phase", dashboard.VisibilityOperatorNotEquals, "PRD")
 ```
 
 Render the panel group only when the selected values of the variable satisfy the operator against the given values.
-The operator is one of `VisibilityOperatorEquals` (`=`), `VisibilityOperatorNotEquals` (`!=`), `VisibilityOperatorMatches` (`=~`) and `VisibilityOperatorNotMatches` (`!~`).
-The patterns of `=~` and `!~` are anchored (full match).
+The operator is one of `VisibilityOperatorEquals` (`equals`), `VisibilityOperatorNotEquals` (`notEquals`), `VisibilityOperatorMatches` (`matches`) and `VisibilityOperatorNotMatches` (`notMatches`).
+The patterns of `matches` and `notMatches` are anchored (full match).
 Panel visibility, the same rule on a panel display, is a follow-up.
 
 ### AddPanel
