@@ -259,14 +259,20 @@ func (n *native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, 
 		return nil, err
 	}
 	c := n.cache.Load()
+	var claimProjects []string
 	if claims, ok := usr.(*crypto.JWTClaims); ok {
-		if claimProjects := projectsWithPermission(n.claimPermissions(c, claims), requestAction, requestScope); len(claimProjects) > 0 {
+		claimProjects = projectsWithPermission(n.claimPermissions(c, claims), requestAction, requestScope)
+		if slices.Contains(claimProjects, v1.WildcardProject) {
 			return claimProjects, nil
 		}
 	}
+	// Like HasPermission, the projects granted by the claims, by name and through the wildcard subject are combined.
 	projects := projectsWithPermission(c.permissions[username], requestAction, requestScope)
 	if len(c.allUsersPermissions) > 0 {
 		projects = mergeProjects(projects, projectsWithPermission(c.allUsersPermissions, requestAction, requestScope))
+	}
+	if len(claimProjects) > 0 {
+		projects = mergeProjects(projects, claimProjects)
 	}
 	return projects, nil
 }

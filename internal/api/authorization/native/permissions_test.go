@@ -170,11 +170,13 @@ func wildcardUserDataset() *testDataset {
 		},
 		globalRoles: []*v1.GlobalRole{
 			testGlobalRole("project-creator", testCreateProjectPermission),
+			testGlobalRole("reader", testReadAllPermission), // only granted through the claims
 		},
 		roles: []*v1.Role{
 			testRole("p1", "viewer", testReadAllPermission),
 			testRole("p1", "editor", testEditPermission),
 			testRole("p2", "viewer", testReadAllPermission),
+			testRole("p3", "viewer", testReadAllPermission), // only granted through the claims
 		},
 		globalRoleBindings: []*v1.GlobalRoleBinding{
 			asReadFromDatabase(testGlobalRoleBinding("everyone", "project-creator", userSubjects(v1.WildcardUser)...)),
