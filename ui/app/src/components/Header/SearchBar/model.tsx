@@ -11,14 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { MatchingInterval, MatchingResult } from '@nexucis/kvsearch';
+import type { KVSearchResult, MatchingInterval, MatchingResult } from '@nexucis/kvsearch';
 import type { DashboardResource, Resource, StatusError } from '@perses-dev/client';
-
-export interface ResourceListProps {
-  query: string;
-  handleClose: () => void;
-  isResources?: (type: ResourceType, available: boolean) => void;
-}
+import ArchiveIcon from 'mdi-material-ui/Archive';
+import DatabaseIcon from 'mdi-material-ui/Database';
+import DashboardIcon from 'mdi-material-ui/ViewDashboard';
+import type { ReactNode } from 'react';
 
 export type ResourceType = 'dashboards' | 'projects' | 'globalDatasources' | 'datasources';
 
@@ -37,16 +35,18 @@ export type HighlightedDashboardResource = DashboardResource & {
 
 export type SearchItem = Resource;
 
-export interface SearchListProps {
-  list: SearchItem[];
-  query: string;
+export interface SearchResultSection {
+  type: ResourceType;
+  results: Array<KVSearchResult<SearchItem>>;
+  isLoading: boolean;
+  error: StatusError | null;
+}
+
+export interface SearchListProps extends Omit<SearchResultSection, 'isLoading'> {
   handleClose: () => void;
-  isResource?: (isAvailable: boolean) => void;
   // Number of dashboards and datasources per project, displayed next to the project results.
   dashboardCounts?: Map<string, number>;
   datasourceCounts?: Map<string, number>;
-  error?: StatusError | null;
-  errorTitle?: string;
 }
 
 export interface SearchItemProps {
@@ -91,4 +91,11 @@ export const getTagDisplayValues = (tags: string[] | undefined, matchingTagValue
     hiddenTagsCount: Math.max(0, orderedTags.length - MAX_VISIBLE_RESOURCE_TAGS),
     hasAnyTags: orderedTags.length > 0,
   };
+};
+
+export const ICON_TO_RESOURCE_TYPE: Record<ResourceType, ReactNode> = {
+  dashboards: <DashboardIcon fontSize="small" />,
+  datasources: <DatabaseIcon fontSize="small" />,
+  projects: <ArchiveIcon fontSize="small" />,
+  globalDatasources: <DatabaseIcon fontSize="small" />,
 };

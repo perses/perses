@@ -22,12 +22,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChangeEvent, MouseEvent, ReactElement } from 'react';
 
 import { useIsMobileSize } from '../../../utils/browser-size';
-import type { ResourceType } from './model';
 import { SearchBarFilters, useResourceTypeFilters } from './SearchBarFilters';
-import { SearchDashboardList } from './SearchDashboardList';
-import { SearchDatasourceList } from './SearchDatasourceList';
-import { SearchGlobalDatasource } from './SearchGlobalDatasource';
-import { SearchProjectList } from './SearchProjectList';
+import { SearchList } from './SearchList';
+import { useSearchResults } from './useSearchResults';
 
 const SEARCH_PLACE_HOLDER = 'Search dashboards, projects, datasources...';
 
@@ -79,20 +76,14 @@ export const STATIC_SX = {
     overflowY: 'auto',
     maxHeight: '70vh',
   },
-  escButton: {
-    minWidth: 0,
-    height: 32,
-    textTransform: 'none',
-    borderRadius: 1,
-  },
 } satisfies Record<string, SxProps<Theme>>;
 
 const handleOpenMouseDown = (event: MouseEvent<HTMLButtonElement>): void => {
   event.preventDefault();
 };
 
-function shortcutDisplay(): string[] {
-  return formatForDisplay('Mod+K', { separatorToken: '|' }).split('|');
+function shortcutDisplay(): string {
+  return formatForDisplay('Mod+K');
 }
 
 function useHandleShortCut(handleOpen: () => void): void {
@@ -113,13 +104,11 @@ export function SearchBar(): ReactElement {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const { filters, activeTypes, toggleType } = useResourceTypeFilters();
-
-  const [hasResource, setHasResource] = useState<Record<ResourceType, boolean>>({
-    dashboards: false,
-    projects: false,
-    globalDatasources: false,
-    datasources: false,
-  });
+  const { sections, dashboardCounts, datasourceCounts } = useSearchResults(query, activeTypes, open);
+  const hasQuery = query.trim().length > 0;
+  const isAnySectionLoading = sections.some((section) => section.isLoading);
+  // An error is displayed in place of the results, so it should not lead to "No records found".
+  const hasAnyResult = sections.some(({ results, error }) => results.length > 0 || !!error);
 
   const handleClose = useCallback((): void => setOpen(false), []);
 
@@ -133,11 +122,6 @@ export function SearchBar(): ReactElement {
     inputElement?.focus();
   }, []);
 
-  const handleIsResourceAvailable = useCallback((type: ResourceType, available: boolean): void => {
-    setHasResource((prev) => (prev[type] === available ? prev : { ...prev, [type]: available }));
-  }, []);
-
-  const hasAnyResource = Array.from(activeTypes).some((type) => hasResource[type]);
   const handleOpen = useCallback((): void => setOpen(true), []);
   useHandleShortCut(handleOpen);
 
@@ -184,13 +168,7 @@ export function SearchBar(): ReactElement {
           <Magnify sx={STATIC_SX.magnify} fontSize="medium" />
           <Typography>{SEARCH_PLACE_HOLDER}</Typography>
         </Box>
-        {!isMobileSize && (
-          <Stack direction="row" spacing={0.5}>
-            {shortcutDisplay().map((key) => {
-              return <Chip key={key} label={key} size="small" />;
-            })}
-          </Stack>
-        )}
+        {!isMobileSize && <Chip label={shortcutDisplay()} />}
       </Button>
       <Modal
         open={open}
@@ -235,15 +213,13 @@ export function SearchBar(): ReactElement {
                         <Close fontSize="small" />
                       </IconButton>
                     )}
-                    <Button variant="outlined" size="small" onClick={handleClose} sx={STATIC_SX.escButton}>
-                      esc
-                    </Button>
+                    <Chip label="esc" size="small" onClick={handleClose} />
                   </InputAdornment>
                 ),
               },
             }}
           />
-          {query.trim().length > 0 && !hasAnyResource && (
+          {hasQuery && !isAnySectionLoading && !hasAnyResult && (
             <Box
               data-testid={SEARCH_BAR_DATA_TEST_ID.noRecordContainer}
               className="noRecordsFoundWrapper"
@@ -254,24 +230,19 @@ export function SearchBar(): ReactElement {
             </Box>
           )}
           <SearchBarFilters filters={filters} onToggle={toggleType} />
-          {query.trim().length > 0 && (
+          {hasQuery && (
             <Stack className="searchItemsWrapper" direction="column" sx={STATIC_SX.searchItemsWrapper}>
-              {activeTypes.has('dashboards') && (
-                <SearchDashboardList query={query} handleClose={handleClose} isResources={handleIsResourceAvailable} />
-              )}
-              {activeTypes.has('projects') && (
-                <SearchProjectList query={query} handleClose={handleClose} isResources={handleIsResourceAvailable} />
-              )}
-              {activeTypes.has('globalDatasources') && (
-                <SearchGlobalDatasource
-                  query={query}
+              {sections.map(({ type, results, error }) => (
+                <SearchList
+                  key={type}
+                  type={type}
+                  results={results}
+                  error={error}
                   handleClose={handleClose}
-                  isResources={handleIsResourceAvailable}
+                  dashboardCounts={dashboardCounts}
+                  datasourceCounts={datasourceCounts}
                 />
-              )}
-              {activeTypes.has('datasources') && (
-                <SearchDatasourceList query={query} handleClose={handleClose} isResources={handleIsResourceAvailable} />
-              )}
+              ))}
             </Stack>
           )}
         </Paper>
