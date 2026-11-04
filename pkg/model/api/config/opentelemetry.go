@@ -47,7 +47,7 @@ type OpenTelemetry struct {
 	// Insecure disables TLS when connecting to the endpoint.
 	Insecure bool `json:"insecure,omitempty" yaml:"insecure,omitempty"`
 	// TLSConfig to use to connect to the endpoint.
-	TLSConfig *secret.TLSConfig `json:"tls_config,omitempty" yaml:"tls_config,omitempty"`
+	TLSConfig *secret.PublicTLSConfig `json:"tls_config,omitempty" yaml:"tls_config,omitempty"`
 	// BasicAuth credentials sent with each export request.
 	BasicAuth *secret.BasicAuth `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`
 	// Authorization credentials (like a bearer token) sent with each export request.
