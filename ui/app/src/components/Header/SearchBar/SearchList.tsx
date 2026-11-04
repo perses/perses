@@ -18,7 +18,7 @@ import { isProjectMetadata } from '@perses-dev/client';
 import type { ReactElement } from 'react';
 import { useCallback, useState } from 'react';
 
-import { ALL_RESOURCE_TYPES_TITLES, getTagDisplayValues } from './model';
+import { ALL_RESOURCE_TYPES_TITLES, getTagDisplayValues, ICON_TO_RESOURCE_TYPE } from './model';
 import type { HighlightedDashboardResource, SearchItem, SearchListProps } from './model';
 import { SearchDashboardItem } from './SearchDashboardItem';
 import { SearchDatasourceItem } from './SearchDatasourceItem';
@@ -63,8 +63,8 @@ const STATIC_SX = {
     marginTop: 0.5,
     marginBottom: 1,
     marginLeft: 0.5,
+    gap: 1,
   },
-  resourceIcon: { marginRight: 0.5 },
   alert: { margin: 1 },
 };
 
@@ -91,6 +91,7 @@ export function SearchList(props: SearchListProps): ReactElement | null {
   return (
     <Box sx={STATIC_SX.flexColumn}>
       <Box sx={STATIC_SX.flexRow}>
+        {ICON_TO_RESOURCE_TYPE[type]}
         <Typography variant="h3">{`${ALL_RESOURCE_TYPES_TITLES[type]} (${filteredList.length})`}</Typography>
       </Box>
       <Stack display="flex" direction="column">
