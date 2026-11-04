@@ -35,6 +35,10 @@ import (
 //
 // Run them with:
 //   go test -run '^$' -bench . -benchmem ./internal/api/authorization/native/
+//
+// A pull request that can affect the performance of the native authorization must include a benchstat comparison of
+// these benchmarks between its base and its branch: see the "Native authorization changes" section of CONTRIBUTING.md.
+// Keep the existing benchmarks and their datasets stable, otherwise the comparison with the base is not possible.
 
 // maxRefreshDurationForConcurrentBench is the maximum duration of a cache refresh for the "concurrent-refresh"
 // benchmark to be meaningful: beyond, no new cache would be published during the measurement.
