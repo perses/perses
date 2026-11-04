@@ -26,6 +26,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/crypto"
+	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/route"
@@ -112,6 +113,7 @@ type endpoint struct {
 	isAuthnEnable    bool
 	isDelegatedAuthn bool
 	apiPrefix        string
+	userDao          user.DAO
 }
 
 func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, providers config.AuthenticationProviders, isAuthnEnable bool, apiPrefix string) (route.Endpoint, crypto.TokenRefresher, error) {
@@ -123,6 +125,7 @@ func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, provid
 		// Currently only k8s is a delegated authentication provider
 		isDelegatedAuthn: providers.KubernetesProvider.Enable,
 		apiPrefix:        apiPrefix,
+		userDao:          dao,
 	}
 
 	// Register the native provider if enabled
@@ -181,10 +184,21 @@ func (e *endpoint) refresh(ctx echo.Context) error {
 	if len(refreshToken) == 0 {
 		return apiinterface.HandleBadRequestError("no refresh token has been found")
 	}
+
 	claims, err := e.jwt.ValidateRefreshToken(refreshToken)
 	if err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
+
+	_, err = e.userDao.Get(claims.Subject)
+	if err != nil {
+		if databaseModel.IsKeyNotFound(err) {
+			return apiinterface.UnauthorizedError
+		}
+		logrus.WithError(err).Error("failed to verify user during token refresh")
+		return apiinterface.InternalError
+	}
+
 	accessToken, err := e.tokenManagement.accessToken(claims.Subject, claims.ProviderInfo, claims.PersistedClaims, ctx.SetCookie)
 	if err != nil {
 		return err
