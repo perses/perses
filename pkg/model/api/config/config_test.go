@@ -196,8 +196,9 @@ func TestJSONMarshalConfig(t *testing.T) {
     "check_latest_update_interval": "30s",
     "index_keys": {
       "dashboard": [
+        "spec.display.name",
         "metadata.name",
-        "spec.display.name"
+        "metadata.tags"
       ]
     }
   }
@@ -616,7 +617,7 @@ plugin:
 				Search: Search{
 					CheckLatestUpdateInterval: common.Duration(defaultCacheInterval),
 					ExcludedChars:             nil,
-					IndexKeys:                 IndexKeys{Dashboard: []string{"metadata.name", "spec.display.name"}},
+					IndexKeys:                 IndexKeys{Dashboard: []string{"spec.display.name", "metadata.name", "metadata.tags"}},
 				},
 			},
 		},

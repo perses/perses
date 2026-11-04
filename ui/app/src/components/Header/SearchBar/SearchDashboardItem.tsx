@@ -20,6 +20,7 @@ import { Link as RouterLink } from 'react-router-dom';
 
 import { ProjectRoute } from '../../../model/route';
 import { HighlightedMatch } from './HighlightedMatch';
+import { getDisplayNameMatch } from './model';
 import type { HighlightedDashboardResource, SearchItemProps, TagsDisplayValue } from './model';
 import { SearchRow } from './SearchRow';
 
@@ -100,7 +101,7 @@ export const SearchDashboardItem = (props: SearchDashboardItemProps): ReactEleme
     );
   }, [highlight]);
 
-  const match = matchingResult?.find((mr) => mr.path.join('.') === 'metadata.name');
+  const { value, intervals } = getDisplayNameMatch(name, resource.spec?.display?.name, matchingResult);
 
   return (
     <SearchRow>
@@ -113,8 +114,8 @@ export const SearchDashboardItem = (props: SearchDashboardItemProps): ReactEleme
         direction="row"
       >
         <HighlightedMatch
-          value={name}
-          intervals={match?.intervals ?? []}
+          value={value}
+          intervals={intervals}
           sx={STATIC_SX.name}
           dataTestId={`${DASHBOARD_ITEM_DATA_TEST_IDS.dashboardRowName}-${name}`}
         />

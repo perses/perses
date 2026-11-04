@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { KVSearchResult } from '@nexucis/kvsearch';
+import type { KVSearchResult, MatchingResult } from '@nexucis/kvsearch';
 import { KVSearch } from '@nexucis/kvsearch';
 import { useMemo } from 'react';
 
@@ -24,6 +24,8 @@ import { resolveImportantDashboardList, useDashboardList } from '../../../model/
 import { useDatasourceList } from '../../../model/datasource-client';
 import { useGlobalDatasourceList } from '../../../model/global-datasource-client';
 import { useProjectList } from '../../../model/project-client';
+import { useSearchDashboards } from '../../../model/search-client';
+import type { SearchProjectResource } from '../../../model/search-client';
 import type { HighlightedDashboardResource, ResourceType, SearchItem, SearchResultSection } from './model';
 
 const kvSearch = new KVSearch<SearchItem>({
@@ -65,8 +67,77 @@ function useFilteredList(query: string, list: SearchItem[] | undefined): Array<K
   return useMemo(() => (list ? kvSearch.filter(query, list) : []), [query, list]);
 }
 
+// The search API returns the value of the first indexed field matching the query, but not which field it is.
+function getMatchedPath({ metadata, displayName, original }: SearchProjectResource): string[] | undefined {
+  if (original === undefined) {
+    return undefined;
+  }
+  if (original === displayName) {
+    return ['spec', 'display', 'name'];
+  }
+  if (original === metadata.name) {
+    return ['metadata', 'name'];
+  }
+  if (metadata.tags?.includes(original)) {
+    return ['metadata', 'tags'];
+  }
+  return undefined;
+}
+
 /**
- * Fetches the resources of the active types and filters them with the query.
+ * Searches the dashboards with the search API, and converts the results into the same structure as the other
+ * resource types. The API only returns the metadata and the display name of the dashboards.
+ */
+function useDashboardSearchResults(query: string, enabled: boolean): Omit<SearchResultSection, 'type'> {
+  const importantDashboardGroups = useImportantDashboardGroups();
+  const shouldNormalizeResourceNames = useShouldNormalizeResourceNames();
+  const searchQuery = useSearchDashboards(undefined, query.trim(), {
+    enabled,
+    staleTime: Infinity,
+    // Keep displaying the results of the previous query while the results of the current one are loading.
+    keepPreviousData: true,
+  });
+  const { data, error } = searchQuery;
+
+  const results = useMemo((): Array<KVSearchResult<SearchItem>> => {
+    if (!enabled || !data) {
+      return [];
+    }
+    const dashboardResults = data.map((result, index): KVSearchResult<HighlightedDashboardResource> => {
+      const dashboard = {
+        kind: 'Dashboard',
+        metadata: result.metadata,
+        spec: { display: { name: result.displayName } },
+        highlight: false,
+      } as HighlightedDashboardResource;
+      const path = getMatchedPath(result);
+      const matched: MatchingResult[] | undefined =
+        path && result.original !== undefined
+          ? [{ path, value: result.original, intervals: result.intervals ?? [] }]
+          : undefined;
+      return { original: dashboard, rendered: dashboard, score: result.score ?? 0, index, matched };
+    });
+    const importantDashboardKeys = new Set(
+      resolveImportantDashboardList(
+        dashboardResults.map(({ original }) => original),
+        importantDashboardGroups,
+        shouldNormalizeResourceNames,
+      ).map(({ metadata }) => `${metadata.project}/${metadata.name}`),
+    );
+    for (const { original } of dashboardResults) {
+      original.highlight = importantDashboardKeys.has(`${original.metadata.project}/${original.metadata.name}`);
+    }
+    // Unlike the filtering done in the browser, the results of the search API are not sorted.
+    return dashboardResults.toSorted((a, b) => b.score - a.score);
+  }, [enabled, data, importantDashboardGroups, shouldNormalizeResourceNames]);
+
+  // The results of the previous query are displayed while the current one is fetched, so it is considered as loading.
+  return { results, isLoading: isPending(searchQuery), error };
+}
+
+/**
+ * Fetches the resources of the active types and filters them with the query. Dashboards are searched by the search
+ * API, while the other resource types are filtered in the browser.
  *
  * The search bar is always mounted in the header, so nothing is fetched until the search is enabled (i.e. opened)
  * with a non-empty query. Lists are kept in cache afterward and are only fetched again when invalidated.
@@ -77,15 +148,10 @@ export function useSearchResults(query: string, activeTypes: Set<ResourceType>, 
   const isDashboardsActive = isActive('dashboards');
   const isProjectsActive = isActive('projects');
   const isProjectDatasourceEnabled = useIsProjectDatasourceEnabled();
-  const importantDashboardGroups = useImportantDashboardGroups();
-  const shouldNormalizeResourceNames = useShouldNormalizeResourceNames();
 
-  // Dashboards and datasources are also needed to display the counts next to the project results.
-  const dashboards = useDashboardList({
-    metadataOnly: true,
-    staleTime: Infinity,
-    enabled: isDashboardsActive || isProjectsActive,
-  });
+  const dashboardSection = useDashboardSearchResults(query, isDashboardsActive);
+  // The list of the dashboards is only needed to display the counts next to the project results.
+  const dashboards = useDashboardList({ metadataOnly: true, staleTime: Infinity, enabled: isProjectsActive });
   const projects = useProjectList({ staleTime: Infinity, enabled: isProjectsActive });
   const globalDatasources = useGlobalDatasourceList({ staleTime: Infinity, enabled: isActive('globalDatasources') });
   const datasources = useDatasourceList({
@@ -93,24 +159,6 @@ export function useSearchResults(query: string, activeTypes: Set<ResourceType>, 
     enabled: isActive('datasources') || (isProjectsActive && isProjectDatasourceEnabled),
   });
 
-  // The lists are shared with other pages (e.g. the home page loads the dashboards), and the search bar is always
-  // mounted: they are only processed when they are searched.
-  const highlightedDashboards = useMemo((): HighlightedDashboardResource[] | undefined => {
-    if (!isDashboardsActive || !dashboards.data) {
-      return undefined;
-    }
-    const importantDashboardKeys = new Set(
-      resolveImportantDashboardList(dashboards.data, importantDashboardGroups, shouldNormalizeResourceNames).map(
-        ({ metadata }) => `${metadata.project}/${metadata.name}`,
-      ),
-    );
-    return dashboards.data.map((dashboard) => ({
-      ...dashboard,
-      highlight: importantDashboardKeys.has(`${dashboard.metadata.project}/${dashboard.metadata.name}`),
-    }));
-  }, [isDashboardsActive, dashboards.data, importantDashboardGroups, shouldNormalizeResourceNames]);
-
-  const dashboardResults = useFilteredList(query, highlightedDashboards);
   const projectResults = useFilteredList(query, isProjectsActive ? projects.data : undefined);
   const globalDatasourceResults = useFilteredList(
     query,
@@ -128,7 +176,7 @@ export function useSearchResults(query: string, activeTypes: Set<ResourceType>, 
   );
 
   const sections: SearchResultSection[] = [
-    { type: 'dashboards', results: dashboardResults, isLoading: isPending(dashboards), error: dashboards.error },
+    { type: 'dashboards', ...dashboardSection },
     { type: 'projects', results: projectResults, isLoading: isPending(projects), error: projects.error },
     {
       type: 'globalDatasources',
