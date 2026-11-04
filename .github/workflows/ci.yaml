@@ -147,3 +147,79 @@ jobs:
         run: make cross-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  homebrew-tap:
+    name: "update homebrew tap"
+    needs: "build"
+    ## Open a pull request on https://github.com/perses/homebrew-tap to update the formulae.
+    ## Only stable releases are published to the tap, pre-releases (alpha, beta, rc) are skipped.
+    if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') && !contains(github.ref_name, '-') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      TAG: ${{ github.ref_name }}
+      TAP_BRANCH: perses-bot/release-${{ github.ref_name }}
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      HOMEBREW_NO_ANALYTICS: "1"
+      HOMEBREW_NO_ENV_HINTS: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - uses: perses/github-actions@v0.13.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+      - name: Checkout Homebrew tap
+        uses: actions/checkout@v7
+        with:
+          repository: perses/homebrew-tap
+          path: homebrew-tap
+          token: ${{ secrets.BOT_TOKEN }}
+      - name: Update formulae
+        run: make update-homebrew-tap VERSION="${TAG}" HOMEBREW_TAP_DIR=./homebrew-tap
+      - name: Commit changes
+        id: commit
+        ## The commit is only pushed once the formulae have been installed and tested.
+        uses: stefanzweifel/git-auto-commit-action@v7.2.1
+        with:
+          repository: homebrew-tap
+          branch: ${{ env.TAP_BRANCH }}
+          create_branch: true
+          skip_fetch: true
+          skip_push: true
+          commit_message: "Release ${{ env.TAG }}"
+          commit_options: "--signoff"
+          commit_user_name: "perses-bot"
+          commit_user_email: "perses-team+bot@googlegroups.com"
+          commit_author: "perses-bot <perses-team+bot@googlegroups.com>"
+      - name: Install and test formulae
+        if: ${{ steps.commit.outputs.changes_detected == 'true' }}
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          brew tap perses/tap "${GITHUB_WORKSPACE}/homebrew-tap"
+          brew trust --tap perses/tap
+          brew install perses/tap/perses perses/tap/percli
+          brew test perses/tap/perses perses/tap/percli
+      - name: Open pull request
+        if: ${{ steps.commit.outputs.changes_detected == 'true' }}
+        working-directory: homebrew-tap
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+        run: |
+          git push --force origin "${TAP_BRANCH}"
+          if [[ -n "$(gh pr list --repo perses/homebrew-tap --head "${TAP_BRANCH}" --state open --json number --jq '.[]')" ]]; then
+            echo "A pull request is already open for ${TAP_BRANCH}"
+            exit 0
+          fi
+          version="${TAG#v}"
+          gh pr create --repo perses/homebrew-tap --base main --head "${TAP_BRANCH}" --title "Release ${TAG}" --body-file - <<EOF
+          Update the \`perses\` and \`percli\` formulae to [${TAG}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${TAG}).
+
+          - \`version\` set to \`${version}\`.
+          - \`sha256\` of the archives taken from \`perses_${version}_checksums.txt\`.
+
+          Both formulae have been installed and tested with \`brew install\` and \`brew test\` on Linux amd64.
+
+          This pull request has been opened by the [release workflow](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}).
+          EOF
