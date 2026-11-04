@@ -76,20 +76,14 @@ export const STATIC_SX = {
     overflowY: 'auto',
     maxHeight: '70vh',
   },
-  escButton: {
-    minWidth: 0,
-    height: 32,
-    textTransform: 'none',
-    borderRadius: 1,
-  },
 } satisfies Record<string, SxProps<Theme>>;
 
 const handleOpenMouseDown = (event: MouseEvent<HTMLButtonElement>): void => {
   event.preventDefault();
 };
 
-function shortcutDisplay(): string[] {
-  return formatForDisplay('Mod+K', { separatorToken: '|' }).split('|');
+function shortcutDisplay(): string {
+  return formatForDisplay('Mod+K');
 }
 
 function useHandleShortCut(handleOpen: () => void): void {
@@ -174,13 +168,7 @@ export function SearchBar(): ReactElement {
           <Magnify sx={STATIC_SX.magnify} fontSize="medium" />
           <Typography>{SEARCH_PLACE_HOLDER}</Typography>
         </Box>
-        {!isMobileSize && (
-          <Stack direction="row" spacing={0.5}>
-            {shortcutDisplay().map((key) => {
-              return <Chip key={key} label={key} size="small" />;
-            })}
-          </Stack>
-        )}
+        {!isMobileSize && <Chip label={shortcutDisplay()} />}
       </Button>
       <Modal
         open={open}
@@ -225,9 +213,7 @@ export function SearchBar(): ReactElement {
                         <Close fontSize="small" />
                       </IconButton>
                     )}
-                    <Button variant="outlined" size="small" onClick={handleClose} sx={STATIC_SX.escButton}>
-                      esc
-                    </Button>
+                    <Chip label="esc" size="small" onClick={handleClose} />
                   </InputAdornment>
                 ),
               },

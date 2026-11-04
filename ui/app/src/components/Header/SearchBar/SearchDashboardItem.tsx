@@ -14,7 +14,6 @@
 import { Box, Chip, Stack } from '@mui/material';
 import type { SxProps, Theme } from '@mui/material';
 import StarIcon from 'mdi-material-ui/StarFourPoints';
-import DashboardIcon from 'mdi-material-ui/ViewDashboard';
 import { useMemo } from 'react';
 import type { ReactElement } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
@@ -113,7 +112,6 @@ export const SearchDashboardItem = (props: SearchDashboardItemProps): ReactEleme
         onClick={handleClose}
         direction="row"
       >
-        <DashboardIcon fontSize="small" />
         <HighlightedMatch
           value={name}
           intervals={match?.intervals ?? []}
