@@ -27,7 +27,7 @@ function checkPackage() {
   fi
   for workspace in ${workspaces}; do
     cd "${workspace}"
-    package_version=$(npm run env | grep npm_package_version | cut -d= -f2-)
+    package_version=$(jq -r '.version' package.json)
     if [ "${version}" != "${package_version}" ]; then
       echo "version of ${workspace} is not the correct one"
       echo "expected one: ${version}"
@@ -61,14 +61,14 @@ function bumpVersion() {
   for workspace in ${workspaces}; do
     # sed -i syntax is different on mac and linux
     if [[ "$OSTYPE" == "darwin"* ]]; then
-      sed -E -i "" "s|(\"@perses-dev/internal.+\": )\".+\"|\1\"${version}\"|" "${workspace}"/package.json
+      sed -E -i "" "s|(\"@perses-dev/internal.+\": )\".+\"|\1\"workspace:${version}\"|" "${workspace}"/package.json
     else
-      sed -E -i "s|(\"@perses-dev/internal.+\": )\".+\"|\1\"${version}\"|" "${workspace}"/package.json
+      sed -E -i "s|(\"@perses-dev/internal.+\": )\".+\"|\1\"workspace:${version}\"|" "${workspace}"/package.json
     fi
   done
 
   # increase the version on all packages
-  npm version "${version}" --workspaces
+  pnpm --filter './*' --fail-if-no-match version "${version}" --no-git-tag-version --no-git-checks
 }
 
 # Validates branch name and extracts snapshot name from it.
@@ -92,10 +92,12 @@ function removeSnapshot() {
   tagName=$(getBranchSnapshotName $branch)
 
   echo "Removing snapshot for tag ${tagName}"
-  for workspace in ${publish_workspaces}; do
-    cd "${workspace}"
-    eval "npm dist-tag rm @perses-dev/${workspace} ${tagName}"
-    cd ../
+  for workspace in ${workspaces}; do
+    # Private packages are never published, so they cannot have a snapshot tag.
+    if [ "$(jq -r '.private // false' < "${workspace}"/package.json)" == "true" ]; then
+      continue
+    fi
+    pnpm dist-tag remove "$(jq -r '.name' < "${workspace}"/package.json)" "${tagName}"
   done
 }
 

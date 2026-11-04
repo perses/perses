@@ -17,15 +17,12 @@ node_modules
 .env.production.local
 webpack.local.js
 
-npm-debug.log*
+pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
 # Build output
 dist
-
-# Ignore turborepo cache
-.turbo
 
 # Ignore test coverage output
 coverage
@@ -37,4 +34,4 @@ CHANGELOG.md
 
 # ignore shared package links
 .perses-shared-link-bk.json
-.perses-shared-link-lock-bk.json
+.perses-shared-link-lock-bk.yaml

@@ -12,12 +12,10 @@ for example in "${examples[@]}";
 do
   pushd "$example"
 
-  npm install |& tee out.log
-  if grep -q ERESOLVE out.log; then
-    exit 1
-  fi
-  npm run type-check
-  npm run build
+  # Fail on peer dependency conflicts (pnpm only warns about them by default)
+  pnpm install --no-frozen-lockfile --strict-peer-dependencies
+  pnpm run type-check
+  pnpm run build
 
   popd
 done

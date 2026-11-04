@@ -2,7 +2,7 @@
 
 function ncu() {
     target=$1
-    npx npm-check-updates -u --target "${target}"
+    pnpm dlx npm-check-updates -u --target "${target}"
 }
 
 cd ui/
@@ -13,4 +13,4 @@ for workspace in $(cat package.json | jq -r '.workspaces[]'); do
 done; \
 
 ncu "$1"
-npm install
+pnpm install

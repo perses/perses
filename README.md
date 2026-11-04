@@ -94,7 +94,7 @@ To build Perses from source code, You need:
 
 - Go [version 1.26 or greater](https://golang.org/doc/install).
 - NodeJS [version 22 or greater](https://nodejs.org/).
-- npm [version 10 or greater](https://www.npmjs.com/).
+- pnpm [version 12](https://pnpm.io/installation).
 
 Start by cloning the repository:
 

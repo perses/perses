@@ -8,13 +8,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
-      - uses: ./.github/perses-ci/actions/setup_environment
+      - uses: pnpm/setup@v2.1.0
         with:
-          enable_npm: true
-          nvmrc_path: "./ui/.nvmrc"
+          working-directory: ./ui
+          install: false
+          cache: true
+      - name: Configure npm registry authentication
+        # pnpm only expands environment variables in user-level registry credentials,
+        # so the token placeholder must be written in ~/.npmrc (not in the repository .npmrc).
+        run: echo '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' >> ~/.npmrc
       - name: Remove npm snapshot tag
         run: ./scripts/ui_release.sh --remove-snapshot "${{ github.event.ref }}"
         env:
-          # The setup-node action writes an .npmrc file with this env variable
-          # as the placeholder for the auth token
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

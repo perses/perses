@@ -24,6 +24,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/perses/common/async"
+	"github.com/perses/perses/internal/cli/packagemanager"
 	"github.com/sirupsen/logrus"
 )
 
@@ -99,7 +100,8 @@ func newDevServer(pluginName, pluginPath, rsbuildScriptName string, writer, errW
 }
 
 func (d *devserver) Execute(ctx context.Context, _ context.CancelFunc) error {
-	cmd := exec.CommandContext(ctx, "npm", "run", d.rsbuildScriptName)
+	pm := packagemanager.Detect(d.pluginPath)
+	cmd := exec.CommandContext(ctx, string(pm.Name), pm.RunArgs(d.rsbuildScriptName)...) //nolint:gosec
 	cmd.Stdout = d.writer
 	cmd.Stderr = d.errWriter
 	cmd.Dir = d.pluginPath

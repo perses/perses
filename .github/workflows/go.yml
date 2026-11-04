@@ -103,6 +103,10 @@ jobs:
         with:
           name: plugins
           path: plugins-archive
+      - uses: pnpm/setup@v2.1.0
+        with:
+          working-directory: ./ui
+          install: false
       - name: test
         run: make integration-test
   test-windows:
@@ -138,6 +142,10 @@ jobs:
         run: sh scripts/download-prometheus.sh
       - name: "start prometheus"
         run: sh scripts/run-prometheus.sh
+      - uses: pnpm/setup@v2.1.0
+        with:
+          working-directory: ./ui
+          install: false
       - name: test
         run: make integration-test
   test-mysql:
@@ -180,6 +188,10 @@ jobs:
         with:
           name: plugins
           path: plugins-archive
+      - uses: pnpm/setup@v2.1.0
+        with:
+          working-directory: ./ui
+          install: false
       - name: test
         run: make mysql-integration-test
   golangci:

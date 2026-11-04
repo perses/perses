@@ -1,5 +1,7 @@
 FROM node:24 AS node-builder
 WORKDIR /app
+# Keep the pnpm major aligned with ui/package.json.
+RUN npm install -g pnpm@12
 COPY ui ui
 COPY Makefile Makefile
 RUN make build-ui
