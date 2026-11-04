@@ -45,8 +45,8 @@ func NewMetadata(name string) *Metadata {
 type DatasourceMetadata struct {
 	Metadata      `json:",inline" yaml:",inline"`
 	Source        MetadataSource `json:"source,omitempty" yaml:"source,omitempty"`
-	DiscoveryName string         `json:"discovery_name,omitempty" yaml:"discovery_name,omitempty"`
-	DiscoveryType DiscoveryType  `json:"discovery_type,omitempty" yaml:"discovery_type,omitempty"`
+	DiscoveryName string         `json:"discoveryName,omitempty" yaml:"discoveryName,omitempty"`
+	DiscoveryType DiscoveryType  `json:"discoveryType,omitempty" yaml:"discoveryType,omitempty"`
 }
 
 // UnmarshalJSON is needed to correctly populate both the embedded Metadata fields
