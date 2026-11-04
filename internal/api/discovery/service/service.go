@@ -74,6 +74,18 @@ func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 			Name: entity.Metadata.Name,
 		}
 
+		// check for existing global datasources with the same name
+		// if the name exists, but datasource type differs, log and skip update
+		existing, getErr := a.svc.Get(param)
+		if getErr != nil {
+			logrus.WithError(getErr).Errorf("unable to get the globaldatasource %q", entity.Metadata.Name)
+			continue
+		}
+		if existing.Metadata.Source != v1.DiscoverySource {
+			logrus.Debugf("skipping update of globaldatasource %q: stored source is %q, not discovery", entity.Metadata.Name, existing.Metadata.Source)
+			continue
+		}
+
 		if _, updateError := a.svc.Update(nil, entity, param); updateError != nil {
 			logrus.WithError(updateError).Errorf("unable to update the globaldatasource %q", entity.Metadata.Name)
 		}
