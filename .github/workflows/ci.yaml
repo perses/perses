@@ -203,15 +203,17 @@ jobs:
           brew test perses/tap/perses perses/tap/percli
       - name: Open pull request
         if: ${{ steps.commit.outputs.changes_detected == 'true' }}
+        ## An open pull request is left untouched, so that re-running the job doesn't discard the commits added to it.
         working-directory: homebrew-tap
         env:
           GH_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
-          git push --force origin "${TAP_BRANCH}"
-          if [[ -n "$(gh pr list --repo perses/homebrew-tap --head "${TAP_BRANCH}" --state open --json number --jq '.[]')" ]]; then
-            echo "A pull request is already open for ${TAP_BRANCH}"
+          open_pull_requests="$(gh pr list --repo perses/homebrew-tap --head "${TAP_BRANCH}" --state open --json number --jq 'length')"
+          if [[ "${open_pull_requests}" != "0" ]]; then
+            echo "A pull request is already open for ${TAP_BRANCH}, leaving it untouched"
             exit 0
           fi
+          git push --force origin "${TAP_BRANCH}"
           version="${TAG#v}"
           gh pr create --repo perses/homebrew-tap --base main --head "${TAP_BRANCH}" --title "Release ${TAG}" --body-file - <<EOF
           Update the \`perses\` and \`percli\` formulae to [${TAG}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${TAG}).
