@@ -14,12 +14,16 @@
 package generate
 
 import (
+	"context"
+	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	cmdTest "github.com/perses/perses/internal/cli/test"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -53,9 +57,29 @@ func getFileList(filePaths []string) string {
 	return listString
 }
 
+// fakeGo records the go commands instead of running them, so the tests don't download modules. `go mod init` writes
+// a go.mod, since the generator checks for it.
+type fakeGo struct {
+	calls [][]string
+}
+
+func (f *fakeGo) run(_ context.Context, dir string, args ...string) ([]byte, error) {
+	f.calls = append(f.calls, args)
+	if len(args) == 3 && args[0] == "mod" && args[1] == "init" {
+		return nil, os.WriteFile(filepath.Join(dir, "go.mod"), []byte("module "+args[2]+"\n"), 0o600)
+	}
+	return nil, nil
+}
+
+func (f *fakeGo) newCMD() *cobra.Command {
+	return newCMD(f.run)
+}
+
 func TestPluginGenerateCMD(t *testing.T) {
 	removeTestFiles()
 	defer removeTestFiles()
+
+	goCmd := &fakeGo{}
 
 	testSuite := []cmdTest.Suite{
 		{
@@ -100,6 +124,7 @@ func TestPluginGenerateCMD(t *testing.T) {
 				"vitest.config.ts",
 				"schemas/datasources/my-test-datasource/my-test-datasource.cue",
 				"schemas/datasources/my-test-datasource/my-test-datasource.json",
+				"sdk/go/datasources/my-test-datasource/my-test-datasource.go",
 				"src/datasources/index.ts",
 				"src/datasources/my-test-datasource/index.ts",
 				"src/datasources/my-test-datasource/my-test-datasource-types.ts",
@@ -138,6 +163,7 @@ func TestPluginGenerateCMD(t *testing.T) {
 				"vitest.config.ts",
 				"schemas/panels/my-test-panel/my-test-panel.cue",
 				"schemas/panels/my-test-panel/my-test-panel.json",
+				"sdk/go/panels/my-test-panel/my-test-panel.go",
 				"src/panels/index.ts",
 				"src/panels/my-test-panel/index.ts",
 				"src/panels/my-test-panel/my-test-panel-types.ts",
@@ -146,14 +172,23 @@ func TestPluginGenerateCMD(t *testing.T) {
 				"src/panels/my-test-panel/MyTestPanelSettingsEditor.tsx"}),
 		},
 	}
-	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
+	cmdTest.ExecuteSuiteTest(t, goCmd.newCMD, testSuite)
+
+	assert.Equal(t, [][]string{
+		{"mod", "init", "github.com/my-plugin-org/my-plugin-module"},
+		{"get", "github.com/perses/perses@" + persesModuleVersion()},
+		{"mod", "tidy"},
+		// The panel added to the existing module brings new imports, so the dependencies are resolved again.
+		{"get", "github.com/perses/perses@" + persesModuleVersion()},
+		{"mod", "tidy"},
+	}, goCmd.calls)
 }
 
 // generateModule creates a module with a datasource plugin under dir.
 func generateModule(t *testing.T, dir string) {
 	t.Helper()
 
-	cmdTest.ExecuteSuiteTest(t, NewCMD, []cmdTest.Suite{
+	cmdTest.ExecuteSuiteTest(t, (&fakeGo{}).newCMD, []cmdTest.Suite{
 		{
 			Title: "Build module with a plugin",
 			Args: []string{
@@ -176,7 +211,8 @@ func TestPluginGenerateKeepsExistingGoMod(t *testing.T) {
 	customGoMod := "module example.com/custom\n\ngo 1.21\n"
 	require.NoError(t, os.WriteFile(goModPath, []byte(customGoMod), 0o600))
 
-	cmdTest.ExecuteSuiteTest(t, NewCMD, []cmdTest.Suite{
+	goCmd := &fakeGo{}
+	cmdTest.ExecuteSuiteTest(t, goCmd.newCMD, []cmdTest.Suite{
 		{
 			Title: "Build a plugin in a module that already has a go.mod",
 			Args: []string{
@@ -191,6 +227,12 @@ func TestPluginGenerateKeepsExistingGoMod(t *testing.T) {
 	content, err := os.ReadFile(goModPath) //nolint:gosec // goModPath is inside t.TempDir
 	require.NoError(t, err)
 	assert.Equal(t, customGoMod, string(content))
+
+	// The existing module is not initialized again, only its dependencies are resolved for the new Go SDK.
+	assert.Equal(t, [][]string{
+		{"get", "github.com/perses/perses@" + persesModuleVersion()},
+		{"mod", "tidy"},
+	}, goCmd.calls)
 }
 
 func TestPluginGenerateFailsBeforeWritingWithoutGo(t *testing.T) {
@@ -245,4 +287,60 @@ func TestPluginGenerateFailsBeforeWritingWithEmptyRegistry(t *testing.T) {
 
 	assert.NoDirExists(t, filepath.Join(dir, "src", "panels", "my-test-panel"))
 	assert.NoFileExists(t, filepath.Join(dir, "go.mod"))
+}
+
+func TestGetGoPackageName(t *testing.T) {
+	for name, expected := range map[string]string{
+		"MyTestPanel":       "mytestpanel",
+		"my-test-panel":     "mytestpanel",
+		"my_test panel 2":   "mytestpanel2",
+		"MyTestDatasource":  "mytestdatasource",
+		"ISO-8601 Time":     "iso8601time",
+		"already lowercase": "alreadylowercase",
+	} {
+		assert.Equal(t, expected, GetGoPackageName(name), name)
+	}
+}
+
+// TestGeneratedGoSDKCompiles generates every plugin type that has a Go SDK into one module, with the go commands run
+// for real except that the perses module is replaced by this checkout, then builds the module.
+func TestGeneratedGoSDKCompiles(t *testing.T) {
+	if _, err := exec.LookPath("go"); err != nil {
+		t.Skip("the go binary is required")
+	}
+	persesRoot, err := filepath.Abs(filepath.Join("..", "..", "..", "..", ".."))
+	require.NoError(t, err)
+	require.FileExists(t, filepath.Join(persesRoot, "go.mod"))
+
+	run := func(ctx context.Context, dir string, args ...string) ([]byte, error) {
+		if args[0] == "get" {
+			// Use this checkout instead of downloading the released module.
+			args = []string{"mod", "edit",
+				"-require=github.com/perses/perses@v0.0.0-00010101000000-000000000000",
+				"-replace=github.com/perses/perses=" + filepath.ToSlash(persesRoot)}
+		}
+		return runGo(ctx, dir, args...)
+	}
+
+	dir := t.TempDir()
+	for i, pluginType := range pluginTypesWithGoSDK {
+		args := []string{"--plugin.name", fmt.Sprintf("MyTest%s", pluginType), "--plugin.type", string(pluginType), dir}
+		if i == 0 {
+			args = append([]string{"--module.name", "MyPluginModule", "--module.org", "MyPluginOrg"}, args...)
+		}
+		cmdTest.ExecuteSuiteTest(t, func() *cobra.Command { return newCMD(run) }, []cmdTest.Suite{
+			{
+				Title:                fmt.Sprintf("Generate a %s plugin", pluginType),
+				Args:                 args,
+				ExpectedRegexMessage: `generated successfully`,
+			},
+		})
+	}
+
+	goMod, err := os.ReadFile(filepath.Join(dir, "go.mod")) //nolint:gosec // the path is inside t.TempDir
+	require.NoError(t, err)
+	assert.Contains(t, string(goMod), "github.com/perses/perses ")
+
+	out, err := runGo(context.Background(), dir, "build", "./...")
+	require.NoError(t, err, string(out))
 }

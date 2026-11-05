@@ -1,0 +1,97 @@
+// Package {{ .PluginGoPackage }} provides the Dashboard-as-Code builder for the {{ .PluginPascalName }} annotation plugin.
+package {{ .PluginGoPackage }}
+
+import (
+	"github.com/perses/perses/go-sdk/annotation"
+	"github.com/perses/perses/go-sdk/datasource"
+	"github.com/perses/spec/go/plugin"
+)
+
+const PluginKind = "{{ .PluginPascalName }}"
+
+// PluginSpec follows the spec in schemas/annotations/{{ .PluginName }}/annotation.cue.
+type PluginSpec struct {
+	Datasource *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	Query      string               `json:"query" yaml:"query"`
+	Title      string               `json:"title,omitempty" yaml:"title,omitempty"`
+	Legend     string               `json:"legend,omitempty" yaml:"legend,omitempty"`
+	Tags       []string             `json:"tags,omitempty" yaml:"tags,omitempty"`
+}
+
+type Option func(plugin *Builder) error
+
+type Builder struct {
+	PluginSpec `json:",inline" yaml:",inline"`
+}
+
+func create(expr string, options ...Option) (Builder, error) {
+	builder := &Builder{
+		PluginSpec: PluginSpec{},
+	}
+
+	defaults := []Option{
+		Expr(expr),
+	}
+
+	for _, opt := range append(defaults, options...) {
+		if err := opt(builder); err != nil {
+			return *builder, err
+		}
+	}
+
+	return *builder, nil
+}
+
+// {{ .PluginPascalName }} sets the {{ .PluginPascalName }} plugin on an annotation.
+func {{ .PluginPascalName }}(expr string, options ...Option) annotation.Option {
+	return func(builder *annotation.Builder) error {
+		plg, err := create(expr, options...)
+		if err != nil {
+			return err
+		}
+		return annotation.Plugin(plugin.Plugin{
+			Kind: PluginKind,
+			Spec: plg.PluginSpec,
+		})(builder)
+	}
+}
+
+func Expr(expr string) Option {
+	return func(builder *Builder) error {
+		builder.Query = expr
+		return nil
+	}
+}
+
+// Datasource selects the datasource of the given kind to run the annotation query against.
+func Datasource(kind, name string) Option {
+	return func(builder *Builder) error {
+		selector, err := datasource.NewSelector(kind, name)
+		if err != nil {
+			return err
+		}
+		builder.Datasource = selector
+		return nil
+	}
+}
+
+func Title(title string) Option {
+	return func(builder *Builder) error {
+		builder.Title = title
+		return nil
+	}
+}
+
+func Legend(legend string) Option {
+	return func(builder *Builder) error {
+		builder.Legend = legend
+		return nil
+	}
+}
+
+func Tags(tags ...string) Option {
+	return func(builder *Builder) error {
+		builder.Tags = append(builder.Tags, tags...)
+		return nil
+	}
+}
