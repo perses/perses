@@ -160,6 +160,9 @@ func validateDashboardSpec(spec dashboard.Spec, sch schema.Schema, proxyCfg *con
 	if err := validateLinks(spec); err != nil {
 		return err
 	}
+	if err := validateDashboardLayouts(spec); err != nil {
+		return err
+	}
 
 	if sch != nil {
 		if err := sch.ValidateDashboardVariables(spec.Variables); err != nil {
