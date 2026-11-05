@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	"github.com/brunoga/deep"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/role"
@@ -49,7 +49,7 @@ func NewService(dao rolebinding.DAO, roleDAO role.DAO, userDAO user.DAO, authz a
 	}
 }
 
-func (s *service) Create(_ echo.Context, entity *v1.RoleBinding) (*v1.RoleBinding, error) {
+func (s *service) Create(_ *echo.Context, entity *v1.RoleBinding) (*v1.RoleBinding, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -70,7 +70,7 @@ func (s *service) create(entity *v1.RoleBinding) (*v1.RoleBinding, error) {
 	return entity, nil
 }
 
-func (s *service) Update(_ echo.Context, entity *v1.RoleBinding, parameters apiInterface.Parameters) (*v1.RoleBinding, error) {
+func (s *service) Update(_ *echo.Context, entity *v1.RoleBinding, parameters apiInterface.Parameters) (*v1.RoleBinding, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -114,7 +114,7 @@ func (s *service) update(entity *v1.RoleBinding, parameters apiInterface.Paramet
 	return entity, nil
 }
 
-func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
+func (s *service) Delete(_ *echo.Context, parameters apiInterface.Parameters) error {
 	if err := s.dao.Delete(parameters.Project, parameters.Name); err != nil {
 		return err
 	}

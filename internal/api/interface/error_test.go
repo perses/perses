@@ -14,25 +14,15 @@
 package apiinterface
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"testing"
 
-	echojwt "github.com/labstack/echo-jwt/v4"
-	"github.com/labstack/echo/v4"
+	echojwt "github.com/labstack/echo-jwt/v5"
+	"github.com/labstack/echo/v5"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/stretchr/testify/assert"
 )
-
-// statusCode returns the HTTP status code carried by the error, or 0 if it doesn't carry any.
-func statusCode(err error) int {
-	var httpErr *echo.HTTPError
-	if errors.As(err, &httpErr) {
-		return httpErr.Code
-	}
-	return 0
-}
 
 func TestHandleError(t *testing.T) {
 	tests := []struct {
@@ -60,7 +50,7 @@ func TestHandleError(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.expectedStatus, statusCode(HandleError(tt.err)))
+			assert.Equal(t, tt.expectedStatus, echo.StatusCode(HandleError(tt.err)))
 		})
 	}
 	assert.NoError(t, HandleError(nil))

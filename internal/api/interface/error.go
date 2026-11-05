@@ -19,7 +19,7 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/sirupsen/logrus"
 )
@@ -87,10 +87,10 @@ func HandleError(err error) error {
 		return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
 	}
 
-	var HTTPError *echo.HTTPError
-	if errors.As(err, &HTTPError) {
-		// The error is coming from the echo framework likely because the route doesn't exist.
-		// In this particular case, we shouldn't touch to the error and let it like that
+	if echo.StatusCode(err) != 0 {
+		// The error is coming from the echo framework (for example, because the route doesn't exist) or it is already an HTTP error.
+		// In this particular case, we shouldn't touch to the error and let it like that.
+		// Note: the errors predefined by echo (like echo.ErrNotFound) are not *echo.HTTPError, they only carry an HTTP status.
 		return err
 	}
 	logrus.WithError(err).Error("unexpected error not handled")

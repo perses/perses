@@ -24,7 +24,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -55,7 +55,7 @@ func newForwardingServer(t *testing.T) (*echo.Echo, func() receivedRequest) {
 
 	e := echo.New()
 	e.Pre(Decompress())
-	e.POST("/proxy", func(c echo.Context) error {
+	e.POST("/proxy", func(c *echo.Context) error {
 		httputil.NewSingleHostReverseProxy(upstreamURL).ServeHTTP(c.Response(), c.Request())
 		return nil
 	})
@@ -87,6 +87,33 @@ func TestDecompress(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		assert.Equal(t, body, received().body)
 		assert.Empty(t, received().contentEncoding)
+	})
+
+	t.Run("the gzip content encoding is case-insensitive", func(t *testing.T) {
+		e, received := newForwardingServer(t)
+
+		req := httptest.NewRequest(http.MethodPost, "/proxy", bytes.NewReader(gzipBody(t, body)))
+		req.Header.Set(echo.HeaderContentEncoding, "GZIP")
+		rec := httptest.NewRecorder()
+		e.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, body, received().body)
+		assert.Empty(t, received().contentEncoding)
+	})
+
+	t.Run("empty gzip body is forwarded without content encoding", func(t *testing.T) {
+		e, received := newForwardingServer(t)
+
+		req := httptest.NewRequest(http.MethodPost, "/proxy", http.NoBody)
+		req.Header.Set(echo.HeaderContentEncoding, "gzip")
+		rec := httptest.NewRecorder()
+		e.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Empty(t, received().body)
+		assert.Empty(t, received().contentEncoding)
+		assert.Equal(t, int64(0), received().contentLength)
 	})
 
 	t.Run("plain body is forwarded untouched", func(t *testing.T) {

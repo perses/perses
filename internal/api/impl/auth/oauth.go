@@ -24,7 +24,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/securecookie"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/crypto"
 	apiinterface "github.com/perses/perses/internal/api/interface"
@@ -198,7 +198,7 @@ func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DA
 	}, nil
 }
 
-func (e *oAuthEndpoint) setCookie(ctx echo.Context, name, value string) error {
+func (e *oAuthEndpoint) setCookie(ctx *echo.Context, name, value string) error {
 	encoded, err := e.secureCookie.Encode(name, value)
 	if err != nil {
 		return err
@@ -214,7 +214,7 @@ func (e *oAuthEndpoint) setCookie(ctx echo.Context, name, value string) error {
 	return nil
 }
 
-func (e *oAuthEndpoint) deleteCookie(ctx echo.Context, name string) {
+func (e *oAuthEndpoint) deleteCookie(ctx *echo.Context, name string) {
 	ctx.SetCookie(&http.Cookie{ //nolint:gosec
 		Name:     name,
 		Value:    "",
@@ -226,7 +226,7 @@ func (e *oAuthEndpoint) deleteCookie(ctx echo.Context, name string) {
 	})
 }
 
-func (e *oAuthEndpoint) checkCookie(ctx echo.Context, name string) (string, error) {
+func (e *oAuthEndpoint) checkCookie(ctx *echo.Context, name string) (string, error) {
 	cookie, err := ctx.Cookie(name)
 	if err != nil {
 		return "", err
@@ -238,7 +238,7 @@ func (e *oAuthEndpoint) checkCookie(ctx echo.Context, name string) (string, erro
 	return value, nil
 }
 
-func (e *oAuthEndpoint) checkQueryCookie(ctx echo.Context, name string) (string, error) {
+func (e *oAuthEndpoint) checkQueryCookie(ctx *echo.Context, name string) (string, error) {
 	value, err := e.checkCookie(ctx, name)
 	if err != nil {
 		return "", err
@@ -249,15 +249,15 @@ func (e *oAuthEndpoint) checkQueryCookie(ctx echo.Context, name string) (string,
 	return value, nil
 }
 
-func (e *oAuthEndpoint) saveStateCookie(ctx echo.Context, state string) error {
+func (e *oAuthEndpoint) saveStateCookie(ctx *echo.Context, state string) error {
 	return e.setCookie(ctx, stateParam, state)
 }
 
-func (e *oAuthEndpoint) saveCodeVerifierCookie(ctx echo.Context, code string) error {
+func (e *oAuthEndpoint) saveCodeVerifierCookie(ctx *echo.Context, code string) error {
 	return e.setCookie(ctx, codeVerifierParam, code)
 }
 
-func (e *oAuthEndpoint) readStateCookie(ctx echo.Context) (state string, err error) {
+func (e *oAuthEndpoint) readStateCookie(ctx *echo.Context) (state string, err error) {
 	state, err = e.checkQueryCookie(ctx, stateParam)
 	if err != nil {
 		return "", err
@@ -266,7 +266,7 @@ func (e *oAuthEndpoint) readStateCookie(ctx echo.Context) (state string, err err
 	return state, nil
 }
 
-func (e *oAuthEndpoint) readCodeVerifierCookie(ctx echo.Context) (state string, err error) {
+func (e *oAuthEndpoint) readCodeVerifierCookie(ctx *echo.Context) (state string, err error) {
 	state, err = e.checkCookie(ctx, codeVerifierParam)
 	if err != nil {
 		return "", err
@@ -278,7 +278,7 @@ func (e *oAuthEndpoint) readCodeVerifierCookie(ctx echo.Context) (state string, 
 // newQueryContext build a specific context for the oauth provider.
 // It allows us to set up tls config hacking the http client directly in the given context
 // Ref: https://github.com/golang/oauth2/issues/187
-func (e *oAuthEndpoint) newQueryContext(ctx echo.Context) context.Context {
+func (e *oAuthEndpoint) newQueryContext(ctx *echo.Context) context.Context {
 	return context.WithValue(ctx.Request().Context(), oauth2.HTTPClient, e.httpClient)
 }
 
@@ -297,7 +297,7 @@ func (e *oAuthEndpoint) CollectRoutes(g *route.Group) {
 // authHandler is the http handler on Perses side that triggers the "Authorization Code"
 // flow to the oauth 2.0 provider.
 // It will redirect the user to the provider's "auth" url.
-func (e *oAuthEndpoint) authHandler(ctx echo.Context) error {
+func (e *oAuthEndpoint) authHandler(ctx *echo.Context) error {
 
 	// Save the state cookie, will be verified in the codeExchangeHandler
 	redirectPath := ctx.Request().URL.Query().Get(redirectQueryParam)
@@ -334,7 +334,7 @@ func (e *oAuthEndpoint) authHandler(ctx echo.Context) error {
 //     "user infos" url (if given)
 //   - save the user in database if it's a new user, or update it with the collected information
 //   - ultimately, generate a Perses user session with an access and refresh token
-func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
+func (e *oAuthEndpoint) codeExchangeHandler(ctx *echo.Context) error {
 	code := ctx.QueryParam("code")
 
 	// Verify that the state in the query match the saved one
@@ -390,7 +390,7 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 // user to login in a browser.
 // Then the client will be responsible to poll the /{slug_id}/token Perses endpoint to generate
 // a proper Perses session.
-func (e *oAuthEndpoint) deviceCodeHandler(ctx echo.Context) error {
+func (e *oAuthEndpoint) deviceCodeHandler(ctx *echo.Context) error {
 	if e.deviceCodeConf.Endpoint.DeviceAuthURL == "" {
 		e.logWithError(errors.New("device code flow is not supported by this provider"))
 		return echo.NewHTTPError(http.StatusNotImplemented, "Device code flow is not supported by this provider")
@@ -405,7 +405,7 @@ func (e *oAuthEndpoint) deviceCodeHandler(ctx echo.Context) error {
 
 // tokenHandler is the http handler on Perses side that will generate a proper Perses session.
 // It is used only in case of device code flow and client credentials flow.
-func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
+func (e *oAuthEndpoint) tokenHandler(ctx *echo.Context) error {
 	grantType := ctx.FormValue("grant_type")
 
 	providerCtx := e.newQueryContext(ctx)
@@ -617,7 +617,7 @@ func (e *oAuthEndpoint) requestUserInfo(ctx context.Context, token *oauth2.Token
 
 // RefreshOIDCToken refreshes the OAuth token using the stored refresh token and updates the cookies.
 // It returns the new access token, or an empty string if no refresh token is available or if the refresh fails.
-func (e *oAuthEndpoint) RefreshOIDCToken(ctx echo.Context) string {
+func (e *oAuthEndpoint) RefreshOIDCToken(ctx *echo.Context) string {
 	refreshTokenCookie, err := ctx.Cookie(crypto.CookieKeyOIDCRefreshToken)
 	if err != nil {
 		// No OIDC refresh token stored, nothing to refresh

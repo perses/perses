@@ -17,7 +17,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/pkg/model/api"
@@ -33,17 +33,17 @@ type mockGlobalDatasourceService struct {
 	updateCalls     int
 }
 
-func (m *mockGlobalDatasourceService) Create(ctx echo.Context, entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
+func (m *mockGlobalDatasourceService) Create(ctx *echo.Context, entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
 	m.createdEntities = append(m.createdEntities, entity)
 	return entity, nil
 }
 
-func (m *mockGlobalDatasourceService) Update(ctx echo.Context, entity *v1.GlobalDatasource, parameters apiInterface.Parameters) (*v1.GlobalDatasource, error) {
+func (m *mockGlobalDatasourceService) Update(ctx *echo.Context, entity *v1.GlobalDatasource, parameters apiInterface.Parameters) (*v1.GlobalDatasource, error) {
 	m.updateCalls++
 	return entity, nil
 }
 
-func (m *mockGlobalDatasourceService) Delete(ctx echo.Context, parameters apiInterface.Parameters) error {
+func (m *mockGlobalDatasourceService) Delete(ctx *echo.Context, parameters apiInterface.Parameters) error {
 	return nil
 }
 
