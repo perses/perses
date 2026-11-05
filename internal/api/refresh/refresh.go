@@ -15,6 +15,7 @@ package refresh
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/perses/common/async"
@@ -23,12 +24,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func New(persesDAO model.DAO, refresh func() error, listToCheck []modelV1.Kind) async.SimpleTask {
-	return &task{persesDAO: persesDAO, refresh: refresh, listToCheck: listToCheck}
+// New returns a task refreshing a cache when one of the given kinds has been updated.
+// The name identifies the cache in the logs.
+func New(name string, persesDAO model.DAO, refresh func() error, listToCheck []modelV1.Kind) async.SimpleTask {
+	return &task{name: name, persesDAO: persesDAO, refresh: refresh, listToCheck: listToCheck}
 }
 
 type task struct {
 	async.SimpleTask
+	name            string
 	refresh         func() error
 	persesDAO       model.DAO
 	lastRefreshTime time.Time
@@ -38,8 +42,7 @@ type task struct {
 func (r *task) Execute(_ context.Context, _ context.CancelFunc) error {
 	lastUpdateTime, err := r.persesDAO.GetLatestUpdateTime(r.listToCheck)
 	if err != nil {
-		logrus.WithError(err).Error("failed to retrieve last update time")
-		return nil
+		return fmt.Errorf("failed to retrieve last update time: %w", err)
 	}
 
 	// If tables have never been updated, using older date than now and that can't be wrong with any timezones
@@ -50,15 +53,13 @@ func (r *task) Execute(_ context.Context, _ context.CancelFunc) error {
 
 	lastUpdateTimeParsed, err := time.Parse("2006-01-02 15:04:05", *lastUpdateTime)
 	if err != nil {
-		logrus.WithError(err).Error("failed to parse last update time")
-		return nil
+		return fmt.Errorf("failed to parse last update time: %w", err)
 	}
 
 	if r.lastRefreshTime.Before(lastUpdateTimeParsed) {
-		logrus.Debugf("refreshing cache, previous last refresh time %v", r.lastRefreshTime)
+		logrus.Debugf("%s: refreshing cache, previous last refresh time %v", r.String(), r.lastRefreshTime)
 		if refreshErr := r.refresh(); refreshErr != nil {
-			logrus.WithError(refreshErr).Error("failed to refresh cache")
-			return nil
+			return fmt.Errorf("failed to refresh the %s cache: %w", r.name, refreshErr)
 		}
 		r.lastRefreshTime = lastUpdateTimeParsed
 	}
@@ -66,5 +67,5 @@ func (r *task) Execute(_ context.Context, _ context.CancelFunc) error {
 }
 
 func (r *task) String() string {
-	return "refresh task"
+	return fmt.Sprintf("%s refresh", r.name)
 }

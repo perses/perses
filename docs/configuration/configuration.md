@@ -22,11 +22,11 @@ Perses is configured via command-line flags and a configuration file
   -web.telemetry-path string
     	Path under which to expose metrics. (default "/metrics")
   -web.tls-cert-file string
-    	The path to the cert to use for the HTTPS server
+    	The path to the cert to use for the HTTPS server. It is reloaded when the file changes.
   -web.tls-cipher-suites string
     	Comma-separated list of TLS cipher suite names
   -web.tls-key-file string
-    	The path to the key to use for the HTTPS server
+    	The path to the key to use for the HTTPS server. It is reloaded when the file changes.
   -web.tls-max-version string
     	Maximum TLS version (e.g., "1.2", "1.3")
   -web.tls-min-version string

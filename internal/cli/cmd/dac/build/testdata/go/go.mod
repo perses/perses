@@ -7,7 +7,7 @@ replace github.com/perses/perses => ../../../../../../../ // Use current version
 require (
 	github.com/perses/perses v0.55.0-rc.1
 	github.com/perses/plugins/timeserieschart v0.14.0
-	github.com/perses/spec v0.3.0
+	github.com/perses/spec v0.4.0-beta.0
 )
 
 require (
@@ -18,12 +18,11 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/jpillora/backoff v1.0.0 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/muhlemmer/gu v0.3.1 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
 	github.com/pandatix/go-abnf v0.5.1 // indirect
-	github.com/perses/common v0.31.2 // indirect
+	github.com/perses/common v0.32.0 // indirect
 	github.com/prometheus/client_golang v1.25.0 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
 	github.com/prometheus/common v0.73.0 // indirect
