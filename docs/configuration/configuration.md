@@ -487,6 +487,9 @@ enable: <boolean> | default = false # Optional
 # Each value is an exact origin (`scheme://host[:port]`, e.g. `https://perses.dev`), or `*` to allow every origin.
 # DEPRECATED: the wildcard patterns, where '*' matches 0 or more characters and '?' matches 1 character
 # (e.g. `https://*.example.com`), are deprecated and will be removed in v0.58.0. List the exact origins instead.
+# The patterns can allow more origins than expected: `https://*example.com` also allows `https://evilexample.com`,
+# and a `*` label matches one or more labels while the labels on its left are ignored, so `https://*.example.com`
+# also allows `https://a.b.example.com` and `https://admin.*.example.com` also allows `https://victim.example.com`.
 # See https://github.com/perses/perses/issues/4721.
 # See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin
 allow_origins: <string[]> | default = ["*"] # Optional
@@ -502,8 +505,13 @@ allow_methods: <string[]> | default = [] # Optional
 allow_headers: <string[]> | default = [] # Optional
 
 # Configure the value of the Access-Control-Allow-Credentials response header.
-# When it is true, `allow_origins` must list the allowed origins: `*` (the default value of `allow_origins`) is
-# rejected, as the browsers reject the requests with credentials when every origin is allowed.
+# The browsers reject the requests with credentials answered with the response header `Access-Control-Allow-Origin: *`.
+# The entries of `allow_origins` are checked in order, and the origins matched by `*` receive this header. Hence, when
+# `enable` and `allow_credentials` are true, Perses refuses to start if `allow_origins` is not set (its default value is
+# `["*"]`) or if its first entry is `*`, as every origin would receive `Access-Control-Allow-Origin: *`.
+# DEPRECATED: `*` placed after other entries of `allow_origins` (e.g. `["https://app.example.com", "*"]`) while
+# `allow_credentials` is true is deprecated and will be rejected in v0.58.0. Only the origins matched by an entry
+# before `*` can send requests with credentials. See https://github.com/perses/perses/issues/4721.
 # See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials
 allow_credentials: <boolean> | default = false # Optional
 

@@ -266,7 +266,7 @@ func TestCORSConfig_Verify(t *testing.T) {
 		title            string
 		config           CORSConfig
 		expectedOrigins  []string
-		expectedWarnings int
+		expectedWarnings []string
 		errMessage       string
 	}{
 		{
@@ -287,17 +287,37 @@ func TestCORSConfig_Verify(t *testing.T) {
 			title:            "wildcard patterns are deprecated",
 			config:           CORSConfig{Enable: true, AllowOrigins: []string{"https://*.perses.dev", "https://perses.dev", "https://app?.perses.dev"}},
 			expectedOrigins:  []string{"https://*.perses.dev", "https://perses.dev", "https://app?.perses.dev"},
-			expectedWarnings: 2,
+			expectedWarnings: []string{`"https://*.perses.dev" of security.cors.allow_origins is a wildcard pattern`, `"https://app?.perses.dev" of security.cors.allow_origins is a wildcard pattern`},
 		},
 		{
-			title:      "'*' cannot be used with credentials",
-			config:     CORSConfig{Enable: true, AllowOrigins: []string{"*"}, AllowCredentials: true},
-			errMessage: "security.cors.allow_origins cannot contain '*' (the default value) when security.cors.allow_credentials is true",
+			title:           "'*' after an exact origin without credentials",
+			config:          CORSConfig{Enable: true, AllowOrigins: []string{"https://perses.dev", "*"}},
+			expectedOrigins: []string{"https://perses.dev", "*"},
+		},
+		{
+			title:            "'*' after an exact origin is deprecated with credentials",
+			config:           CORSConfig{Enable: true, AllowOrigins: []string{"https://perses.dev", "*", "*"}, AllowCredentials: true},
+			expectedOrigins:  []string{"https://perses.dev", "*", "*"},
+			expectedWarnings: []string{"security.cors.allow_origins contains '*' while security.cors.allow_credentials is true"},
+		},
+		{
+			title:           "'*' after a wildcard pattern is deprecated with credentials",
+			config:          CORSConfig{Enable: true, AllowOrigins: []string{"https://*.perses.dev", "*"}, AllowCredentials: true},
+			expectedOrigins: []string{"https://*.perses.dev", "*"},
+			expectedWarnings: []string{
+				"security.cors.allow_origins contains '*' while security.cors.allow_credentials is true",
+				`"https://*.perses.dev" of security.cors.allow_origins is a wildcard pattern`,
+			},
+		},
+		{
+			title:      "'*' as first origin cannot be used with credentials",
+			config:     CORSConfig{Enable: true, AllowOrigins: []string{"*", "https://perses.dev"}, AllowCredentials: true},
+			errMessage: "security.cors.allow_credentials cannot be true when the first entry of security.cors.allow_origins is '*'",
 		},
 		{
 			title:      "the default origin cannot be used with credentials",
 			config:     CORSConfig{Enable: true, AllowCredentials: true},
-			errMessage: "security.cors.allow_origins cannot contain '*' (the default value) when security.cors.allow_credentials is true",
+			errMessage: "security.cors.allow_credentials cannot be true when the first entry of security.cors.allow_origins is '*'",
 		},
 	}
 	for _, test := range testSuite {
@@ -315,14 +335,18 @@ func TestCORSConfig_Verify(t *testing.T) {
 			}
 			require.NoError(t, err)
 			assert.Equal(t, test.expectedOrigins, test.config.AllowOrigins)
-			warnings := 0
+			var warnings []string
 			for _, entry := range hook.AllEntries() {
 				if entry.Level == logrus.WarnLevel {
-					assert.Contains(t, entry.Message, "will be removed in v0.58.0")
-					warnings++
+					warnings = append(warnings, entry.Message)
 				}
 			}
-			assert.Equal(t, test.expectedWarnings, warnings)
+			require.Len(t, warnings, len(test.expectedWarnings))
+			for i, expectedWarning := range test.expectedWarnings {
+				assert.Contains(t, warnings[i], expectedWarning)
+				assert.Contains(t, warnings[i], "in v0.58.0")
+				assert.Contains(t, warnings[i], "https://github.com/perses/perses/issues/4721")
+			}
 		})
 	}
 }
