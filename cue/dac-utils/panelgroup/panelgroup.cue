@@ -30,6 +30,7 @@ import (
 #title:           string
 #isCollapsed?:    bool
 #repeatVariable?: string
+#visibility?:     dashboard.#Visibility
 #groupIndex:      number
 #cols:            >0 & <=#gridCols
 #height:          number | *8
@@ -56,6 +57,9 @@ layout: dashboard.#Layout & {
 				collapse: {
 					open: !#isCollapsed
 				}
+			}
+			if #visibility != _|_ {
+				visibility: #visibility
 			}
 		}
 		items: [for i, panel in #panels {

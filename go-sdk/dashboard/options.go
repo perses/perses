@@ -159,6 +159,7 @@ func AddPanelGroup(title string, options ...panelgroup.Option) Option {
 		}
 
 		gridLayoutSpec.Display.Collapse = buildCollapsedSpec(r.IsCollapsed)
+		gridLayoutSpec.Display.Visibility = r.Visibility
 
 		for i := range r.Panels {
 			panelRef := fmt.Sprintf("%d_%d", len(builder.Dashboard.Spec.Layouts), i)
@@ -234,6 +235,7 @@ func AddCustomPanelGroup(title string, positions []GridItem, options ...panelgro
 		}
 
 		gridLayoutSpec.Display.Collapse = buildCollapsedSpec(r.IsCollapsed)
+		gridLayoutSpec.Display.Visibility = r.Visibility
 
 		builder.Dashboard.Spec.Layouts = append(builder.Dashboard.Spec.Layouts, dashboard.Layout{
 			Kind: "Grid",
