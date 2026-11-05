@@ -16,10 +16,11 @@ import { Box, Divider, IconButton, MenuItem, Stack, TextField, Typography } from
 import type { Action, Role } from '@perses-dev/client';
 import { ACTIONS, GLOBAL_SCOPES, PROJECT_SCOPES, rolesEditorSchema } from '@perses-dev/client';
 import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
-import type { ReactElement } from 'react';
-import { Fragment, useMemo, useState } from 'react';
+import type { ForwardedRef, ReactElement } from 'react';
+import { forwardRef, Fragment, useImperativeHandle, useMemo, useState } from 'react';
 import type { Control, SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
@@ -32,16 +33,10 @@ type RoleEditorFormProps = FormEditorProps<Role>;
 // TODO: Remove in the next shared beta release.
 const formSchema = z.transform((value: Role): unknown => value).pipe(rolesEditorSchema);
 
-export function RoleEditorForm({
-  initialValue,
-  action,
-  isDraft,
-  isReadonly,
-  onActionChange,
-  onSave,
-  onClose,
-  onDelete,
-}: RoleEditorFormProps): ReactElement {
+export const RoleEditorForm = forwardRef(function RoleEditorForm(
+  { initialValue, action, isDraft, isReadonly, onActionChange, onSave, onClose, onDelete }: RoleEditorFormProps,
+  ref: ForwardedRef<FormEditorHandle>,
+): ReactElement {
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
 
   const titleAction = getTitleAction(action, isDraft);
@@ -73,6 +68,8 @@ export function RoleEditorForm({
       onClose();
     }
   }
+
+  useImperativeHandle(ref, () => ({ requestClose: handleCancel }));
 
   return (
     <FormProvider {...form}>
@@ -170,7 +167,7 @@ export function RoleEditorForm({
       />
     </FormProvider>
   );
-}
+});
 
 interface PermissionControl {
   control: Control<Role>;
