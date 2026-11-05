@@ -22,8 +22,8 @@ package link
 }
 
 #tags: {
-	name:              string
-	tags:              [...string] & [_, ...]
+	name: string
+	tags: [...string] & [_, ...]
 	tooltip?:          string
 	keepTime?:         bool | *false
 	includeVariables?: bool | *false
