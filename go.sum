@@ -481,8 +481,8 @@ github.com/pb33f/ordered-map/v2 v2.3.1 h1:5319HDO0aw4DA4gzi+zv4FXU9UlSs3xGZ40wcP
 github.com/pb33f/ordered-map/v2 v2.3.1/go.mod h1:qxFQgd0PkVUtOMCkTapqotNgzRhMPL7VvaHKbd1HnmQ=
 github.com/pelletier/go-toml/v2 v2.3.1 h1:MYEvvGnQjeNkRF1qUuGolNtNExTDwct51yp7olPtrEc=
 github.com/pelletier/go-toml/v2 v2.3.1/go.mod h1:2gIqNv+qfxSVS7cM2xJQKtLSTLUE9V8t9Stt+h56mCY=
-github.com/perses/common v0.32.1-0.20261105150120-44d46106ebac h1:/xOs89F+fY7N+rU1qzLsoY/yD84tjtFCCEELicn5/Tc=
-github.com/perses/common v0.32.1-0.20261105150120-44d46106ebac/go.mod h1:VG7flG8ukok+dPUsP9kQQZ6/X9ahA10E2ntCBajeVHs=
+github.com/perses/common v0.32.1-0.20261105152907-2344031865cc h1:MMAQb893yQDlksG7kQmcoFgQB7XCbXHmpYQXD22UieQ=
+github.com/perses/common v0.32.1-0.20261105152907-2344031865cc/go.mod h1:VG7flG8ukok+dPUsP9kQQZ6/X9ahA10E2ntCBajeVHs=
 github.com/perses/spec v0.3.0 h1:pAkpwX32lQpdz1YLmGmmAMItdgtuVDVrkAQfWEqX6ZI=
 github.com/perses/spec v0.3.0/go.mod h1:bbTvfdCprae8P4JHknL2VnIkLkTLXqV4stpOlZyxibo=
 github.com/pierrec/lz4/v4 v4.1.22 h1:cKFw6uJDK+/gfw5BcDL0JL5aBsAFdsIT18eRtLj7VIU=
