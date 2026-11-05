@@ -1,5 +1,6 @@
-# Until bug below is sorted we will not allow dependabot to run by itself for npm dependencies
-# https://github.com/dependabot/dependabot-core/issues/1190
+# Security updates (enable "Dependabot security updates" in the repository settings) are NOT grouped:
+# Dependabot opens one dedicated PR per vulnerability so they can be reviewed and merged quickly.
+# Version updates are grouped by semver update type (patch / minor / major).
 version: 2
 updates:
   - package-ecosystem: "gomod"
@@ -9,13 +10,25 @@ updates:
     schedule:
       interval: "weekly"
     groups:
-      gomod:
-        patterns:
-          - "*"
+      gomod-patch:
+        applies-to: version-updates
+        update-types:
+          - "patch"
+      gomod-minor:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+      gomod-major:
+        applies-to: version-updates
+        update-types:
+          - "major"
     # Raise all gomod pull requests with custom labels
     labels:
       - "dependencies"
       - "api"
+  # Until bug below is sorted we will not allow dependabot to run by itself for npm version updates
+  # https://github.com/dependabot/dependabot-core/issues/1190
+  # Note: `open-pull-requests-limit: 0` only disables version updates, security updates are still raised.
   - package-ecosystem: "npm"
     directory: "/ui"
     open-pull-requests-limit: 0
@@ -30,15 +43,33 @@ updates:
     schedule:
       interval: "weekly"
     groups:
-      actions:
-        patterns:
-          - "*"
+      actions-patch:
+        applies-to: version-updates
+        update-types:
+          - "patch"
+      actions-minor:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+      actions-major:
+        applies-to: version-updates
+        update-types:
+          - "major"
   - package-ecosystem: "docker"
     directories:
       - "/"
     schedule:
       interval: "weekly"
     groups:
-      docker:
-        patterns:
-          - "*"
+      docker-patch:
+        applies-to: version-updates
+        update-types:
+          - "patch"
+      docker-minor:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+      docker-major:
+        applies-to: version-updates
+        update-types:
+          - "major"
