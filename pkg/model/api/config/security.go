@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/perses/perses/pkg/model/api/v1/secret"
@@ -149,14 +150,22 @@ func (c *CORSConfig) Verify() error {
 		// Every origin is allowed by default.
 		c.AllowOrigins = []string{"*"}
 	}
-	for _, origin := range c.AllowOrigins {
-		if origin == "*" {
-			if c.AllowCredentials {
-				return errors.New("security.cors.allow_origins cannot contain '*' (the default value) when security.cors.allow_credentials is true, " +
-					"as the browsers reject the requests with credentials in that case. Set security.cors.allow_origins to the list of the allowed origins instead")
-			}
-			continue
+	if c.AllowCredentials {
+		// The entries are checked in order, so every origin receives 'Access-Control-Allow-Origin: *' when '*' comes first.
+		if c.AllowOrigins[0] == "*" {
+			return errors.New("security.cors.allow_credentials cannot be true when the first entry of security.cors.allow_origins is '*' (its default value is [\"*\"]): " +
+				"every origin then receives the response header 'Access-Control-Allow-Origin: *', which the browsers reject for the requests with credentials. " +
+				"Set security.cors.allow_origins to the list of the allowed origins instead")
 		}
+		if slices.Contains(c.AllowOrigins, "*") {
+			// TODO: return an error instead in v0.58.0, like echo v5 does natively, see https://github.com/perses/perses/issues/4721
+			logrus.Warn("security.cors.allow_origins contains '*' while security.cors.allow_credentials is true: the origins not matched by an entry before '*' " +
+				"receive the response header 'Access-Control-Allow-Origin: *', which the browsers reject for the requests with credentials. " +
+				"This configuration is deprecated and will be rejected in v0.58.0. Remove '*' from security.cors.allow_origins, or set security.cors.allow_credentials to false. " +
+				"See https://github.com/perses/perses/issues/4721")
+		}
+	}
+	for _, origin := range c.AllowOrigins {
 		if IsCORSOriginPattern(origin) {
 			// TODO: return an error instead in v0.58.0, see https://github.com/perses/perses/issues/4721
 			logrus.Warnf("the entry %q of security.cors.allow_origins is a wildcard pattern. The wildcard patterns are deprecated and will be removed in v0.58.0. "+
