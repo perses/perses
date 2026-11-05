@@ -49,6 +49,9 @@ func (q *Query) GetProjectQueryParam() string {
 func (q *Query) SetProjectQueryParam(_ string) {
 }
 
+func (q *Query) SetProjectsQueryParam(_ []string) {
+}
+
 type DAO interface {
 	Create(entity *v1.User) error
 	Update(entity *v1.User) error

@@ -15,8 +15,11 @@ package toolbox
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"testing"
 
 	"github.com/labstack/echo/v4"
@@ -31,6 +34,7 @@ import (
 
 type listAuthorization struct {
 	authorization.Authorization
+	projects []string
 }
 
 func (*listAuthorization) IsEnabled() bool {
@@ -41,72 +45,92 @@ func (*listAuthorization) HasPermission(_ echo.Context, _ role.Action, _ string,
 	return true
 }
 
-func (*listAuthorization) GetUserProjects(_ echo.Context, _ role.Action, _ role.Scope) ([]string, error) {
-	return []string{"project-1", "project-2"}, nil
+func (a *listAuthorization) GetUserProjects(_ echo.Context, _ role.Action, _ role.Scope) ([]string, error) {
+	return a.projects, nil
 }
 
-// synchronizedDashboardService parks every list goroutine inside RawList so the
-// test can inspect the query objects while both project lists are in flight.
-type synchronizedDashboardService struct {
+// recordingDashboardService records the projects of every RawList call, and returns one row per project listed.
+type recordingDashboardService struct {
 	dashboard.Service
-	entered chan *dashboard.Query
-	release chan struct{}
+	calls [][]string
 }
 
-func (s *synchronizedDashboardService) RawList(query *dashboard.Query) ([]json.RawMessage, error) {
-	s.entered <- query
-	<-s.release
-	// Echo this query's project so the test can check each goroutine listed its
-	// own project instead of a shared last-write-wins value.
-	result, err := json.Marshal(query.Project)
-	return []json.RawMessage{result}, err
-}
-
-// TestListAcrossAuthorizedProjects proves each authorized project gets its own
-// query copy. listWhenPermissionIsActivated fans out one goroutine per project
-// from GetUserProjects. The old code called SetProjectQueryParam on the same
-// *dashboard.Query from every goroutine, so the project name raced. The barrier
-// waits until both RawList calls are inside the service at once, then checks
-// they received different query pointers, left the caller's query untouched,
-// and returned both projects.
-func TestListAcrossAuthorizedProjects(t *testing.T) {
-	service := &synchronizedDashboardService{
-		entered: make(chan *dashboard.Query, 2),
-		release: make(chan struct{}),
+func (s *recordingDashboardService) RawList(query *dashboard.Query) ([]json.RawMessage, error) {
+	if len(query.Project) > 0 {
+		return nil, errors.New("the project of the query must not be set")
 	}
-	tb := New[*v1.Dashboard, *v1.Dashboard, *dashboard.Query](service, &listAuthorization{}, v1.KindDashboard, true).(*toolbox[*v1.Dashboard, *v1.Dashboard, *dashboard.Query])
+	s.calls = append(s.calls, slices.Clone(query.Projects))
+	result := make([]json.RawMessage, 0, len(query.Projects))
+	for _, project := range query.Projects {
+		row, err := json.Marshal(project)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, row)
+	}
+	return result, nil
+}
+
+func listedProjects(t *testing.T, list any) []string {
+	t.Helper()
+	var projects []string
+	switch typedList := list.(type) {
+	case []json.RawMessage:
+		for _, row := range typedList {
+			var project string
+			require.NoError(t, json.Unmarshal(row, &project))
+			projects = append(projects, project)
+		}
+	case []any:
+		for _, row := range typedList {
+			var project string
+			require.NoError(t, json.Unmarshal(row.(json.RawMessage), &project))
+			projects = append(projects, project)
+		}
+	default:
+		t.Fatalf("unexpected list type %T", list)
+	}
+	return projects
+}
+
+// TestListAcrossAuthorizedProjects checks that the resources of all the authorized projects are listed with a single
+// request, instead of one request per project, without modifying the query of the caller.
+func TestListAcrossAuthorizedProjects(t *testing.T) {
+	authorizedProjects := []string{"project-1", "project-2"}
+	service := &recordingDashboardService{}
+	tb := New[*v1.Dashboard, *v1.Dashboard, *dashboard.Query](service, &listAuthorization{projects: authorizedProjects}, v1.KindDashboard, true).(*toolbox[*v1.Dashboard, *v1.Dashboard, *dashboard.Query])
 	e := echo.New()
 	ctx := e.NewContext(httptest.NewRequest(http.MethodGet, "/api/v1/dashboards", nil), httptest.NewRecorder())
 	query := &dashboard.Query{}
 
-	type response struct {
-		value any
-		err   error
-	}
-	responseCh := make(chan response, 1)
-	go func() {
-		value, err := tb.list(ctx, apiInterface.Parameters{}, query)
-		responseCh <- response{value: value, err: err}
-	}()
-
-	// Wait until both project lists have entered RawList. A shared query would
-	// already have been mutated by both goroutines at this point.
-	firstQuery := <-service.entered
-	secondQuery := <-service.entered
-	close(service.release)
-
-	result := <-responseCh
-	require.NoError(t, result.err)
-	require.NotSame(t, firstQuery, secondQuery)
+	result, err := tb.list(ctx, apiInterface.Parameters{}, query)
+	require.NoError(t, err)
+	require.Equal(t, [][]string{authorizedProjects}, service.calls)
 	require.Empty(t, query.Project)
+	require.Empty(t, query.Projects)
+	require.ElementsMatch(t, authorizedProjects, listedProjects(t, result))
+}
 
-	projects := make([]string, 0, 2)
-	for _, item := range result.value.([]any) {
-		var project string
-		require.NoError(t, json.Unmarshal(item.(json.RawMessage), &project))
-		projects = append(projects, project)
+// TestListAcrossManyAuthorizedProjects checks that a very large number of authorized projects is split into several
+// requests of at most maxProjectsPerListQuery projects, whose results are combined.
+func TestListAcrossManyAuthorizedProjects(t *testing.T) {
+	authorizedProjects := make([]string, 0, 2*maxProjectsPerListQuery+1)
+	for i := range cap(authorizedProjects) {
+		authorizedProjects = append(authorizedProjects, fmt.Sprintf("project-%d", i))
 	}
-	require.ElementsMatch(t, []string{"project-1", "project-2"}, projects)
+	service := &recordingDashboardService{}
+	tb := New[*v1.Dashboard, *v1.Dashboard, *dashboard.Query](service, &listAuthorization{projects: authorizedProjects}, v1.KindDashboard, true).(*toolbox[*v1.Dashboard, *v1.Dashboard, *dashboard.Query])
+	e := echo.New()
+	ctx := e.NewContext(httptest.NewRequest(http.MethodGet, "/api/v1/dashboards", nil), httptest.NewRecorder())
+
+	result, err := tb.list(ctx, apiInterface.Parameters{}, &dashboard.Query{})
+	require.NoError(t, err)
+	require.Equal(t, [][]string{
+		authorizedProjects[:maxProjectsPerListQuery],
+		authorizedProjects[maxProjectsPerListQuery : 2*maxProjectsPerListQuery],
+		authorizedProjects[2*maxProjectsPerListQuery:],
+	}, service.calls)
+	require.ElementsMatch(t, authorizedProjects, listedProjects(t, result))
 }
 
 // wildcardAuthorization returns the wildcard mixed with a real project, as k8s authz does for a user

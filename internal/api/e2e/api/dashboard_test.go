@@ -206,6 +206,84 @@ func TestAuthListDashboardInProject(t *testing.T) {
 	})
 }
 
+// TestAuthListDashboardAcrossAuthorizedProjects lists the dashboards of all the projects a user can read, when the user
+// can't read the dashboards of every project: a project granted by name, a project opened to every user with the
+// wildcard subject, but not a project the user has no access to.
+func TestAuthListDashboardAcrossAuthorizedProjects(t *testing.T) {
+	conf := e2eframework.DefaultAuthConfig()
+	// No guest permission: the user can only read the dashboards of the projects granted by the role bindings.
+	conf.Security.Authorization.Provider.Native.GuestPermissions = nil
+	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
+		usrEntity := e2eframework.NewUser("alice", "password")
+		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
+			WithJSON(usrEntity).
+			Expect().
+			Status(http.StatusOK)
+
+		authEntity := modelAPI.Auth{
+			Login:    usrEntity.GetMetadata().GetName(),
+			Password: usrEntity.Spec.NativeProvider.Password,
+		}
+		authResponse := expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthnKindNative, utils.PathLogin)).
+			WithJSON(authEntity).
+			Expect().
+			Status(http.StatusOK)
+		token := authResponse.JSON().Object().Value("access_token").String().Raw()
+		authHeaderKey, authHeaderValue := e2eframework.CreateAuthorizationHeader(token)
+
+		entities := []api.Entity{}
+		for _, projectName := range []string{"granted", "opened", "forbidden"} {
+			entities = append(entities, e2eframework.NewProject(projectName), e2eframework.NewDashboard(t, projectName, "Demo"))
+		}
+		newViewerRoleAndBinding := func(projectName string, subject string) (*modelV1.Role, *modelV1.RoleBinding) {
+			viewerRole := &modelV1.Role{
+				Kind:     modelV1.KindRole,
+				Metadata: *modelV1.NewProjectMetadata(projectName, "viewer"),
+				Spec: modelV1.RoleSpec{
+					Permissions: []role.Permission{{Actions: []role.Action{role.ReadAction}, Scopes: []role.Scope{role.WildcardScope}}},
+				},
+			}
+			viewerRole.Metadata.CreateNow()
+			viewerRoleBinding := &modelV1.RoleBinding{
+				Kind:     modelV1.KindRoleBinding,
+				Metadata: *modelV1.NewProjectMetadata(projectName, "viewer"),
+				Spec: modelV1.RoleBindingSpec{
+					Role:     viewerRole.Metadata.Name,
+					Subjects: []modelV1.Subject{{Kind: modelV1.KindUser, Name: subject}},
+				},
+			}
+			viewerRoleBinding.Metadata.CreateNow()
+			return viewerRole, viewerRoleBinding
+		}
+		grantedRole, grantedRoleBinding := newViewerRoleAndBinding("granted", usrEntity.Metadata.Name)
+		openedRole, openedRoleBinding := newViewerRoleAndBinding("opened", modelV1.WildcardUser)
+		entities = append(entities, grantedRole, grantedRoleBinding, openedRole, openedRoleBinding)
+		objects := make([]any, 0, len(entities))
+		for _, entity := range entities {
+			objects = append(objects, entity)
+		}
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager.Persistence(), objects...)
+		if err := manager.Service().GetAuthorization().RefreshPermissionsAndRoles(); err != nil {
+			t.Fatalf("failed to refresh permissions: %v", err)
+		}
+
+		dashboards := expect.GET(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathDashboard)).
+			WithHeader(authHeaderKey, authHeaderValue).
+			Expect().
+			Status(http.StatusOK).
+			JSON().
+			Array()
+		var projects []string
+		for _, dashboard := range dashboards.Iter() {
+			projects = append(projects, dashboard.Path("$.metadata.project").String().Raw())
+		}
+		assert.ElementsMatch(t, []string{"granted", "opened"}, projects)
+
+		e2eframework.ClearAllKeys(t, manager.Persistence().GetPersesDAO(), usrEntity)
+		return entities
+	})
+}
+
 // newDatasourceSpecWithSecret builds a local datasource spec whose HTTP proxy references a secret.
 func newDatasourceSpecWithSecret(t *testing.T, secretName string) *datasourceSpec.Spec {
 	spec := e2eframework.NewDatasource(t, "perses", "withSecret").Spec

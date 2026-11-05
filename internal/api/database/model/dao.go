@@ -30,6 +30,10 @@ type Query interface {
 	// In case of project resource, this will return the project name set in the query parameter or in the URL path.
 	GetProjectQueryParam() string
 	SetProjectQueryParam(project string)
+	// SetProjectsQueryParam restricts the list of project resources to the given projects (in addition to the project
+	// set with SetProjectQueryParam), so that the resources of several projects are listed with a single request to
+	// the database. An empty list doesn't restrict anything. It is ignored by the queries of the global resources.
+	SetProjectsQueryParam(projects []string)
 }
 
 type DAO interface {

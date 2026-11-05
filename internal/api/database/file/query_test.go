@@ -30,7 +30,7 @@ func TestBuildQuery(t *testing.T) {
 	testSuite := []struct {
 		title              string
 		query              databaseModel.Query
-		expectedPath       string
+		expectedPaths      []string
 		expectedNamePrefix string
 	}{
 		{
@@ -39,7 +39,7 @@ func TestBuildQuery(t *testing.T) {
 				NamePrefix: "meta",
 				Project:    "perses",
 			},
-			expectedPath:       filepath.Join("dashboards", "perses"),
+			expectedPaths:      []string{filepath.Join("dashboards", "perses")},
 			expectedNamePrefix: "meta",
 		},
 		{
@@ -47,7 +47,7 @@ func TestBuildQuery(t *testing.T) {
 			query: &dashboard.Query{
 				NamePrefix: "meta",
 			},
-			expectedPath:       "dashboards",
+			expectedPaths:      []string{"dashboards"},
 			expectedNamePrefix: "meta",
 		},
 		{
@@ -56,7 +56,7 @@ func TestBuildQuery(t *testing.T) {
 				NamePrefix: "meta",
 				Project:    "perses",
 			},
-			expectedPath:       filepath.Join("datasources", "perses"),
+			expectedPaths:      []string{filepath.Join("datasources", "perses")},
 			expectedNamePrefix: "meta",
 		},
 		{
@@ -65,15 +65,40 @@ func TestBuildQuery(t *testing.T) {
 				NamePrefix: "meta",
 				Project:    "perses",
 			},
-			expectedPath:       filepath.Join("folders", "perses"),
+			expectedPaths:      []string{filepath.Join("folders", "perses")},
 			expectedNamePrefix: "meta",
+		},
+		{
+			title: "dashboardQuery with several projects",
+			query: &dashboard.Query{
+				NamePrefix: "meta",
+				Projects:   []string{"perses", "Demo"},
+			},
+			expectedPaths:      []string{filepath.Join("dashboards", "perses"), filepath.Join("dashboards", "demo")},
+			expectedNamePrefix: "meta",
+		},
+		{
+			title: "dashboardQuery with a project among several projects",
+			query: &dashboard.Query{
+				Project:  "perses",
+				Projects: []string{"Perses", "demo"},
+			},
+			expectedPaths: []string{filepath.Join("dashboards", "perses")},
+		},
+		{
+			title: "dashboardQuery with a project not among several projects",
+			query: &dashboard.Query{
+				Project:  "perses",
+				Projects: []string{"demo"},
+			},
+			expectedPaths: []string{},
 		},
 		{
 			title: "globalDatasourceQuery",
 			query: &globaldatasource.Query{
 				NamePrefix: "meta",
 			},
-			expectedPath:       "globaldatasources",
+			expectedPaths:      []string{"globaldatasources"},
 			expectedNamePrefix: "meta",
 		},
 		{
@@ -81,7 +106,7 @@ func TestBuildQuery(t *testing.T) {
 			query: &project.Query{
 				NamePrefix: "meta",
 			},
-			expectedPath:       "projects",
+			expectedPaths:      []string{"projects"},
 			expectedNamePrefix: "meta",
 		},
 	}
@@ -89,10 +114,16 @@ func TestBuildQuery(t *testing.T) {
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			d := &DAO{Folder: ""}
-			result, prefix, _, err := d.buildQuery(test.query)
+			result, prefix, err := d.buildQuery(test.query)
 			assert.NoError(t, err)
-			assert.Equal(t, test.expectedPath, result)
+			assert.ElementsMatch(t, test.expectedPaths, result)
 			assert.Equal(t, test.expectedNamePrefix, prefix)
 		})
 	}
+}
+
+func TestBuildQueryRejectsInvalidProjects(t *testing.T) {
+	d := &DAO{Folder: ""}
+	_, _, err := d.buildQuery(&dashboard.Query{Projects: []string{"perses", "../secret"}})
+	assert.True(t, databaseModel.IsKeyBadRequest(err))
 }
