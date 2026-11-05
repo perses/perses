@@ -110,32 +110,32 @@ describe('SearchBar', () => {
   beforeEach(() => {
     vi.mocked(useHasPermission).mockReturnValue(true);
 
-    vi.mocked(useConfig).mockReturnValue({ data: MOCK_CLIENT_CONFIG, isLoading: false } as ReturnType<
+    vi.mocked(useConfig).mockReturnValue({ data: MOCK_CLIENT_CONFIG, isPending: false } as ReturnType<
       typeof useConfig
     >);
 
     vi.mocked(useDashboardList).mockReturnValue({
       data: DASHBOARDS_RESOURCES,
-      isLoading: false,
+      isPending: false,
       isSuccess: true,
     } as ReturnType<typeof useDashboardList>);
 
     vi.mocked(useDatasourceList).mockReturnValue({
       data: DATASOURCE_RESOURCE,
-      isLoading: false,
+      isPending: false,
       isSuccess: true,
     } as ReturnType<typeof useDatasourceList>);
 
     vi.mocked(useGlobalDatasourceList).mockReturnValue({
       data: GLOBAL_DATASOURCE_RESOURCE,
-      isLoading: false,
+      isPending: false,
       isSuccess: true,
       error: null,
     } as ReturnType<typeof useGlobalDatasourceList>);
 
     vi.mocked(useProjectList).mockReturnValue({
       data: PROJECT_RESOURCE,
-      isLoading: false,
+      isPending: false,
       isSuccess: true,
     } as ReturnType<typeof useProjectList>);
 
@@ -310,7 +310,22 @@ describe('SearchBar', () => {
     it('should not show no records found while a list is loading', () => {
       vi.mocked(useProjectList).mockReturnValue({
         data: undefined,
-        isLoading: true,
+        isPending: true,
+        isFetching: true,
+      } as ReturnType<typeof useProjectList>);
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'XYZ' } });
+
+      expect(screen.queryByTestId(TEST_IDS.noRecordContainer)).not.toBeInTheDocument();
+    });
+
+    it('should not show no records found while the initial fetch of a list is paused', () => {
+      // e.g. when the browser is offline, the fetch is paused: the list has no data yet but is not fetching.
+      vi.mocked(useProjectList).mockReturnValue({
+        data: undefined,
+        isPending: true,
+        isFetching: false,
       } as ReturnType<typeof useProjectList>);
 
       fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
@@ -323,7 +338,7 @@ describe('SearchBar', () => {
       // e.g. after a dashboard has been created, the cached list is refetched when the search is opened.
       vi.mocked(useDashboardList).mockReturnValue({
         data: DASHBOARDS_RESOURCES,
-        isLoading: false,
+        isPending: false,
         isFetching: true,
       } as ReturnType<typeof useDashboardList>);
 
@@ -361,7 +376,7 @@ describe('SearchBar', () => {
     it('should display the number of dashboards and datasources of a project', () => {
       vi.mocked(useProjectList).mockReturnValue({
         data: [{ kind: 'Project', metadata: { name: 'P1' } }],
-        isLoading: false,
+        isPending: false,
         isSuccess: true,
       } as ReturnType<typeof useProjectList>);
 
@@ -409,7 +424,7 @@ describe('SearchBar', () => {
     it('should display the error instead of "no records found" when a list fails to load', () => {
       vi.mocked(useProjectList).mockReturnValue({
         data: undefined,
-        isLoading: false,
+        isPending: false,
         isError: true,
         error: new UserFriendlyError('internal server error', 500),
       } as ReturnType<typeof useProjectList>);
@@ -426,7 +441,7 @@ describe('SearchBar', () => {
       const error = new UserFriendlyError('database unavailable', 500);
       vi.mocked(useDashboardList).mockReturnValue({
         data: undefined,
-        isLoading: false,
+        isPending: false,
         isError: true,
         error,
       } as ReturnType<typeof useDashboardList>);
@@ -499,7 +514,7 @@ describe('SearchBar', () => {
           ...MOCK_CLIENT_CONFIG,
           datasource: { ...MOCK_CLIENT_CONFIG.datasource, global: { disable: true }, project: { disable: true } },
         },
-        isLoading: false,
+        isPending: false,
       } as ReturnType<typeof useConfig>);
       vi.mocked(useGlobalDatasourceList).mockClear();
       vi.mocked(useDatasourceList).mockClear();

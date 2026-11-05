@@ -33,7 +33,7 @@ interface ProjectSecretsProps {
 export function ProjectSecrets(props: ProjectSecretsProps): ReactElement {
   const { projectName, id } = props;
 
-  const { data, isLoading } = useSecretList(projectName);
+  const { data, isPending } = useSecretList(projectName);
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const createSecretMutation = useCreateSecretMutation(projectName);
@@ -98,7 +98,7 @@ export function ProjectSecrets(props: ProjectSecretsProps): ReactElement {
     <Card id={id}>
       <SecretList
         data={data ?? []}
-        isLoading={isLoading}
+        isLoading={isPending}
         onCreate={handleSecretCreate}
         onUpdate={handleSecretUpdate}
         onDelete={handleSecretDelete}

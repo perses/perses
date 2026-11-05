@@ -32,7 +32,7 @@ interface GlobalDatasourcesProps {
 
 export function GlobalDatasources(props: GlobalDatasourcesProps): ReactElement {
   const { hideToolbar, id } = props;
-  const { data, isLoading } = useGlobalDatasourceList({});
+  const { data, isPending } = useGlobalDatasourceList({});
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
   const createDatasourceMutation = useCreateGlobalDatasourceMutation();
@@ -110,7 +110,7 @@ export function GlobalDatasources(props: GlobalDatasourcesProps): ReactElement {
         onCreate={handleDatasourceCreate}
         onUpdate={handleDatasourceUpdate}
         onDelete={handleDatasourceDelete}
-        isLoading={isLoading}
+        isLoading={isPending}
         initialState={{
           columns: {
             columnVisibilityModel: {

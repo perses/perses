@@ -34,7 +34,7 @@ interface ConfigContextType {
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 
 export function ConfigContextProvider(props: { children: React.ReactNode }): ReactElement {
-  const { data, isLoading } = useConfig();
+  const { data, isPending } = useConfig();
   const contextValue = useMemo<ConfigContextType | undefined>(() => (data ? { config: data } : undefined), [data]);
   const defaultPreferences = useMemo(
     () => ({ timezone: data?.frontend.default_user_preferences?.timezone ?? 'local' }),
@@ -65,7 +65,7 @@ export function ConfigContextProvider(props: { children: React.ReactNode }): Rea
     });
   }, [data?.frontend.auto_refresh?.options]);
 
-  if (isLoading || data === undefined || contextValue === undefined) {
+  if (isPending || data === undefined || contextValue === undefined) {
     return <PersesLoader />;
   }
   return (
