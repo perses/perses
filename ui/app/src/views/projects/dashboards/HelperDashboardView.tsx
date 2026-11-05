@@ -1,0 +1,153 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { Box, CircularProgress, Stack } from '@mui/material';
+import type { DashboardResource } from '@perses-dev/client';
+import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/components';
+import type { ExternalVariableDefinition, OnSaveDashboard } from '@perses-dev/dashboards';
+import { ViewDashboard } from '@perses-dev/dashboards';
+import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
+import type { DashboardSpec } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
+
+import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
+import { PERSES_APP_CONFIG } from '../../../config';
+import {
+  useIsKeyboardShortcutsEnabled,
+  useIsLocalDatasourceEnabled,
+  useIsLocalVariableEnabled,
+  useIsLockModeAvailable,
+} from '../../../context/Config';
+import { useUserPreferences } from '../../../context/UserPreferences';
+import { useDatasourceApi } from '../../../model/datasource-api';
+import { useGlobalVariableList } from '../../../model/global-variable-client';
+import { useProject } from '../../../model/project-client';
+import { useRemotePluginLoader } from '../../../model/remote-plugin-loader';
+import { useVariableList } from '../../../model/variable-client';
+import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
+
+export interface GenericDashboardViewProps {
+  dashboardResource: DashboardResource;
+  onSave?: OnSaveDashboard;
+  onDiscard?: (name: string, spec: DashboardSpec) => void;
+  isReadonly: boolean;
+  isEditing: boolean;
+  isCreating?: boolean;
+  isLeavingConfirmDialogEnabled?: boolean;
+}
+
+/**
+ * The View for displaying a Dashboard.
+ */
+export function HelperDashboardView(props: GenericDashboardViewProps): ReactElement {
+  const { userPreferences } = useUserPreferences();
+  const {
+    dashboardResource,
+    onSave,
+    onDiscard,
+    isReadonly,
+    isEditing,
+    isCreating,
+    isLeavingConfirmDialogEnabled = true,
+  } = props;
+  const breadcrumbVariant = isEditing || isCreating ? 'workspace' : 'default';
+  const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
+  const isLocalVariableEnabled = useIsLocalVariableEnabled();
+  const isKeyboardShortcutsEnabled = useIsKeyboardShortcutsEnabled();
+  const isLockModeAvailable = useIsLockModeAvailable();
+  const datasourceApi = useDatasourceApi();
+  const pluginLoader = useRemotePluginLoader();
+
+  // Collect the Project variables and setup external variables from it
+  const { data: project, isPending: isProjectPending } = useProject(dashboardResource.metadata.project);
+  const { data: globalVars, isPending: isGlobalVarsPending } = useGlobalVariableList();
+  const { data: projectVars, isPending: isProjectVarsPending } = useVariableList(dashboardResource.metadata.project);
+  const externalVariableDefinitions: ExternalVariableDefinition[] | undefined = useMemo(
+    () => [
+      buildProjectVariableDefinition(dashboardResource.metadata.project, projectVars ?? []),
+      buildGlobalVariableDefinition(globalVars ?? []),
+    ],
+    [dashboardResource.metadata.project, projectVars, globalVars],
+  );
+
+  if (isProjectPending || isProjectVarsPending || isGlobalVarsPending) {
+    return (
+      <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Stack>
+    );
+  }
+
+  if (!project) {
+    throw new Error('Unable to get the project');
+  }
+
+  return (
+    <Box
+      component="main"
+      sx={{
+        flexGrow: 1,
+        overflow: 'hidden',
+      }}
+    >
+      <ErrorBoundary FallbackComponent={ErrorAlert}>
+        <PluginRegistry
+          pluginLoader={pluginLoader}
+          defaultPluginKinds={{
+            Panel: 'TimeSeriesChart',
+            TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
+          }}
+        >
+          <ValidationProvider>
+            <ErrorBoundary FallbackComponent={ErrorAlert}>
+              <UsageMetricsProvider
+                apiPrefix={PERSES_APP_CONFIG.api_prefix}
+                project={project.metadata.name}
+                dashboard={dashboardResource.metadata.name}
+              >
+                <ViewDashboard
+                  key={`${dashboardResource.metadata.project}/${dashboardResource.metadata.name}`}
+                  dashboardResource={dashboardResource}
+                  datasourceApi={datasourceApi}
+                  externalVariableDefinitions={externalVariableDefinitions}
+                  dashboardTitleComponent={
+                    <ProjectBreadcrumbs
+                      dashboardName={getResourceDisplayName(dashboardResource)}
+                      project={project}
+                      variant={breadcrumbVariant}
+                    />
+                  }
+                  onSave={onSave}
+                  onDiscard={onDiscard}
+                  isInitialVariableSticky={true}
+                  isReadonly={isReadonly}
+                  isAnnotationEnabled={true}
+                  isVariableEnabled={isLocalVariableEnabled}
+                  isDatasourceEnabled={isLocalDatasourceEnabled}
+                  disableShortcuts={!isKeyboardShortcutsEnabled}
+                  isLockModeAvailable={isLockModeAvailable}
+                  isUpdateButtonAvailable={isLockModeAvailable}
+                  isEditing={isEditing}
+                  isCreating={isCreating}
+                  isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
+                  userPreferenceTimezone={userPreferences.timezone}
+                />
+              </UsageMetricsProvider>
+            </ErrorBoundary>
+          </ValidationProvider>
+        </PluginRegistry>
+      </ErrorBoundary>
+    </Box>
+  );
+}

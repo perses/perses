@@ -1,0 +1,14 @@
+{
+  "kind": "Folder",
+  "metadata": {
+    "name": "ff15"
+  },
+  "spec": {
+    "items": [
+      {
+        "kind": "Dashboard",
+        "name": "node_exporter"
+      }
+    ]
+  }
+}

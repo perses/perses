@@ -1,0 +1,6 @@
+{
+  "kind": "SecondVariable",
+  "spec": {
+    "array": ["yes", "no"]
+  }
+}

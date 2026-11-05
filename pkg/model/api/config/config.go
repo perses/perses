@@ -1,0 +1,99 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package config
+
+import (
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/perses/common/config"
+	"github.com/perses/spec/go/common"
+)
+
+const (
+	defaultEphemeralDashboardsCleanupInterval = 24 * time.Hour
+	defaultInterval                           = 1 * time.Hour
+)
+
+type EphemeralDashboard struct {
+	// When true user will be able to use the ephemeral dashboard at project level.
+	Enable bool `json:"enable" yaml:"enable"`
+	// The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
+	CleanupInterval common.Duration `json:"cleanup_interval" yaml:"cleanup_interval"`
+	// MaxTTL is the maximum time to live that a user can set on an ephemeral dashboard.
+	// It is not set by default, meaning there is no limit.
+	MaxTTL common.Duration `json:"max_ttl,omitempty" yaml:"max_ttl,omitempty"`
+}
+
+func (e *EphemeralDashboard) Verify() error {
+	if e.Enable && e.CleanupInterval <= 0 {
+		e.CleanupInterval = common.Duration(defaultEphemeralDashboardsCleanupInterval)
+	}
+	if e.MaxTTL < 0 {
+		return fmt.Errorf("max_ttl cannot be negative")
+	}
+	return nil
+}
+
+type Config struct {
+	// Use it in case you want to prefix the API path.
+	// This can be useful if you are running Perses behind a reverse proxy.
+	// By default, the API is served with the path /api.
+	// With this config, it will be served with the path <api_prefix>/api
+	// Example: "/perses"
+	APIPrefix string `json:"api_prefix,omitempty" yaml:"api_prefix,omitempty"`
+	// Security contains any configuration that changes the API behavior like the endpoints exposed or if the permissions are activated.
+	Security Security `json:"security,omitempty" yaml:"security,omitempty"`
+	// Database contains the different configuration depending on the database you want to use
+	Database Database `json:"database,omitempty" yaml:"database,omitempty"`
+	// Dashboard contains the configuration for the dashboard feature.
+	Dashboard DashboardConfig `json:"dashboard,omitempty" yaml:"dashboard,omitempty"`
+	// Provisioning contains the provisioning config that can be used if you want to provide default resources.
+	Provisioning ProvisioningConfig `json:"provisioning,omitempty" yaml:"provisioning,omitempty"`
+	// Datasource contains the configuration for the datasource.
+	Datasource DatasourceConfig `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	// Variable contains the configuration for the variable.
+	Variable VariableConfig `json:"variable,omitempty" yaml:"variable,omitempty"`
+	// EphemeralDashboard contains the config about the ephemeral dashboard feature
+	EphemeralDashboard EphemeralDashboard `json:"ephemeral_dashboard,omitempty" yaml:"ephemeral_dashboard,omitempty"`
+	// Frontend contains any config that will be used by the frontend itself.
+	Frontend Frontend `json:"frontend,omitempty" yaml:"frontend,omitempty"`
+	// Plugin contains the config for runtime plugins.
+	Plugin Plugin `json:"plugin,omitempty" yaml:"plugin,omitempty"`
+	// Search contains the config for the search engine and the index in memory.
+	Search Search `json:"search,omitempty" yaml:"search,omitempty"`
+}
+
+func (c *Config) Verify() error {
+	if len(c.APIPrefix) > 0 && !strings.HasPrefix(c.APIPrefix, "/") {
+		c.APIPrefix = "/" + c.APIPrefix
+	}
+	// As the global variable depends on the global datasource, we need to disable the global variable if the global datasource is disabled.
+	c.Variable.Global.Disable = c.Variable.Global.Disable || c.Datasource.Global.Disable
+	// The same logic applies for a project variable with an additional rules.
+	// Since a project variable can either depend on a global datasource or a project datasource,
+	// we need to disable the project variable if the global datasource is disabled and the project datasource is disabled.
+	c.Variable.Project.Disable = c.Variable.Project.Disable || (c.Datasource.Global.Disable && c.Datasource.Project.Disable)
+	return nil
+}
+
+func Resolve(configFile string) (Config, error) {
+	c := Config{}
+	return c, config.NewResolver[Config]().
+		SetConfigFile(configFile).
+		SetEnvPrefix("PERSES").
+		Resolve(&c).
+		Verify()
+}

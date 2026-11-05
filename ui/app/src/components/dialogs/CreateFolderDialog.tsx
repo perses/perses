@@ -1,0 +1,182 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Autocomplete, Button, Chip, CircularProgress, Stack, TextField } from '@mui/material';
+import type { FolderItem, FolderResource } from '@perses-dev/client';
+import { Dialog, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import type { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
+import { useMemo } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
+
+import { useCreateFolderMutation } from '../../model/folder-client';
+import { useSearchDashboards } from '../../model/search-client';
+import { generateMetadataName } from '../../utils/metadata';
+import type { CreateFolderValidationType } from '../../validation/folder';
+import { useFolderValidationSchema } from '../../validation/folder';
+
+export interface CreateFolderDialogProps {
+  projectName: string;
+  open: boolean;
+  onClose: DispatchWithoutAction;
+  onSuccess?: Dispatch<string>;
+}
+
+/**
+ * Dialog used to create a new root-level folder in a project.
+ * @param open Define if the dialog should be opened or not.
+ * @param onClose Provides the function to close itself.
+ * @param onSuccess Action to perform when user confirmed.
+ * @param projectName The project to create the folder in.
+ */
+export const CreateFolderDialog = ({
+  projectName,
+  open,
+  onClose,
+  onSuccess,
+}: CreateFolderDialogProps): ReactElement => {
+  const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const { data: dashboards } = useSearchDashboards(projectName);
+  const createFolderMutation = useCreateFolderMutation();
+  const { schema, isSchemaLoading } = useFolderValidationSchema(projectName);
+
+  const options = useMemo(
+    () => [...(dashboards?.values() ?? [])].map((d) => ({ label: d.displayName, name: d.metadata.name })),
+    [dashboards],
+  );
+
+  const form = useForm<CreateFolderValidationType>({
+    resolver: schema ? zodResolver(schema) : undefined,
+    mode: 'onBlur',
+    defaultValues: {
+      selectedDashboards: [],
+      name: '',
+    },
+  });
+  const { reset } = form;
+
+  const processForm: SubmitHandler<CreateFolderValidationType> = (data) => {
+    const dashboardItems: FolderItem[] = data.selectedDashboards.map((option) => ({
+      kind: 'Dashboard' as const,
+      name: option.name,
+    }));
+    const newFolder: FolderResource = {
+      kind: 'Folder',
+      metadata: {
+        name: generateMetadataName(data.name),
+        project: projectName,
+      },
+      spec: {
+        display: { name: data.name },
+        items: dashboardItems,
+      },
+    };
+
+    createFolderMutation.mutate(newFolder, {
+      onSuccess: (createdFolder: FolderResource) => {
+        successSnackbar(`Folder ${getResourceExtendedDisplayName(createdFolder)} has been successfully created`);
+        onClose();
+        reset();
+        onSuccess?.(createdFolder.metadata.name);
+      },
+      onError: (err) => {
+        exceptionSnackbar(err);
+        throw err;
+      },
+    });
+  };
+
+  const handleClose = (): void => {
+    onClose();
+    reset();
+  };
+
+  return (
+    <Dialog open={open} onClose={handleClose} aria-labelledby="confirm-dialog" fullWidth={true}>
+      <Dialog.Header>Add Folder</Dialog.Header>
+      {isSchemaLoading ? (
+        <Stack
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            width: '100%',
+            overflow: 'hidden',
+          }}
+        >
+          <CircularProgress />
+        </Stack>
+      ) : (
+        <FormProvider {...form}>
+          <form onSubmit={form.handleSubmit(processForm)}>
+            <Dialog.Content sx={{ width: '100%' }}>
+              <Stack spacing={2}>
+                <Controller
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      label="Name"
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                      {...field}
+                    />
+                  )}
+                  name="name"
+                />
+                <Controller
+                  control={form.control}
+                  name="selectedDashboards"
+                  render={({ field, fieldState }) => (
+                    <Autocomplete
+                      multiple
+                      disableCloseOnSelect
+                      options={options}
+                      getOptionLabel={(option) => option.label}
+                      getOptionKey={(option) => option.name}
+                      isOptionEqualToValue={(option, value) => option.name === value.name}
+                      value={field.value}
+                      onChange={(_, newValue) => field.onChange(newValue)}
+                      renderTags={(value, getTagProps) =>
+                        value.map((option, index) => (
+                          <Chip {...getTagProps({ index })} key={option.name} label={option.label} />
+                        ))
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Dashboards"
+                          placeholder="Select dashboards"
+                          error={!!fieldState.error}
+                          helperText={fieldState.error?.message}
+                        />
+                      )}
+                    />
+                  )}
+                />
+              </Stack>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button variant="contained" disabled={!form.formState.isValid} type="submit">
+                Add
+              </Button>
+              <Button variant="outlined" color="secondary" onClick={handleClose}>
+                Cancel
+              </Button>
+            </Dialog.Actions>
+          </form>
+        </FormProvider>
+      )}
+    </Dialog>
+  );
+};

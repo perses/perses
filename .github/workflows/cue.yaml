@@ -1,0 +1,51 @@
+name: cue
+on:
+  push:
+    branches:
+      - main
+      - release/*
+      - snapshot/*
+    tags:
+      - v*
+  pull_request:
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.ref_name != 'main' }}
+
+jobs:
+  validate-schemas:
+    name: validate CUE schemas
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v7
+      - uses: perses/github-actions@v0.13.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+          enable_cue: true
+          cue_version: "v0.17.1"
+      - name: check cue schema
+        run: make cue-eval
+
+  publish-module:
+    name: "publish module to Central Registry"
+    needs: "validate-schemas"
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - uses: perses/github-actions@v0.13.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+          enable_cue: true
+          cue_version: "v0.17.1"
+      - name: Login to Central Registry # to allow publishing the module
+        run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
+      - name: Publish the module
+        run: cue mod publish ${{ github.ref_name }}
+        working-directory: cue

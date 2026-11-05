@@ -1,0 +1,248 @@
+# Embedding Perses panels
+
+This little documentation aims to provide you the minimum code needed to have a Perses panel into your React
+application.
+
+!!! info
+    We are working actively on reducing this amount of required dependencies/providers working on some default values or opt-in/opt-out mechanisms.
+
+## Getting started (npm example)
+
+> These UI libraries now live in the [`perses/shared`](https://github.com/perses/shared) repository. If you need to link them locally for development, follow the instructions in that repo.
+
+```bash
+# Create new React app or modify an existing app using the dependencies below
+# Example: https://react.dev/learn/build-a-react-app-from-scratch
+
+# Install Perses dependencies (React 18 and React 19+ are both supported)
+# React 19 requires the v0.56 Perses packages: until v0.56.0 is released, install the versions below instead of `latest`.
+npm i --save @perses-dev/client@0.56.0-beta.1 @perses-dev/spec @perses-dev/components@0.56.0-beta.1 \
+  @perses-dev/plugin-system@0.56.0-beta.1 @perses-dev/timeseries-chart-plugin@0.15.0-beta.1 \
+  @perses-dev/prometheus-plugin@0.60.0-beta.1 @perses-dev/dashboards@0.56.0-beta.1 \
+  @tanstack/react-query \
+  @mui/material @mui/system \
+  @emotion/styled @hookform/resolvers \
+  react@19 react-dom@19 # or react@18 react-dom@18
+```
+
+Complete, buildable examples are available for [React 18](https://github.com/perses/perses/tree/main/examples/embedded-react18)
+and [React 19](https://github.com/perses/perses/tree/main/examples/embedded-react19).
+
+!!! note
+    The Perses packages are published as ES modules and default-import some CommonJS dependencies (e.g. `mdi-material-ui`
+    icons). With Rspack or webpack, treat dependencies as `javascript/auto` modules so these imports resolve correctly,
+    as done in the `rsbuild.config.ts` of the examples above.
+
+### React Compiler
+
+The Perses packages are compiled with the [React Compiler](https://react.dev/learn/react-compiler), targeting the
+minimum supported React version (18). The compiled code relies on the `react-compiler-runtime` package, a dependency of
+the Perses packages, which delegates to the runtime built into React 19+. No extra setup is required on your side.
+
+To also compile your own components, enable the compiler in your bundler: on React 18, set the compiler target to `18`
+and install `react-compiler-runtime`; on React 19+, the default target works without additional dependencies. The
+examples above show both configurations with [Rsbuild](https://rsbuild.rs/plugins/list/plugin-react#reactcompiler).
+
+## Minimal code
+
+Here replacing your App.tsx
+
+```typescript
+import React from "react";
+import "./App.css";
+
+import {
+  ChartsProvider,
+  generateChartsTheme,
+  getTheme,
+  SnackbarProvider,
+} from "@perses-dev/components";
+import {
+  DataQueriesProvider,
+  dynamicImportPluginLoader,
+  PluginRegistry,
+  TimeRangeProvider,
+} from "@perses-dev/plugin-system";
+import { ThemeProvider } from "@mui/material";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  DatasourceStoreProvider,
+  Panel,
+  VariableProvider,
+} from "@perses-dev/dashboards";
+import type {
+  DashboardResource,
+  DatasourceApi,
+  DatasourceResource,
+  GlobalDatasourceResource,
+} from "@perses-dev/client";
+import type { DurationString, TimeRangeValue } from "@perses-dev/spec";
+import * as prometheusPlugin from "@perses-dev/prometheus-plugin";
+import * as timeseriesChartPlugin from "@perses-dev/timeseries-chart-plugin";
+
+const fakeDatasource: GlobalDatasourceResource = {
+  kind: "GlobalDatasource",
+  metadata: { name: "hello" },
+  spec: {
+    default: true,
+    plugin: {
+      kind: "PrometheusDatasource",
+      spec: {
+        // Update to your actual datasource url
+        directUrl: "https://prometheus.demo.do.prometheus.io",
+      },
+    },
+  },
+};
+
+class DatasourceApiImpl implements DatasourceApi {
+  getDatasource(): Promise<DatasourceResource | undefined> {
+    return Promise.resolve(undefined);
+  }
+
+  getGlobalDatasource(): Promise<GlobalDatasourceResource | undefined> {
+    return Promise.resolve(fakeDatasource);
+  }
+
+  listDatasources(): Promise<DatasourceResource[]> {
+    return Promise.resolve([]);
+  }
+
+  listGlobalDatasources(): Promise<GlobalDatasourceResource[]> {
+    return Promise.resolve([fakeDatasource]);
+  }
+
+  buildProxyUrl(): string {
+    return "/prometheus";
+  }
+}
+export const fakeDatasourceApi = new DatasourceApiImpl();
+export const fakeDashboard = {
+  kind: "Dashboard",
+  metadata: {},
+  spec: {},
+} as DashboardResource;
+
+function App() {
+  const [timeRange, setTimeRange] = React.useState<TimeRangeValue>({ pastDuration: "30m" });
+  const [refreshInterval, setRefreshInterval] = React.useState<DurationString>("0s");
+
+  const muiTheme = getTheme("light");
+  const chartsTheme = generateChartsTheme(muiTheme, {});
+  const pluginLoader = dynamicImportPluginLoader([
+    {
+      resource: prometheusPlugin.getPluginModule(),
+      importPlugin: () => Promise.resolve(prometheusPlugin),
+    },
+    {
+      resource: timeseriesChartPlugin.getPluginModule(),
+      importPlugin: () => Promise.resolve(timeseriesChartPlugin),
+    },
+  ]);
+
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        retry: 0,
+      },
+    },
+  });
+  return (
+    <ThemeProvider theme={muiTheme}>
+      <ChartsProvider chartsTheme={chartsTheme}>
+        <SnackbarProvider
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          variant="default"
+          content=""
+        >
+          <PluginRegistry
+            pluginLoader={pluginLoader}
+            defaultPluginKinds={{
+              Panel: "TimeSeriesChart",
+              TimeSeriesQuery: "PrometheusTimeSeriesQuery",
+            }}
+          >
+            <QueryClientProvider client={queryClient}>
+              <TimeRangeProvider timeRange={timeRange} refreshInterval={refreshInterval} setTimeRange={setTimeRange} setRefreshInterval={setRefreshInterval}>
+                <VariableProvider>
+                  <DatasourceStoreProvider
+                    dashboardResource={fakeDashboard}
+                    datasourceApi={fakeDatasourceApi}
+                  >
+                    <DataQueriesProvider
+                      definitions={[
+                        {
+                          kind: "TimeSeriesQuery",
+                          spec: {
+                            plugin: {
+                              kind: "PrometheusTimeSeriesQuery",
+                              spec: { query: 'up{job="prometheus"}' },
+                            },
+                          },
+                        },
+                      ]}
+                    >
+                      <Panel
+                        panelOptions={{
+                          hideHeader: true,
+                        }}
+                        definition={{
+                          kind: "Panel",
+                          spec: {
+                            display: { name: "Example Panel" },
+                            plugin: {
+                              kind: "TimeSeriesChart",
+                              spec: {
+                                legend: {
+                                  position: "bottom",
+                                  size: "medium",
+                                },
+                              },
+                            },
+                          },
+                        }}
+                      />
+                    </DataQueriesProvider>
+                  </DatasourceStoreProvider>
+                </VariableProvider>
+              </TimeRangeProvider>
+            </QueryClientProvider>
+          </PluginRegistry>
+        </SnackbarProvider>
+      </ChartsProvider>
+    </ThemeProvider>
+  );
+}
+
+export default App;
+```
+
+You should now see a Perses panel in your app's UI:
+
+![embedded_panel](./images/embedded-panel.png)
+
+## Definitions by provider
+
+> Check each Provider's source code/jsdoc for more details.
+
+- `DataQueriesProvider`: Provide the queries' definition, with the query type, the value. This is to be inside the
+  chart below. For each query, one line will be displayed in the chart.
+- `DatasourceStoreProvider`: Provide the datasources. In other terms, the place from which the data will be collected.
+- `VariableProvider`: Provide the variables that can be used inside the chart.
+  It will allow you to reference any variable into the queries thanks to the `${myVar}` syntax.
+  Available variables will be either the builtin variables or the local/external variables that you can pass to the provider.
+- `TimeRangeProvider`: Provide `time range` of the query, but also the `refresh interval` (time between each query
+  automatic replay)
+- `QueryClientProvider`: Provide a `@tanstack/react-query` `QueryClient`, which is a mandatory dependency.
+  (We advise to configure it with `refetchOnWindowFocus: false` except if you want to replay the queries every time
+  you change window)
+- `QueryParamProvider`: Provide the ability to take time range, refresh interval, and different variables from the
+  url query params.
+- `BrowserRouter`: Provide necessary elements for the `QueryParamProvider`
+- `PluginRegistry`: Provide the different Perses plugins that will be used in the providers/charts below.
+- `SnackbarProvider`: Provide the toaster that will occurs in case of error/success.
+- `ChartsProvider`: Provider for the option of [apache/echarts](https://echarts.apache.org/en/option.html) library.
+  Which is used for all the charts display.
+- `ThemeProvider`: Provider of the [Material UI theme](https://mui.com/material-ui/customization/theming/) which is
+  currently the theme used in Perses.

@@ -1,0 +1,182 @@
+Proxy
+=====
+
+Perses can serve as a proxy for various supported datasource types. This is especially useful when:
+
+* The datasource is not accessible from your browser.
+* The datasource is protected by an authentication mechanism.
+
+# HTTP Proxy
+
+## How it works
+
+Depending on the datasource scope (Global, Project, Local), the URL to access the datasource will be different.
+
+1. For a global scope, the URL to access a datasource in the global scope is:
+
+```text
+/proxy/globaldatasources/<datasource-name>/<datasource_api_path>
+```
+
+2. For a project scope, the URL to access a datasource in the project scope is:
+
+```text
+/proxy/projects/<project-name>/datasources/<datasource-name>/<datasource_api_path>
+```
+
+3. For a local scope, the URL to access a datasource in the local scope is:
+
+```text
+/proxy/projects/<project-name>/dashboards/<dashboard-name>/datasources/<datasource-name>/<datasource_api_path>
+```
+
+For example, if we have a Prometheus Global datasource named `brometheus`, the following URI will return the Prometheus
+config:
+
+```text
+/proxy/globaldatasources/brometheus/api/v1/status/config
+```
+
+`/api/v1/status/config` is the path to get the Prometheus config if you were contacting the Prometheus API directly.
+
+When contacting one of these URLs, Perses will first get the datasource from the database based on the provided
+information in the URI.
+Then, if a secret is associated with the datasource, Perses will retrieve the secret from the database and use it to
+inject the secret in the request.
+Finally, Perses will forward the request to the datasource and return the response to the client.
+
+Before forwarding the request, Perses removes the credentials the client used to authenticate against Perses:
+
+* the `Cookie` header sent by the client is always removed, as it contains the Perses session (and possibly the tokens
+  of the OIDC/OAuth provider). A `Cookie` header explicitly defined in the datasource configuration is sent instead,
+  unless it is removed by the header policy (`allowHeaders` / `dropHeaders`), as the policy is applied after the
+  configured headers are set.
+* when the Perses native authorization is enabled, the `Authorization` header sent by the client (which contains the
+  Perses token) is always removed. To authenticate against the datasource, use a Secret or the `oauthPassthrough` option.
+
+The client's `Cookie` header (and, with the native authorization, the client's `Authorization` header) cannot be
+forwarded using `allowHeaders`.
+
+There are exceptions for the `Authorization` header sent by the client:
+
+* when the authorization is delegated (i.e. Kubernetes), it is **forwarded to the datasource**, even though it is the
+  bearer token used to authenticate the request against Perses. Deployments relying on it to query the datasource
+  keep working. To prevent this, add `Authorization` to `dropHeaders`, or don't add it to `allowHeaders`.
+* when the authentication is disabled, it is not a Perses credential and is forwarded as is.
+
+In every case, the `Authorization` header is overwritten when the datasource uses the `oauthPassthrough` option, or a
+Secret defining `basicAuth`, `authorization` or `oauth`.
+
+An `Authorization` header defined in the `headers` of the datasource configuration is always ignored, whatever its case
+(e.g. `authorization`). Use a Secret to store the credentials of the datasource.
+
+The HTTP proxy spec supports two optional request header policies:
+
+* `allowHeaders`: forward only the listed headers.
+* `dropHeaders`: remove the listed headers and forward the others.
+
+Header names are matched case-insensitively, and all values of retained headers are preserved.
+An empty list leaves headers unchanged. Only one list can be configured.
+Filtering happens after configured headers, but before secret authentication. No need to allow `Authorization`, as it will be injected after filtering.
+Excluding `X-Forwarded-For` also prevents the reverse proxy from adding it.
+
+```mermaid
+sequenceDiagram
+    actor client as Client
+    participant backend as Perses Backend
+    participant db as Database
+    participant datasource as Datasource
+    client ->> backend: GET timeseries from datasource
+    backend ->> backend: Check if client has permission to access the datasource
+    backend ->> db: Get datasource
+    backend ->> db: Get secret
+    backend ->> backend: Modify the request by injecting<br/> the secret and changing the URL
+    backend ->> datasource: Forward the request
+    datasource ->> backend: Return the response
+    backend ->> client: Forward the response
+```
+
+# SQL Proxy
+
+When using the SQLProxy kind, the Perses server takes the request body from the FE and then executes the query
+against the datsource's database.
+
+## How it works
+
+Depending on the datasource scope (Global, Project, Local), the URL to access the datasource will be different.
+
+The difference between the HTTP proxy and SQL proxy is that the URL is pointing to the datsource path only
+and the request needs to be `POST`
+
+1. For a global scope, the URL to access a datasource in the global scope is:
+
+```text
+/proxy/globaldatasources/<datasource-name>
+```
+
+2. For a project scope, the URL to access a datasource in the project scope is:
+
+```text
+/proxy/projects/<project-name>/datasources/<datasource-name>
+```
+
+3. For a local scope, the URL to access a datasource in the local scope is:
+
+```text
+/proxy/projects/<project-name>/dashboards/<dashboard-name>/datasources/<datasource-name>
+```
+
+The request JSON body should have the following schema:
+
+```
+  {
+    "query": "select * from table limit 5"
+  }
+```  
+
+When contacting one of these URLs, Perses will first get the datasource from the database based on the provided
+information in the URI.
+Then, if a secret is associated with the datasource, Perses will retrieve the secret from the database and use it to
+inject the secret in the request.
+Finally, Perses will execute the query to the SQL datasource and return the response in JSON format to the client.
+
+## Read-only queries
+
+The SQL proxy only executes read-only queries:
+
+- The query must start with one of the following keywords: `SELECT`, `WITH`, `SHOW`, `DESCRIBE`, `DESC`, `EXPLAIN`, `VALUES`, `TABLE`.
+  Any other query is rejected.
+- The query must not contain `INTO OUTFILE` or `INTO DUMPFILE`, which would write a file on the database server (MySQL / MariaDB, with the `FILE` privilege).
+- The query is executed in a read-only transaction, so the database rejects any statement modifying the data or the schema of the database,
+  even when the query starts with one of the keywords above (e.g. `WITH d AS (DELETE FROM ...) SELECT ...`).
+  The database must support read-only transactions (`START TRANSACTION READ ONLY` for MySQL / MariaDB, `BEGIN READ ONLY` for PostgreSQL).
+  It may not be the case of a database that is only compatible with the MySQL or PostgreSQL protocol: every query then fails.
+- A single statement is executed per query.
+
+These checks are a safety net, not a security boundary. A read-only transaction doesn't prevent the side effects happening
+outside the tables of the database, for example:
+
+- writing a file on the database server (`SELECT ... INTO OUTFILE` in MySQL / MariaDB, with the `FILE` privilege). Such queries are rejected by the SQL proxy,
+- the file-reading functions in PostgreSQL (`pg_read_file`, `pg_ls_dir`, `pg_read_binary_file`, with the `pg_read_server_files` role), which read files on the database server,
+- the administration functions (e.g. `pg_terminate_backend` or `pg_reload_conf` in PostgreSQL),
+- the functions acting through another connection (e.g. `dblink_exec` in PostgreSQL).
+
+It is still strongly recommended to configure the datasource with a database user having only the permissions it needs
+(e.g. read-only access to the relevant tables, without the `FILE` privilege or any administration role).
+
+
+```mermaid
+sequenceDiagram
+    actor client as Client
+    participant backend as Perses Backend
+    participant db as Database
+    participant datasource as Datasource
+    client ->> backend: GET timeseries from datasource
+    backend ->> backend: Check if client has permission to access the datasource
+    backend ->> db: Get datasource
+    backend ->> db: Get secret
+    backend ->> backend: Build the SQL database connection 
+    backend ->> datasource: Execute the SQL query in a read-only transaction
+    datasource ->> backend: Return the rows
+    backend ->> client: Forward the rows in JSON format
+```

@@ -1,0 +1,330 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { Stack } from '@mui/material';
+import type { EphemeralDashboardInfo, FolderResource } from '@perses-dev/client';
+import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import type { DashboardSelector } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { useDashboardCreateAllowedProjects } from '../../context/Authorization';
+import { useNavHistory } from '../../context/DashboardNavHistory';
+import type { PartialDashboardResource } from '../../model/dashboard-client';
+import { getDashboard, useDeleteDashboardMutation } from '../../model/dashboard-client';
+import type { SearchProjectResource } from '../../model/search-client';
+import { AddFolderDialog } from '../dialogs/AddFolderDialog';
+import { CreateDashboardDialog } from '../dialogs/CreateDashboardDialog';
+import { DeleteFolderDialog } from '../dialogs/DeleteFolderDialog';
+import { DeleteResourceDialog } from '../dialogs/DeleteResourceDialog';
+import { EditDashboardDialog } from '../dialogs/EditDashboardDialog';
+import { EditFolderDialog } from '../dialogs/EditFolderDialog';
+import DashboardTreeList from './DashboardTreeList';
+
+type editDashboardAction = { type: 'editDashboard'; target: SearchProjectResource };
+type duplicateDashboardAction = { type: 'duplicateDashboard'; target: SearchProjectResource };
+type deleteDashboardAction = { type: 'deleteDashboard'; target: SearchProjectResource };
+type deleteFolderAction = { type: 'deleteFolder'; target: FolderResource; path: string[] };
+type editFolderAction = {
+  type: 'editFolder';
+  target: FolderResource;
+  availableDashboards: Map<string, DashboardListRow>;
+  path: string[];
+};
+type addFolder = {
+  type: 'addFolder';
+  target: FolderResource;
+  availableDashboards: Map<string, DashboardListRow>;
+  path: string[];
+};
+type openDialogAction =
+  | editDashboardAction
+  | duplicateDashboardAction
+  | deleteDashboardAction
+  | editFolderAction
+  | addFolder
+  | deleteFolderAction
+  | { type: 'none' };
+type openDialogActionType = openDialogAction['type'];
+
+export interface DashboardListRow {
+  index: number;
+  project: string;
+  name: string;
+  displayName: string;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+  tags: string[];
+  viewedAt?: string;
+}
+
+export interface DashboardListProperties {
+  dashboardList: SearchProjectResource[];
+  folderList: FolderResource[];
+  isLoading: boolean;
+  isEphemeralDashboardEnabled: boolean;
+}
+
+/**
+ * Display dashboards in a tree style.
+ * @param props.dashboardList Contains all dashboards to display
+ * @param props.isLoading Display a loading circle if enabled
+ * @param props.isEphemeralDashboardEnabled Display switch button if ephemeral dashboards are enabled in copy dialog.
+ */
+export function DashboardList(props: DashboardListProperties): ReactElement {
+  const navigate = useNavigate();
+  const { dashboardList, folderList, isLoading, isEphemeralDashboardEnabled } = props;
+  const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const deleteDashboardMutation = useDeleteDashboardMutation();
+  // TODO: a temporary copy creates an 'EphemeralDashboard', which has its own 'create' permission.
+  // The projects are currently filtered on the 'Dashboard' permission only; the backend still enforces RBAC.
+  const { data: dashboardCreateAllowedProjects, isPending: isDashboardCreateAllowedProjectsPending } =
+    useDashboardCreateAllowedProjects();
+  let duplicationDisabledReason: string | undefined;
+  if (isDashboardCreateAllowedProjectsPending) {
+    duplicationDisabledReason = 'Loading projects...';
+  } else if (dashboardCreateAllowedProjects.length === 0) {
+    duplicationDisabledReason = "Missing 'create' permission in any project for 'Dashboard' kind";
+  }
+  const navHistory = useNavHistory();
+  const dashboardsRows = useMemo(() => {
+    const historyMap = new Map(navHistory.map((h) => [`${h.project}/${h.name}`, h.date]));
+    return dashboardList.map<DashboardListRow>((dashboard, index) => {
+      const viewedAt = historyMap.get(`${dashboard.metadata.project}/${dashboard.metadata.name}`);
+      return {
+        index,
+        project: dashboard.metadata.project,
+        name: dashboard.metadata.name,
+        displayName: dashboard.displayName,
+        version: dashboard.metadata.version ?? 0,
+        createdAt: dashboard.metadata.createdAt ?? '',
+        updatedAt: dashboard.metadata.updatedAt ?? '',
+        tags: dashboard.metadata.tags ?? [],
+        viewedAt,
+      };
+    });
+  }, [dashboardList, navHistory]);
+
+  const dashboardsMap = useMemo(() => {
+    const map = new Map<string, Map<string, DashboardListRow>>();
+    dashboardsRows.forEach((dashboard) => {
+      const projectMap = map.get(dashboard.project) ?? new Map<string, DashboardListRow>();
+      projectMap.set(dashboard.name, dashboard);
+      map.set(dashboard.project, projectMap);
+    });
+    return map;
+  }, [dashboardsRows]);
+
+  const [activeDialog, setActiveDialog] = useState<openDialogAction>({ type: 'none' });
+
+  const openDialog = useCallback(
+    (dialog: openDialogActionType) => (project: string, name: string, path?: string[]) => (): void => {
+      switch (dialog) {
+        case 'editDashboard':
+        case 'duplicateDashboard':
+        case 'deleteDashboard': {
+          const dashboard = dashboardsMap.get(project)?.get(name);
+          const dashboardResource = dashboard ? dashboardList[dashboard.index] : undefined;
+          if (dashboardResource) {
+            setActiveDialog({ type: dialog, target: dashboardResource });
+          }
+          break;
+        }
+        case 'editFolder': {
+          const target = folderList.find((folder) => folder.metadata.name === (path?.[0] ?? name));
+          if (target) {
+            setActiveDialog({
+              type: 'editFolder',
+              target,
+              availableDashboards: dashboardsMap.get(project) ?? new Map(),
+              path: [...(path ?? []), name].slice(1),
+            });
+          }
+          break;
+        }
+        case 'addFolder': {
+          const target = folderList.find((folder) => folder.metadata.name === (path?.[0] ?? name));
+          if (target) {
+            setActiveDialog({
+              type: 'addFolder',
+              target,
+              availableDashboards: dashboardsMap.get(project) ?? new Map(),
+              path: [...(path ?? []), name].slice(1),
+            });
+          }
+          break;
+        }
+        case 'deleteFolder': {
+          const target = folderList.find((folder) => folder.metadata.name === (path?.[0] ?? name));
+          if (!target) break;
+          setActiveDialog({
+            type: 'deleteFolder',
+            target: target,
+            path: [...(path ?? []), name].slice(1),
+          });
+          break;
+        }
+      }
+    },
+    [dashboardList, dashboardsMap, folderList],
+  );
+
+  const handleRenameButtonClick = useMemo(() => openDialog('editDashboard'), [openDialog]);
+  const handleDuplicateButtonClick = useMemo(() => openDialog('duplicateDashboard'), [openDialog]);
+  const handleDeleteButtonClick = useMemo(() => openDialog('deleteDashboard'), [openDialog]);
+  const handleEditFolderButtonClick = useMemo(() => openDialog('editFolder'), [openDialog]);
+  const handleAddFolderButtonClick = useMemo(() => openDialog('addFolder'), [openDialog]);
+  const handleDeleteFolderButtonClick = useMemo(() => openDialog('deleteFolder'), [openDialog]);
+
+  const closeDialog = useCallback(() => setActiveDialog({ type: 'none' }), []);
+
+  // The dashboard list only contains metadata: the full dashboard is fetched when the user confirms the duplication.
+  // It also guarantees the copy is based on the latest version of the dashboard, and not on an outdated cached one.
+  const handleDashboardDuplication = useCallback(
+    (dashboardInfo: DashboardSelector | EphemeralDashboardInfo) => {
+      if (activeDialog.type !== 'duplicateDashboard') {
+        return;
+      }
+      const { project, name } = activeDialog.target.metadata;
+      getDashboard(project, name)
+        .then((dashboard) => {
+          if ('ttl' in dashboardInfo) {
+            navigate(`/projects/${dashboardInfo.project}/ephemeraldashboard/new`, {
+              state: {
+                name: dashboardInfo.dashboard,
+                spec: {
+                  ...dashboard.spec,
+                  ttl: dashboardInfo.ttl,
+                  display: { name: dashboardInfo.dashboard },
+                },
+              },
+            });
+          } else {
+            navigate(`/projects/${dashboardInfo.project}/dashboard/new`, {
+              state: {
+                name: dashboardInfo.dashboard,
+                spec: {
+                  ...dashboard.spec,
+                  display: { name: dashboardInfo.dashboard },
+                },
+              },
+            });
+          }
+        })
+        .catch((err) => exceptionSnackbar(err));
+    },
+    [navigate, activeDialog, exceptionSnackbar],
+  );
+
+  const handleDashboardDelete = useCallback(
+    (dashboard: PartialDashboardResource): Promise<void> =>
+      new Promise((resolve, reject) => {
+        deleteDashboardMutation.mutate(dashboard, {
+          onSuccess: (deletedDashboard: PartialDashboardResource) => {
+            successSnackbar(`Dashboard ${getResourceExtendedDisplayName(deletedDashboard)} was successfully deleted`);
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      }),
+    [exceptionSnackbar, successSnackbar, deleteDashboardMutation],
+  );
+
+  return (
+    <Stack width="100%">
+      <DashboardTreeList
+        folderList={folderList}
+        dashboardsMap={dashboardsMap}
+        handleRenameButtonClick={handleRenameButtonClick}
+        handleDuplicateButtonClick={handleDuplicateButtonClick}
+        handleDeleteButtonClick={handleDeleteButtonClick}
+        handleEditFolderButtonClick={handleEditFolderButtonClick}
+        handleAddFolderButtonClick={handleAddFolderButtonClick}
+        handleDeleteFolderButtonClick={handleDeleteFolderButtonClick}
+        duplicationDisabledReason={duplicationDisabledReason}
+        isLoading={isLoading}
+      />
+      {activeDialog.type === 'editDashboard' && (
+        <EditDashboardDialog
+          open={activeDialog.type === 'editDashboard'}
+          project={activeDialog.target.metadata.project}
+          name={activeDialog.target.metadata.name}
+          onClose={closeDialog}
+        />
+      )}
+      {activeDialog.type === 'duplicateDashboard' && (
+        <CreateDashboardDialog
+          open={activeDialog.type === 'duplicateDashboard'}
+          projects={dashboardCreateAllowedProjects}
+          defaultProject={activeDialog.target.metadata.project}
+          mode="duplicate"
+          name={activeDialog.target.displayName}
+          onSuccess={handleDashboardDuplication}
+          onClose={closeDialog}
+          isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
+        />
+      )}
+      {activeDialog.type === 'deleteDashboard' && (
+        <DeleteResourceDialog
+          open={activeDialog.type === 'deleteDashboard'}
+          resource={{
+            kind: 'Dashboard',
+            metadata: activeDialog.target.metadata,
+            spec:
+              // If the display name is the same as the metadata name, we don't need to pass it to the delete dialog, otherwise we need to pass it.
+              // It will preserve the display name in the delete dialog and show it to the user.
+              activeDialog.target.displayName === activeDialog.target.metadata.name
+                ? undefined
+                : { display: { name: activeDialog.target.displayName } },
+          }}
+          onSubmit={(v) => handleDashboardDelete(v).then(closeDialog)}
+          onClose={closeDialog}
+        />
+      )}
+      {activeDialog.type === 'editFolder' && (
+        <EditFolderDialog
+          open={activeDialog.type === 'editFolder'}
+          folder={activeDialog.target}
+          dashboards={activeDialog.availableDashboards}
+          path={activeDialog.path}
+          onClose={closeDialog}
+          onSuccess={closeDialog}
+        />
+      )}
+      {activeDialog.type === 'addFolder' && (
+        <AddFolderDialog
+          open={activeDialog.type === 'addFolder'}
+          folder={activeDialog.target}
+          dashboards={activeDialog.availableDashboards}
+          path={activeDialog.path}
+          onClose={closeDialog}
+          onSuccess={closeDialog}
+        />
+      )}
+      {activeDialog.type === 'deleteFolder' && (
+        <DeleteFolderDialog
+          open={activeDialog.type === 'deleteFolder'}
+          folder={activeDialog.target}
+          path={activeDialog.path}
+          onClose={closeDialog}
+        />
+      )}
+    </Stack>
+  );
+}

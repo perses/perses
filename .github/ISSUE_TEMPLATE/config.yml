@@ -1,0 +1,7 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Perses Discussions
+    url: https://github.com/perses/perses/discussions
+  - name: Perses Development Channel
+    url: https://cloud-native.slack.com/messages/C07KQR95WBE
+    about: If you are unsure about what to do, and you are eager to contribute, you can reach us on this development channel

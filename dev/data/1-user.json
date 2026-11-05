@@ -1,0 +1,24 @@
+[
+  {
+    "kind": "User",
+    "metadata": {
+      "name": "admin"
+    },
+    "spec": {
+      "nativeProvider": {
+        "password": "password"
+      }
+    }
+  },
+  {
+    "kind": "User",
+    "metadata": {
+      "name": "guest"
+    },
+    "spec": {
+      "nativeProvider": {
+        "password": "password"
+      }
+    }
+  }
+]

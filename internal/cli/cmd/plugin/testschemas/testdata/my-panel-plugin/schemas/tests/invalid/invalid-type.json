@@ -1,0 +1,13 @@
+{
+  "kind": "MyPanel",
+  "spec": {
+    "title": "Invalid Panel",
+    "query": {
+      "datasource": "prometheus",
+      "expression": "some_metric"
+    },
+    "display": {
+      "size": "invalid_size"
+    }
+  }
+}

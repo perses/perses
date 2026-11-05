@@ -1,0 +1,109 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { Box, Stack } from '@mui/material';
+import type { ProjectResource } from '@perses-dev/client';
+import type { DashboardSelector } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { CreateProjectDialog, CreateDashboardDialog } from '../../components/dialogs';
+import { useDashboardCreateAllowedProjects } from '../../context/Authorization';
+import { useIsEphemeralDashboardEnabled, useHasImportantDashboards } from '../../context/Config';
+import { useIsMobileSize } from '../../utils/browser-size';
+import { HomeViewHeroSection } from './HomeViewHeroSection';
+import { ImportantDashboards } from './ImportantDashboards';
+import { Projects } from './Projects';
+import { RecentDashboards } from './RecentDashboards';
+
+function HomeView(): ReactElement {
+  // Navigate to the project page if the project has been successfully added
+  const navigate = useNavigate();
+  const isMobileSize = useIsMobileSize();
+  const { data: userProjects } = useDashboardCreateAllowedProjects();
+  const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
+  const hasImportantDashboards = useHasImportantDashboards();
+
+  const handleAddProjectDialogSubmit = (entity: ProjectResource): void => navigate(`/projects/${entity.metadata.name}`);
+  const handleAddDashboardDialogSubmit = (dashboardSelector: DashboardSelector): void =>
+    navigate(`/projects/${dashboardSelector.project}/dashboard/new`, {
+      state: { name: dashboardSelector.dashboard, tags: dashboardSelector.tags },
+    });
+
+  // Open/Close management for dialogs
+  const [isAddProjectDialogOpen, setIsAddProjectDialogOpen] = useState(false);
+  const [isAddDashboardDialogOpen, setIsAddDashboardDialogOpen] = useState(false);
+
+  const handleAddProjectDialogOpen = (): void => {
+    setIsAddProjectDialogOpen(true);
+  };
+  const handleAddProjectDialogClose = (): void => {
+    setIsAddProjectDialogOpen(false);
+  };
+  const handleAddDashboardDialogOpen = (): void => {
+    setIsAddDashboardDialogOpen(true);
+  };
+  const handleAddDashboardDialogClose = (): void => {
+    setIsAddDashboardDialogOpen(false);
+  };
+
+  return (
+    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} gap={3}>
+      <HomeViewHeroSection
+        userProjects={userProjects}
+        onAddProjectClick={handleAddProjectDialogOpen}
+        onAddDashboardClick={handleAddDashboardDialogOpen}
+      />
+      <CreateProjectDialog
+        open={isAddProjectDialogOpen}
+        onClose={handleAddProjectDialogClose}
+        onSuccess={handleAddProjectDialogSubmit}
+      />
+      <CreateDashboardDialog
+        open={isAddDashboardDialogOpen}
+        projects={userProjects}
+        onClose={handleAddDashboardDialogClose}
+        onSuccess={handleAddDashboardDialogSubmit}
+        isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
+      />
+
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: 'minmax(0, 1fr)',
+            lg: hasImportantDashboards ? 'minmax(0, 1.35fr) minmax(0, 1fr)' : 'minmax(0, 1fr)',
+          },
+          gap: 3,
+          alignItems: 'start',
+        }}
+      >
+        <Box sx={{ minWidth: 0 }}>
+          <RecentDashboards />
+        </Box>
+        {hasImportantDashboards && (
+          <Box sx={{ minWidth: 0 }}>
+            <ImportantDashboards />
+          </Box>
+        )}
+      </Box>
+
+      <Box>
+        <Projects />
+      </Box>
+    </Stack>
+  );
+}
+
+export default HomeView;

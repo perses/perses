@@ -1,0 +1,35 @@
+[
+  {
+    "kind": "Project",
+    "metadata": {
+      "name": "perses"
+    },
+    "spec": {
+      "display": {
+        "name": "perses"
+      }
+    }
+  },
+  {
+    "kind": "Project",
+    "metadata": {
+      "name": "IncredibleProject"
+    },
+    "spec": {
+      "display": {
+        "name": "Incredible Project"
+      }
+    }
+  },
+  {
+    "kind": "Project",
+    "metadata": {
+      "name": "testing"
+    },
+    "spec": {
+      "display": {
+        "name": "Testing"
+      }
+    }
+  }
+]

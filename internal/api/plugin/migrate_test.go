@@ -1,0 +1,435 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// /!\ this file is not located under migrate/ in order to avoid an import cycle
+
+package plugin
+
+import (
+	"encoding/json"
+	"path/filepath"
+	"testing"
+
+	"github.com/perses/common/set"
+	"github.com/perses/perses/internal/api/plugin/migrate"
+	testUtils "github.com/perses/perses/internal/test"
+	"github.com/perses/perses/pkg/model/api/config"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/dashboard"
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
+)
+
+const testDataFolder = "testdata"
+
+// LoadTestPlugins is a helper function that loads the dummy plugins from testdata
+func loadTestPlugins(path string) Plugin {
+	cfg := config.Plugin{
+		Path:         path,
+		ArchivePaths: []string{"unused"},
+	}
+	pluginService := New(cfg)
+	if err := pluginService.Load(); err != nil {
+		logrus.Fatal(err)
+	}
+	return pluginService
+}
+
+func loadDefaultTestPlugins() Plugin {
+	return loadTestPlugins(filepath.Join("migrate", testDataFolder, "plugins"))
+}
+
+// TestNoRegMigration is loading specific plugin and actual production plugins to ensure it is still working
+func TestNoRegMigration(t *testing.T) {
+	testSuite := []struct {
+		title                string
+		pluginPath           string
+		grafanaDashboardFile string
+		persesDashboardFile  string
+	}{
+		{
+			// When moving from cue v0.16 to v0.17, cueValue.MarshalJSON did not work anymore, and somehow it happens when using the timeseriesChart.
+			// This test is ensuring the issue https://github.com/perses/perses/issues/4272 won't happen again.
+			title:                "Cue marshalling",
+			pluginPath:           filepath.Join("migrate", "testdata", "non-reg", "cue-marshal", "plugins"),
+			grafanaDashboardFile: filepath.Join("migrate", "testdata", "non-reg", "cue-marshal", "dashboards", "simple-grafana.json"),
+			persesDashboardFile:  filepath.Join("migrate", "testdata", "non-reg", "cue-marshal", "dashboards", "simple-perses.json"),
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			pl := loadTestPlugins(test.pluginPath)
+			input := testUtils.ReadFile(test.grafanaDashboardFile)
+			expected := testUtils.ReadFile(test.persesDashboardFile)
+			grafanaDashboard := &migrate.SimplifiedDashboard{}
+
+			if unmarshallErr := json.Unmarshal(input, grafanaDashboard); unmarshallErr != nil {
+				t.Fatal(unmarshallErr)
+			}
+			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			output := testUtils.JSONMarshalStrict(persesDashboard)
+			assert.JSONEq(t, string(expected), string(output))
+		})
+	}
+}
+
+func TestMig_Migrate(t *testing.T) {
+	testSuite := []struct {
+		title                       string
+		inputGrafanaDashboardFile   string
+		expectedPersesDashboardFile string
+	}{
+		{
+			title:                       "basic dashboard with few vars & panels",
+			inputGrafanaDashboardFile:   "basic_grafana_dashboard.json",
+			expectedPersesDashboardFile: "basic_perses_dashboard.json",
+		},
+		{
+			title:                       "dashboard without panels should be migrated without error",
+			inputGrafanaDashboardFile:   "empty_panels_list_grafana_dashboard.json",
+			expectedPersesDashboardFile: "empty_panels_list_perses_dashboard.json",
+		},
+		{
+			title:                       "dashboard embedding a library panel",
+			inputGrafanaDashboardFile:   "library_panel_grafana_dashboard.json",
+			expectedPersesDashboardFile: "library_panel_perses_dashboard.json",
+		},
+		{
+			title:                       "dashboard with panel links should migrate links correctly",
+			inputGrafanaDashboardFile:   "panel_with_links_grafana_dashboard.json",
+			expectedPersesDashboardFile: "panel_with_links_perses_dashboard.json",
+		},
+		{
+			title:                       "dashboard with repeated row should set repeatVariable on grid layout",
+			inputGrafanaDashboardFile:   "row_repeat_grafana_dashboard.json",
+			expectedPersesDashboardFile: "row_repeat_perses_dashboard.json",
+		},
+		{
+			title:                       "dashboard with panel-level repeat should set repeatVariable on grid items",
+			inputGrafanaDashboardFile:   "panel_repeat_grafana_dashboard.json",
+			expectedPersesDashboardFile: "panel_repeat_perses_dashboard.json",
+		},
+		{
+			title:                       "dashboard with panel repeat and no direction defaults to horizontal alignment",
+			inputGrafanaDashboardFile:   "panel_repeat_only_grafana_dashboard.json",
+			expectedPersesDashboardFile: "panel_repeat_only_perses_dashboard.json",
+		},
+	}
+
+	pl := loadDefaultTestPlugins()
+
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			input := testUtils.ReadFile(filepath.Join("migrate", testDataFolder, "dashboards", test.inputGrafanaDashboardFile))
+			expected := testUtils.ReadFile(filepath.Join("migrate", testDataFolder, "dashboards", test.expectedPersesDashboardFile))
+			grafanaDashboard := &migrate.SimplifiedDashboard{}
+			if unmarshallErr := json.Unmarshal(input, grafanaDashboard); unmarshallErr != nil {
+				t.Fatal(unmarshallErr)
+			}
+			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			output := testUtils.JSONMarshalStrict(persesDashboard)
+			assert.JSONEq(t, string(expected), string(output))
+		})
+	}
+}
+
+func TestMig_MigrateTags(t *testing.T) {
+	pl := loadDefaultTestPlugins()
+	grafanaDashboard := &migrate.SimplifiedDashboard{
+		UID:   "dashboard-with-tags",
+		Title: "Dashboard with tags",
+		Tags:  []string{"ops", "prod", "ops"},
+	}
+
+	persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
+	assert.NoError(t, err)
+	assert.Equal(t, set.New("ops", "prod"), persesDashboard.Metadata.Tags)
+}
+
+func TestMig_MigrateTimeSettings(t *testing.T) {
+	testSuite := []struct {
+		title                   string
+		grafanaDashboard        string
+		expectedDuration        common.DurationString
+		expectedRefreshInterval common.DurationString
+		expectedTimezone        string
+	}{
+		{
+			title:            "dashboard without time settings",
+			grafanaDashboard: `{"uid": "time-settings", "title": "Time settings"}`,
+			expectedDuration: "6h",
+		},
+		{
+			title:                   "time range, refresh interval and timezone are kept",
+			grafanaDashboard:        `{"uid": "time-settings", "title": "Time settings", "time": {"from": "now-24h", "to": "now"}, "refresh": "1m", "timezone": "utc"}`,
+			expectedDuration:        "24h",
+			expectedRefreshInterval: "1m",
+			expectedTimezone:        "UTC",
+		},
+		{
+			title:            "years are converted into days and auto-refresh off is kept off",
+			grafanaDashboard: `{"uid": "time-settings", "title": "Time settings", "time": {"from": "now-1y", "to": "now"}, "refresh": false, "timezone": "Europe/Paris"}`,
+			expectedDuration: "365d",
+			expectedTimezone: "Europe/Paris",
+		},
+		{
+			title:                   "implicit count in the time range and refresh interval in milliseconds",
+			grafanaDashboard:        `{"uid": "time-settings", "title": "Time settings", "time": {"from": "now-d", "to": "now"}, "refresh": "500ms"}`,
+			expectedDuration:        "1d",
+			expectedRefreshInterval: "500ms",
+		},
+		{
+			title:            "time settings that can't be migrated are replaced by the defaults",
+			grafanaDashboard: `{"uid": "time-settings", "title": "Time settings", "time": {"from": "now-1d/d", "to": "now-1d/d"}, "refresh": "auto", "timezone": "browser"}`,
+			expectedDuration: "1h",
+		},
+	}
+
+	pl := loadDefaultTestPlugins()
+
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			grafanaDashboard := &migrate.SimplifiedDashboard{}
+			if unmarshallErr := json.Unmarshal([]byte(test.grafanaDashboard), grafanaDashboard); unmarshallErr != nil {
+				t.Fatal(unmarshallErr)
+			}
+			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			assert.Equal(t, test.expectedDuration, persesDashboard.Spec.Duration)
+			assert.Equal(t, test.expectedRefreshInterval, persesDashboard.Spec.RefreshInterval)
+			assert.Equal(t, test.expectedTimezone, persesDashboard.Spec.Timezone)
+			// Decoding the migrated dashboard runs the validation of a Perses dashboard.
+			assert.NoError(t, json.Unmarshal(testUtils.JSONMarshalStrict(persesDashboard), &v1.Dashboard{}))
+		})
+	}
+}
+
+func TestMig_MigrateVariableAllValue(t *testing.T) {
+	// The test plugins only migrate "custom" variables (SomeVariable), so a "query" variable gets the placeholder plugin.
+	testSuite := []struct {
+		title                  string
+		grafanaVariable        string
+		expectedPluginKind     string
+		expectedAllowAllValue  bool
+		expectedCustomAllValue string
+	}{
+		{
+			title:              "variable that no plugin can migrate, allValue without includeAll is dropped",
+			grafanaVariable:    `{"name": "host", "type": "query", "datasource": {"type": "elasticsearch", "uid": "es"}, "includeAll": false, "allValue": ".*"}`,
+			expectedPluginKind: "StaticListVariable",
+		},
+		{
+			title:                  "variable that no plugin can migrate, allValue with includeAll is kept",
+			grafanaVariable:        `{"name": "host", "type": "query", "datasource": {"type": "elasticsearch", "uid": "es"}, "includeAll": true, "allValue": ".*"}`,
+			expectedPluginKind:     "StaticListVariable",
+			expectedAllowAllValue:  true,
+			expectedCustomAllValue: ".*",
+		},
+		{
+			title:              "variable migrated by a plugin, allValue without includeAll is dropped",
+			grafanaVariable:    `{"name": "env", "type": "custom", "query": "dev,prod", "includeAll": false, "allValue": ".*"}`,
+			expectedPluginKind: "SomeVariable",
+		},
+		{
+			title:                  "variable migrated by a plugin, allValue with includeAll is kept",
+			grafanaVariable:        `{"name": "env", "type": "custom", "query": "dev,prod", "includeAll": true, "allValue": ".*"}`,
+			expectedPluginKind:     "SomeVariable",
+			expectedAllowAllValue:  true,
+			expectedCustomAllValue: ".*",
+		},
+	}
+
+	pl := loadDefaultTestPlugins()
+
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			input := `{"uid": "variable-all-value", "title": "Variable all value", "templating": {"list": [` + test.grafanaVariable + `]}}`
+			grafanaDashboard := &migrate.SimplifiedDashboard{}
+			if unmarshallErr := json.Unmarshal([]byte(input), grafanaDashboard); unmarshallErr != nil {
+				t.Fatal(unmarshallErr)
+			}
+			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			spec, ok := persesDashboard.Spec.Variables[0].Spec.(*dashboard.ListVariableSpec)
+			if !ok {
+				t.Fatalf("expected a list variable, got %T", persesDashboard.Spec.Variables[0].Spec)
+			}
+			assert.Equal(t, test.expectedPluginKind, spec.Plugin.Kind)
+			assert.Equal(t, test.expectedAllowAllValue, spec.AllowAllValue)
+			assert.Equal(t, test.expectedCustomAllValue, spec.CustomAllValue)
+			// Decoding the migrated dashboard runs the validation of a Perses dashboard.
+			assert.NoError(t, json.Unmarshal(testUtils.JSONMarshalStrict(persesDashboard), &v1.Dashboard{}))
+		})
+	}
+}
+
+func TestMigrateDashboardLinks(t *testing.T) {
+	pl := loadDefaultTestPlugins()
+
+	testCases := []struct {
+		name          string
+		grafanaLink   migrate.GrafanaLink
+		expectedLinks []dashboard.Link
+	}{
+		{
+			name: "Link with URL only",
+			grafanaLink: migrate.GrafanaLink{
+				URL:     "http://fakedomain/${samplevar}/$samplevar",
+				Tooltip: "",
+			},
+			expectedLinks: []dashboard.Link{
+				{
+					URL:             "http://fakedomain/${samplevar}/$samplevar",
+					TargetBlank:     false,
+					RenderVariables: false,
+					Tooltip:         "",
+					Name:            "",
+				},
+			},
+		},
+		{
+			name: "Full link with variables and target blank",
+			grafanaLink: migrate.GrafanaLink{
+				IncludeVars: true,
+				TargetBlank: true,
+				Title:       "sample link",
+				Tooltip:     "sample link",
+				URL:         "http://fakedomain/${samplevar}/$samplevar",
+			},
+			expectedLinks: []dashboard.Link{
+				{
+					Name:            "sample link",
+					Tooltip:         "sample link",
+					URL:             "http://fakedomain/${samplevar}/$samplevar",
+					TargetBlank:     true,
+					RenderVariables: true,
+				},
+			},
+		},
+		{
+			name: "Link with defaults",
+			grafanaLink: migrate.GrafanaLink{
+				Title: "sample link",
+				URL:   "http://fakedomain/${samplevar}/$samplevar",
+			},
+			expectedLinks: []dashboard.Link{
+				{
+					Name:            "sample link",
+					URL:             "http://fakedomain/${samplevar}/$samplevar",
+					TargetBlank:     false,
+					RenderVariables: false,
+					Tooltip:         "",
+				},
+			},
+		},
+		{
+			name:          "Empty or invalid link should be dropped",
+			grafanaLink:   migrate.GrafanaLink{Title: "sample link"},
+			expectedLinks: []dashboard.Link{},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			grafanaDashboard := &migrate.SimplifiedDashboard{
+				UID:   "dashboard-with-links",
+				Title: "Dashboard with links",
+				Links: []migrate.GrafanaLink{tc.grafanaLink},
+			}
+
+			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
+			assert.NoError(t, err)
+			assert.NotNil(t, persesDashboard)
+			assert.Equal(t, tc.expectedLinks, persesDashboard.Spec.Links)
+		})
+	}
+}
+
+func TestLinkConversionLogic(t *testing.T) {
+	testSuite := []struct {
+		name                    string
+		grafanaLinks            []migrate.GrafanaLink
+		expectedURLs            []string
+		expectedRenderVariables []bool
+		expectedTargetBlanks    []bool
+		expectedNames           []string
+	}{
+		{
+			name: "mixed links with variables and static URLs",
+			grafanaLinks: []migrate.GrafanaLink{
+				{
+					Title:       "Dynamic Prometheus",
+					URL:         "https://prometheus.${region}.com/graph?service=${service}",
+					TargetBlank: true,
+				},
+				{
+					Title:       "Static Dashboard",
+					URL:         "https://grafana.example.com/d/abc123",
+					TargetBlank: false,
+				},
+			},
+			expectedURLs:            []string{"https://prometheus.${region}.com/graph?service=${service}", "https://grafana.example.com/d/abc123"},
+			expectedRenderVariables: []bool{true, false},
+			expectedTargetBlanks:    []bool{true, false},
+			expectedNames:           []string{"Dynamic Prometheus", "Static Dashboard"},
+		},
+		{
+			name:                    "empty links",
+			grafanaLinks:            []migrate.GrafanaLink{},
+			expectedURLs:            []string{},
+			expectedRenderVariables: []bool{},
+			expectedTargetBlanks:    []bool{},
+			expectedNames:           []string{},
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.name, func(t *testing.T) {
+			grafanaPanelJSON := map[string]any{
+				"type":  "test",
+				"title": "Test Panel",
+				"links": test.grafanaLinks,
+			}
+
+			jsonData, err := json.Marshal(grafanaPanelJSON)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			var panel migrate.Panel
+			err = json.Unmarshal(jsonData, &panel)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			assert.Equal(t, len(test.expectedURLs), len(panel.Links))
+
+			for i, expectedURL := range test.expectedURLs {
+				assert.Equal(t, expectedURL, panel.Links[i].URL)
+				assert.Equal(t, test.expectedTargetBlanks[i], panel.Links[i].TargetBlank)
+				assert.Equal(t, test.expectedNames[i], panel.Links[i].Title)
+			}
+		})
+	}
+}

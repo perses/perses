@@ -1,0 +1,17 @@
+version: "2"
+linters:
+  settings:
+    goconst:
+      ignore-tests: true
+    revive:
+      rules:
+        - name: exported
+          disabled: true
+
+  enable:
+    - goconst
+    - unconvert
+    - gosec
+    - revive
+    - unparam
+    - gocyclo

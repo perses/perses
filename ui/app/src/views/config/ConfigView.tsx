@@ -1,0 +1,120 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { Stack, Box } from '@mui/material';
+import { JSONEditor } from '@perses-dev/components';
+import Cog from 'mdi-material-ui/Cog';
+import Puzzle from 'mdi-material-ui/Puzzle';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
+
+import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
+import PageHeader from '../../components/page-header/PageHeader';
+import { MenuTab, MenuTabs } from '../../components/tabs';
+import { useConfigContext } from '../../context/Config';
+import { useIsMobileSize } from '../../utils/browser-size';
+import { PluginsList } from './PluginsList';
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps): ReactElement | null {
+  const { children, value, index, ...other } = props;
+  return (
+    <div role="tabpanel" hidden={value !== index} id={`tabpanel-${index}`} aria-labelledby={`tab-${index}`} {...other}>
+      {value === index && children}
+    </div>
+  );
+}
+
+function ConfigView(): ReactElement {
+  const { config } = useConfigContext();
+  const isMobileSize = useIsMobileSize();
+  const [tabIndex, setTabIndex] = useState(0);
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number): void => {
+    setTabIndex(newValue);
+  };
+
+  return (
+    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={1.5}>
+      <PageHeader breadcrumb={<AppBreadcrumbs rootPageName="Configuration" icon={<Cog />} />} title="Configuration" />
+      <Stack gap={0}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          sx={{
+            bgcolor: 'background.paper',
+            borderRadius: '8px 8px 0 0',
+            border: '1px solid',
+            borderColor: 'divider',
+            borderBottom: 'none',
+            px: 1,
+          }}
+        >
+          <MenuTabs value={tabIndex} onChange={handleTabChange} aria-label="configuration tabs">
+            <MenuTab
+              iconPosition="start"
+              icon={<Cog />}
+              label="Server Configuration"
+              id="tab-0"
+              aria-controls="tabpanel-0"
+            />
+            <MenuTab
+              iconPosition="start"
+              icon={<Puzzle />}
+              label="Installed Plugins"
+              id="tab-1"
+              aria-controls="tabpanel-1"
+            />
+          </MenuTabs>
+        </Stack>
+        <TabPanel value={tabIndex} index={0}>
+          <Box
+            sx={{
+              overflow: 'hidden',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderTop: 'none',
+              borderRadius: '0 0 8px 8px',
+              bgcolor: 'background.default',
+              boxShadow: (theme) => theme.shadows[1],
+            }}
+          >
+            <JSONEditor value={config} readOnly />
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabIndex} index={1}>
+          <Box
+            sx={{
+              overflow: 'hidden',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderTop: 'none',
+              borderRadius: '0 0 8px 8px',
+              bgcolor: 'background.paper',
+              boxShadow: (theme) => theme.shadows[1],
+            }}
+          >
+            <PluginsList />
+          </Box>
+        </TabPanel>
+      </Stack>
+    </Stack>
+  );
+}
+
+export default ConfigView;

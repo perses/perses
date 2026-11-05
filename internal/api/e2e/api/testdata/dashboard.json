@@ -1,0 +1,120 @@
+{
+  "kind" : "Dashboard",
+  "metadata" : {
+    "createdAt" : "2025-02-11T14:26:42.808358355Z",
+    "name" : "myDashboard",
+    "project" : "perses",
+    "updatedAt" : "2025-02-12T19:44:44.663962406Z",
+    "version" : 3
+  },
+  "spec" : {
+    "datasources" : {
+      "Victoria Metrics" : {
+        "default" : true,
+        "display" : {
+          "name" : "VM"
+        },
+        "plugin" : {
+          "kind" : "PrometheusDatasource",
+          "spec" : {
+            "proxy" : {
+              "kind" : "HTTPProxy",
+              "spec" : {
+                "allowedEndpoints" : [
+                  {
+                    "endpointPattern" : "/api/v1/labels",
+                    "method" : "POST"
+                  },
+                  {
+                    "endpointPattern" : "/api/v1/series",
+                    "method" : "POST"
+                  },
+                  {
+                    "endpointPattern" : "/api/v1/metadata",
+                    "method" : "GET"
+                  },
+                  {
+                    "endpointPattern" : "/api/v1/query",
+                    "method" : "POST"
+                  },
+                  {
+                    "endpointPattern" : "/api/v1/query_range",
+                    "method" : "POST"
+                  },
+                  {
+                    "endpointPattern" : "/api/v1/label/([a-zA-Z0-9_-]+)/values",
+                    "method" : "GET"
+                  },
+                  {
+                    "endpointPattern" : "/api/v1/parse_query",
+                    "method" : "POST"
+                  },
+                  {
+                    "endpointPattern" : "/api/v1/status/config",
+                    "method" : "GET"
+                  }
+                ],
+                "url" : "http://localhost:9090"
+              }
+            }
+          }
+        }
+      }
+    },
+    "display" : {
+      "name" : "eta"
+    },
+    "duration" : "1h",
+    "layouts" : [
+      {
+        "kind" : "Grid",
+        "spec" : {
+          "display" : {
+            "collapse" : {
+              "open" : true
+            },
+            "title" : "Panel Group"
+          },
+          "items" : [
+            {
+              "content" : {
+                "$ref" : "#/spec/panels/eta"
+              },
+              "height" : 6,
+              "width" : 12,
+              "x" : 0,
+              "y" : 0
+            }
+          ]
+        }
+      }
+    ],
+    "panels" : {
+      "eta" : {
+        "kind" : "Panel",
+        "spec" : {
+          "display" : {
+            "name" : "eta"
+          },
+          "plugin" : {
+            "kind" : "TimeSeriesChart",
+            "spec" : {}
+          },
+          "queries" : [
+            {
+              "kind" : "TimeSeriesQuery",
+              "spec" : {
+                "plugin" : {
+                  "kind" : "PrometheusTimeSeriesQuery",
+                  "spec" : {
+                    "query" : "metric_eta{CML=\"1830\"}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "FooChart",
+  "name": "FooChart",
+  "metaData": {
+    "name": "FooChart",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "0.10.0",
+      "buildName": "@perses-dev/foo-chart-plugin"
+    }
+  }
+}

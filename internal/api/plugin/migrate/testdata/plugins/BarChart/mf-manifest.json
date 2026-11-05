@@ -1,0 +1,12 @@
+{
+  "id": "BarChart",
+  "name": "BarChart",
+  "metaData": {
+    "name": "BarChart",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "0.10.0",
+      "buildName": "@perses-dev/bar-chart-plugin"
+    }
+  }
+}

@@ -1,0 +1,242 @@
+# Copyright 2024 The Perses Authors
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+GO                    ?= go
+CUE                   ?= cue
+GOCI                  ?= golangci-lint
+GOFMT                 ?= $(GO)fmt
+MDOX                  ?= mdox
+# docs/ is imported by perses/website, which supports syntaxes that are not GitHub Flavored Markdown, like the
+# admonitions of MkDocs (`!!! note`). mdox formats GitHub Flavored Markdown and can break them.
+MDOX_MD_FILES_CMD     = find . -name '*.md' -not -path "./docs/*" -not -path "./internal/cli/cmd/plugin/build/testdata/*" -not -path "./plugins/*" -not -path "./plugins-archive/*" -not -path "./.github/perses-ci/*" -not -path "./ui/node_modules/*" -not -path "./ui/app/node_modules/*" -not -path "./ui/storybook/node_modules/*" -print
+GOOS                  ?= $(shell $(GO) env GOOS)
+GOARCH                ?= $(shell $(GO) env GOARCH)
+GOHOSTOS              ?= $(shell $(GO) env GOHOSTOS)
+GOHOSTARCH            ?= $(shell $(GO) env GOHOSTARCH)
+COMMIT                := $(shell git rev-parse HEAD)
+DATE                  := $(shell date +%Y-%m-%d)
+BRANCH                := $(shell git rev-parse --abbrev-ref HEAD)
+VERSION               ?= $(shell cat VERSION)
+COVER_PROFILE         := coverage.txt
+PKG_LDFLAGS           := github.com/prometheus/common/version
+LDFLAGS               := -s -w -X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}
+GORELEASER_PARALLEL   ?= 0
+IMAGE_REGISTRY_DEV    ?= localhost:5000
+IMAGE_REPO_DEV        ?= persesdev
+IMAGE_VERSION_DEV     ?= $(shell git describe --tags)
+
+export LDFLAGS
+export DATE
+
+all: clean build
+
+.PHONY: bump-version
+bump-version:
+	./scripts/ui_release.sh --bump-version "${VERSION}"
+	cd ui/ && npm install
+	git add "./ui/package-lock.json" "./**/package.json"
+
+.PHONY: tag
+tag:
+	./scripts/release.sh --tag "${VERSION}"
+
+.PHONY: checkformat
+checkformat:
+	@echo ">> Check Go code format"
+	! $(GOFMT) -d $$(find . -name '*.go' -not -path "./ui/*" -print) | grep '^'
+	@echo ">> Check CUE files format"
+	./scripts/cue.sh --checkformat
+
+.PHONY: checkdocs
+checkdocs:
+	@echo ">> Check mdox-managed markdown documents"
+	$(MDOX) fmt --check --soft-wraps -l $$($(MDOX_MD_FILES_CMD)) --links.validate.config-file=./.mdox.validate.yaml
+	@echo ">> Check the navigation of the documentation (docs/nav.yaml)"
+	$(GO) run ./scripts/check-docs-nav
+
+.PHONY: checkunused
+checkunused:
+	@echo ">> Check for unused/missing packages in go.mod"
+	$(GO) mod tidy
+	@git diff --exit-code -- go.sum go.mod
+
+.PHONY: checkstyle
+checkstyle:
+	@echo ">> Check Go code style"
+	$(GOCI) run --timeout 5m
+
+.PHONY: checklint
+checklint:
+	@echo ">> Check TS code style"
+	cd ui && npm run lint
+
+.PHONY: checklicense
+checklicense:
+	@echo ">> Check license"
+	go run ./scripts/check-license --check
+
+.PHONY: fixlicense
+fixlicense:
+	@echo ">> Add license header where it's missing"
+	go run ./scripts/check-license --fix
+
+.PHONY: fmt
+fmt:
+	@echo ">> Format Go code"
+	$(GOFMT) -w -l $$(find . -name '*.go' -not -path "./ui/*" -print)
+	@echo ">> Format CUE files"
+	./scripts/cue.sh --fmt
+
+.PHONY: fmt-docs
+fmt-docs:
+	@echo ">> Format mdox-managed markdown documents"
+	$(MDOX) fmt --soft-wraps -l $$($(MDOX_MD_FILES_CMD)) --links.validate.config-file=./.mdox.validate.yaml
+
+.PHONY: cue-eval
+cue-eval:
+	@echo ">> Validate CUE schemas"
+	cd cue && $(CUE) eval ./...
+
+.PHONY: cue-gen
+cue-gen:
+	@echo ">> Generate CUE definitions from golang datamodel"
+	@for pkg in $$($(GO) list github.com/perses/perses/pkg/model/api/v1/...); do \
+		$(CUE) get go $$pkg; \
+	done
+	cp -r cue.mod/gen/github.com/perses/perses/pkg/model/* cue/model/ && rm -r cue.mod/gen
+	find cue/model -name "*.cue" -exec sed -i 's/\"github.com\/perses\/perses\/pkg/\"github.com\/perses\/perses\/cue/g' {} \;
+	find cue/model -name "*.cue" -exec sed -i 's/\"github.com\/perses\/spec\/go/\"github.com\/perses\/spec\/cue/g' {} \;
+
+.PHONY: validate-data
+validate-data:
+	@echo ">> Validate all data in dev/data"
+	$(GO) run ./scripts/validate-data/validate-data.go
+
+.PHONY: go-sdk-test
+go-sdk-test:
+	@echo ">> Run Perses Go SDK tests"
+	cd ./go-sdk/test && $(GO) test -v -count=1 ./...
+
+.PHONY: test
+test: generate
+	@echo ">> Run all tests"
+	$(GO) test -count=1 -v ./...
+
+.PHONY: integration-test
+integration-test: generate go-sdk-test
+	@echo ">> Run integration tests"
+	$(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
+
+.PHONY: mysql-integration-test
+mysql-integration-test: generate go-sdk-test
+	@echo ">> Run MySQL integration tests"
+	PERSES_TEST_USE_SQL=true $(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
+
+.PHONY: coverage-html
+coverage-html: integration-test
+	@echo ">> Print test coverage"
+	$(GO) tool cover -html=$(COVER_PROFILE)
+
+.PHONY: assets-compress
+assets-compress:
+	@echo ">> Compress assets"
+	scripts/compress_assets.sh
+
+## Cross build binaries for all platforms (Use "make build" in development)
+.PHONY: cross-build
+cross-build: generate-goreleaser ## Cross build binaries for all platforms (Use "make build" in development)
+	goreleaser release --snapshot --clean --parallelism ${GORELEASER_PARALLEL}
+
+.PHONY: cross-release
+cross-release: generate-goreleaser
+	goreleaser release --clean --parallelism ${GORELEASER_PARALLEL} --release-notes EXTRACTED_CHANGELOG.md
+
+.PHONY: build
+build: build-ui build-api build-cli
+
+.PHONY: build-api
+build-api: generate
+	@echo ">> Build the Perses API"
+	CGO_ENABLED=0 GOARCH=${GOARCH} GOOS=${GOOS} $(GO) build -ldflags "${LDFLAGS}" -o ./bin/perses ./cmd/perses
+
+.PHONY: build-ui
+build-ui:
+	@echo ">> Build the Perses UI"
+	cd ./ui && npm install $(NPM_INSTALL_FLAGS) && npm run build
+
+.PHONY: build-cli
+build-cli:
+	@echo ">> Build the Perses CLI"
+	CGO_ENABLED=0 GOARCH=${GOARCH} GOOS=${GOOS} $(GO) build -ldflags "${LDFLAGS}" -o ./bin/percli ./cmd/percli
+
+.PHONY: generate
+generate: assets-compress install-default-plugins
+	GOARCH=${GOHOSTARCH} GOOS=${GOHOSTOS} $(GO) generate ./internal/api
+
+.PHONY: extract-changelog
+extract-changelog:
+	$(GO) run ./scripts/extract-changelog/extract-changelog.go --version="${VERSION}"
+
+.PHONY: generate-changelog
+generate-changelog:
+	$(GO) run ./scripts/generate-changelog/generate-changelog.go --version="${VERSION}"
+
+.PHONY: generate-goreleaser
+generate-goreleaser:
+	$(GO) run ./scripts/generate-goreleaser/generate-goreleaser.go
+
+.PHONY: push-main-docker-image
+push-main-docker-image:
+	$(GO) run ./scripts/push-main-docker-image/push-main-docker-image.go
+
+.PHONY: clean
+clean:
+	rm -rf ./bin
+	rm -rf EXTRACTED_CHANGELOG.md
+	./scripts/ui_release.sh --clean
+	cd ./ui && npm run clean
+
+.PHONY: update-go-deps
+update-go-deps:
+	@echo ">> Update Go dependencies"
+	@for m in $$($(GO) list -mod=readonly -m -f '{{ if and (not .Indirect) (not .Main)}}{{.Path}}{{end}}' all); do \
+		$(GO) get -d $$m; \
+	done
+
+.PHONY: update-npm-deps
+update-npm-deps:
+	@echo ">> Update npm dependencies"
+	./scripts/npm-deps.sh "minor"
+
+.PHONY: upgrade-npm-deps
+upgrade-npm-deps:
+	@echo ">> Upgrade npm dependencies"
+	./scripts/npm-deps.sh "latest"
+
+.PHONY: update-helm-readme
+update-helm-readme:
+	@docker run --rm --volume "$$(pwd)/charts/perses:/helm-docs" -u $$(id -u) jnorwood/helm-docs:latest
+	@make fmt-docs
+
+.PHONY: install-default-plugins
+install-default-plugins:
+	@echo ">> Install default plugins"
+	$(GO) run ./scripts/plugin/install_plugin.go
+
+.PHONY: container-dev
+container-dev: generate
+	docker build -f Dockerfile.dev . -t ${IMAGE_REGISTRY_DEV}/${IMAGE_REPO_DEV}:${IMAGE_VERSION_DEV}
+
+.PHONY: push-container-dev
+push-container-dev:
+	docker push ${IMAGE_REGISTRY_DEV}/${IMAGE_REPO_DEV}:${IMAGE_VERSION_DEV}

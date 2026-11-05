@@ -1,0 +1,475 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package generate
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"io"
+	"log"
+	"os"
+	"os/exec"
+	"path"
+	"path/filepath"
+	"slices"
+	"strings"
+	"text/template"
+
+	"github.com/perses/perses/internal/api/plugin"
+	persesCMD "github.com/perses/perses/internal/cli/cmd"
+	"github.com/perses/perses/internal/cli/file"
+	"github.com/perses/perses/internal/cli/output"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/module"
+	pluginSpec "github.com/perses/spec/go/plugin"
+	"github.com/spf13/cobra"
+)
+
+type generateOptions struct {
+	persesCMD.Option
+	pluginModuleName  string
+	pluginModuleOrg   string
+	pluginType        pluginSpec.Kind
+	rawPluginType     string
+	pluginName        string
+	pluginPascalName  string
+	pluginDisplayName string
+	outputDir         string
+	// goModuleMissing is true when the output directory has no go.mod yet, so one has to be created.
+	goModuleMissing bool
+	ctx             context.Context
+	writer          io.Writer
+	errWriter       io.Writer
+}
+
+type ExposedModule struct {
+	ID   string
+	Path string
+}
+
+type GeneratedPlugin struct {
+	module.Plugin
+	PluginPascalName string
+}
+
+func toGeneratedPlugin(p module.Plugin) GeneratedPlugin {
+	return GeneratedPlugin{
+		Plugin:           p,
+		PluginPascalName: GetPascalCase(p.Spec.Name),
+	}
+}
+
+func (o *generateOptions) Complete(args []string) error {
+	if len(args) > 0 {
+		o.outputDir = args[0]
+	} else {
+		o.outputDir = "."
+	}
+
+	if len(o.rawPluginType) > 0 {
+		o.pluginType = pluginSpec.Kind(o.rawPluginType)
+	}
+
+	return nil
+}
+
+var availablePluginTypes = []pluginSpec.Kind{
+	pluginSpec.KindDatasource,
+	pluginSpec.KindTimeSeriesQuery,
+	pluginSpec.KindVariable,
+	pluginSpec.KindAnnotation,
+	pluginSpec.KindPanel,
+	pluginSpec.KindExplore,
+}
+
+func (o *generateOptions) Validate() error {
+	destDir, err := filepath.Abs(o.outputDir)
+	if err != nil {
+		return fmt.Errorf("could not resolve destination directory path %q: %w", o.pluginModuleName, err)
+	}
+
+	if _, err := os.Stat(destDir); os.IsNotExist(err) {
+		return fmt.Errorf("destination directory %q does not exists", destDir)
+	}
+
+	o.outputDir = destDir
+
+	if err := o.checkGoModuleRequirements(); err != nil {
+		return err
+	}
+
+	if o.pluginName == "" || o.pluginType == "" {
+		return fmt.Errorf("plugin.name and plugin.type are required")
+	}
+
+	if !slices.Contains(availablePluginTypes, o.pluginType) {
+		return fmt.Errorf("plugin.type %q is not valid, possible values are: %s", o.pluginType, availablePluginTypes)
+	}
+
+	o.pluginName = GetKebabCase(o.pluginName)
+	o.pluginPascalName = GetPascalCase(o.pluginName)
+
+	if o.pluginDisplayName == "" {
+		o.pluginDisplayName = o.pluginPascalName
+	}
+
+	return nil
+}
+
+func replacePaths(outputRelativePath string, o *generateOptions) string {
+	outputRelativePath = strings.ReplaceAll(outputRelativePath, "plugin_name__", o.pluginName)
+	outputRelativePath = strings.ReplaceAll(outputRelativePath, "plugin_pascal_name__", o.pluginPascalName)
+
+	return outputRelativePath
+}
+
+func getPluginPath(pluginName string, pluginType pluginSpec.Kind) (string, error) {
+	pluginSlug := GetKebabCase(pluginName)
+	switch pluginType {
+	case pluginSpec.KindDatasource:
+		return path.Join("src", "datasources", pluginSlug), nil
+	case pluginSpec.KindTimeSeriesQuery:
+		return path.Join("src", "queries", pluginSlug), nil
+	case pluginSpec.KindVariable:
+		return path.Join("src", "variables", pluginSlug), nil
+	case pluginSpec.KindAnnotation:
+		return path.Join("src", "annotations", pluginSlug), nil
+	case pluginSpec.KindPanel:
+		return path.Join("src", "panels", pluginSlug), nil
+	case pluginSpec.KindExplore:
+		return path.Join("src", "explore", pluginSlug), nil
+	}
+
+	return "", fmt.Errorf("unknown plugin type %q", pluginType)
+}
+
+func getTemplatePath(pluginType pluginSpec.Kind) (string, error) {
+	switch pluginType {
+	case pluginSpec.KindDatasource:
+		return path.Join("templates", "datasource"), nil
+	case pluginSpec.KindTimeSeriesQuery:
+		return path.Join("templates", "query", "timeseriesquery"), nil
+	case pluginSpec.KindVariable:
+		return path.Join("templates", "variable"), nil
+	case pluginSpec.KindAnnotation:
+		return path.Join("templates", "annotations"), nil
+	case pluginSpec.KindPanel:
+		return path.Join("templates", "panel"), nil
+	case pluginSpec.KindExplore:
+		return path.Join("templates", "explore"), nil
+	}
+
+	return "", fmt.Errorf("unknown plugin type %q", pluginType)
+}
+
+func (o *generateOptions) Execute() error {
+	var err error
+
+	moduleDir := path.Join("templates", "module")
+	blocksDir := path.Join("templates", "blocks")
+
+	isModuleGeneration := false
+
+	var persesPlugins []GeneratedPlugin
+	var persesPanelPlugins []GeneratedPlugin
+	var persesDatasourcePlugins []GeneratedPlugin
+	var persesQueryPlugins []GeneratedPlugin
+	var persesVariablePlugins []GeneratedPlugin
+	var persesAnnotationsPlugins []GeneratedPlugin
+	var persesExplorePlugins []GeneratedPlugin
+	var exposedModules []ExposedModule
+
+	currentModule, err := plugin.ReadPackage(o.outputDir)
+	var currentPlugins []module.Plugin
+
+	if err != nil || currentModule == nil {
+		if err != nil && errors.Is(err, os.ErrNotExist) {
+			if o.pluginModuleName == "" || o.pluginModuleOrg == "" {
+				return fmt.Errorf("module.name and module.org are required when creating a new module as none was found under %q", o.outputDir)
+			}
+		} else {
+			return fmt.Errorf("could not read module from %q: %w", o.outputDir, err)
+		}
+
+		log.Printf("No perses plugin module found under %q, creating a new one", o.outputDir)
+		isModuleGeneration = true
+	} else {
+		o.pluginModuleName = currentModule.Perses.Metadata.Name
+		o.pluginModuleOrg = currentModule.Perses.Metadata.Registry
+		currentPlugins = currentModule.Perses.Plugins
+	}
+
+	// merge existing plugins and exposed modules with the one being generated
+	for _, p := range currentPlugins {
+		if GetKebabCase(p.Spec.Name) != GetKebabCase(o.pluginName) {
+			persesPlugins = append(persesPlugins, toGeneratedPlugin(p))
+
+			pluginPath, errPath := getPluginPath(p.Spec.Name, p.Kind)
+			if errPath != nil {
+				return fmt.Errorf("could not get existing plugin path %q: %w", o.pluginName, errPath)
+			}
+
+			exposedModules = append(exposedModules, ExposedModule{
+				ID:   GetPascalCase(p.Spec.Name),
+				Path: pluginPath,
+			})
+		}
+	}
+
+	goModulePath, err := o.goModulePath()
+	if err != nil {
+		return err
+	}
+
+	persesPlugins = append(persesPlugins, toGeneratedPlugin(module.Plugin{
+		Kind: o.pluginType,
+		Spec: module.PluginSpec{
+			Display: &common.Display{
+				Name: o.pluginDisplayName,
+			},
+			Name: o.pluginName,
+		},
+	}))
+
+	pluginPath, err := getPluginPath(o.pluginName, o.pluginType)
+	if err != nil {
+		return fmt.Errorf("could not get plugin path %q: %w", o.pluginName, err)
+	}
+
+	exposedModules = append(exposedModules, ExposedModule{
+		ID:   GetPascalCase(o.pluginName),
+		Path: pluginPath,
+	})
+
+	for _, p := range persesPlugins {
+		if p.Kind.IsQuery() {
+			persesQueryPlugins = append(persesQueryPlugins, p)
+		} else {
+			switch p.Kind {
+			case pluginSpec.KindDatasource:
+				persesDatasourcePlugins = append(persesDatasourcePlugins, p)
+			case pluginSpec.KindVariable:
+				persesVariablePlugins = append(persesVariablePlugins, p)
+			case pluginSpec.KindAnnotation:
+				persesAnnotationsPlugins = append(persesAnnotationsPlugins, p)
+			case pluginSpec.KindExplore:
+				persesExplorePlugins = append(persesExplorePlugins, p)
+			case pluginSpec.KindPanel:
+				persesPanelPlugins = append(persesPanelPlugins, p)
+			}
+		}
+	}
+
+	data := map[string]any{
+		"ModuleName":               GetKebabCase(o.pluginModuleName),
+		"ModulePascalName":         GetPascalCase(o.pluginModuleName),
+		"ModuleOrg":                GetKebabCase(o.pluginModuleOrg),
+		"PluginName":               GetKebabCase(o.pluginName),
+		"PluginPascalName":         o.pluginPascalName,
+		"ExposedModules":           exposedModules,
+		"PersesPlugins":            persesPlugins,
+		"PersesPanelPlugins":       persesPanelPlugins,
+		"PersesDatasourcePlugins":  persesDatasourcePlugins,
+		"PersesQueryPlugins":       persesQueryPlugins,
+		"PersesVariablePlugins":    persesVariablePlugins,
+		"PersesAnnotationsPlugins": persesAnnotationsPlugins,
+		"PersesExplorePlugins":     persesExplorePlugins,
+	}
+
+	var moduleTemplateFiles []string
+	templateSet := template.New("root")
+
+	moduleTemplateFiles, err = CollectTemplatePaths(moduleDir, templateSet)
+	if err != nil {
+		log.Fatalf("error walking module template directory: %v", err)
+	}
+
+	blocksTemplateFiles, err := CollectTemplatePaths(blocksDir, templateSet)
+	if err != nil {
+		log.Fatalf("error walking blocks template directory: %v", err)
+	}
+
+	srcDir, err := getTemplatePath(o.pluginType)
+	if err != nil {
+		return fmt.Errorf("could not get template path %q: %w", o.pluginType, err)
+	}
+
+	pluginTypeTemplateFiles, err := CollectTemplatePaths(srcDir, templateSet)
+	if err != nil {
+		log.Fatalf("error walking plugin type template directory: %v", err)
+	}
+
+	allTemplateFiles := append(append(moduleTemplateFiles, blocksTemplateFiles...), pluginTypeTemplateFiles...)
+
+	var createdPaths []string
+
+	for _, relTemplatePath := range allTemplateFiles {
+		outputRelativePath := strings.TrimSuffix(relTemplatePath, tmplExt)
+
+		// Skip blocks templates from generating files, excluding the LICENSE file
+		if filepath.Ext(outputRelativePath) == "" && !strings.HasSuffix(outputRelativePath, "LICENSE") {
+			continue
+		}
+
+		// Replace paths to create files with plugin names
+		outputRelativePath = replacePaths(outputRelativePath, o)
+
+		outputFullPath := filepath.Clean(path.Join(o.outputDir, outputRelativePath))
+
+		outputDir := filepath.Dir(outputFullPath)
+		if err := os.MkdirAll(outputDir, 0750); err != nil {
+			return fmt.Errorf("error creating output directory '%s': %v. Skipping template '%s'", outputDir, err, relTemplatePath)
+		}
+
+		outputFile, err := os.Create(outputFullPath)
+		if err != nil {
+			return fmt.Errorf("error creating output file '%s': %v. Skipping template '%s'", outputFullPath, err, relTemplatePath)
+		}
+		defer outputFile.Close() //nolint:errcheck
+
+		err = templateSet.ExecuteTemplate(outputFile, relTemplatePath, data)
+		if err != nil {
+			return fmt.Errorf("error executing template '%s' to file '%s': %v", relTemplatePath, outputFullPath, err)
+		}
+
+		createdPaths = append(createdPaths, outputRelativePath)
+	}
+
+	goModPaths, err := o.ensureGoModule(goModulePath)
+	if err != nil {
+		return err
+	}
+	createdPaths = append(createdPaths, goModPaths...)
+
+	return output.HandleString(o.writer, o.successMessage(isModuleGeneration, createdPaths))
+}
+
+// successMessage lists the files created by the generation.
+func (o *generateOptions) successMessage(isModuleGeneration bool, createdPaths []string) string {
+	msg := fmt.Sprintf("plugin %s generated successfully", o.pluginPascalName)
+	if isModuleGeneration {
+		msg = fmt.Sprintf("module %s created successfully, %s", o.pluginModuleName, msg)
+	}
+
+	for _, p := range createdPaths {
+		msg += fmt.Sprintf("\n- %s", p)
+	}
+
+	return msg
+}
+
+// checkGoModuleRequirements records whether the output directory needs a go.mod and, if so, checks that the go binary
+// is available. It runs before anything is written, so the command doesn't leave a half-generated module behind.
+func (o *generateOptions) checkGoModuleRequirements() error {
+	goModExists, err := file.Exists(filepath.Join(o.outputDir, "go.mod"))
+	if err != nil {
+		return fmt.Errorf("could not check for an existing go.mod under %q: %w", o.outputDir, err)
+	}
+
+	o.goModuleMissing = !goModExists
+	if !o.goModuleMissing {
+		return nil
+	}
+
+	if _, err := exec.LookPath("go"); err != nil {
+		return fmt.Errorf("the go binary is required to initialize the Go module but was not found in PATH: %w", err)
+	}
+
+	return nil
+}
+
+// goModulePath returns the path of the Go module to initialize, or an empty string when the output directory
+// already has a go.mod. It fails when the module org or name is empty, since `go mod init` would reject the path.
+func (o *generateOptions) goModulePath() (string, error) {
+	if !o.goModuleMissing {
+		return "", nil
+	}
+
+	org := GetKebabCase(o.pluginModuleOrg)
+	name := GetKebabCase(o.pluginModuleName)
+
+	if org == "" || name == "" {
+		return "", fmt.Errorf("the module org and name are required to initialize the Go module under %q, "+
+			"set the registry and the name of the module in its package.json or pass --module.org and --module.name", o.outputDir)
+	}
+
+	return fmt.Sprintf("github.com/%s/%s", org, name), nil
+}
+
+// ensureGoModule initializes the Go module with `go mod init` and `go mod tidy` when the output directory
+// doesn't have a go.mod yet. An existing go.mod is left untouched. It returns the relative paths of the created files.
+func (o *generateOptions) ensureGoModule(modulePath string) ([]string, error) {
+	if !o.goModuleMissing {
+		return nil, nil
+	}
+
+	ctx := o.ctx
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	for _, args := range [][]string{
+		{"mod", "init", modulePath},
+		{"mod", "tidy"},
+	} {
+		cmd := exec.CommandContext(ctx, "go", args...) //nolint:gosec // the arguments are passed straight to exec, no shell is involved
+		cmd.Dir = o.outputDir
+		if out, err := cmd.CombinedOutput(); err != nil {
+			return nil, fmt.Errorf("`go %s` failed under %q: %w\n%s", strings.Join(args, " "), o.outputDir, err, out)
+		}
+	}
+
+	created := []string{"go.mod"}
+	goSumExists, err := file.Exists(filepath.Join(o.outputDir, "go.sum"))
+	if err != nil {
+		return nil, fmt.Errorf("could not check for the go.sum under %q: %w", o.outputDir, err)
+	}
+	if goSumExists {
+		created = append(created, "go.sum")
+	}
+	return created, nil
+}
+
+func (o *generateOptions) SetWriter(writer io.Writer) {
+	o.writer = writer
+}
+
+func (o *generateOptions) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
+}
+
+func NewCMD() *cobra.Command {
+	o := &generateOptions{}
+	cmd := &cobra.Command{
+		Use:   "generate [<output-directory>]",
+		Short: "Generate a plugin module or plugin type",
+		Long: `
+Creates a new plugin module if does not exist and generates a plugin inside it. 
+This command can be used several times to add more plugins to the same module. 
+A single plugin can be generated at a time.
+`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			o.ctx = cmd.Context()
+			return persesCMD.Run(o, cmd, args)
+		},
+	}
+	cmd.Flags().StringVar(&o.pluginModuleName, "module.name", "", "The plugin module name, required only when the module does not exist, ignored otherwise.")
+	cmd.Flags().StringVar(&o.pluginModuleOrg, "module.org", "", "The organization name on which the plugin module will be created, useful for publising the plugin. This is required only when the module does not exist, ignored otherwise.")
+	cmd.Flags().StringVar(&o.pluginName, "plugin.name", "", "The plugin name. A pascal case and kebab case variants will be generated inside the templates. If a plugin with the same name already exists, it will be overwritten.")
+	cmd.Flags().StringVar(&o.pluginDisplayName, "plugin.display-name", "", "The more human name of the plugin to be used in the UI. If not provided, the plugin name will be used.")
+	cmd.Flags().StringVar(&o.rawPluginType, "plugin.type", "", "The plugin type can be one of 'Datasource', 'TimeSeriesQuery', 'Variable', 'Panel', or 'Explore'.")
+
+	return cmd
+}

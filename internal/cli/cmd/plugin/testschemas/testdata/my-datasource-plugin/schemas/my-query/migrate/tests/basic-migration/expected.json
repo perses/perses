@@ -1,0 +1,6 @@
+{
+  "kind": "MyQuery",
+  "spec": {
+    "query": "return timeseries from the database"
+  }
+}

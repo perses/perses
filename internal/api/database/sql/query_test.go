@@ -1,0 +1,88 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package databasesql
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestGenerateProjectResourceSelectQuery(t *testing.T) {
+	testSuite := []struct {
+		title    string
+		project  string
+		name     string
+		sqlQuery string
+		sqlArgs  []any
+	}{
+		{
+			title:    "no project with a prefix name",
+			project:  "",
+			name:     "test",
+			sqlQuery: "SELECT doc FROM perses.dashboard WHERE name LIKE ?",
+			sqlArgs:  []any{"test%"},
+		},
+		{
+			title:    "with a prefix name",
+			project:  "",
+			name:     "test",
+			sqlQuery: "SELECT doc FROM perses.dashboard WHERE name LIKE ?",
+			sqlArgs:  []any{"test%"},
+		},
+		{
+			title:    "a project with a prefix name",
+			project:  "foo",
+			name:     "bar",
+			sqlQuery: "SELECT doc FROM perses.dashboard WHERE name LIKE ? AND project = ?",
+			sqlArgs:  []any{"bar%", "foo"},
+		},
+		{
+			title:    "a prefix name with an underscore is escaped",
+			project:  "",
+			name:     "foo_bar",
+			sqlQuery: "SELECT doc FROM perses.dashboard WHERE name LIKE ?",
+			sqlArgs:  []any{`foo\_bar%`},
+		},
+		{
+			title:    "a prefix name with a percent sign is escaped",
+			project:  "",
+			name:     "100%",
+			sqlQuery: "SELECT doc FROM perses.dashboard WHERE name LIKE ?",
+			sqlArgs:  []any{`100\%%`},
+		},
+		{
+			title:    "a prefix name with a backslash is escaped",
+			project:  "",
+			name:     `foo\bar`,
+			sqlQuery: "SELECT doc FROM perses.dashboard WHERE name LIKE ?",
+			sqlArgs:  []any{`foo\\bar%`},
+		},
+		{
+			title:    "empty query",
+			project:  "",
+			name:     "",
+			sqlQuery: "SELECT doc FROM perses.dashboard",
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			d := &DAO{}
+			sqlQuery, args := d.generateSelectQuery("perses.dashboard", test.project, test.name)
+			assert.Equal(t, test.sqlQuery, sqlQuery)
+			assert.Equal(t, test.sqlArgs, args)
+		})
+	}
+}

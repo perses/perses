@@ -1,0 +1,15 @@
+{
+  "kind": "Folder",
+  "metadata": {
+    "name": "myfolder",
+    "project": "newproject"
+  },
+  "spec": {
+    "items": [
+      {
+        "kind": "Dashboard",
+        "name": "node_exporter"
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "@test/exotic-tsdb-plugin",
+  "version": "1.0.0",
+  "perses": {
+    "schemasPath": "schemas",
+    "plugins": [
+      {
+        "kind": "Datasource",
+        "spec": {
+          "display": {
+            "name": "Exotic TSDB"
+          },
+          "name": "ExoticTSDB"
+        }
+      },
+      {
+        "kind": "TimeSeriesQuery",
+        "spec": {
+          "display": {
+            "name": "Exotic Query"
+          },
+          "name": "ExoticQuery"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import type { StatusError } from '@perses-dev/client';
+import { fetchJson } from '@perses-dev/client';
+import type { PluginModuleResource } from '@perses-dev/plugin-system';
+import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+
+import buildURL from './url-builder';
+
+const resource = 'plugins';
+
+export function usePlugins(
+  options?: Omit<UseQueryOptions<PluginModuleResource[], StatusError>, 'queryKey' | 'queryFn'>,
+): UseQueryResult<PluginModuleResource[], StatusError> {
+  return useQuery<PluginModuleResource[], StatusError>({
+    queryKey: ['plugins'],
+    queryFn: fetchPlugins,
+    ...options,
+  });
+}
+
+export function fetchPlugins(): Promise<PluginModuleResource[]> {
+  const url = buildURL({ resource });
+  return fetchJson<PluginModuleResource[]>(url);
+}

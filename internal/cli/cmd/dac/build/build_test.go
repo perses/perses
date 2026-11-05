@@ -1,0 +1,175 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package build
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
+	"testing"
+
+	"github.com/perses/perses/internal/cli/config"
+	cmdTest "github.com/perses/perses/internal/cli/test"
+)
+
+func TestDacBuildCMD_GoExtraArgsAreSplit(t *testing.T) {
+	buffer := strings.Builder{}
+	cmd := NewCMD()
+	cmd.SetOut(&buffer)
+	cmd.SetErr(&buffer)
+	cmd.SetArgs([]string{"-f", filepath.Join("testdata", "go", "args", "main.go"), "--", "--project-name=demo", "--dashboard-name=ContainerMonitoringDemo"})
+
+	config.Global = &config.Config{}
+	config.Global.Dac.OutputFolder = config.DefaultOutputFolder
+
+	err := cmd.Execute()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	outputFilePath := filepath.Join(config.DefaultOutputFolder, "testdata", "go", "args", "main_output.yaml")
+	builtContent, readErr := os.ReadFile(outputFilePath) // nolint: gosec
+	if readErr != nil {
+		t.Fatalf("unable to read generated output file: %v", readErr)
+	}
+
+	builtYAML := string(builtContent)
+	if !strings.Contains(builtYAML, "name: ContainerMonitoringDemo") {
+		t.Fatalf("expected dashboard name from flag in generated YAML, got:\n%s", builtYAML)
+	}
+	if !strings.Contains(builtYAML, "project: demo") {
+		t.Fatalf("expected project from flag in generated YAML, got:\n%s", builtYAML)
+	}
+	if strings.Contains(builtYAML, "project: demo --dashboard-name=ContainerMonitoringDemo") {
+		t.Fatalf("expected CLI flags to be passed as distinct args, got merged value:\n%s", builtYAML)
+	}
+}
+
+func TestDacBuildCMD(t *testing.T) {
+	// os-specific separator is required for the tests that go through the code that calls filepath.Walk
+	separator := string(os.PathSeparator)
+
+	// os-specific error strings are required for the "file not found" cases
+	winSpecificErrStr := "GetFileAttributesEx %s: The system cannot find the file specified."
+	linuxSpecificErrStr := "stat %s: no such file or directory"
+	unknownFileName := "idontexist.cue"
+	unknownDirName := "idontexist"
+	var fileNotFoundErrStr string
+	var dirNotFoundErrStr string
+	if runtime.GOOS == "windows" {
+		fileNotFoundErrStr = fmt.Sprintf(winSpecificErrStr, unknownFileName)
+		dirNotFoundErrStr = fmt.Sprintf(winSpecificErrStr, unknownDirName)
+	} else {
+		fileNotFoundErrStr = fmt.Sprintf(linuxSpecificErrStr, unknownFileName)
+		dirNotFoundErrStr = fmt.Sprintf(linuxSpecificErrStr, unknownDirName)
+	}
+
+	testSuiteCommonAndGo := []cmdTest.Suite{
+		{
+			Title:           "file not found",
+			Args:            []string{"-f", unknownFileName},
+			IsErrorExpected: true,
+			ExpectedMessage: fmt.Sprintf("invalid value set to the File flag: %s", fileNotFoundErrStr),
+		},
+		{
+			Title:           "directory not found",
+			Args:            []string{"-d", unknownDirName},
+			IsErrorExpected: true,
+			ExpectedMessage: fmt.Sprintf("invalid value set to the Directory flag: %s", dirNotFoundErrStr),
+		},
+		{
+			Title:           "file & directory options should not be both provided",
+			Args:            []string{"-f", "whatever.cue", "-d", "whocares"},
+			IsErrorExpected: true,
+			ExpectedMessage: "if any flags in the group [file directory] are set none of the others can be; [directory file] were all set",
+		},
+		{
+			Title:           "nominal case with a single Go file",
+			Args:            []string{"-f", filepath.Join("testdata", "go", "cmd", "main.go")},
+			IsErrorExpected: false,
+			ExpectedMessage: fmt.Sprintf("Successfully built %s at %s\n", filepath.Join("testdata", "go", "cmd", "main.go"), filepath.Join("built", "testdata", "go", "cmd", "main_output.yaml")),
+		},
+		{
+			Title:           "nominal case with a Go project",
+			Args:            []string{"-d", filepath.Join("testdata", "go", "cmd")},
+			IsErrorExpected: false,
+			ExpectedMessage: fmt.Sprintf("Successfully built %s at %s\n", filepath.Join("testdata", "go", "cmd", "main.go"), filepath.Join("built", "testdata", "go", "cmd", "main_output.yaml")),
+		},
+		{
+			// Regression test for https://github.com/perses/perses/issues/3819:
+			// non-main Go files in sub-packages must be silently skipped; only
+			// files in package main are passed to `go run`.
+			Title:           "directory with non-main sub-packages skips them without error",
+			Args:            []string{"-d", filepath.Join("testdata", "go")},
+			IsErrorExpected: false,
+			// args/main.go and cmd/main.go are both package main and must be built;
+			// prometheus/query/*.go are package query and must be silently skipped.
+			ExpectedMessage: fmt.Sprintf(
+				"Successfully built %s at %s\nSuccessfully built %s at %s\n",
+				filepath.Join("testdata", "go", "args", "main.go"), filepath.Join("built", "testdata", "go", "args", "main_output.yaml"),
+				filepath.Join("testdata", "go", "cmd", "main.go"), filepath.Join("built", "testdata", "go", "cmd", "main_output.yaml"),
+			),
+		},
+	}
+	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuiteCommonAndGo)
+
+	// Change to the cue test directory to be able to resolve imports
+	err := os.Chdir(strings.ReplaceAll("testdata%scue", "%s", separator))
+	if err != nil {
+		t.Fatalf("Failed to change directory: %v", err)
+	}
+
+	testSuiteCUE := []cmdTest.Suite{
+		{
+			Title:           "nominal case with a single cue file",
+			Args:            []string{"-f", filepath.Join("valid", "dac.cue")},
+			IsErrorExpected: false,
+			ExpectedMessage: fmt.Sprintf("Successfully built %s at %s\n", filepath.Join("valid", "dac.cue"), filepath.Join("built", "valid", "dac_output.yaml")),
+		},
+		{
+			Title:           "nominal case with a cue directory",
+			Args:            []string{"-d", "valid"},
+			IsErrorExpected: false,
+			ExpectedMessage: fmt.Sprintf("Successfully built %s at %s\nSuccessfully built %s at %s\n", filepath.Join("valid", "dac.cue"), filepath.Join("built", "valid", "dac_output.yaml"), filepath.Join("valid", "dac_2.cue"), filepath.Join("built", "valid", "dac_2_output.yaml")),
+		},
+		{
+			Title:           "print on stdout as json",
+			Args:            []string{"-f", filepath.Join("valid", "dac_2.cue"), "-m", "stdout", "-o", "json"},
+			IsErrorExpected: false,
+			ExpectedMessage: "{\n    \"success\": true\n}\n\n",
+		},
+		{
+			Title:           "invalid CUE definition",
+			Args:            []string{"-f", filepath.Join("invalid", "dac.cue")},
+			IsErrorExpected: true,
+			ExpectedMessage: strings.ReplaceAll("failed to build invalid%sdac.cue: success: reference \"fals\" not found:\n    .%sinvalid%sdac.cue:16:10\n", "%s", separator),
+		},
+		{
+			Title:           "invalid CUE definition in a folder",
+			Args:            []string{"-d", "invalid"},
+			IsErrorExpected: true,
+			ExpectedMessage: `processing directory "invalid" failed, see the message(s) above`,
+		},
+		{
+			Title:           "nominal case with a custom output folder",
+			Args:            []string{"-f", filepath.Join("valid", "dac.cue")},
+			Config:          config.Config{Dac: config.Dac{OutputFolder: "test_output"}},
+			IsErrorExpected: false,
+			ExpectedMessage: fmt.Sprintf("Successfully built %s at %s\n", filepath.Join("valid", "dac.cue"), filepath.Join("test_output", "valid", "dac_output.yaml")),
+		},
+	}
+	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuiteCUE)
+}

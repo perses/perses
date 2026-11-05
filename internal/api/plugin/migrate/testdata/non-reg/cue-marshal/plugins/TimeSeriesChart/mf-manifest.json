@@ -1,0 +1,311 @@
+{
+  "id": "TimeSeriesChart",
+  "name": "TimeSeriesChart",
+  "metaData": {
+    "name": "TimeSeriesChart",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "0.13.0-rc.0",
+      "buildName": "@perses-dev/timeseries-chart-plugin"
+    },
+    "remoteEntry": {
+      "name": "__mf/js/TimeSeriesChart.3eab0aad.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "TimeSeriesChart",
+    "pluginVersion": "2.6.0",
+    "getPublicPath": "function() { const prefix = window.PERSES_PLUGIN_ASSETS_PATH || window.PERSES_APP_CONFIG?.api_prefix || \"\"; return prefix + \"/plugins/TimeSeriesChart/\"; }"
+  },
+  "shared": [
+    {
+      "id": "TimeSeriesChart:@emotion/react",
+      "name": "@emotion/react",
+      "version": "11.14.0",
+      "singleton": true,
+      "requiredVersion": "^11.11.3",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/274.72dfa9c8.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "TimeSeriesChart:@emotion/styled",
+      "name": "@emotion/styled",
+      "version": "11.14.1",
+      "singleton": true,
+      "requiredVersion": "^11.14.1",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/235.d23c8ef0.js",
+            "__mf/js/async/616.79484ac8.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "TimeSeriesChart:@hookform/resolvers",
+      "name": "@hookform/resolvers",
+      "version": "3.10.0",
+      "singleton": true,
+      "requiredVersion": "^3.10.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/587.c9460696.js",
+            "__mf/js/async/968.2a9fb1a0.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "TimeSeriesChart:@perses-dev/components",
+      "name": "@perses-dev/components",
+      "version": "0.54.0-rc.0",
+      "singleton": true,
+      "requiredVersion": "^0.54.0-rc.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/208.b9f374ad.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "__mf/css/async/208.85c2cbf6.css"
+          ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "TimeSeriesChart:@perses-dev/dashboards",
+      "name": "@perses-dev/dashboards",
+      "version": "0.54.0-rc.0",
+      "singleton": true,
+      "requiredVersion": "^0.54.0-rc.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/984.4793f667.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "TimeSeriesChart:@perses-dev/plugin-system",
+      "name": "@perses-dev/plugin-system",
+      "version": "0.54.0-rc.0",
+      "singleton": true,
+      "requiredVersion": "^0.54.0-rc.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/558.8ac6d4e3.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "TimeSeriesChart:date-fns",
+      "name": "date-fns",
+      "version": "4.4.0",
+      "singleton": true,
+      "requiredVersion": "^4.4.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/192.c3dd56d5.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "TimeSeriesChart:echarts",
+      "name": "echarts",
+      "version": "5.5.0",
+      "singleton": true,
+      "requiredVersion": "^undefined",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/873.04a201bf.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "TimeSeriesChart:lodash",
+      "name": "lodash",
+      "version": "4.18.1",
+      "singleton": true,
+      "requiredVersion": "^4.18.1",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/392.b9ba5bf2.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "TimeSeriesChart:react-dom",
+      "name": "react-dom",
+      "version": "18.3.1",
+      "singleton": true,
+      "requiredVersion": "18.2.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/470.e09f33b7.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "TimeSeriesChart:react",
+      "name": "react",
+      "version": "18.3.1",
+      "singleton": true,
+      "requiredVersion": "18.2.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/121.c3c0e54f.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "TimeSeriesChart:date-fns-tz",
+      "name": "date-fns-tz",
+      "version": "3.2.0",
+      "singleton": true,
+      "requiredVersion": "^3.2.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/978.a9865b23.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    }
+  ],
+  "remotes": [],
+  "exposes": [
+    {
+      "id": "TimeSeriesChart:TimeSeriesChart",
+      "name": "TimeSeriesChart",
+      "assets": {
+        "js": {
+          "sync": [
+            "__mf/js/async/955.176fe200.js",
+            "__mf/js/async/702.785cd635.js",
+            "__mf/js/async/527.f97d1b86.js",
+            "__mf/js/async/52.0d78de2b.js",
+            "__mf/js/async/724.c45dcf5b.js",
+            "__mf/js/async/__federation_expose_TimeSeriesChart.62d8f589.js"
+          ],
+          "async": [
+            "__mf/js/async/lib-router.319c02cd.js",
+            "__mf/js/async/655.dbf8c618.js",
+            "__mf/js/async/137.59c998ab.js",
+            "__mf/js/async/356.8170c96d.js",
+            "__mf/js/async/603.3b771310.js",
+            "__mf/js/async/694.0fb9ee5a.js",
+            "__mf/js/async/588.0a1aa144.js",
+            "__mf/js/async/71.8c6cf914.js",
+            "__mf/js/async/491.85194549.js",
+            "__mf/js/async/187.f5e8932b.js",
+            "__mf/js/async/177.2fef2962.js"
+          ]
+        },
+        "css": {
+          "sync": [],
+          "async": [
+            "__mf/css/async/208.85c2cbf6.css"
+          ]
+        }
+      },
+      "path": "./TimeSeriesChart"
+    }
+  ]
+}

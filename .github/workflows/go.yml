@@ -1,0 +1,244 @@
+name: go
+on:
+  push:
+    branches:
+      - main
+      - release/*
+      - snapshot/*
+    tags:
+      - v*
+  pull_request:
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.ref_name != 'main' }}
+
+jobs:
+  download-plugin:
+    name: "download default plugins"
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v7
+      - uses: perses/github-actions@v0.13.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+          enable_cue: false
+      - name: download plugin
+        run: make install-default-plugins
+      - name: store plugin to share with other jobs
+        uses: actions/upload-artifact@v7
+        with:
+          name: plugins
+          path: |
+            plugins-archive
+  checklicense:
+    name: "check license headers"
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v7
+      - name: check license headers
+        run: make checklicense
+  docs-fmt:
+    name: "check doc format"
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v7
+      - uses: perses/github-actions@v0.13.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+      - name: install mdox
+        run: go install github.com/bwplotka/mdox@v0.10.0
+      - name: check docs
+        run: make checkdocs
+  gofmt:
+    name: "check code format"
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v7
+      - uses: perses/github-actions@v0.13.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+          enable_cue: true
+          cue_version: "v0.17.1"
+      - name: check format
+        run: make checkformat
+      - name: check go.mod
+        run: make checkunused
+  test-file:
+    name: "tests with file DB"
+    runs-on: ubuntu-latest
+    needs: "download-plugin"
+    services:
+      prometheus:
+        image: prom/prometheus
+        ports:
+          - "9090:9090"
+      postgres:
+        image: postgres:17
+        ports:
+          - "5432:5432"
+        env:
+          POSTGRES_DB: perses
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+    steps:
+      - name: checkout
+        uses: actions/checkout@v7
+      - uses: perses/github-actions@v0.13.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+          enable_cue: true # needed for DaC CLI commands unit tests
+          cue_version: "v0.17.1"
+      - name: Download plugin archive
+        uses: actions/download-artifact@v8
+        with:
+          name: plugins
+          path: plugins-archive
+      - name: test
+        run: make integration-test
+  test-windows:
+    name: "tests with file DB on windows"
+    runs-on: windows-latest
+    needs: "download-plugin"
+    steps:
+      - name: checkout
+        uses: actions/checkout@v7
+      - uses: perses/github-actions@v0.13.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+          enable_cue: true # needed for DaC CLI commands unit tests
+          cue_version: "v0.17.1"
+      - name: Download plugin archive
+        uses: actions/download-artifact@v8
+        with:
+          name: plugins
+          path: plugins-archive
+      - name: "cache postgres installation"
+        uses: actions/cache@v6
+        id: pg-cache
+        with:
+          path: postgres
+          key: postgres-windows-17.4-1
+      - name: "install postgres"
+        if: steps.pg-cache.outputs.cache-hit != 'true'
+        run: sh scripts/windows/postgres/download.sh
+      - name: "start postgres"
+        run: sh scripts/windows/postgres/run.sh
+      - name: "install prometheus"
+        run: sh scripts/download-prometheus.sh
+      - name: "start prometheus"
+        run: sh scripts/run-prometheus.sh
+      - name: test
+        run: make integration-test
+  test-mysql:
+    name: "tests with mysql"
+    runs-on: ubuntu-latest
+    needs: "download-plugin"
+    services:
+      prometheus:
+        image: prom/prometheus
+        ports:
+          - "9090:9090"
+      mariadb:
+        image: mariadb
+        ports:
+          - "3306:3306"
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: perses
+          MARIADB_USER: user
+          MARIADB_PASSWORD: password
+      postgres:
+        image: postgres:17
+        ports:
+          - "5432:5432"
+        env:
+          POSTGRES_DB: perses
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+    steps:
+      - name: checkout
+        uses: actions/checkout@v7
+      - uses: perses/github-actions@v0.13.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+          enable_cue: true # needed for DaC CLI commands unit tests
+          cue_version: "v0.17.1"
+      - name: Download plugin archive
+        uses: actions/download-artifact@v8
+        with:
+          name: plugins
+          path: plugins-archive
+      - name: test
+        run: make mysql-integration-test
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v7
+      - uses: perses/github-actions@v0.13.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+          enable_go_cache: false
+          enable_npm: false
+      - name: generate files
+        run: make assets-compress
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9.3.0
+        with:
+          # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
+          version: v2.14
+          args: --timeout 5m
+  validate-dev-data:
+    name: validate CUE schemas
+    runs-on: ubuntu-latest
+    needs: "download-plugin"
+    steps:
+      - name: checkout
+        uses: actions/checkout@v7
+      - uses: perses/github-actions@v0.13.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+          enable_cue: false
+      - name: Download plugin archive
+        uses: actions/download-artifact@v8
+        with:
+          name: plugins
+          path: plugins-archive
+      - name: validate all data from dev/data
+        run: make validate-data
+  check-cue-gen:
+    name: "check generated CUE files"
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v7
+      - uses: perses/github-actions@v0.13.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+          enable_cue: true
+          cue_version: "v0.17.1"
+      - name: generate .cue model files
+        run: make cue-gen
+      - name: check for changes
+        run: |
+          git add .
+          if ! git diff --cached --exit-code; then
+            echo "The generated .cue model files are not up to date. Please run 'make cue-gen' locally and commit the changes."
+            exit 1
+          fi

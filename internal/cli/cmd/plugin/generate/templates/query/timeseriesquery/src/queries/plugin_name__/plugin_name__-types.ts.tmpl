@@ -1,0 +1,18 @@
+import type { DatasourceSelector, TimeSeries } from '@perses-dev/spec';
+
+export interface {{ .PluginPascalName }}Spec {
+  query: string;
+  datasource?: DatasourceSelector;
+}
+
+// TODO: import this type from your datasource or an existing datasource plugin
+export type DatasourceQueryResponse = {
+  status: string;
+  data: TimeSeries[];
+  warnings?: string[];
+};
+
+// TODO: import this client type from your datasource plugin.
+export interface QueryDatasourceClient {
+  query(params: { query: string; start: string; end: string }): Promise<DatasourceQueryResponse>;
+}

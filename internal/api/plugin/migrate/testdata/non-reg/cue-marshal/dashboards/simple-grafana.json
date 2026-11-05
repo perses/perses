@@ -1,0 +1,15 @@
+{
+  "title": "Test Dashboard",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Panel 1",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(metric[5m])"
+        }
+      ]
+    }
+  ]
+}

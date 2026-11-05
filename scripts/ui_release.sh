@@ -1,0 +1,120 @@
+#!/bin/bash
+
+## /!\ This file must be used at the root of the perses project
+## This script provides utils method to help to release and verify the readiness of each libs under the folder ui/
+
+set -e
+
+cd ui/
+
+files=("../LICENSE" "../CHANGELOG.md")
+workspaces=$(jq -r '.workspaces[]' < package.json)
+
+function copy() {
+  for file in "${files[@]}"; do
+    for workspace in ${workspaces}; do
+      if [ -f "${file}" ]; then
+        cp "${file}" "${workspace}"/"$(basename "${file}")"
+      fi
+    done
+  done
+}
+
+function checkPackage() {
+  version=${1}
+  if [[ "${version}" == v* ]]; then
+    version="${version:1}"
+  fi
+  for workspace in ${workspaces}; do
+    cd "${workspace}"
+    package_version=$(npm run env | grep npm_package_version | cut -d= -f2-)
+    if [ "${version}" != "${package_version}" ]; then
+      echo "version of ${workspace} is not the correct one"
+      echo "expected one: ${version}"
+      echo "current one: ${package_version}"
+      echo "please use ./ui_release --release ${version}"
+      exit 1
+    fi
+    cd ..
+  done
+}
+
+function clean() {
+  for file in "${files[@]}"; do
+    for workspace in ${workspaces}; do
+      f="${workspace}"/"$(basename "${file}")"
+      if [ -f "${f}" ]; then
+        rm "${f}"
+      fi
+    done
+  done
+}
+
+function bumpVersion() {
+  # TODO does not work since the move to the shared repository, we need to find a way to bump the version of all packages only in the monorepo
+  # See shared package for the solution
+  version="${1}"
+  if [[ "${version}" == v* ]]; then
+    version="${version:1}"
+  fi
+  # upgrade the @perses-dev/* dependencies on all packages
+  for workspace in ${workspaces}; do
+    # sed -i syntax is different on mac and linux
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      sed -E -i "" "s|(\"@perses-dev/internal.+\": )\".+\"|\1\"${version}\"|" "${workspace}"/package.json
+    else
+      sed -E -i "s|(\"@perses-dev/internal.+\": )\".+\"|\1\"${version}\"|" "${workspace}"/package.json
+    fi
+  done
+
+  # increase the version on all packages
+  npm version "${version}" --workspaces
+}
+
+# Validates branch name and extracts snapshot name from it.
+function getBranchSnapshotName() {
+  branch="${1}"
+
+  snapshotRegex="^snapshot\/[-a-zA-Z0-9]+$"
+
+  if [[ ! $branch =~ $snapshotRegex ]]; then 
+    echo "Snapshot branch '${branch}' must start with 'snapshot/' and end with a kebab-case name (e.g. 'snapshot/my-feature')." 1>&2
+    exit 1
+  fi
+
+  # Replace "/"" with "-"
+  echo "$(echo "${branch}" | sed -E  's/\//-/')"
+}
+
+
+function removeSnapshot() {
+  branch="${1}"
+  tagName=$(getBranchSnapshotName $branch)
+
+  echo "Removing snapshot for tag ${tagName}"
+  for workspace in ${publish_workspaces}; do
+    cd "${workspace}"
+    eval "npm dist-tag rm @perses-dev/${workspace} ${tagName}"
+    cd ../
+  done
+}
+
+if [[ "$1" == "--copy" ]]; then
+  copy
+fi
+
+if [[ $1 == "--check-package" ]]; then
+  checkPackage "${@:2}"
+fi
+
+if [[ $1 == "--bump-version" ]]; then
+  bumpVersion "${@:2}"
+fi
+
+if [[ $1 == "--clean" ]]; then
+  clean
+fi
+
+if [[ $1 == "--remove-snapshot" ]]; then
+  removeSnapshot "${@:2}"
+fi

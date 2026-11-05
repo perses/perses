@@ -1,0 +1,14 @@
+{
+  "kind": "SecondChart",
+  "spec": {
+    "a": "yes",
+    "b": {
+      "c": false,
+      "d": [
+        {
+          "f": 66
+        }
+      ]
+    }
+  }
+}

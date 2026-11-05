@@ -1,0 +1,26 @@
+{
+  "kind": "Datasource",
+  "metadata": {
+    "name": "PrometheusWithTooHighTimeout",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
+    "version": 0,
+    "project": ""
+  },
+  "spec": {
+    "default": false,
+    "plugin": {
+      "kind": "PrometheusDatasource",
+      "spec": {
+        "proxy": {
+          "kind": "HTTPProxy",
+          "spec": {
+            "url": "https://prometheus.demo.do.prometheus.io",
+            "timeout": "5m"
+          }
+        }
+      }
+    }
+  }
+}
+

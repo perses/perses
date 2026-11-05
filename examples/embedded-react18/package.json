@@ -1,0 +1,34 @@
+{
+  "name": "embedded-react18",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rsbuild build",
+    "dev": "rsbuild dev --open",
+    "preview": "rsbuild preview",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@mui/material": "^6",
+    "@mui/system": "^6",
+    "@perses-dev/client": "0.56.0-beta.1",
+    "@perses-dev/components": "0.56.0-beta.1",
+    "@perses-dev/dashboards": "0.56.0-beta.1",
+    "@perses-dev/explore": "0.56.0-beta.1",
+    "@perses-dev/plugin-system": "0.56.0-beta.1",
+    "@perses-dev/prometheus-plugin": "0.60.0-beta.1",
+    "@perses-dev/timeseries-chart-plugin": "0.15.0-beta.1",
+    "@tanstack/react-query": "^5.105.0",
+    "react": "^18",
+    "react-compiler-runtime": "^1",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "^2",
+    "@rsbuild/plugin-react": "^2",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5.9.2"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "kind": "MyPanel",
+  "spec": {
+    "title": "CPU Usage",
+    "query": {
+      "datasource": "prometheus",
+      "expression": "cpu_usage_percent"
+    },
+    "display": {
+      "color": "green",
+      "size": "medium",
+      "showLegend": true
+    }
+  }
+}

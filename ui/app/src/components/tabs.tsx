@@ -1,0 +1,93 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import type { BoxProps, TabProps } from '@mui/material';
+import { Box, Chip, Stack, Tab, Tabs, styled } from '@mui/material';
+import type { ReactElement } from 'react';
+import { forwardRef } from 'react';
+import type { LinkProps } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
+
+export const MENU_TABS_HEIGHT = '54px';
+
+export const MenuTabs = styled(Tabs)({
+  minHeight: MENU_TABS_HEIGHT,
+});
+
+export const MenuTab = styled(Tab)({
+  minHeight: MENU_TABS_HEIGHT,
+});
+
+export type MenuLinkTabProps = TabProps<typeof RouterLink, LinkProps>;
+
+export const MenuLinkTab = styled(
+  forwardRef<HTMLAnchorElement, MenuLinkTabProps>(function MenuLinkTab(props, ref) {
+    return <Tab {...props} ref={ref} component={RouterLink} />;
+  }),
+)({
+  minHeight: MENU_TABS_HEIGHT,
+});
+
+interface TabPanelProperties extends BoxProps {
+  index: string;
+  value: string;
+  idPrefix: string;
+}
+
+export function TabPanel({ children, value, index, idPrefix, sx, ...props }: TabPanelProperties): ReactElement {
+  return (
+    <Box
+      role="tabpanel"
+      hidden={value !== index}
+      id={`${idPrefix}-tabpanel-${index}`}
+      aria-labelledby={`${idPrefix}-tab-${index}`}
+      sx={[
+        {
+          '& > .MuiCard-root': {
+            border: '1px solid',
+            borderColor: 'divider',
+            borderTop: 'none',
+            borderRadius: '0 0 8px 8px',
+            overflow: 'hidden',
+          },
+        },
+        ...((Array.isArray(sx) ? sx : [sx].filter(Boolean)) as Array<Record<string, unknown>>),
+      ]}
+      {...props}
+    >
+      {value === index && children}
+    </Box>
+  );
+}
+
+export function TabLabel({ label, count }: { label: string; count?: number }): ReactElement {
+  return (
+    <Stack direction="row" alignItems="center" gap={0.75}>
+      <span>{label}</span>
+      {count !== undefined && count > 0 && (
+        <Chip
+          label={count}
+          size="small"
+          sx={{
+            height: 20,
+            minWidth: 20,
+            fontSize: '0.6875rem',
+            fontWeight: 600,
+            bgcolor: 'action.selected',
+            '& .MuiChip-label': { px: 0.75 },
+          }}
+        />
+      )}
+    </Stack>
+  );
+}

@@ -1,0 +1,13 @@
+package model
+
+import (
+	"strings"
+)
+
+kind: "{{ .PluginPascalName }}"
+spec: close({
+	datasource?: {
+		kind: "YourDatasourceKind"
+	}
+	query:             strings.MinRunes(1)
+})

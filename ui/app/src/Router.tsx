@@ -1,0 +1,281 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { SnackbarProvider } from '@perses-dev/components';
+import { HotkeysProvider } from '@perses-dev/dashboards';
+import { keepPreviousData, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { ReactElement } from 'react';
+import { lazy, Suspense } from 'react';
+import { CookiesProvider } from 'react-cookie';
+import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router-dom';
+import { QueryParamProvider } from 'use-query-params';
+import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
+
+// Default route is eagerly loaded
+import App from './App';
+import type { PageTitleHandle } from './components/PageTitle';
+import { PageTitle } from './components/PageTitle';
+import { PersesLoader } from './components/PersesLoader';
+import { PERSES_APP_CONFIG } from './config';
+import { AuthorizationProvider } from './context/Authorization';
+import {
+  ConfigContextProvider,
+  useIsAuthEnabled,
+  useIsDelegatedAuthnProviderEnabled,
+  useIsEphemeralDashboardEnabled,
+  useIsExplorerEnabled,
+} from './context/Config';
+import { DarkModeContextProvider } from './context/DarkMode';
+import { NavHistoryProvider } from './context/DashboardNavHistory';
+import { buildRedirectQueryString, useIsLoggedIn, useRedirectQueryParam } from './model/auth/auth-client';
+import {
+  AdminRoute,
+  ConfigRoute,
+  DelegatedAuthnErrorRoute,
+  ExploreRoute,
+  ImportRoute,
+  ProfileRoute,
+  ProjectRoute,
+  SignInRoute,
+  SignUpRoute,
+} from './model/route';
+import DelegatedAuthnErrorView from './views/auth/DelegatedAuthnErrorView';
+import SignInView from './views/auth/SignInView';
+import SignUpView from './views/auth/SignUpView';
+import HomeView from './views/home/HomeView';
+
+// Other routes are lazy-loaded for code-splitting
+const ImportView = lazy(() => import('./views/import/ImportView'));
+const AdminView = lazy(() => import('./views/admin/AdminView'));
+const ConfigView = lazy(() => import('./views/config/ConfigView'));
+const GuardedProjectRoute = lazy(() => import('./guard/GuardedProjectRoute'));
+const ProjectView = lazy(() => import('./views/projects/ProjectView'));
+const CreateDashboardView = lazy(() => import('./views/projects/dashboards/CreateDashboardView'));
+const DashboardView = lazy(() => import('./views/projects/dashboards/DashboardView'));
+const ExploreView = lazy(() => import('./views/explore/ExploreView'));
+const CreateEphemeralDashboardView = lazy(() => import('./views/projects/dashboards/CreateEphemeralDashboardView'));
+const EphemeralDashboardView = lazy(() => import('./views/projects/dashboards/EphemeralDashboardView'));
+const ProfileView = lazy(() => import('./views/profile/ProfileView'));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      // react-query uses a default of 3 retries.
+      // This sets the default to 0 retries.
+      // If needed, the number of retries can be overridden in individual useQuery calls.
+      retry: 0,
+      placeholderData: keepPreviousData,
+    },
+  },
+});
+
+function AppProviders(): ReactElement {
+  return (
+    <CookiesProvider>
+      <PageTitle />
+      <QueryClientProvider client={queryClient}>
+        <HotkeysProvider
+          defaultOptions={{
+            hotkey: { preventDefault: true, stopPropagation: true },
+            hotkeySequence: { timeout: 1000 },
+          }}
+        >
+          <DarkModeContextProvider>
+            <ConfigContextProvider>
+              <QueryParamProvider adapter={ReactRouter6Adapter}>
+                <NavHistoryProvider>
+                  <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                    <AuthorizationProvider>
+                      <App />
+                    </AuthorizationProvider>
+                  </SnackbarProvider>
+                </NavHistoryProvider>
+              </QueryParamProvider>
+            </ConfigContextProvider>
+          </DarkModeContextProvider>
+        </HotkeysProvider>
+      </QueryClientProvider>
+    </CookiesProvider>
+  );
+}
+
+const router = createBrowserRouter(
+  [
+    {
+      path: '/',
+      Component: AppProviders,
+      children: [
+        {
+          path: '',
+          element: <RequireAuth />,
+          children: [
+            { index: true, Component: HomeView, handle: { title: 'Home' } satisfies PageTitleHandle },
+            { path: ProfileRoute, Component: ProfileView, handle: { title: 'Profile' } satisfies PageTitleHandle },
+            {
+              path: AdminRoute,
+              handle: { title: 'Administration' } satisfies PageTitleHandle,
+              children: [
+                { index: true, Component: AdminView },
+                { path: ':tab', Component: AdminView },
+              ],
+            },
+            { path: ConfigRoute, Component: ConfigView, handle: { title: 'Configuration' } satisfies PageTitleHandle },
+            { path: ImportRoute, Component: ImportView, handle: { title: 'Import' } satisfies PageTitleHandle },
+            { path: ProjectRoute, Component: ProjectView, handle: { title: 'Projects' } satisfies PageTitleHandle },
+            {
+              path: ExploreRoute,
+              handle: { title: 'Explore' } satisfies PageTitleHandle,
+              element: <RequireExplorerEnabled />,
+              children: [{ index: true, Component: ExploreView }],
+            },
+            {
+              path: ProjectRoute,
+              element: <GuardedProjectRoute />,
+              children: [
+                { index: true, element: <Navigate to="/" replace /> },
+                {
+                  path: `:projectName`,
+                  handle: { title: ({ projectName }): string | undefined => projectName } satisfies PageTitleHandle,
+                  children: [
+                    { index: true, Component: ProjectView },
+                    {
+                      path: 'dashboard/new',
+                      Component: CreateDashboardView,
+                      handle: { title: 'New Dashboard' } satisfies PageTitleHandle,
+                    },
+                    {
+                      path: 'dashboards/:dashboardName',
+                      Component: DashboardView,
+                      handle: {
+                        title: ({ dashboardName }): string | undefined => dashboardName,
+                      } satisfies PageTitleHandle,
+                    },
+                    {
+                      path: 'ephemeraldashboard/new',
+                      handle: { title: 'New Ephemeral Dashboard' } satisfies PageTitleHandle,
+                      element: <RequireEphemeralDashboardEnabled />,
+                      children: [{ index: true, Component: CreateEphemeralDashboardView }],
+                    },
+                    {
+                      path: 'ephemeraldashboards/:ephemeralDashboardName',
+                      handle: {
+                        title: ({ ephemeralDashboardName }): string | undefined => ephemeralDashboardName,
+                      } satisfies PageTitleHandle,
+                      element: <RequireEphemeralDashboardEnabled />,
+                      children: [{ index: true, Component: EphemeralDashboardView }],
+                    },
+                    { path: ':tab', Component: ProjectView },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          path: '',
+          element: <AlreadyLoggedIn />,
+          children: [
+            {
+              path: SignInRoute,
+              handle: { title: 'Sign In' } satisfies PageTitleHandle,
+              element: <RequireAuthEnabled />,
+              children: [{ index: true, Component: SignInView }],
+            },
+            {
+              path: SignUpRoute,
+              handle: { title: 'Sign Up' } satisfies PageTitleHandle,
+              element: <RequireAuthEnabled />,
+              children: [{ index: true, Component: SignUpView }],
+            },
+            {
+              path: DelegatedAuthnErrorRoute,
+              handle: { title: 'Authentication Error' } satisfies PageTitleHandle,
+              element: <RequireAuthEnabled />,
+              children: [{ index: true, Component: DelegatedAuthnErrorView }],
+            },
+          ],
+        },
+      ],
+    },
+    { path: '*', element: <Navigate to="/" replace /> },
+  ],
+  { basename: PERSES_APP_CONFIG.api_prefix },
+);
+
+function Router(): ReactElement {
+  return (
+    <Suspense fallback={<PersesLoader />}>
+      <RouterProvider router={router} />
+    </Suspense>
+  );
+}
+
+function RequireExplorerEnabled(): ReactElement {
+  const isExplorerEnabled = useIsExplorerEnabled();
+  if (!isExplorerEnabled) {
+    return <Navigate to="/" replace />;
+  }
+  return <Outlet />;
+}
+
+function RequireEphemeralDashboardEnabled(): ReactElement {
+  const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
+  if (!isEphemeralDashboardEnabled) {
+    return <Navigate to="/" replace />;
+  }
+  return <Outlet />;
+}
+
+function AlreadyLoggedIn(): ReactElement {
+  const isLoggedIn = useIsLoggedIn();
+  const params = useRedirectQueryParam();
+  if (isLoggedIn) {
+    return <Navigate to={params} replace />;
+  }
+  return <Outlet />;
+}
+
+/**
+ * This component aims to redirect the user to the SignIn page if not logged in
+ * or to the delegated authn error page if there is an error with the delegated authn.
+ * Otherwise, it just loads the underlying component(s) defined as children.
+ * This is leveraging the following mechanism:
+ * https://reactrouter.com/en/main/upgrading/v5#refactor-custom-routes
+ * https://gist.github.com/mjackson/d54b40a094277b7afdd6b81f51a0393f
+ * @constructor
+ */
+function RequireAuth(): ReactElement {
+  const isDelegatedAuthnProviderEnabled = useIsDelegatedAuthnProviderEnabled();
+  const isAuthEnabled = useIsAuthEnabled();
+  const isLoggedIn = useIsLoggedIn();
+  const location = useLocation();
+  if (!isAuthEnabled || isLoggedIn) {
+    return <Outlet />;
+  }
+  let to = isDelegatedAuthnProviderEnabled ? DelegatedAuthnErrorRoute : SignInRoute;
+  if (location.pathname !== '' && location.pathname !== '/') {
+    to += `?${buildRedirectQueryString(location.pathname + location.search)}`;
+  }
+  return <Navigate to={to} />;
+}
+
+function RequireAuthEnabled(): ReactElement {
+  const isAuthEnabled = useIsAuthEnabled();
+  if (!isAuthEnabled) {
+    return <Navigate to="/" replace />;
+  }
+  return <Outlet />;
+}
+
+export default Router;

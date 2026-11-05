@@ -1,0 +1,235 @@
+# CUE in Perses
+
+Perses comes with validation capabilities based on [CUE](https://cuelang.org/), a powerful validation language that permitted us to move the type constraints out of Golang (static language), which in the end makes it possible to modify at runtime the list of objects that Perses can accept. More concretely, this allows to support new kinds of charts and/or datasources dynamically, in the form of plugins written in CUE.
+
+## Writing plugins
+
+This section explains about the format any plugin should follow to be accepted & registered by Perses at runtime.
+
+!!! tip
+    Some of the below examples rely on the [`github.com/perses/shared/cue/common` package](https://registry.cue.works/docs/github.com/perses/shared/cue/common). This CUE package provides standard definitions (e.g unit, legend..) used by most of the official plugins & that any custom plugin could reuse as well. Leveraging a standard definition is likely to allow leveraging as well the frontend code that corresponds to it (e.g FormatControls, LegendOptionsEditor..)
+
+### Variable
+
+A variable plugin looks like the following:
+
+```cue
+package model
+
+kind: "<Variable name>" // e.g kind: "PrometheusLabelValuesVariable"
+spec: close({
+	labelName: string
+	matchers: [...string]
+})
+```
+
+it should define:
+
+- the `model` package,
+- the variable's `kind`,
+- the variable's `spec` containing any field you want for this variable plugin.
+
+### Panel
+
+A panel plugin looks like the following:
+
+```cue
+package model
+
+import "github.com/perses/shared/cue/common"
+
+kind: "<Panel name>" // e.g kind: "TimeSeriesChart",
+spec: {
+	queries: [...#ts_query]
+	legend?:      #legend
+	format?:      common.#format
+	thresholds?:  common.#thresholds
+}
+```
+
+it should define:
+
+- the `model` package,
+- the panel's `kind`,
+- the panel's `spec` containing any field you want for this panel plugin.
+
+### Query
+
+A query plugin looks like the following:
+
+```cue
+package model
+
+kind: "<Query name>" // e.g kind: "PrometheusTimeSeriesQuery"
+spec: {
+  datasource: {
+    kind: "<Datasource type>" // e.g kind: "PrometheusDatasource"
+  }
+  query:       string
+  minStep?:   =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
+  resolution?: number
+}
+```
+
+it should define:
+
+- the `model` package,
+- the query's `kind`,
+- the query's `spec` containing:
+    - a `datasource` field that holds the `kind` of datasource corresponding to this query type,
+    - any other field you want for this query plugin.
+
+## Migration from Grafana
+
+A Perses plugin can optionally embed a `migrate` folder file at its root, that contains a `migrate.cue` file. This file is basically describing in CUE language how to convert a given Grafana object into an instance of this plugin. In such case your plugin is considered as the Perses equivalent of this Grafana object type, i.e it will be used as part of the translation process when a Grafana dashboard is received on the `/api/migrate` endpoint.
+
+!!! warning
+    If ever you come to the situation where you have 2 or more plugins describing a migration logic for the same Grafana panel type, be aware that the last one encountered by alphabetical order will take priority.
+
+### Panel
+
+A panel migration file looks like the following:
+
+```cue
+package migrate
+
+import (
+	commonMigrate "github.com/perses/shared/cue/common/migrate"
+)
+
+#grafanaType: "bargauge"
+#panel:       _
+
+kind: "BarChart"
+spec: {
+	calculation: *commonMigrate.#mapping.calc[#panel.options.reduceOptions.calcs[0]] | commonMigrate.#defaultCalc // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
+
+	#unit: *commonMigrate.#mapping.unit[#panel.fieldConfig.defaults.unit] | null
+	if #unit != null {
+		format: unit: #unit
+	}
+
+	#decimal: *#panel.fieldConfig.defaults.decimal | null
+	if #decimal != null {
+		format: decimalPlaces: #decimal
+	}
+}
+```
+
+- The file must be named `migrate.cue`.
+- `#grafanaType` is a mandatory definition to provide, whose string value must match the `type` of the Grafana panel you want to migrate.
+- `#panel` is the reference used by Perses to inject the Grafana panel objects to migrate. You can access the different fields via the `#panel.field.subfield` syntax. To find the list of available fields, refer to the Grafana data model for the relevant panel type (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
+- The logic consists of field assignments, using the content of `#panel`. The end result must match the model of the considered Perses panel plugin.
+    - Optionally, you can use the `github.com/perses/shared/cue/common/migrate` package that Perses provides in order to remap some of the attributes:
+        - `#mapping.unit`: mapping table for the `unit` attribute (key = grafana unit, value = perses equivalent).
+        - `#mapping.calc`: mapping table for the `calculation` attribute (key = grafana unit, value = perses equivalent).
+        - `#mapping.color`: mapping table for the "standard" colors used by Grafana (key = color name, value = hex code).
+        - `#defaultCalc`: standard default value for the `calculation` attribute.
+
+### Query
+
+A query migration file looks like the following:
+
+```cue
+package migrate
+
+#target: _
+
+if (*#target.datasource.type | null) == "prometheus" && #target.expr != _|_ {
+	kind: "PrometheusTimeSeriesQuery"
+	spec: {
+		datasource: {
+			kind: "PrometheusDatasource"
+			name: #target.datasource.uid
+		}
+		query:         #target.expr
+		#legendFormat: *#target.legendFormat | "__auto"
+		if #legendFormat != "__auto" {
+			seriesNameFormat: #legendFormat
+		}
+		if #target.interval != _|_ {
+			minStep: #target.interval
+		}
+	}
+}
+```
+
+Alternatively, the same migration logic can be written this way:
+
+```cue
+package migrate
+
+#target: {
+	type: "prometheus"
+	expr: string
+	...
+}
+
+kind: "PrometheusTimeSeriesQuery"
+spec: {
+	datasource: {
+		kind: "PrometheusDatasource"
+		name: #target.datasource.uid
+	}
+	query:         #target.expr
+	#legendFormat: *#target.legendFormat | "__auto"
+	if #legendFormat != "__auto" {
+		seriesNameFormat: #legendFormat
+	}
+	if #target.interval != _|_ {
+		minStep: #target.interval
+	}
+}
+```
+
+- The file must be named `migrate.cue`.
+- `#target` is the reference used by Perses to inject the Grafana target objects to migrate. You can access the different fields via the `#target.field.subfield` syntax. To find the list of available fields, refer to the Grafana data model for the targets (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
+- The logic consists of field assignments, using the content of `#target`. The end result must match the model of the considered Perses query plugin.
+
+!!! warning
+    Ensure that your file evaluates to an invalid result (error or empty) if the provided `#target` value does not match the expected payload.
+
+### Variable
+
+A variable migration file looks like the following:
+
+```cue
+package migrate
+
+import "strings"
+
+#grafanaVar: _ 
+
+if #grafanaVar.type == "custom" || #grafanaVar.type == "interval" {
+	kind: "StaticListVariable"
+    spec: {
+        values: strings.Split(#grafanaVar.query, ",")
+    }
+}
+```
+
+Alternatively, the same migration logic can be written this way:
+
+```cue
+package migrate
+
+import "strings"
+
+#grafanaVar: {
+	type: "custom" | "interval"
+	query: string
+	...
+}
+
+kind: "StaticListVariable"
+spec: {
+	values: strings.Split(#grafanaVar.query, ",")
+}
+```
+
+- The file must be named `migrate.cue`.
+- `#grafanaVar` is the reference used by Perses to inject the Grafana variable objects to migrate. You can access the different fields via the `#grafanaVar.field.subfield` syntax. To find the list of available fields, refer to the Grafana data model for the relevant variable type (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
+- The logic consists of field assignments, using the content of `#grafanaVar`. The end result must match the model of the considered Perses variable plugin.
+
+!!! warning
+    Ensure that your file evaluates to an invalid result (error or empty) if the provided `#grafanaVar` value does not match the expected payload.

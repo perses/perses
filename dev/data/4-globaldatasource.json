@@ -1,0 +1,158 @@
+[
+  {
+    "kind": "GlobalDatasource",
+    "metadata": {
+      "name": "PrometheusDemo"
+    },
+    "spec": {
+      "default": false,
+      "plugin": {
+        "kind": "PrometheusDatasource",
+        "spec": {
+          "proxy": {
+            "kind": "HTTPProxy",
+            "spec": {
+              "url": "https://prometheus.demo.prometheus.io"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "GlobalDatasource",
+    "metadata": {
+      "name": "PrometheusLocal"
+    },
+    "spec": {
+      "default": true,
+      "plugin": {
+        "kind": "PrometheusDatasource",
+        "spec": {
+          "proxy": {
+            "kind": "HTTPProxy",
+            "spec": {
+              "url": "http://localhost:9090"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "GlobalDatasource",
+    "metadata": {
+      "name": "TempoLocal"
+    },
+    "spec": {
+      "default": true,
+      "plugin": {
+        "kind": "TempoDatasource",
+        "spec": {
+          "proxy": {
+            "kind": "HTTPProxy",
+            "spec": {
+              "url": "http://localhost:3200"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "GlobalDatasource",
+    "metadata": {
+      "name": "LokiLocal"
+    },
+    "spec": {
+      "default": true,
+      "plugin": {
+        "kind": "LokiDatasource",
+        "spec": {
+          "proxy": {
+            "kind": "HTTPProxy",
+            "spec": {
+              "allowedEndpoints": [
+                {
+                  "endpointPattern": "/loki/api/v1/query",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/loki/api/v1/query_range",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/loki/api/v1/labels",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/loki/api/v1/label/([a-zA-Z0-9_-]+)/values",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/loki/api/v1/series",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/loki/api/v1/index/volume",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/loki/api/v1/index/volume_range",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/loki/api/v1/index/stats",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/loki/api/v1/tail",
+                  "method": "GET"
+                }
+              ],
+              "url": "http://localhost:3100"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "GlobalDatasource",
+    "metadata": {
+      "name": "PyroscopeLocal"
+    },
+    "spec": {
+      "default": true,
+      "plugin": {
+        "kind": "PyroscopeDatasource",
+        "spec": {
+          "proxy": {
+            "kind": "HTTPProxy",
+            "spec": {
+              "allowedEndpoints": [
+                {
+                  "endpointPattern": "/pyroscope/render",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/querier.v1.QuerierService/ProfileTypes",
+                  "method": "POST"
+                },
+                {
+                  "endpointPattern": "/querier.v1.QuerierService/LabelNames",
+                  "method": "POST"
+                },
+                {
+                  "endpointPattern": "/querier.v1.QuerierService/LabelValues",
+                  "method": "POST"
+                }
+              ],
+              "url": "http://localhost:4040"
+            }
+          }
+        }
+      }
+    }
+  }
+]

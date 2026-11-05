@@ -1,0 +1,149 @@
+name: ci
+on:
+  push:
+    branches:
+      - main
+      - release/*
+      - snapshot/*
+    tags:
+      - v*
+  pull_request:
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.ref_name != 'main' }}
+
+jobs:
+  build-frontend:
+    name: "build-frontend"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - uses: perses/github-actions@v0.13.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_npm: true
+          nvmrc_path: "./ui/.nvmrc"
+
+      - name: Check Tag
+        ## This step is verifying that the tag follow the semver
+        ## It is only triggered when a tag is created
+        if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
+        run: ./scripts/release.sh --check-version "${{ github.ref_name }}"
+
+      - name: Check libraries version
+        ## This step is verifying that the version of each package is matching the tag
+        if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
+        run: ./scripts/ui_release.sh --check-package "${{ github.ref_name }}"
+
+      - name: Use snapshot version
+        ## This step only runs for "snapshot" branches starting with "snapshot/"
+        if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'snapshot/') }}
+        run: ./scripts/ui_release.sh --snapshot-version "${{ github.ref_name }}" "${{ github.sha }}"
+
+      - name: Install UI deps
+        working-directory: ./ui
+        run: npm ci
+      - name: Build the app and all packages
+        working-directory: ./ui
+        run: npm run build
+
+      - name: Generate frontend SBOM (CycloneDX)
+        working-directory: ./ui
+        run: npx @cyclonedx/cyclonedx-npm --output-file ../ui-sbom.cdx.json --output-format JSON
+      - name: store frontend SBOM
+        if: ${{ github.event_name == 'push' && (startsWith(github.ref_name, 'v') || startsWith(github.ref_name, 'snapshot/')) }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ui-sbom
+          path: ui-sbom.cdx.json
+
+      - name: store react production build
+        uses: actions/upload-artifact@v7
+        with:
+          name: ui-libs
+          path: |
+            ui/**/dist
+            !ui/node_modules
+
+  build:
+    name: "go and github release"
+    needs: "build-frontend"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      # This env is required for the docker manifest command to work
+      DOCKER_CLI_EXPERIMENTAL: "enabled"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: perses/github-actions@v0.13.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+      - name: Download react build
+        uses: actions/download-artifact@v8
+        with:
+          name: ui-libs
+          path: ui
+      - name: Download frontend SBOM
+        if: ${{ github.event_name == 'push' && (startsWith(github.ref_name, 'v') || startsWith(github.ref_name, 'snapshot/')) }}
+        uses: actions/download-artifact@v8
+        with:
+          name: ui-sbom
+          path: .
+      - name: Generate endpoints
+        run: make generate
+      - name: Install go deps
+        run: go mod download
+      - name: Extract Changelog
+        run: make extract-changelog
+      - # Add support for more platforms with QEMU (optional)
+        # https://github.com/docker/setup-qemu-action
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        if: ${{ github.event_name == 'push' && (startsWith(github.ref_name, 'v') || github.ref_name == 'main') }}
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: "docker.io"
+      - name: Login to Quay.io
+        uses: docker/login-action@v4
+        if: ${{ github.event_name == 'push' && (startsWith(github.ref_name, 'v') || github.ref_name == 'main') }}
+        with:
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+          registry: "quay.io"
+      - name: Override version
+        if: ${{ github.ref_name == 'main' }}
+        run: ./scripts/override_version.sh
+      - name: Install syft (for SBOM generation)
+        uses: anchore/sbom-action/download-syft@v0
+      - name: install goreleaser
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser
+          install-only: true
+      - name: Build Go binaries and docker images
+        run: make cross-build
+      - name: Publish main docker image
+        if: ${{ github.ref_name == 'main' }}
+        run: make push-main-docker-image
+      - name: Publish Release and binaries
+        ## This step will only run when a new tag is pushed.
+        ## It will build the Go binaries and the docker images and then publish:
+        ## - the GitHub release with the archive built
+        ## - docker images on the different docker registry selected
+        if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
+        run: make cross-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

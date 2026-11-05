@@ -1,0 +1,107 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import type { DatasourceApi, DatasourceSelector } from '@perses-dev/client';
+import { buildProxyUrl } from '@perses-dev/client';
+import { useCallback, useMemo } from 'react';
+
+import { useDatasourceList } from './datasource-client';
+import { useGlobalDatasourceList } from './global-datasource-client';
+
+export function useDatasourceApi(): DatasourceApi {
+  const { data: globalDatasources } = useGlobalDatasourceList();
+  const { data: datasources } = useDatasourceList({});
+
+  const getDatasource = useCallback(
+    async (project: string, selector: DatasourceSelector) => {
+      if (!datasources) {
+        return undefined;
+      }
+      return datasources.find((datasource) => {
+        if (datasource.metadata.project !== project) {
+          return false;
+        }
+        if (selector.kind !== datasource.spec.plugin.kind) {
+          return false;
+        }
+        if (!selector.name) {
+          return datasource.spec.default;
+        }
+        return datasource.metadata.name.toLowerCase() === selector.name.toLowerCase();
+      });
+    },
+    [datasources],
+  );
+
+  const getGlobalDatasource = useCallback(
+    async (selector: DatasourceSelector) => {
+      if (!globalDatasources) {
+        return undefined;
+      }
+      return globalDatasources.find((datasource) => {
+        if (selector.kind !== datasource.spec.plugin.kind) {
+          return false;
+        }
+        if (!selector.name) {
+          return datasource.spec.default;
+        }
+        return datasource.metadata.name.toLowerCase() === selector.name.toLowerCase();
+      });
+    },
+    [globalDatasources],
+  );
+
+  const listDatasources = useCallback(
+    async (project: string, pluginKind?: string) => {
+      if (!datasources) {
+        return [];
+      }
+      return datasources.filter((datasource) => {
+        if (datasource.metadata.project !== project) {
+          return false;
+        }
+        if (pluginKind && datasource.spec.plugin.kind !== pluginKind) {
+          return false;
+        }
+        return true;
+      });
+    },
+    [datasources],
+  );
+
+  const listGlobalDatasources = useCallback(
+    async (pluginKind?: string) => {
+      if (!globalDatasources) {
+        return [];
+      }
+      return globalDatasources.filter((datasource) => {
+        if (pluginKind && datasource.spec.plugin.kind !== pluginKind) {
+          return false;
+        }
+        return true;
+      });
+    },
+    [globalDatasources],
+  );
+
+  return useMemo(
+    () => ({
+      getDatasource,
+      getGlobalDatasource,
+      listDatasources,
+      listGlobalDatasources,
+      buildProxyUrl,
+    }),
+    [getDatasource, getGlobalDatasource, listDatasources, listGlobalDatasources],
+  );
+}

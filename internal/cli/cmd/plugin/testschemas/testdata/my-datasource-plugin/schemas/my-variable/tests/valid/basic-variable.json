@@ -1,0 +1,7 @@
+{
+  "kind": "MyVariable",
+  "spec": {
+    "options": ["option1", "option2", "option3"],
+    "multiSelect": true
+  }
+}

@@ -1,0 +1,311 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package config
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"slices"
+	"time"
+
+	"github.com/perses/perses/pkg/model/api/v1/secret"
+	"github.com/perses/spec/go/common"
+)
+
+const (
+	DefaultAccessTokenTTL  = time.Minute * 15
+	DefaultRefreshTokenTTL = time.Hour * 24
+	DefaultProviderTimeout = time.Minute * 1
+)
+
+type OAuthOverride struct {
+	ClientID         secret.Hidden `json:"client_id" yaml:"client_id"`
+	ClientSecret     secret.Hidden `json:"client_secret,omitempty" yaml:"client_secret,omitempty"`
+	ClientSecretFile string        `json:"client_secret_file,omitempty" yaml:"client_secret_file,omitempty"`
+	Scopes           []string      `json:"scopes" yaml:"scopes"`
+}
+
+func (o *OAuthOverride) Verify() error {
+	if len(o.ClientSecret) > 0 && len(o.ClientSecretFile) > 0 {
+		return errors.New("only one of `client_secret` or `client_secret_file` can be set")
+	}
+	if len(o.ClientSecretFile) > 0 {
+		data, err := os.ReadFile(o.ClientSecretFile)
+		if err != nil {
+			return fmt.Errorf("failed to read client_secret_file: %w", err)
+		}
+		o.ClientSecret = secret.Hidden(data)
+	}
+	return nil
+}
+
+// appendIfMissing will append the value in the slice, only if not already present.
+// Will return a boolean saying if the value has been appended or not.
+func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
+	if slices.Contains(slice, value) {
+		return slice, false
+	}
+	return append(slice, value), true
+}
+
+type HTTP struct {
+	Timeout   common.Duration   `json:"timeout" yaml:"timeout"`
+	TLSConfig *secret.TLSConfig `json:"tls_config,omitempty" yaml:"tls_config,omitempty"`
+}
+
+func (h HTTP) MarshalYAML() (any, error) {
+	cfg := secret.NewPublicTLSConfig(h.TLSConfig)
+	return struct {
+		Timeout   common.Duration         `json:"timeout" yaml:"timeout"`
+		TLSConfig *secret.PublicTLSConfig `json:"tls_config" yaml:"tls_config"`
+	}{
+		Timeout:   h.Timeout,
+		TLSConfig: cfg,
+	}, nil
+}
+
+func (h HTTP) MarshalJSON() ([]byte, error) {
+	cfg := secret.NewPublicTLSConfig(h.TLSConfig)
+	return json.Marshal(struct {
+		Timeout   common.Duration         `json:"timeout"`
+		TLSConfig *secret.PublicTLSConfig `json:"tls_config"`
+	}{
+		Timeout:   h.Timeout,
+		TLSConfig: cfg,
+	})
+}
+
+func (h *HTTP) Verify() error {
+	if h.Timeout == 0 {
+		h.Timeout = common.Duration(DefaultProviderTimeout)
+	}
+	return nil
+}
+
+// ClaimMapping maps a single upstream token claim value to a Perses role.
+// When Project is empty, RoleName is resolved as a GlobalRole (global permissions).
+// When Project is non-empty, RoleName is resolved as a project-scoped Role within that project.
+type ClaimMapping struct {
+	ClaimValue string `json:"claim_value" yaml:"claim_value"`
+	RoleName   string `json:"role_name" yaml:"role_name"`
+	// Project is optional. When set, maps the claim value to a project-scoped Role.
+	// When empty, maps to a GlobalRole.
+	// +optional
+	Project string `json:"project,omitempty" yaml:"project,omitempty"`
+}
+
+func (c *ClaimMapping) Verify() error {
+	if c.ClaimValue == "" {
+		return errors.New("claim_mapping's `claim_value` is mandatory")
+	}
+	if c.RoleName == "" {
+		return errors.New("claim_mapping's `role_name` is mandatory")
+	}
+	return nil
+}
+
+// ProviderClaimConfig describes one claim field that Perses should persist
+// from the upstream access token, and optionally map to Perses roles.
+type ProviderClaimConfig struct {
+	// ClaimName is the JSON field name in the upstream access token (e.g. "roles", "groups").
+	ClaimName string `json:"claim_name" yaml:"claim_name"`
+	// Mappings maps individual claim values to Perses roles.
+	// +optional
+	Mappings []ClaimMapping `json:"mappings,omitempty" yaml:"mappings,omitempty"`
+}
+
+func (p *ProviderClaimConfig) Verify() error {
+	if p.ClaimName == "" {
+		return errors.New("provider_claim_config's `claim_name` is mandatory")
+	}
+	for i := range p.Mappings {
+		if err := p.Mappings[i].Verify(); err != nil {
+			return fmt.Errorf("invalid mapping in claim %q: %w", p.ClaimName, err)
+		}
+	}
+	return nil
+}
+
+type Provider struct {
+	SlugID            string         `json:"slug_id" yaml:"slug_id"`
+	Name              string         `json:"name" yaml:"name"`
+	ClientID          secret.Hidden  `json:"client_id" yaml:"client_id"`
+	ClientSecret      secret.Hidden  `json:"client_secret,omitempty" yaml:"client_secret,omitempty"`
+	ClientSecretFile  string         `json:"client_secret_file,omitempty" yaml:"client_secret_file,omitempty"`
+	DeviceCode        *OAuthOverride `json:"device_code,omitempty" yaml:"device_code,omitempty"`
+	ClientCredentials *OAuthOverride `json:"client_credentials,omitempty" yaml:"client_credentials,omitempty"`
+	RedirectURI       common.URL     `json:"redirect_uri,omitempty" yaml:"redirect_uri,omitempty"`
+	Scopes            []string       `json:"scopes,omitempty" yaml:"scopes,omitempty"`
+	HTTP              HTTP           `json:"http" yaml:"http"`
+	// Claims lists upstream token claim fields that Perses should persist in the
+	// Perses JWT and optionally map to Perses roles.
+	// +optional
+	Claims []ProviderClaimConfig `json:"claims,omitempty" yaml:"claims,omitempty"`
+}
+
+func (p *Provider) Verify() error {
+	if p.SlugID == "" {
+		return errors.New("provider's `slug_id` is mandatory")
+	}
+	if p.Name == "" {
+		return errors.New("provider's `name` is mandatory")
+	}
+	if p.ClientID == "" {
+		return errors.New("provider's `client_id` is mandatory")
+	}
+	if len(p.ClientSecret) > 0 && len(p.ClientSecretFile) > 0 {
+		return errors.New("only one of `client_secret` or `client_secret_file` can be set")
+	}
+	if len(p.ClientSecretFile) > 0 {
+		data, err := os.ReadFile(p.ClientSecretFile)
+		if err != nil {
+			return fmt.Errorf("failed to read client_secret_file: %w", err)
+		}
+		p.ClientSecret = secret.Hidden(data)
+	}
+	for i := range p.Claims {
+		if err := p.Claims[i].Verify(); err != nil {
+			return fmt.Errorf("invalid claim config at index %d: %w", i, err)
+		}
+	}
+	return nil
+}
+
+type K8sAuthnProvider struct {
+	Enable bool `json:"enable" yaml:"enable"`
+}
+
+type OIDCLogout struct {
+	Enabled                 bool   `json:"enabled" yaml:"enabled"`
+	LogoutRedirectParamName string `json:"logout_redirect_param_name,omitempty" yaml:"logout_redirect_param_name,omitempty"`
+}
+
+// LoginProperty is the name of a userinfo property that can be used as the OIDC "login" of the user.
+type LoginProperty string
+
+const (
+	LoginPropertyName              LoginProperty = "name"
+	LoginPropertyGivenName         LoginProperty = "given_name"
+	LoginPropertyFamilyName        LoginProperty = "family_name"
+	LoginPropertyMiddleName        LoginProperty = "middle_name"
+	LoginPropertyNickname          LoginProperty = "nickname"
+	LoginPropertyPreferredUsername LoginProperty = "preferred_username"
+	LoginPropertyEmail             LoginProperty = "email"
+)
+
+func (p *LoginProperty) Verify() error {
+	switch *p {
+	case "", LoginPropertyName, LoginPropertyGivenName, LoginPropertyFamilyName, LoginPropertyMiddleName, LoginPropertyNickname, LoginPropertyPreferredUsername, LoginPropertyEmail:
+		return nil
+	default:
+		return fmt.Errorf("invalid custom_login_property %q", *p)
+	}
+}
+
+type OIDCProvider struct {
+	Provider     `json:",inline" yaml:",inline"`
+	Issuer       common.URL        `json:"issuer" yaml:"issuer"`
+	DiscoveryURL common.URL        `json:"discovery_url,omitempty" yaml:"discovery_url,omitempty"`
+	URLParams    map[string]string `json:"url_params,omitempty" yaml:"url_params,omitempty"`
+	DisablePKCE  bool              `json:"disable_pkce" yaml:"disable_pkce"`
+	Logout       OIDCLogout        `json:"logout" yaml:"logout"`
+	// CustomLoginProperty is the name of the userinfo property to use as the "login" of the user
+	// (e.g. "preferred_username"). It must be one of the properties Perses already extracts from
+	// the userinfo response. If not set or not found in the response, it falls back to the email,
+	// then to the subject.
+	CustomLoginProperty LoginProperty `json:"custom_login_property,omitempty" yaml:"custom_login_property,omitempty"`
+}
+
+func (p *OIDCProvider) Verify() error {
+	if p.Issuer.IsNilOrEmpty() {
+		return errors.New("provider's `issuer` is mandatory")
+	}
+	return nil
+}
+
+type OAuthProvider struct {
+	Provider            `json:",inline" yaml:",inline"`
+	AuthURL             common.URL `json:"auth_url" yaml:"auth_url"`
+	TokenURL            common.URL `json:"token_url" yaml:"token_url"`
+	UserInfosURL        common.URL `json:"user_infos_url" yaml:"user_infos_url"`
+	DeviceAuthURL       common.URL `json:"device_auth_url" yaml:"device_auth_url"`
+	CustomLoginProperty string     `json:"custom_login_property,omitempty" yaml:"custom_login_property,omitempty"`
+}
+
+func (p *OAuthProvider) Verify() error {
+	if p.AuthURL.IsNilOrEmpty() {
+		return errors.New("provider's `auth_url` is mandatory")
+	}
+	if p.TokenURL.IsNilOrEmpty() {
+		return errors.New("provider's `token_url` is mandatory")
+	}
+	if p.UserInfosURL.IsNilOrEmpty() {
+		return errors.New("provider's `user_infos_url` is mandatory")
+	}
+	return nil
+}
+
+type AuthenticationProviders struct {
+	EnableNative bool `json:"enable_native" yaml:"enable_native"`
+	// +optional
+	KubernetesProvider K8sAuthnProvider `json:"kubernetes,omitzero" yaml:"kubernetes,omitempty"`
+	OAuth              []OAuthProvider  `json:"oauth,omitempty" yaml:"oauth,omitempty"`
+	OIDC               []OIDCProvider   `json:"oidc,omitempty" yaml:"oidc,omitempty"`
+}
+
+func (p *AuthenticationProviders) Verify() error {
+	var tmpOIDCSlugIDs []string
+	for _, prov := range p.OIDC {
+		var ok bool
+		tmpOIDCSlugIDs, ok = appendIfMissing(tmpOIDCSlugIDs, prov.SlugID)
+		if !ok {
+			return fmt.Errorf("several OIDC providers exist with the same slug_id %q", prov.SlugID)
+		}
+	}
+	var tmpOAuthSlugIDs []string
+	for _, prov := range p.OAuth {
+		var ok bool
+		tmpOAuthSlugIDs, ok = appendIfMissing(tmpOAuthSlugIDs, prov.SlugID)
+		if !ok {
+			return fmt.Errorf("several OAuth providers exist with the same slug_id %q", prov.SlugID)
+		}
+	}
+	return nil
+}
+
+type AuthenticationConfig struct {
+	// AccessTokenTTL is the time to live of the access token. By default, it is 15 minutes.
+	AccessTokenTTL common.Duration `json:"access_token_ttl,omitempty" yaml:"access_token_ttl,omitempty"`
+	// RefreshTokenTTL is the time to live of the refresh token.
+	// The refresh token is used to get a new access token when it is expired.
+	// By default, it is 24 hours.
+	RefreshTokenTTL common.Duration `json:"refresh_token_ttl,omitempty" yaml:"refresh_token_ttl,omitempty"`
+	// DisableSignUp deactivates the Sign-up page in the UI.
+	// It also disables the endpoint that gives the possibility to create a user.
+	DisableSignUp bool `json:"disable_sign_up" yaml:"disable_sign_up"`
+	// Providers configure the different authentication providers
+	Providers AuthenticationProviders `json:"providers" yaml:"providers"`
+}
+
+func (a *AuthenticationConfig) Verify() error {
+	if a.AccessTokenTTL == 0 {
+		a.AccessTokenTTL = common.Duration(DefaultAccessTokenTTL)
+	}
+	if a.RefreshTokenTTL == 0 {
+		a.RefreshTokenTTL = common.Duration(DefaultRefreshTokenTTL)
+	}
+	return nil
+}

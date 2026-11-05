@@ -1,0 +1,26 @@
+route:
+  receiver: default
+  group_by: ['alertname', 'severity']
+  group_wait: 5s
+  group_interval: 15s
+  repeat_interval: 1h
+  routes:
+    - receiver: platform-critical
+      matchers:
+        - team="platform"
+        - severity="critical"
+      continue: true
+    - receiver: observability
+      matchers:
+        - team="observability"
+      continue: true
+    - receiver: app-backend
+      matchers:
+        - team="app-backend"
+      continue: true
+
+receivers:
+  - name: default
+  - name: platform-critical
+  - name: observability
+  - name: app-backend

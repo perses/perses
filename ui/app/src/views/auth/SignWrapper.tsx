@@ -1,0 +1,209 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import type { Theme } from '@mui/material';
+import { alpha, Divider, Stack, useTheme } from '@mui/material';
+import Bitbucket from 'mdi-material-ui/Bitbucket';
+import type { ReactElement, ReactNode } from 'react';
+import { useMemo } from 'react';
+import * as React from 'react';
+import {
+  AmazonLoginButton,
+  AppleLoginButton,
+  BufferLoginButton,
+  createButton,
+  DiscordLoginButton,
+  FacebookLoginButton,
+  GithubLoginButton,
+  GitlabLoginButton,
+  GoogleLoginButton,
+  InstagramLoginButton,
+  LinkedInLoginButton,
+  MetamaskLoginButton,
+  MicrosoftLoginButton,
+  OktaLoginButton,
+  SlackLoginButton,
+  TelegramLoginButton,
+  TikTokLoginButton,
+  TwitterLoginButton,
+  YahooLoginButton,
+  ZaloLoginButton,
+} from 'react-social-login-buttons';
+
+import DarkThemePersesLogo from '../../components/logo/DarkThemePersesLogo';
+import LightThemePersesLogo from '../../components/logo/LightThemePersesLogo';
+import PersesLogoCropped from '../../components/logo/PersesLogoCropped';
+import { PERSES_APP_CONFIG } from '../../config';
+import { useConfigContext, useIsNativeAuthnProviderEnabled } from '../../context/Config';
+import { useDarkMode } from '../../context/DarkMode';
+import { buildRedirectQueryString, useRedirectQueryParam } from '../../model/auth/auth-client';
+import { useIsLaptopSize } from '../../utils/browser-size';
+
+type SocialLoginButton = ReturnType<typeof createButton>;
+type SocialIconProps = { size: string | number; color: string };
+
+function BitbucketIcon({ size, color }: SocialIconProps): ReactElement {
+  return <Bitbucket sx={{ fontSize: size, color }} />;
+}
+
+type SocialButtonFactory = (theme: Theme) => SocialLoginButton;
+
+// Default button. Will match all remaining providers.
+const DEFAULT_SOCIAL_BUTTON: SocialButtonFactory = (theme) =>
+  createButton({
+    icon: '',
+    style: {
+      color: theme.palette.text.primary,
+      backgroundColor: theme.palette.background.default,
+    },
+    activeStyle: {
+      backgroundColor: alpha(theme.palette.primary.main, theme.palette.action.hoverOpacity),
+    },
+  });
+
+// A simple map to know which button to use, according to the configuration.
+// If the issuer/auth url contains the given key, this will use the corresponding button.
+// noinspection JSUnusedGlobalSymbols
+const SOCIAL_BUTTONS_MAPPING: Record<string, SocialButtonFactory> = {
+  // Managed by the lib.
+  amazon: () => AmazonLoginButton,
+  apple: () => AppleLoginButton,
+  buffer: () => BufferLoginButton,
+  discord: () => DiscordLoginButton,
+  facebook: () => FacebookLoginButton,
+  github: () => GithubLoginButton,
+  google: () => GoogleLoginButton,
+  instagram: () => InstagramLoginButton,
+  linkedin: () => LinkedInLoginButton,
+  metamask: () => MetamaskLoginButton,
+  microsoft: () => MicrosoftLoginButton,
+  okta: () => OktaLoginButton,
+  slack: () => SlackLoginButton,
+  telegram: () => TelegramLoginButton,
+  tiktok: () => TikTokLoginButton,
+  twitter: () => TwitterLoginButton,
+  yahoo: () => YahooLoginButton,
+  zalo: () => ZaloLoginButton,
+  gitlab: () => GitlabLoginButton,
+  // Not (yet?) managed by the lib.
+  bitbucket: () =>
+    createButton({
+      icon: BitbucketIcon,
+      style: { background: '#0C66E4' },
+      activeStyle: { background: '#0055CC' },
+    }),
+  '': DEFAULT_SOCIAL_BUTTON,
+};
+
+/**
+ * Get the social button corresponding with the given URL (issuer or auth url).
+ * If no social button is associated, it will build one using the theme.
+ * @param theme
+ * @param url
+ */
+function computeSocialButtonFromURL(theme: Theme, url: string): SocialLoginButton {
+  for (const [key, createSocialButton] of Object.entries(SOCIAL_BUTTONS_MAPPING)) {
+    if (url.includes(key)) {
+      return createSocialButton(theme);
+    }
+  }
+
+  // Should not happen as '' is always contained in any string.
+  return DEFAULT_SOCIAL_BUTTON(theme);
+}
+
+export function PersesLogo({
+  isLaptopSize,
+  isDarkModeEnabled,
+}: {
+  isLaptopSize: boolean;
+  isDarkModeEnabled: boolean;
+}): ReactElement {
+  if (!isLaptopSize) {
+    return <PersesLogoCropped />;
+  }
+
+  if (isDarkModeEnabled) {
+    return <DarkThemePersesLogo />;
+  }
+
+  return <LightThemePersesLogo />;
+}
+
+export function SignWrapper(props: { children: ReactNode }): ReactElement {
+  const { isDarkModeEnabled } = useDarkMode();
+  const isLaptopSize = useIsLaptopSize();
+  const config = useConfigContext();
+  const theme = useTheme();
+  const isNativeAuthnProviderEnabled = useIsNativeAuthnProviderEnabled();
+  const providers = config.config.security.authentication.providers;
+  const socialProviders = useMemo(() => {
+    const oauthProviders = (providers.oauth || []).map((provider) => ({
+      path: `oauth/${provider.slug_id}`,
+      name: provider.name,
+      button: computeSocialButtonFromURL(theme, provider.auth_url),
+    }));
+    const oidcProviders = (providers.oidc || []).map((provider) => ({
+      path: `oidc/${provider.slug_id}`,
+      name: provider.name,
+      button: computeSocialButtonFromURL(theme, provider.issuer),
+    }));
+    return [...oidcProviders, ...oauthProviders];
+  }, [providers.oauth, providers.oidc, theme]);
+  const path = useRedirectQueryParam(true);
+
+  return (
+    <Stack
+      width="100%"
+      flexDirection={isLaptopSize ? 'row' : 'column'}
+      alignItems="center"
+      justifyContent="center"
+      gap={2}
+    >
+      <PersesLogo isLaptopSize={isLaptopSize} isDarkModeEnabled={isDarkModeEnabled} />
+      <Divider
+        orientation={isLaptopSize ? 'vertical' : 'horizontal'}
+        variant="middle"
+        flexItem
+        sx={{
+          marginTop: isLaptopSize ? '30vh' : undefined,
+          marginBottom: isLaptopSize ? '30vh' : undefined,
+        }}
+      />
+      <Stack gap={1} sx={{ maxWidth: '85%', minWidth: '200px' }}>
+        {isNativeAuthnProviderEnabled && props.children}
+        {isNativeAuthnProviderEnabled && socialProviders.length > 0 && (
+          <div>
+            <Divider sx={{ marginTop: '16px' }}>or</Divider>
+          </div>
+        )}
+        {socialProviders.map((provider) => {
+          const SocialButton = provider.button;
+          return (
+            <SocialButton
+              iconSize="20px"
+              size="32px"
+              key={provider.path}
+              style={{ fontSize: '1em' }}
+              onClick={() => {
+                window.location.href = `${PERSES_APP_CONFIG.api_prefix}/api/auth/providers/${provider.path}/login?${buildRedirectQueryString(path)}`;
+              }}
+            >
+              Sign in with {provider.name}
+            </SocialButton>
+          );
+        })}
+      </Stack>
+    </Stack>
+  );
+}

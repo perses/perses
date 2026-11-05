@@ -1,0 +1,469 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package start
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strconv"
+	"strings"
+	"sync"
+	"syscall"
+	"time"
+
+	"github.com/fatih/color"
+	"github.com/fsnotify/fsnotify"
+	"github.com/perses/common/async"
+	"github.com/perses/common/async/taskhelper"
+	"github.com/perses/perses/internal/api/plugin"
+	persesCMD "github.com/perses/perses/internal/cli/cmd"
+	"github.com/perses/perses/internal/cli/config"
+	"github.com/perses/perses/pkg/client/api"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/module"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
+)
+
+const defaultRSBuildPort = 3000
+
+var (
+	portRegexp = regexp.MustCompile(`(?m)port\s*:\s*(\d+)`)
+	nameRegexp = regexp.MustCompile(`(?m)name\s*:\s*'?"?(\w+)'?"?`)
+)
+
+func extractServerPort(data []byte) (int, error) {
+	// We are trying to find the config:
+	//  server: {
+	//    port: 8080,
+	//  }
+	// If not find, the default port will be 3000 as defined in the rsbuild documentation.
+	matches := portRegexp.FindSubmatch(data)
+	if len(matches) != 2 {
+		return defaultRSBuildPort, nil
+	}
+	return strconv.Atoi(string(matches[1]))
+}
+
+func extractPluginName(data []byte) (string, error) {
+	matches := nameRegexp.FindSubmatch(data)
+	if len(matches) != 2 {
+		return "", errors.New("unable to find the plugin name")
+	}
+	return string(matches[1]), nil
+}
+
+func getServerPortAndExactPluginName(pluginPath string) (int, string, error) {
+	// todo we should support all format supported by rsbuild: https://rsbuild.dev/guide/basic/configure-rsbuild#configuration-file
+	configPath := filepath.Join(pluginPath, "rsbuild.config.ts")
+	data, err := os.ReadFile(configPath) //nolint: gosec
+	if err != nil {
+		return 0, "", err
+	}
+	port, err := extractServerPort(data)
+	if err != nil {
+		return 0, "", err
+	}
+	name, err := extractPluginName(data)
+	if err != nil {
+		return 0, "", err
+	}
+	return port, name, nil
+}
+
+// buildTasks is responsible to create the list of tasks that will be executed.
+// It will wrap the devserver in a taskhelper.Helper and create a signal listener.
+func buildDevServerTasks(servers []*devserver) []taskhelper.Helper {
+	var tasks []taskhelper.Helper
+	signalsListener, _ := taskhelper.New(async.NewSignalListener(syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL))
+	tasks = append(tasks, signalsListener)
+	for _, server := range servers {
+		task, _ := taskhelper.New(server)
+		tasks = append(tasks, task)
+	}
+	return tasks
+}
+
+func buildWaitDevServerTasks(pluginInDev []*v1.PluginInDevelopment) []taskhelper.Helper {
+	var result []taskhelper.Helper
+	for _, plg := range pluginInDev {
+		w := &waiter{
+			serverURL:  common.NewURL(plg.URL),
+			pluginName: plg.Name,
+		}
+		task, _ := taskhelper.New(w)
+		result = append(result, task)
+	}
+	return result
+}
+
+type option struct {
+	persesCMD.Option
+	all        bool
+	pluginList []string
+	apiClient  api.ClientInterface
+	writer     io.Writer
+	errWriter  io.Writer
+}
+
+func (o *option) Complete(args []string) error {
+	if len(args) > 0 {
+		if o.all {
+			return errors.New("you cannot have arguments when the flag --all is set")
+		}
+		o.pluginList = args
+	} else if o.all {
+		// We are assuming we are in a mono-repo, and we are able to find the plugins in the workspace list of the file `package.json`.
+		if err := o.completeAllPlugin(); err != nil {
+			return err
+		}
+	} else {
+		// In that case, we will start the plugin in the current directory.
+		o.pluginList = []string{"."}
+	}
+	apiClient, err := config.Global.GetAPIClient()
+	if err != nil {
+		return err
+	}
+	o.apiClient = apiClient
+	return nil
+}
+
+func (o *option) completeAllPlugin() error {
+	pkg, err := plugin.ReadPackage(".")
+	if err != nil {
+		return err
+	}
+	o.pluginList = pkg.Workspaces
+	return nil
+}
+
+func (o *option) Validate() error {
+	cfg, err := o.apiClient.Config()
+	if err != nil {
+		return err
+	}
+	if !cfg.Plugin.EnableDev {
+		return errors.New("remote server is not configured to receive plugin in development")
+	}
+	return nil
+}
+
+func (o *option) Execute() error {
+	servers, pluginInDev, err := o.prepareAllPlugins()
+	if err != nil {
+		return err
+	}
+
+	// Create the primary context that must be shared by every task
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Start all dev servers
+	devServersTasks := o.startDevServers(ctx, cancel, servers)
+
+	// Discover and update ports from dev server output
+	o.discoverAndUpdatePorts(ctx, servers, pluginInDev)
+
+	// Wait for dev servers to be ready and register plugins
+	if err := o.waitAndRegisterPlugins(ctx, cancel, pluginInDev); err != nil {
+		return err
+	}
+
+	// Wait for graceful shutdown and cleanup
+	o.waitForShutdownAndCleanup(ctx, devServersTasks, pluginInDev)
+	return nil
+}
+
+// prepareAllPlugins prepares all plugins and creates dev servers for them
+func (o *option) prepareAllPlugins() ([]*devserver, []*v1.PluginInDevelopment, error) {
+	var servers []*devserver
+	var pluginInDev []*v1.PluginInDevelopment
+	colors := generateColors(len(o.pluginList))
+
+	for i, pluginName := range o.pluginList {
+		s, cfg, err := o.preparePlugin(pluginName, colors[i])
+		if err != nil {
+			logrus.WithError(err).Errorf("failed to prepare plugin %q", pluginName)
+			continue
+		}
+		servers = append(servers, s)
+		pluginInDev = append(pluginInDev, cfg)
+	}
+
+	if len(servers) == 0 {
+		return nil, nil, errors.New("no plugins could be prepared")
+	}
+
+	return servers, pluginInDev, nil
+}
+
+// startDevServers starts all dev server tasks
+func (o *option) startDevServers(ctx context.Context, cancel context.CancelFunc, servers []*devserver) []taskhelper.Helper {
+	devServerTasks := buildDevServerTasks(servers)
+	for _, task := range devServerTasks {
+		taskhelper.Run(ctx, cancel, task)
+	}
+	return devServerTasks
+}
+
+// discoverAndUpdatePorts captures ports from dev server output and updates plugin URLs
+func (o *option) discoverAndUpdatePorts(ctx context.Context, servers []*devserver, pluginInDev []*v1.PluginInDevelopment) {
+	const portDiscoveryTimeout = 10 * time.Second
+	const overallTimeout = 15 * time.Second
+
+	portWaitGroup := make(chan struct{})
+	go func() {
+		var wg sync.WaitGroup
+		for i, server := range servers {
+			wg.Add(1)
+			go o.capturePortForPlugin(ctx, &wg, server, pluginInDev[i], portDiscoveryTimeout)
+		}
+		wg.Wait()
+		close(portWaitGroup)
+	}()
+
+	// Wait for all ports to be captured or timeout
+	select {
+	case <-portWaitGroup:
+		logrus.Info("All dev server ports have been captured")
+	case <-time.After(overallTimeout):
+		logrus.Warn("Timeout waiting for all dev server ports")
+	case <-ctx.Done():
+	}
+}
+
+// capturePortForPlugin captures the port for a single plugin from its dev server output
+func (o *option) capturePortForPlugin(ctx context.Context, wg *sync.WaitGroup, server *devserver, plugin *v1.PluginInDevelopment, timeout time.Duration) {
+	defer wg.Done()
+
+	select {
+	case port := <-server.GetPort():
+		logrus.Infof("Dev server for %s detected on port %d", plugin.Name, port)
+		plugin.URL = common.MustParseURL(fmt.Sprintf("http://localhost:%d", port))
+	case <-time.After(timeout):
+		logrus.Warnf("Timeout waiting for port from dev server %s, using configured port", plugin.Name)
+	case <-ctx.Done():
+	}
+}
+
+// waitAndRegisterPlugins waits for dev servers to be ready and registers them with the API
+func (o *option) waitAndRegisterPlugins(ctx context.Context, cancel context.CancelFunc, pluginInDev []*v1.PluginInDevelopment) error {
+	waitDevServerTasks := buildWaitDevServerTasks(pluginInDev)
+
+	for _, task := range waitDevServerTasks {
+		taskhelper.Run(ctx, cancel, task)
+	}
+	taskhelper.WaitAll(time.Second*60, waitDevServerTasks)
+
+	// Register the plugins in development
+	if apiErr := o.apiClient.V1().Plugin().PushDevPlugin(pluginInDev); apiErr != nil {
+		logrus.WithError(apiErr).Error("failed to register the plugin in development")
+		cancel()
+		return apiErr
+	}
+
+	// Start watching the plugin schemas
+	o.startWatchingPluginSchemas(ctx, pluginInDev)
+	return nil
+}
+
+// startWatchingPluginSchemas starts watching the plugin schemas for changes
+func (o *option) startWatchingPluginSchemas(ctx context.Context, pluginInDev []*v1.PluginInDevelopment) {
+	for _, plg := range pluginInDev {
+		if err := o.watchPluginSchema(ctx, plg); err != nil {
+			logrus.WithError(err).Errorf("failed to watch the plugin schema for the plugin %q", plg.Name)
+		} else {
+			logrus.Infof("watching the plugin schema for %q", plg.Name)
+		}
+	}
+}
+
+// waitForShutdownAndCleanup waits for shutdown signal and unregisters plugins
+func (o *option) waitForShutdownAndCleanup(ctx context.Context, devServerTasks []taskhelper.Helper, pluginInDev []*v1.PluginInDevelopment) {
+	// Wait for context to be canceled or tasks to be ended and wait for graceful stop
+	taskhelper.JoinAll(ctx, time.Second*30, devServerTasks)
+
+	// Unregister plugins from the remote server
+	for _, plg := range pluginInDev {
+		if err := o.apiClient.V1().Plugin().UnLoadDevPlugin(module.Metadata{
+			Name:     plg.Name,
+			Version:  plg.Version,
+			Registry: plg.Registry,
+		}); err != nil {
+			logrus.WithError(err).Errorf("failed to unregister the plugin %q from the remote server", plg.Name)
+		} else {
+			logrus.Infof("plugin %q has been unregistered from the remote server", plg.Name)
+		}
+	}
+}
+
+func (o *option) preparePlugin(pluginPath string, c *color.Color) (*devserver, *v1.PluginInDevelopment, error) {
+	// First, we need to find the command to start the dev server.
+	npmPackageData, readErr := plugin.ReadPackage(pluginPath)
+	if readErr != nil {
+		return nil, nil, fmt.Errorf("failed to read package for the plugin %q: %w", pluginPath, readErr)
+	}
+	var rsbuildCMD string
+	for scriptName, script := range npmPackageData.Scripts {
+		if strings.Contains(script, "rsbuild dev") {
+			rsbuildCMD = scriptName
+		}
+	}
+	if rsbuildCMD == "" {
+		return nil, nil, fmt.Errorf("unable to find how to run the rsbuild dev server in the file package.json for the plugin %q", pluginPath)
+	}
+	// Then, we need to find which port is used by the dev server.
+	port, pluginName, err := getServerPortAndExactPluginName(pluginPath)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get the dev server port for the plugin %q", pluginPath)
+	}
+	abs, err := filepath.Abs(pluginPath)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get the absolute path for the plugin %q", pluginPath)
+	}
+	server := newDevServer(pluginName, pluginPath, rsbuildCMD, o.writer, o.errWriter, c)
+	pluginInDevelopment := &v1.PluginInDevelopment{
+		Name:         pluginName,
+		Version:      npmPackageData.Version,
+		Registry:     npmPackageData.Perses.ModuleOrg,
+		URL:          common.MustParseURL(fmt.Sprintf("http://localhost:%d", port)),
+		AbsolutePath: abs,
+	}
+	return server, pluginInDevelopment, nil
+}
+
+func (o *option) watchPluginSchema(ctx context.Context, pluginInDev *v1.PluginInDevelopment) error {
+	// First, we need to find the command to start the dev server.
+	npmPackageData, readErr := plugin.ReadPackage(pluginInDev.AbsolutePath)
+	if readErr != nil {
+		return fmt.Errorf("failed to read package for the plugin %q", pluginInDev.AbsolutePath)
+	}
+	if !plugin.IsSchemaRequired(*v1.NewModuleSpec(npmPackageData.Perses)) || pluginInDev.DisableSchema {
+		logrus.Debugf("the plugin %q does not require a schema or is disabled, no need to watch it", pluginInDev.Name)
+		return nil
+	}
+	// Create new watcher.
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return err
+	}
+	go func() {
+		defer func() {
+			if watcherErr := watcher.Close(); watcherErr != nil {
+				logrus.WithError(watcherErr).Error("failed to close watcher")
+			}
+			logrus.Debug("watcher closed")
+		}()
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				if !ok {
+					// Channel was closed (i.e. Watcher.Close() was called).
+					return
+				}
+				if !event.Has(fsnotify.Write) {
+					// We are only interested in write events, aka file modification.
+					continue
+				}
+
+				if apiErr := o.apiClient.V1().Plugin().RefreshDevPlugin(module.Metadata{
+					Name:     pluginInDev.Name,
+					Version:  pluginInDev.Version,
+					Registry: pluginInDev.Registry,
+				}); apiErr != nil {
+					logrus.WithError(apiErr).Errorf("failed to refresh the plugin schema for the plugin %q: %s", pluginInDev.Name, apiErr)
+				} else {
+					logrus.Infof("plugin schema for %q has been refreshed", pluginInDev.Name)
+				}
+			case watchErr, ok := <-watcher.Errors:
+				if !ok {
+					// Channel was closed (i.e. Watcher.Close() was called).
+					return
+				}
+				logrus.WithError(watchErr).Error("error while watching plugin schema")
+			case <-ctx.Done():
+				logrus.Info("stopping the watcher for plugin schema")
+				return
+			}
+		}
+	}()
+	return filepath.WalkDir(filepath.Join(pluginInDev.AbsolutePath, npmPackageData.Perses.SchemasPath), func(currentPath string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil // we are only interested in files
+		}
+		if filepath.Ext(currentPath) != ".cue" {
+			return nil
+		}
+		// file is a CUE file, we can add it to the watcher.
+		// It does not matter if it is a schema or a migration file because If a CUE file is modified,
+		// we want to reload the Cuelang instance representing the schema.
+		if watcherErr := watcher.Add(currentPath); watcherErr != nil {
+			return fmt.Errorf("failed to add file %q to the watcher: %w", currentPath, watcherErr)
+		}
+		return nil
+	})
+}
+
+func (o *option) SetWriter(writer io.Writer) {
+	o.writer = writer
+}
+
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
+}
+
+func NewCMD() *cobra.Command {
+	o := &option{}
+	cmd := &cobra.Command{
+		Use:   "start [PLUGIN_PATH...]",
+		Short: "Start the plugin",
+		Long: `
+The command is used to start a plugin in development mode.
+That means you can run the plugin in your local environment and see the effect of your changes in real time directly in the Perses UI.
+The command will discover which port is exposed, the exact name of the plugin and the absolute path required for the schemas.
+
+Once these information are collected, the command will execute the npm script defined in "package.json" that contains the command "rsbuild dev" to start any plugin dev server.
+When they are all ready, it will send the config to the Perses remote server.
+
+When Perses is receiving the dev config, it will contact every dev server listed to load the plugin and ensure the plugin is available in the UI.`,
+		Example: `
+# In case you are in a mono repo, you can start all the plugins by using the flag --all
+$ percli plugin start --all
+
+# You can also start a specific plugin by using its path
+$ percli plugin start ./plugins/my-plugin
+
+# You can start multiple plugins by using their path
+$ percli plugin start ./plugins/my-plugin ./plugins/my-other-plugin
+
+# You can as well start a plugin in the current path
+$ percli plugin start
+`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return persesCMD.Run(o, cmd, args)
+		},
+	}
+	cmd.Flags().BoolVar(&o.all, "all", false, "In case you are in a mono-repo, when set to true, it will start all plugins")
+	return cmd
+}

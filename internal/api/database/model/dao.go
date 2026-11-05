@@ -1,0 +1,56 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package model
+
+import (
+	"encoding/json"
+	"io"
+
+	modelAPI "github.com/perses/perses/pkg/model/api"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+)
+
+type Query interface {
+	GetMetadataOnlyQueryParam() bool
+	IsRawQueryAllowed() bool
+	IsRawMetadataQueryAllowed() bool
+	// GetProjectQueryParam will return the project name that is used to filter the list of resources.
+	// In case of global resource, this will return an empty string.
+	// In case of project resource, this will return the project name set in the query parameter or in the URL path.
+	GetProjectQueryParam() string
+	SetProjectQueryParam(project string)
+}
+
+type DAO interface {
+	io.Closer
+	Init() error
+	IsCaseSensitive() bool
+	Create(entity modelAPI.Entity) error
+	Upsert(entity modelAPI.Entity) error
+	// Get will find a unique object. It will depend on the implementation to generate the key based on the kind and the metadata.
+	// entity is the object that will be used by the method to set the value returned by the database.
+	Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error
+	// Query will find a list of resource that is matching the query passed in parameter. The list found will be set in slice.
+	// slice is an interface for casting simplification. But slice must be a pointer to a slice of modelAPI.Metadata
+	Query(query Query, slice any) error
+	RawQuery(query Query) ([]json.RawMessage, error)
+	RawMetadataQuery(query Query, kind modelV1.Kind) ([]json.RawMessage, error)
+	// StreamRaw streams the raw resources matching the type of the resources. It sends each raw resource to the provided channel.
+	// The channel is closed when the streaming is finished or if an error occurs. The method returns an error if the streaming fails.
+	StreamRaw(query Query, ch chan<- json.RawMessage) error
+	Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error
+	DeleteByQuery(query Query) error
+	HealthCheck() bool
+	GetLatestUpdateTime(kind []modelV1.Kind) (*string, error)
+}

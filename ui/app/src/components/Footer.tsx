@@ -1,0 +1,89 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the \"License\");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an \"AS IS\" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import type { Theme } from '@mui/material';
+import { Box, CircularProgress, Link } from '@mui/material';
+import type { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
+import Github from 'mdi-material-ui/Github';
+import type { ReactElement } from 'react';
+
+import { useHealth } from '../model/health-client';
+
+const style: SxProps<Theme> = {
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'center',
+  alignItems: 'center',
+  '& li': {
+    listStyle: 'none',
+    display: 'inline',
+    fontSize: '0.8rem',
+  },
+  '& li + li:before': {
+    content: '"|"',
+    padding: '3px',
+  },
+  '& a:visited': {
+    color: 'inherit',
+  },
+};
+
+function VersionInfo({
+  isLoading,
+  data,
+}: {
+  isLoading: boolean;
+  data?: { version?: string; commit?: string };
+}): ReactElement {
+  if (isLoading) {
+    return <CircularProgress size="1rem" />;
+  }
+
+  if (!data?.version) {
+    return <>development version</>;
+  }
+
+  const href = data.version.startsWith('main')
+    ? `https://github.com/perses/perses/tree/${data.commit}`
+    : `https://github.com/perses/perses/releases/tag/v${data.version}`;
+
+  return (
+    <Link color="inherit" underline="hover" target="_blank" rel="noreferrer" href={href}>
+      {data.version}
+    </Link>
+  );
+}
+
+export default function Footer(): ReactElement {
+  const { data, isPending } = useHealth();
+
+  return (
+    <Box component="footer" sx={style}>
+      <ul
+        style={{
+          paddingLeft: 0,
+        }}
+      >
+        <li>&copy; The Perses Authors {new Date().getFullYear()}</li>
+        <li>
+          <a href="https://github.com/perses/perses" target="_blank" rel="noreferrer">
+            <Github sx={{ verticalAlign: 'bottom' }} />
+          </a>
+        </li>
+        <li>
+          <VersionInfo isLoading={isPending} data={data} />
+        </li>
+      </ul>
+    </Box>
+  );
+}

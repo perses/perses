@@ -1,0 +1,380 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+//go:build integration
+
+package api
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"path/filepath"
+	"testing"
+
+	"github.com/gavv/httpexpect/v2"
+	"github.com/perses/perses/internal/api/dependency"
+	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
+	"github.com/perses/perses/internal/api/utils"
+	testUtils "github.com/perses/perses/internal/test"
+	"github.com/perses/perses/pkg/model/api"
+	apiConfig "github.com/perses/perses/pkg/model/api/config"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/datasource"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/dashboard"
+	datasourceSpec "github.com/perses/spec/go/datasource"
+	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
+	datasourceSQL "github.com/perses/spec/go/datasource/proxy/sql"
+	"github.com/perses/spec/go/plugin"
+)
+
+func newHTTPDatasourceSpec(t *testing.T) datasourceSpec.Spec {
+	promURL, err := common.ParseURL("http://localhost:9090")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pluginSpec := &datasource.Prometheus{
+		Proxy: &datasourceHTTP.Proxy{
+			Kind: "HTTPProxy",
+			Spec: datasourceHTTP.Config{
+				URL: promURL,
+			},
+		},
+	}
+
+	data, err := json.Marshal(pluginSpec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var pluginSpecAsMapInterface map[string]interface{}
+	if umarshallErr := json.Unmarshal(data, &pluginSpecAsMapInterface); umarshallErr != nil {
+		t.Fatal(umarshallErr)
+	}
+
+	return datasourceSpec.Spec{
+		Default: false,
+		Plugin: plugin.Plugin{
+			Kind: "PrometheusDatasource",
+			Spec: pluginSpecAsMapInterface,
+		},
+	}
+}
+
+func newSQLDatasourceSpec(t *testing.T) datasourceSpec.Spec {
+	pluginSpec := &datasource.Postgres{
+		Proxy: &datasourceSQL.Proxy{
+			Kind: "SQLProxy",
+			Spec: datasourceSQL.Config{
+				Driver:   "postgres",
+				Host:     "localhost:5432",
+				Database: "perses",
+				Postgres: &datasourceSQL.PostgresConfig{
+					SSLMode: datasourceSQL.SSLModePreferable,
+				},
+			},
+		},
+	}
+
+	data, err := json.Marshal(pluginSpec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var pluginSpecAsMapInterface map[string]interface{}
+	if umarshallErr := json.Unmarshal(data, &pluginSpecAsMapInterface); umarshallErr != nil {
+		t.Fatal(umarshallErr)
+	}
+
+	return datasourceSpec.Spec{
+		Default: false,
+		Plugin: plugin.Plugin{
+			Kind: "PostgresDatasource",
+			Spec: pluginSpecAsMapInterface,
+		},
+	}
+}
+
+func newDashboard(projectName string, dashboardName string, dtsName string, dts *v1.Datasource) *v1.Dashboard {
+	entity := &v1.Dashboard{
+		Kind: v1.KindDashboard,
+		Metadata: v1.ProjectMetadata{
+			Metadata: v1.Metadata{
+				Name: dashboardName,
+			},
+			ProjectMetadataWrapper: v1.ProjectMetadataWrapper{
+				Project: projectName,
+			},
+		},
+		Spec: dashboard.Spec{
+			Datasources: map[string]*datasourceSpec.Spec{
+				dtsName: &dts.Spec,
+			},
+		},
+	}
+	entity.Metadata.CreateNow()
+	return entity
+}
+
+func newHTTPDatasource(t *testing.T, projectName string, name string) *v1.Datasource {
+	entity := &v1.Datasource{
+		Kind: v1.KindDatasource,
+		Metadata: v1.ProjectMetadata{
+			Metadata: v1.Metadata{
+				Name: name,
+			},
+			ProjectMetadataWrapper: v1.ProjectMetadataWrapper{
+				Project: projectName,
+			},
+		},
+		Spec: newHTTPDatasourceSpec(t),
+	}
+	entity.Metadata.CreateNow()
+	return entity
+}
+
+func newSQLDatasource(t *testing.T, projectName string, name string) *v1.Datasource {
+	entity := &v1.Datasource{
+		Kind: v1.KindDatasource,
+		Metadata: v1.ProjectMetadata{
+			Metadata: v1.Metadata{
+				Name: name,
+			},
+			ProjectMetadataWrapper: v1.ProjectMetadataWrapper{
+				Project: projectName,
+			},
+		},
+		Spec: newSQLDatasourceSpec(t),
+	}
+	entity.Metadata.CreateNow()
+	return entity
+}
+
+func newGlobalHTTPDatasource(t *testing.T, name string) *v1.GlobalDatasource {
+	entity := &v1.GlobalDatasource{
+		Kind:     v1.KindGlobalDatasource,
+		Metadata: v1.Metadata{Name: name},
+		Spec:     newHTTPDatasourceSpec(t),
+	}
+	entity.Metadata.CreateNow()
+	return entity
+}
+
+func newGlobalSQLDatasource(t *testing.T, name string) *v1.GlobalDatasource {
+	entity := &v1.GlobalDatasource{
+		Kind:     v1.KindGlobalDatasource,
+		Metadata: v1.Metadata{Name: name},
+		Spec:     newSQLDatasourceSpec(t),
+	}
+	entity.Metadata.CreateNow()
+	return entity
+}
+
+func TestHTTPProxyGlobalDatasource(t *testing.T) {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
+		dtsName := "myDTS"
+		dts := newGlobalHTTPDatasource(t, dtsName)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), dts)
+
+		expect.GET(fmt.Sprintf("/proxy/%s/%s/api/v1/status/config", utils.PathGlobalDatasource, dtsName)).
+			Expect().
+			Status(http.StatusOK)
+		return []api.Entity{dts}
+	})
+}
+
+func TestSQLProxyBadMethod(t *testing.T) {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
+		dtsName := "mySQLDTS"
+		dts := newGlobalSQLDatasource(t, dtsName)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), dts)
+
+		expect.GET(fmt.Sprintf("/proxy/%s/%s", utils.PathGlobalDatasource, dtsName)).
+			Expect().
+			Status(http.StatusMethodNotAllowed)
+		return []api.Entity{dts}
+	})
+}
+
+func TestSQLProxyGlobalDatasource(t *testing.T) {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
+		// set the postgres user password since the secret isn't working in the test
+		t.Setenv("PGUSER", "user")
+		t.Setenv("PGPASSWORD", "password")
+		dtsName := "mySQLDTS"
+		dts := newGlobalSQLDatasource(t, dtsName)
+		s := e2eframework.NewGlobalSecret(dtsName)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), s)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), dts)
+
+		expect.POST(fmt.Sprintf("/proxy/%s/%s", utils.PathGlobalDatasource, dtsName)).
+			WithBytes([]byte(fmt.Sprintf(`{"query": "SELECT datname FROM pg_database"}`))).
+			Expect().
+			Status(http.StatusOK).
+			Body().
+			IsEqual("{\"columns\":[{\"name\":\"datname\",\"type\":\"NAME\"}],\"rows\":[{\"datname\":\"postgres\"},{\"datname\":\"perses\"},{\"datname\":\"template1\"},{\"datname\":\"template0\"}]}\n")
+		return []api.Entity{dts}
+	})
+}
+
+func TestHTTPProxyProjectDatasource(t *testing.T) {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
+		dtsName := "myDTS"
+		projectName := "perses"
+		dts := newHTTPDatasource(t, projectName, dtsName)
+		project := e2eframework.NewProject(projectName)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), dts)
+
+		expect.GET(fmt.Sprintf("/proxy/%s/%s/%s/%s/api/v1/status/config", utils.PathProject, projectName, utils.PathDatasource, dtsName)).
+			Expect().
+			Status(http.StatusOK)
+		return []api.Entity{project, dts}
+	})
+}
+
+func TestSQLProxyProjectDatasource(t *testing.T) {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
+		// set the postgres user password since the secret isn't working in the test
+		t.Setenv("PGUSER", "user")
+		t.Setenv("PGPASSWORD", "password")
+		dtsName := "mySQLDTS"
+		projectName := "perses"
+		dts := newSQLDatasource(t, projectName, dtsName)
+		project := e2eframework.NewProject(projectName)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), dts)
+
+		expect.POST(fmt.Sprintf("/proxy/%s/%s/%s/%s", utils.PathProject, projectName, utils.PathDatasource, dtsName)).
+			WithBytes([]byte(fmt.Sprintf(`{"query": "SELECT datname FROM pg_database"}`))).
+			Expect().
+			Status(http.StatusOK).
+			Body().
+			IsEqual("{\"columns\":[{\"name\":\"datname\",\"type\":\"NAME\"}],\"rows\":[{\"datname\":\"postgres\"},{\"datname\":\"perses\"},{\"datname\":\"template1\"},{\"datname\":\"template0\"}]}\n")
+		return []api.Entity{project, dts}
+	})
+}
+
+func TestHTTPProxyLocalDatasource(t *testing.T) {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
+		dtsName := "myDTS"
+		dashboardName := "myDashboard"
+		projectName := "perses"
+		dts := newHTTPDatasource(t, projectName, dtsName)
+		dash := newDashboard(projectName, dashboardName, dtsName, dts)
+		project := e2eframework.NewProject(projectName)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), dash)
+
+		expect.GET(fmt.Sprintf("/proxy/%s/%s/%s/%s/%s/%s/api/v1/status/config", utils.PathProject, projectName, utils.PathDashboard, dashboardName, utils.PathDatasource, dtsName)).
+			Expect().
+			Status(http.StatusOK)
+		return []api.Entity{project, dash}
+	})
+}
+
+func TestSQLProxyLocalDatasource(t *testing.T) {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
+		// set the postgres user password since the secret isn't working in the test
+		t.Setenv("PGUSER", "user")
+		t.Setenv("PGPASSWORD", "password")
+		dtsName := "mySQLDTS"
+		dashboardName := "myDashboard"
+		projectName := "perses"
+		dts := newSQLDatasource(t, projectName, dtsName)
+		dash := newDashboard(projectName, dashboardName, dtsName, dts)
+		project := e2eframework.NewProject(projectName)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), dash)
+
+		expect.POST(fmt.Sprintf("/proxy/%s/%s/%s/%s/%s/%s", utils.PathProject, projectName, utils.PathDashboard, dashboardName, utils.PathDatasource, dtsName)).
+			WithBytes([]byte(fmt.Sprintf(`{"query": "SELECT datname FROM pg_database"}`))).
+			Expect().
+			Status(http.StatusOK).
+			Body().
+			IsEqual("{\"columns\":[{\"name\":\"datname\",\"type\":\"NAME\"}],\"rows\":[{\"datname\":\"postgres\"},{\"datname\":\"perses\"},{\"datname\":\"template1\"},{\"datname\":\"template0\"}]}\n")
+		return []api.Entity{project, dash}
+	})
+}
+
+func TestHTTPProxyLocalDatasourceWithRealDashboard(t *testing.T) {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
+		var dash v1.Dashboard
+		testUtils.JSONUnmarshalFromFile(filepath.Join("testdata", "dashboard.json"), &dash)
+		dtsName := "Victoria Metrics"
+		dashboardName := "myDashboard"
+		projectName := "perses"
+		project := e2eframework.NewProject(projectName)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), &dash)
+
+		expect.GET(fmt.Sprintf("/proxy/%s/%s/%s/%s/%s/%s/api/v1/status/config", utils.PathProject, projectName, utils.PathDashboard, dashboardName, utils.PathDatasource, dtsName)).
+			Expect().
+			Status(http.StatusOK)
+		return []api.Entity{project, &dash}
+	})
+}
+
+// TestProxyDeniedDestination reproduces the reported SSRF: with the default configuration, the datasource proxy must
+// refuse to reach the Perses server itself through the loopback interface, whatever the way the target is provided.
+func TestProxyDeniedDestination(t *testing.T) {
+	conf := e2eframework.DefaultConfig()
+	conf.Datasource.Proxy = apiConfig.DatasourceProxyConfig{}
+	e2eframework.WithServerConfig(t, conf, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
+		projectName := "p1"
+		dtsName := "ssrfds"
+		project := e2eframework.NewProject(projectName)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
+
+		var spec datasourceSpec.Spec
+		rawSpec := fmt.Sprintf(`{"plugin":{"kind":"PrometheusDatasource","spec":{"proxy":{"kind":"HTTPProxy","spec":{"url":%q}}}}}`, server.URL)
+		if err := json.Unmarshal([]byte(rawSpec), &spec); err != nil {
+			t.Fatal(err)
+		}
+		unsavedBody := map[string]any{"method": http.MethodGet, "spec": spec}
+
+		// Unsaved proxy endpoints: the spec comes from the request body.
+		expect.POST(fmt.Sprintf("/proxy/%s/%s/%s/%s/api/v1/projects", utils.PathUnsaved, utils.PathProject, projectName, utils.PathDatasource)).
+			WithJSON(unsavedBody).
+			Expect().
+			Status(http.StatusForbidden)
+		expect.POST(fmt.Sprintf("/proxy/%s/%s/api/v1/projects", utils.PathUnsaved, utils.PathGlobalDatasource)).
+			WithJSON(unsavedBody).
+			Expect().
+			Status(http.StatusForbidden)
+
+		// Saving a datasource pointing to a denied destination is refused.
+		dts := &v1.Datasource{
+			Kind: v1.KindDatasource,
+			Metadata: v1.ProjectMetadata{
+				Metadata:               v1.Metadata{Name: dtsName},
+				ProjectMetadataWrapper: v1.ProjectMetadataWrapper{Project: projectName},
+			},
+			Spec: spec,
+		}
+		expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, projectName, utils.PathDatasource)).
+			WithJSON(dts).
+			Expect().
+			Status(http.StatusBadRequest)
+
+		// A datasource stored before the policy was enforced cannot be used either.
+		dts.Metadata.CreateNow()
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), dts)
+		expect.GET(fmt.Sprintf("/proxy/%s/%s/%s/%s/api/v1/projects", utils.PathProject, projectName, utils.PathDatasource, dtsName)).
+			Expect().
+			Status(http.StatusForbidden)
+
+		return []api.Entity{dts, project}
+	})
+}

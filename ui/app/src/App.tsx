@@ -1,0 +1,76 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { Box } from '@mui/material';
+import { ReactRouterProvider } from '@perses-dev/plugin-system';
+import type { ReactElement } from 'react';
+import { Suspense } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+
+import Footer from './components/Footer';
+import { GlobalShortcuts } from './components/GlobalShortcuts';
+import Header from './components/Header/Header';
+import { PersesLoader } from './components/PersesLoader';
+import { ShortcutHelpModal } from './components/ShortcutHelpModal';
+import { useIsKeyboardShortcutsEnabled } from './context/Config';
+import { DelegatedAuthnErrorRoute, SignInRoute, SignUpRoute } from './model/route';
+import './i18n/i18n';
+
+function isDashboardViewRoute(pathname: string): boolean {
+  return /\/projects\/[a-zA-Z0-9_]+\/dashboards\/[a-zA-Z0-9_]+/.test(pathname);
+}
+
+function App(): ReactElement {
+  const location = useLocation();
+  const isKeyboardShortcutsEnabled = useIsKeyboardShortcutsEnabled();
+
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        backgroundColor: ({ palette }) => palette.background.default,
+      }}
+    >
+      {isKeyboardShortcutsEnabled && (
+        <>
+          <GlobalShortcuts />
+          <ShortcutHelpModal />
+        </>
+      )}
+      {location.pathname !== SignInRoute &&
+        location.pathname !== SignUpRoute &&
+        location.pathname !== DelegatedAuthnErrorRoute && <Header />}
+
+      <Box
+        sx={{
+          flex: 1,
+          display: 'flex',
+          '--perses-colors-gray-100': (theme) => theme.palette.grey[100],
+          '--perses-colors-gray-300': (theme) => theme.palette.grey[300],
+          '--perses-colors-primary': (theme) => theme.palette.primary.main,
+        }}
+      >
+        <ReactRouterProvider>
+          <Suspense fallback={<PersesLoader />}>
+            <Outlet />
+          </Suspense>
+        </ReactRouterProvider>
+      </Box>
+      {!isDashboardViewRoute(location.pathname) && <Footer />}
+    </Box>
+  );
+}
+
+export default App;

@@ -1,0 +1,354 @@
+# Authentication
+
+Perses has various authentication flows configurable. You can choose to authenticate from a
+[native provider](./authentication.md#native-provider) that will allow you to create some users,
+or else rely on an external [identity provider](./authentication.md#external-oidcoauth-providers).
+
+In both cases:
+
+- Each new user will be saved in the Perses database.
+- At login time, a Perses session (access_token/refresh_token) will be created
+
+Please note that the number of identity providers is not limited.
+
+```yaml
+security:
+  authentication:
+    providers:
+      # Enable or not the native Perses identity provider
+      enable_native: true/false
+      # Register one or several OIDC provider(s)
+      oidc: []
+      # Register one or several OAuth provider(s)
+      oauth: []
+```
+
+## Native provider
+
+In case a native provider is used, the users and their password are stored in the Perses database.
+
+Login is done through http POST on /api/auth/providers/native/login.
+Example:
+
+```bash
+#!/usr/bin/env bash
+
+TOKEN_JSON=$(
+  curl -X POST \
+    -H "Content-Type: application/json" \
+    -d '{"login":"<USER>","password":"<PASS>"}' \
+    "<PERSES_URL>/api/auth/providers/native/login"
+)
+
+ACCESS_TOKEN=$(jq -r '.access_token' <<<"$TOKEN_JSON")
+
+# Then you can use ACCESS_TOKEN in your requests
+curl \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  "<PERSES_URL>/api/v1/projects"
+```
+
+You can also use the CLI to login:
+
+```bash
+#!/usr/bin/env bash
+
+percli login <PERSES_URL> --username="<USER>" --password="<PASS>"
+
+# Then you can use the CLI to get anything from Perses
+percli get projects
+```
+
+## External OIDC/OAuth provider(s)
+
+It is possible to configure Perses to sign in user with an external identity provider supporting OIDC/Oauth.
+For both of these provider's types, the flow is quite similar:
+
+When a user sign in with an external provider (e.g. Github) the Perses backend will then use the information
+collected (email, firstname, lastname, picture) to **sync the user in database**.
+Then the backend takes in charge the creation of the access_token/refresh_token that will be used to
+authenticate this user in the subsequent requests.
+
+> The **user synchronization** can also update the user's [permissions](./authorization.md) based on
+> roles or groups present in the external provider's token, via [claim-based role assignment](#claim-based-role-assignment).
+
+### => Configuration example
+
+```yaml
+security:
+  authentication:
+    providers:
+      oidc:
+        # Example with a Microsoft Entra ID OIDC configuration
+        - slug_id: msft
+          name: "Microsoft"
+          client_id: "<secret>"
+          client_secret: "<secret>"
+          issuer: "https://login.microsoftonline.com/<tenant-id>/v2.0"
+          redirect_uri: "http://localhost:8080/api/auth/providers/oidc/msft/callback"
+          scopes: [ "openid", "profile", "email", "User.read" ]
+          logout:
+            enabled: true
+        # Example with a Keycloak OIDC configuration
+        - slug_id: keycloak
+          name: "Keycloak"
+          client_id: "<secret>"
+          client_secret: "<secret>"
+          issuer: "https://<keycloak host>/realms/<realm>" // For Keycloak versions <17: https://<keycloak host>/auth/realms/<realm>
+          redirect_uri: "http://localhost:8080/api/auth/providers/oidc/keycloak/callback"
+          scopes: [ "openid", "profile", "email", "roles" ]
+          logout:
+            enabled: true
+      oauth:
+        - slug_id: github
+          name: "Github"
+          client_id: "<secret>"
+          client_secret: "<secret>"
+          auth_url: "https://github.com/login/oauth/authorize"
+          token_url: "https://github.com/login/oauth/access_token"
+          logout_url: "https://github.com/login/oauth/logout"
+          redirect_uri: "http://localhost:8080/api/auth/providers/oauth/github/callback"
+          user_infos_url: "https://api.github.com/user"
+```
+
+## Claim-Based Role Assignment
+
+When authenticating via an external OIDC or OAuth provider, Perses can read claims from the
+upstream token and automatically map them to Perses roles — without requiring manual
+`RoleBinding` or `GlobalRoleBinding` objects per user.
+
+This is configured per-provider using the `claims` field:
+
+```yaml
+security:
+  authentication:
+    providers:
+      oidc:
+        - slug_id: keycloak
+          name: "Keycloak"
+          issuer: "https://<keycloak-host>/realms/<realm>"
+          client_id: "<secret>"
+          client_secret: "<secret>"
+          scopes: ["openid", "profile", "email", "roles"]
+          claims:
+            - claim_name: "roles"        # JSON field name in the upstream token
+              mappings:
+                - claim_value: "admin"
+                  role_name: "admin"     # maps to GlobalRole "admin" (GlobalRole due to no project specified)
+                - claim_value: "editor"
+                  role_name: "dashboard-editor"
+                  project: "myproject"   # maps to Role "dashboard-editor" in project "myproject"
+```
+
+### How it works
+
+1. At login, Perses extracts the configured claim values from the upstream access token (or ID token for OIDC).
+2. The extracted values are embedded in the Perses session JWT.
+3. On every request, Perses evaluates the claim→role mappings and resolves the corresponding permissions — stateless, no extra database lookup.
+4. Resolved permissions are **additive** with any explicit `RoleBinding`/`GlobalRoleBinding` the user may have — permissions from both sources are merged, never reduced. For example, if a user is mapped to the `admin` GlobalRole by a claim but only has an `editor` `GlobalRoleBinding` in the database, the user will hold the full set of permissions from **both** roles.
+
+### `claims` field reference
+
+| Field | Description |
+|---|---|
+| `claim_name` | The JSON key in the upstream token, e.g. `"roles"`, `"groups"` |
+| `mappings[].claim_value` | The upstream value to match, e.g. `"admin"` |
+| `mappings[].role_name` | The Perses `Role` or `GlobalRole` to grant |
+| `mappings[].project` | *(optional)* When set, resolves `role_name` as a project-scoped `Role`. When omitted, resolves as a `GlobalRole`. |
+
+> Multi-valued claims (arrays) are supported — if any value in the array matches a mapping, the role is granted.
+
+> **Note:** The referenced roles must already exist in Perses. Claim mappings do not create roles automatically.
+
+> **Revocation Semantics:** Claims are captured once at login and persisted in the refresh token. Each subsequent refresh re-carries the **same** claim snapshot into the new token without re-querying the identity provider. As a result, if an operator removes a user's claim at the identity provider (e.g., removes them from an LDAP group), that user will retain the derived Perses roles until their refresh token chain expires and they are forced to re-login — which may never happen for an active user. This is a structural property of how Perses sessions work and differs from `RoleBinding`/`GlobalRoleBinding`, which are evaluated live against the database on every request. To tighten the revocation window, operators can lower `access_token_ttl` and `refresh_token_ttl` in the authentication config. See [#3891](https://github.com/perses/perses/issues/3891) for discussion on re-fetching claims from the identity provider on refresh.
+
+### => Login from external OIDC or OAuth2.0 provider with interactive flow, through WEB UI. (`authorization_code`)
+
+```mermaid
+sequenceDiagram
+    actor hu as John
+    #actor ro as Robot
+    participant br as Perses Frontend
+    participant rp as Perses Backend
+    participant op as External Identity Provider
+
+    hu->>br: Login with OIDC provider (e.g Microsoft Entra ID)
+    activate br
+    br->>rp: GET /api/auth/providers/{oidc|oauth}/{slug_id}/login
+    activate rp
+    rp->>br: 302: redirect to Provider
+    deactivate rp
+    br->>op: /oauth/authorize
+    activate op
+    op->>br: 302: redirect to Perses
+    deactivate op
+    br->>rp: GET /api/auth/providers/{oidc|oauth}/{slug_id}/callback?code=...
+    activate rp
+    alt OIDC
+        rp->>op: GET /oauth/token
+        activate op
+        op->>rp: 200: id_token & access_token
+        deactivate op
+        rp->>op: GET /api/userinfo<br/> (endpoint from .well-known URL)
+        activate op
+        op->>rp: 200: User Info
+        deactivate op
+        Note right of rp: User Info + id token are<br/> used to sync user in database
+        rp->>rp: Create or Update user in DB
+    else OAUTH 2.0
+        rp->>op: GET /oauth/token
+        activate op
+        op->>rp: 200: access_token
+        deactivate op
+        rp->>op: GET /api/userinfo<br/> (endpoint from Perses Config)
+        activate op
+        op->>rp: 200: User Info
+        deactivate op
+        Note right of rp: Only User Info is<br/> used to sync user in database
+        rp->>rp: Create or Update user in DB
+    end
+    Note right of rp: A new session is created<br /> with a new signed access_token+refresh_token
+    rp->>br: 200: save session in cookie
+    deactivate rp
+    br->>hu: Home Page
+    deactivate br
+    hu->>br: Click on Projects
+    activate br
+    br->>rp: GET /api/v1/projects
+    activate rp
+    rp->>rp: Verify token and permissions
+    rp->>br: 200: projects list
+    deactivate rp
+    br->>hu: Projects Page
+    deactivate br
+```
+
+### => Login from external OIDC or OAuth2.0 provider with interactive flow, through `percli` command line. (`device_code`)
+
+```mermaid
+sequenceDiagram
+    actor hu as John
+    #actor ro as Robot
+    participant pc as percli Command Line
+    participant rp as Perses Backend
+    participant op as External Identity Provider
+
+    hu->>pc: EXEC: percli login
+    activate pc
+    pc->>rp: GET /api/config
+    activate rp
+    rp->>pc: 200: Config<br/> (containing Providers List)
+    deactivate rp
+    pc->>hu: PROMPT: which provider?
+    deactivate pc
+    hu->>pc: select provider
+    activate pc
+    pc->>rp: GET /api/auth/providers/{oidc|oauth}/{slug_id}/device/code
+    activate rp
+    rp->>op: GET /oauth/device/code
+    activate op
+    op->>rp: 200: Device Code + User Code + Verification URL
+    deactivate op
+    rp->>pc: 200: Device Code + User Code + Verification URL
+    pc->>hu: PRINT: User Code + Verification URL (clickable)
+    rect rgba(66, 95, 237, 0.2)
+        Note over hu, op: Through the browser
+        hu->>op: Go to Verification URL + enter User Code
+        activate op
+        op->>hu: 302: Redirect to Authorization prompt
+        hu->>op: Consent
+        op->>op: Mark device as authorized
+        op->>hu: 200: Invite to close browser
+        deactivate op
+    end
+    Note over hu, op: Meanwhile, percli is polling the following endpoint, until it succeed.
+    pc->>rp: GET /api/auth/providers/{oidc|oauth}/{slug_id}/token
+    activate rp
+    alt OIDC
+        rp->>op: GET /oauth/token
+        activate op
+        op->>rp: 200: id_token & access_token
+        deactivate op
+        rp->>op: GET /api/userinfo<br/> (endpoint from .well-known URL)
+        activate op
+        op->>rp: 200: User Info
+        deactivate op
+        Note right of rp: User Info + id token are<br/> used to sync user in database
+        rp->>rp: Create or Update user in DB
+    else OAUTH 2.0
+        rp->>op: GET /oauth/token
+        activate op
+        op->>rp: 200: access_token
+        deactivate op
+        rp->>op: GET /api/userinfo<br/> (endpoint from Perses Config)
+        activate op
+        op->>rp: 200: User Info
+        deactivate op
+        Note right of rp: Only User Info is<br/> used to sync user in database
+        rp->>rp: Create or Update user in DB
+    end
+    Note right of rp: A new session is created<br /> with a new signed acces_token+refresh_token
+    rp->>pc: 200: access_token + refresh_token
+    deactivate rp
+    pc->>pc: WRITE: session into config file
+    pc->>hu: PRINT: Successfully authenticated!
+    deactivate pc
+    hu->>pc: EXEC: percli get projects
+    activate pc
+    pc->>rp: GET /api/v1/projects
+    activate rp
+    rp->>rp: Verify token and permissions
+    rp->>pc: 200: Projects list
+    deactivate rp
+    pc->>hu: PRINT: Projects list
+    deactivate pc
+```
+
+### => Login from external OIDC or OAuth2.0 provider with non-interactive flow. (`client_credentials`)
+
+> Note: it can be done exactly the same way using directly the backend API.
+> Then one would have to manage the access_token and refresh_token by itself, and send access_token as an Authorization header
+> in the subsequent requests.
+
+```mermaid
+sequenceDiagram
+    participant ro as Robot
+    #actor ro as Robot
+    participant pc as percli Command Line
+    participant rp as Perses Backend
+    participant op as External Identity Provider
+
+    ro->>pc: EXEC: percli login --provider <slug_id> --client-id <client_id> --client-secret <client_secret>
+    activate pc
+    pc->>rp: GET /api/config
+    activate rp
+    rp->>pc: 200: Config<br/> (containing Providers List)
+    deactivate rp
+    pc->>rp: GET /api/auth/providers/{oidc|oauth}/{slug_id}/token
+    activate rp
+    rp->>op: GET /oauth/token
+    activate op
+    op->>rp: 200: access_token
+    deactivate op
+    rp->>op: GET /api/userinfo<br/> (endpoint from Perses Config or .well-known URL)
+    activate op
+    op->>rp: 200: User Info
+    deactivate op
+    Note right of rp: Only User Info is<br/> used to sync user in database
+    rp->>rp: Create or Update user in DB
+    Note right of rp: A new session is created<br /> with a new signed acces_token+refresh_token
+    rp->>pc: 200: access_token + refresh_token
+    deactivate rp
+    pc->>pc: WRITE: session into config file
+    pc->>ro: PRINT: Successfully authenticated!
+    deactivate pc
+    ro->>pc: EXEC: percli get projects
+    activate pc
+    pc->>rp: GET /api/v1/projects
+    activate rp
+    rp->>rp: Verify token and permissions
+    rp->>pc: 200: Projects list
+    deactivate rp
+    pc->>ro: PRINT: Projects list
+    deactivate pc
+```

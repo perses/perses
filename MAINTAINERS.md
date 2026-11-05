@@ -1,0 +1,23 @@
+# Perses Maintainers
+
+More details about our governance and how maintainers are selected can
+be found in [GOVERNANCE.md](GOVERNANCE.md).
+
+## Maintainers
+
+| Maintainer                    | GitHub ID                                               | Affiliation  |
+|-------------------------------|---------------------------------------------------------|--------------|
+| Adrian Sepiol                 | [adrianSepiol](https://github.com/adrianSepiol)         | Accenture    |
+| Akshay Iyyadurai Balasundaram | [ibakshay](https://github.com/ibakshay)                 | SAP          |
+| Antoine Thebaud               | [AntoineThebaud](https://github.com/AntoineThebaud)     | Amadeus      |
+| Andreas Gerstmayr             | [andreasgerstmayr](https://github.com/andreasgerstmayr) | Red Hat      |
+| Augustin Husson               | [nexucis](https://github.com/Nexucis)                   | Amadeus      |
+| Celian Garcia                 | [celian-garcia](https://github.com/celian-garcia)       | Amadeus      |
+| Gabor Fierka                  | [gfierkasap](https://github.com/gfierkasap)             | Accenture    |
+| Gabriel Bernal                | [jgbernalp](https://github.com/jgbernalp)               | Red Hat      |
+| Guillaume Ladorme             | [gladorme](https://github.com/Gladorme)                 | Amadeus      |
+| Jeremy Rickards               | [Jeremy Rickards](https://github.com/rickardsjp)        | SAP          |
+| Nicolas Takashi               | [nicolastakashi](https://github.com/nicolastakashi)     | Dash0        |
+| Steven Cobb                   | [sjcobb](https://github.com/sjcobb)                     | Chronosphere |
+| Seyed Mahmoud SHAHROKNI       | [shahrokni](https://github.com/shahrokni)               | Amadeus      |
+| Jenny Zhu                     | [zhuje](https://github.com/zhuje)                       | Red Hat      |

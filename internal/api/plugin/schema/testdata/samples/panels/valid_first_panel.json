@@ -1,0 +1,14 @@
+{
+  "kind": "FirstChart",
+  "spec": {
+    "a": "yes",
+    "b": {
+      "c": [
+        {
+          "e": "up",
+          "f": "the up metric"
+        }
+      ]
+    }
+  }
+}

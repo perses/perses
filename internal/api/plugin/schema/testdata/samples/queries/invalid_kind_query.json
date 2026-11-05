@@ -1,0 +1,17 @@
+[
+  {
+    "kind": "TimeSeriesQuery",
+    "spec": {
+      "plugin": {
+        "kind": "UnknownGraphQuery",
+        "spec": {
+          "datasource": {
+            "kind": "UnknownDatasource",
+            "name": "MyUnknownDatasource"
+          },
+          "custom": true
+        }
+      }
+    }
+  }
+]

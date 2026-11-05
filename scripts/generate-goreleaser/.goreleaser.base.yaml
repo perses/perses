@@ -1,0 +1,71 @@
+version: 2
+builds:
+  - id: "perses"
+    main: ./cmd/perses/main.go
+    binary: "perses"
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - "{{.Env.LDFLAGS}}"
+  - id: "percli"
+    main: ./cmd/percli/main.go
+    binary: "percli"
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - "{{.Env.LDFLAGS}}"
+archives:
+  - id: "default"
+    ids:
+      - "perses"
+      - "percli"
+    formats:
+      - "tar.gz"
+    files:
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
+      - plugins-archive
+      - src: "docs/examples/config.archive.yaml"
+        dst: "./config.yaml"
+sboms:
+  - id: "archive-sbom"
+    artifacts: archive
+    documents:
+      - "${artifact}.sbom.spdx.json"
+  - id: "source-sbom"
+    artifacts: source
+    documents:
+      - "${artifact}.sbom.spdx.json"
+release:
+  github:
+    owner: "perses"
+    name: "perses"
+  ids:
+    - "default"
+  prerelease: auto
+  name_template: "{{ .Version }} / {{ .Env.DATE }}"
+  extra_files:
+    - glob: "ui-sbom.cdx.json"

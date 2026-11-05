@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "jsc": {
+    "baseUrl": ".",
+    "parser": {
+      "syntax": "typescript",
+      "tsx": true
+    },
+    "target": "es2023",
+    "transform": {
+      "reactCompiler": {
+        "target": "18"
+      },
+      "react": {
+        "runtime": "automatic",
+        "useBuiltins": true
+      }
+    },
+    "experimental": {
+      "keepImportAttributes": true
+    }
+  },
+  "module": {
+    "type": "es6",
+    "resolveFully": true,
+    "outFileExtension": "js"
+  },
+  "sourceMaps": true,
+  "exclude": ["\\.(stories|test)\\."]
+}

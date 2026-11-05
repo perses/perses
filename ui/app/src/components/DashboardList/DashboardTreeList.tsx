@@ -1,0 +1,356 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { Box, Chip, CircularProgress, Stack } from '@mui/material';
+import type { FolderResource } from '@perses-dev/client';
+import type { TableColumnConfig } from '@perses-dev/components';
+import { Table } from '@perses-dev/components';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import AddFolderOutlineIcon from 'mdi-material-ui/FolderPlusOutline';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import type { ReactElement, ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { useDefaultRowsPerPage } from '../../context/Config';
+import { useIsMobileSize } from '../../utils/browser-size';
+import type { RowWithOriginal } from '../../utils/dashboardTableUtils';
+import {
+  buildTableRows,
+  formatAbsoluteTime,
+  formatRelativeTime,
+  sortDashboardTableStringColumn,
+} from '../../utils/dashboardTableUtils';
+import { CRUDIconButton } from '../CRUDButton/CRUDIconButton';
+import type { DashboardListRow } from './DashboardList';
+import { NameCell } from './NameCell';
+
+export interface DashboardTreeTableRow {
+  kind: 'Folder' | 'Dashboard' | 'NoItems';
+  name: string;
+  displayName: string;
+  project: string;
+  path: string[];
+  createdAt?: Date;
+  updatedAt?: Date;
+  tags?: string[];
+  // Space-joined copy of `tags`. The table's global search only considers a column
+  // searchable when its value is a string or number, so this always resolves to a
+  // string (possibly empty) rather than reusing `tags` directly.
+  tagsSearchValue: string;
+  version?: number;
+  viewedAt?: Date;
+  children?: DashboardTreeTableRow[];
+}
+
+// Exported so tests can build a real TanStack table with this exact column config and
+// verify the Tags column stays eligible for (and correctly matches) the table's global
+// search — see dashboardTableUtils.test.ts.
+export const TAGS_COLUMN: TableColumnConfig<DashboardTreeTableRow> = {
+  id: 'tags',
+  accessorKey: 'tagsSearchValue',
+  header: 'Tags',
+  align: 'left',
+  enableSorting: true,
+  cellDescription: (): string => '',
+  cell: ({ row }): ReactNode => {
+    const tags = row.original.tags;
+    return tags ? (
+      <Box
+        sx={{
+          pt: 0.75,
+          mt: -1,
+          overflow: 'inherit',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        {tags.map((tag, index) => (
+          <Chip key={`${tag}-${index}`} label={tag} size="small" sx={{ mr: index < tags.length - 1 ? 0.5 : 0 }} />
+        ))}
+      </Box>
+    ) : (
+      ''
+    );
+  },
+};
+
+export interface DashboardTreeTableProps {
+  folderList: FolderResource[];
+  dashboardsMap: Map<string, Map<string, DashboardListRow>>;
+  handleRenameButtonClick: (project: string, name: string) => () => void;
+  handleDuplicateButtonClick: (project: string, name: string) => () => void;
+  handleDeleteButtonClick: (project: string, name: string) => () => void;
+  handleEditFolderButtonClick: (project: string, name: string, path: string[]) => () => void;
+  handleAddFolderButtonClick: (project: string, name: string, path: string[]) => () => void;
+  handleDeleteFolderButtonClick: (project: string, name: string, path: string[]) => () => void;
+  /** Disables the duplicate button when defined, and explains why in its tooltip. */
+  duplicationDisabledReason?: string;
+  isLoading?: boolean;
+}
+
+function DashboardTreeList({
+  folderList,
+  dashboardsMap,
+  handleDeleteButtonClick,
+  handleDuplicateButtonClick,
+  handleRenameButtonClick,
+  handleEditFolderButtonClick,
+  handleAddFolderButtonClick,
+  handleDeleteFolderButtonClick,
+  duplicationDisabledReason,
+  isLoading,
+}: DashboardTreeTableProps): ReactElement {
+  const defaultRowsPerPage = useDefaultRowsPerPage();
+  const isMobileSize = useIsMobileSize();
+  const getTableHeight = useCallback(
+    () => (isMobileSize ? 500 : (Math.max(window.innerHeight - 350, 300) ?? 300)),
+    [isMobileSize],
+  );
+  const [height, setHeight] = useState(getTableHeight);
+  useEffect(() => {
+    const handleResize = (): void => setHeight(() => getTableHeight());
+    window.addEventListener('resize', handleResize);
+    return (): void => window.removeEventListener('resize', handleResize);
+  }, [getTableHeight]);
+
+  const rows: DashboardTreeTableRow[] = useMemo(() => {
+    return buildTableRows(folderList, dashboardsMap);
+  }, [folderList, dashboardsMap]);
+
+  const [sorting, setSorting] = useState([{ id: 'name', desc: false }]);
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultRowsPerPage });
+
+  const sortStringColumn = useCallback(
+    (accessorKey: 'project' | 'displayName') =>
+      (
+        rowA: RowWithOriginal<DashboardTreeTableRow>,
+        rowB: RowWithOriginal<DashboardTreeTableRow>,
+        columnId: string,
+      ): number => {
+        const isDesc = sorting.find((s) => s.id === columnId)?.desc ?? false;
+        return sortDashboardTableStringColumn(rowA, rowB, accessorKey, isDesc);
+      },
+    [sorting],
+  );
+
+  const columns = useMemo<Array<TableColumnConfig<DashboardTreeTableRow>>>(
+    () => [
+      {
+        id: 'project',
+        accessorKey: 'project',
+        header: 'Project',
+        align: 'left',
+        enableSorting: true,
+        width: 150,
+        sortingFn: sortStringColumn('project'),
+      },
+      {
+        id: 'name',
+        accessorKey: 'displayName',
+        header: 'Name',
+        headerDescription: 'Dashboard or folder name',
+        align: 'left',
+        enableSorting: true,
+        enableHiding: false,
+        width: 300,
+        cellDescription: (): string => '',
+        sortingFn: sortStringColumn('displayName'),
+        cell: ({ row, getValue }): ReactElement => (
+          <NameCell
+            kind={row.original.kind}
+            depth={row.depth}
+            displayName={getValue() as string}
+            project={row.original.project}
+            name={row.original.name}
+            isOpen={row.getIsExpanded() || !row.getCanExpand()}
+            onToggleExpanded={row.getToggleExpandedHandler()}
+          />
+        ),
+      },
+      TAGS_COLUMN,
+      {
+        id: 'version',
+        accessorKey: 'version',
+        header: 'Version',
+        align: 'left',
+        enableSorting: true,
+        width: 150,
+      },
+      {
+        id: 'createdAt',
+        accessorKey: 'createdAt',
+        header: 'Creation Date',
+        align: 'left',
+        enableSorting: true,
+        width: 150,
+        cellDescription: ({ getValue }): string => formatAbsoluteTime(getValue<Date | undefined>()),
+        cell: ({ getValue }): string | null => formatRelativeTime(getValue<Date | undefined>()),
+      },
+      {
+        id: 'updatedAt',
+        accessorKey: 'updatedAt',
+        header: 'Last Update',
+        align: 'left',
+        enableSorting: true,
+        width: 150,
+        cellDescription: ({ getValue }): string => formatAbsoluteTime(getValue<Date | undefined>()),
+        cell: ({ getValue }): string | null => formatRelativeTime(getValue<Date | undefined>()),
+      },
+      {
+        id: 'viewedAt',
+        accessorKey: 'viewedAt',
+        header: 'Last Seen',
+        align: 'left',
+        enableSorting: true,
+        width: 150,
+        cellDescription: ({ getValue }): string => formatAbsoluteTime(getValue<Date | undefined>()),
+        cell: ({ getValue, row }): ReactNode =>
+          formatRelativeTime(getValue<Date | undefined>()) ??
+          (row.original.kind === 'Dashboard' ? <span>—</span> : null),
+      },
+      {
+        id: 'actions',
+        accessorKey: 'actions',
+        header: 'Actions',
+        align: 'center',
+        enableHiding: false,
+        width: 90,
+        cellDescription: (): string => '',
+        cell: ({ row }): ReactElement | undefined => {
+          if (row.original.kind === 'NoItems') {
+            return undefined;
+          }
+          if (row.original.kind === 'Dashboard') {
+            return (
+              <Stack direction="row" gap={1} alignItems="center" justifyContent="center">
+                <CRUDIconButton
+                  key={row.original.name + '-edit'}
+                  label="Edit"
+                  action="update"
+                  scope="Dashboard"
+                  project={row.original.project}
+                  onClick={handleRenameButtonClick(row.original.project, row.original.name)}
+                >
+                  <PencilIcon />
+                </CRUDIconButton>
+                {/* Not bound to the dashboard's project, as the copy can be created in another one */}
+                <CRUDIconButton
+                  key={row.original.name + '-duplicate'}
+                  label="Duplicate"
+                  disabled={duplicationDisabledReason !== undefined}
+                  disabledReason={duplicationDisabledReason}
+                  onClick={handleDuplicateButtonClick(row.original.project, row.original.name)}
+                >
+                  <ContentCopyIcon />
+                </CRUDIconButton>
+                <CRUDIconButton
+                  key={row.original.name + '-delete'}
+                  label="Delete"
+                  action="delete"
+                  scope="Dashboard"
+                  project={row.original.project}
+                  onClick={handleDeleteButtonClick(row.original.project, row.original.name)}
+                >
+                  <DeleteIcon />
+                </CRUDIconButton>
+              </Stack>
+            );
+          }
+          if (row.original.kind === 'Folder') {
+            return (
+              <Stack direction="row" gap={1} alignItems="center" justifyContent="center">
+                <CRUDIconButton
+                  key={row.original.name + '-edit'}
+                  label="Edit"
+                  action="update"
+                  scope="Folder"
+                  project={row.original.project}
+                  onClick={handleEditFolderButtonClick(row.original.project, row.original.name, row.original.path)}
+                >
+                  <PencilIcon />
+                </CRUDIconButton>
+                <CRUDIconButton
+                  key={row.original.name + '-add'}
+                  label="Add Folder"
+                  action="create"
+                  scope="Folder"
+                  project={row.original.project}
+                  onClick={handleAddFolderButtonClick(row.original.project, row.original.name, row.original.path)}
+                >
+                  <AddFolderOutlineIcon />
+                </CRUDIconButton>
+                <CRUDIconButton
+                  key={row.original.name + '-delete'}
+                  label="Delete"
+                  action="delete"
+                  scope="Folder"
+                  project={row.original.project}
+                  onClick={handleDeleteFolderButtonClick(row.original.project, row.original.name, row.original.path)}
+                >
+                  <DeleteIcon />
+                </CRUDIconButton>
+              </Stack>
+            );
+          }
+        },
+      },
+    ],
+    [
+      handleAddFolderButtonClick,
+      handleDeleteButtonClick,
+      handleDeleteFolderButtonClick,
+      handleDuplicateButtonClick,
+      handleEditFolderButtonClick,
+      handleRenameButtonClick,
+      duplicationDisabledReason,
+      sortStringColumn,
+    ],
+  );
+
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: height,
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return (
+    <Table
+      data={rows}
+      columns={columns}
+      getRowId={(row) => `${row.project}/${row.path.join('/')}/${row.name}/${row.kind}`}
+      height={height}
+      width="100%"
+      sorting={sorting}
+      onSortingChange={setSorting}
+      pagination={pagination}
+      onPaginationChange={setPagination}
+      getSubRows={(row: DashboardTreeTableRow): DashboardTreeTableRow[] | undefined => row.children}
+      hiddenColumns={['project', 'version']}
+      tableToolbarConfig={{
+        isSearchEnabled: true,
+        isColumnFilterEnabled: true,
+      }}
+    />
+  );
+}
+
+export default DashboardTreeList;

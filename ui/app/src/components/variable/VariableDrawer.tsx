@@ -1,0 +1,118 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import type { VariableType } from '@perses-dev/client';
+import { getVariableProject } from '@perses-dev/client';
+import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import type { VariableDefinition } from '@perses-dev/dashboards';
+import { DatasourceStoreProvider, VariableProviderWithQueryParams } from '@perses-dev/dashboards';
+import {
+  PluginRegistry,
+  TimeRangeProviderWithQueryParams,
+  ValidationProvider,
+  VariableEditorForm,
+  useInitialTimeRange,
+} from '@perses-dev/plugin-system';
+import type { ReactElement } from 'react';
+import { useMemo, useState } from 'react';
+
+import { useDatasourceApi } from '../../model/datasource-api';
+import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
+import { DeleteResourceDialog } from '../dialogs';
+import type { DrawerProps } from '../form-drawers';
+
+interface VariableDrawerProps<T extends VariableType> extends DrawerProps<T> {
+  variable: T;
+}
+
+const INITIAL_VARIABLE_DEFINITIONS: VariableDefinition[] = [];
+
+export function VariableDrawer<T extends VariableType>({
+  variable,
+  action,
+  isOpen,
+  isReadonly,
+  onActionChange,
+  onSave,
+  onDelete,
+  onClose,
+}: VariableDrawerProps<T>): ReactElement {
+  const projectName = getVariableProject(variable);
+  const [isDeleteVariableDialogStateOpened, setDeleteVariableDialogStateOpened] = useState<boolean>(false);
+
+  const datasourceApi = useDatasourceApi();
+  const pluginLoader = useRemotePluginLoader();
+
+  const variableDef = useMemo(() => {
+    const result = structuredClone(variable.spec);
+    result.spec.name = variable.metadata.name;
+    return result;
+  }, [variable]);
+
+  const handleSave = (definition: VariableDefinition): void => {
+    const updatedVariable = structuredClone(variable);
+    updatedVariable.spec = definition;
+    updatedVariable.metadata.name = definition.spec.name;
+    if (onSave) {
+      onSave(updatedVariable);
+    }
+  };
+
+  const initialTimeRange = useInitialTimeRange('1h');
+
+  // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
+  // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
+  const handleClickOut = (): void => {
+    /* do nothing */
+  };
+
+  return (
+    <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="variable-editor">
+      <ErrorBoundary FallbackComponent={ErrorAlert}>
+        <PluginRegistry pluginLoader={pluginLoader}>
+          <ValidationProvider>
+            <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
+              <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>
+                <VariableProviderWithQueryParams initialVariableDefinitions={INITIAL_VARIABLE_DEFINITIONS}>
+                  <VariableEditorForm
+                    initialVariableDefinition={variableDef}
+                    action={action}
+                    isDraft={false}
+                    isReadonly={isReadonly}
+                    onActionChange={onActionChange}
+                    onSave={handleSave}
+                    onClose={onClose}
+                    onDelete={onDelete ? (): void => setDeleteVariableDialogStateOpened(true) : undefined}
+                  />
+                </VariableProviderWithQueryParams>
+              </TimeRangeProviderWithQueryParams>
+            </DatasourceStoreProvider>
+          </ValidationProvider>
+        </PluginRegistry>
+        {onDelete && (
+          <DeleteResourceDialog
+            open={isDeleteVariableDialogStateOpened}
+            resource={variable}
+            onClose={() => setDeleteVariableDialogStateOpened(false)}
+            onSubmit={(v) =>
+              onDelete(v).then(() => {
+                setDeleteVariableDialogStateOpened(false);
+                onClose();
+              })
+            }
+          />
+        )}
+      </ErrorBoundary>
+    </Drawer>
+  );
+}

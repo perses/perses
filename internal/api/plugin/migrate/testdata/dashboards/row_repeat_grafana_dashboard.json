@@ -1,0 +1,86 @@
+{
+  "id": null,
+  "uid": "row-repeat-test",
+  "title": "Row Repeat Dashboard",
+  "tags": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "panels": [],
+      "repeat": "myVar",
+      "title": "Repeated Row",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "exotic-tsdb",
+        "uid": "my-monitoring-db"
+      },
+      "description": "A panel inside the repeated row",
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "id": 2,
+      "options": {},
+      "targets": [
+        {
+          "datasource": {
+            "type": "exotic-tsdb",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "up",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Panel in repeated row",
+      "type": "timeseries"
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "value1",
+          "value": "value1"
+        },
+        "name": "myVar",
+        "options": [
+          {
+            "selected": true,
+            "text": "value1",
+            "value": "value1"
+          },
+          {
+            "selected": false,
+            "text": "value2",
+            "value": "value2"
+          }
+        ],
+        "query": "value1,value2",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "schemaVersion": 41,
+  "version": 1
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "kind": "GlobalRole",
+    "metadata": {
+      "name": "admin"
+    },
+    "spec": {
+      "permissions": [
+        {
+          "actions": [
+            "*"
+          ],
+          "scopes": [
+            "*"
+          ]
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,97 @@
+# OAuth helper
+
+As we agree that the configuration of an external OAuth/OIDC provider can be a pain, this page is dedicated to
+help you configure the most common providers.
+
+### Supported OAuth flows
+
+We support three types of authentication flows.
+See [authentication.md](../concepts/authentication.md) for more information.
+
+#### Authorization Code Flow [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749#section-1.3.1)
+
+When the user login with their own personal credentials in the external provider's website through the Perses UI.
+
+#### Device Code Flow [RFC 8628](https://datatracker.ietf.org/doc/html/rfc8628)
+
+When the user login with their own personal credentials in the external provider's website but this time from the Perses
+command line (`percli`). User will be invited to go to the provider's website to enter a device code, and then login.
+
+#### Client Credentials Flow [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749#section-1.3.4)
+
+Here we log in as an application, not a user. This is useful for scripted tasks not necessarily requiring a user to be logged in.
+
+### List of providers
+
+For each of the providers, the main pre-requisite is always to create an app in the provider's console and to get the
+client ID and client secret, but we realised that each of them had their own little oddities that we'll try to list up
+there.
+
+> Disclaimer: We try to keep this page up-to-date, but the provider's documentation is always the most reliable source
+> of information.
+
+#### Microsoft Entra ID (ex Azure AD)
+
+```yaml
+security:
+  authentication:
+    providers:
+      oidc:
+        - slug_id: msft
+          name: "Microsoft"
+          client_id: "<your client ID>"
+          client_secret: "<your client Secret>"
+          issuer: "https://login.microsoftonline.com/<your tenant ID>/v2.0"
+          scopes: [ "openid", "profile", "email", "User.read" ] # For Auth code / Device code
+          client_credentials:
+            scopes: [ "https://graph.microsoft.com/.default" ] # For Client Credentials
+          logout:
+            enabled: true # Generally advised, but you can disable it if you don't want to redirect to the provider's logout page
+```
+
+!!! tip
+    The **scope** used to generate a token from client credentials is different from the one used in other flows.
+
+*Reference: [https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow)*
+
+##### Logout redirection with Entra ID
+
+Logout redirection is partially supported with Entra ID. When you click on logout, Perses will redirect you to the Entra logout URL.
+But there can be some situations where Entra will not redirect you back to Perses.
+- The user logged out directly from Entra ID.
+- The user session expired.
+  In this case, you will be logged out from Perses, but you will have to manually go back to Perses.
+
+#### Keycloak
+
+```yaml
+security:
+  authentication:
+    providers:
+      oidc:
+        - slug_id: keycloak
+          name: "Keycloak"
+          client_id: "<your client ID>"
+          client_secret: "<your client Secret>"
+          issuer: "https://<keycloak host>/realms/<realm>" // For Keycloak versions <17: https://<keycloak host>/auth/realms/<realm>
+          scopes: [ "openid", "profile", "email", "roles" ]
+          logout:
+            enabled: true # Generally advised, but you can disable it if you don't want to redirect to the provider's logout page
+          claims:
+            - claim_name: "roles"   # or "groups" depending on your Keycloak configuration
+              mappings:
+                - claim_value: "admin"
+                  role_name: "admin"          # GlobalRole
+                - claim_value: "editor"
+                  role_name: "dashboard-editor"
+                  project: "myproject"        # project-scoped Role
+```
+
+!!! tip
+    Keycloak uses claims `roles` or `groups` for managing user permissions. For more details check this [link](https://www.keycloak.org/docs/latest/server_admin/index.html#assigning-permissions-using-roles-and-groups). Use the `claims` field to map Keycloak roles/groups to Perses roles automatically — see [Claim-Based Role Assignment](../concepts/authentication.md#claim-based-role-assignment) for the full reference.
+
+*Reference: [Keycloak OpenID Connect](https://www.keycloak.org/securing-apps/oidc-layers)*
+
+#### <Place Your Provider here ...\>
+
+... (don't hesitate to propose new providers to add!)

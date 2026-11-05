@@ -1,0 +1,13 @@
+{
+  "name": "@perses-dev/internal-utils",
+  "version": "0.55.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src"
+  }
+}

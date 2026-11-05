@@ -1,0 +1,63 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import type { ProjectResource } from '@perses-dev/client';
+import { getResourceDisplayName } from '@perses-dev/components';
+import Archive from 'mdi-material-ui/Archive';
+import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
+import type { ReactElement } from 'react';
+
+import type { BreadcrumbVariant } from './breadcrumbs';
+import { HomeLinkCrumb, Breadcrumbs, LinkCrumb, StackCrumb, TitleCrumb } from './breadcrumbs';
+
+interface ProjectBreadcrumbsProps {
+  project: ProjectResource;
+  dashboardName?: string;
+  variant?: BreadcrumbVariant;
+}
+
+function ProjectBreadcrumbs(props: ProjectBreadcrumbsProps): ReactElement {
+  const { project, dashboardName, variant } = props;
+
+  if (dashboardName) {
+    return (
+      <Breadcrumbs id="breadcrumbs" variant={variant}>
+        <HomeLinkCrumb variant={variant} />
+        <LinkCrumb to={`/projects/${project.metadata.name}`} variant={variant}>
+          <StackCrumb variant={variant}>
+            <Archive />
+            <TitleCrumb variant={variant} inheritTypography={true}>
+              {getResourceDisplayName(project)}
+            </TitleCrumb>
+          </StackCrumb>
+        </LinkCrumb>
+        <StackCrumb variant={variant}>
+          <ViewDashboardIcon />
+          <TitleCrumb variant={variant}>{dashboardName}</TitleCrumb>
+        </StackCrumb>
+      </Breadcrumbs>
+    );
+  }
+
+  return (
+    <Breadcrumbs id="breadcrumbs" variant={variant}>
+      <HomeLinkCrumb variant={variant} />
+      <StackCrumb variant={variant}>
+        <Archive />
+        <TitleCrumb variant={variant}>{getResourceDisplayName(project)}</TitleCrumb>
+      </StackCrumb>
+    </Breadcrumbs>
+  );
+}
+
+export default ProjectBreadcrumbs;

@@ -1,0 +1,263 @@
+groups:
+  - name: infrastructure
+    rules:
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes > 10000000
+        for: 30s
+        labels:
+          severity: warning
+          team: platform
+          environment: production
+        annotations:
+          summary: "High memory usage on {{ $labels.job }}"
+          description: "Process {{ $labels.job }} ({{ $labels.instance }}) memory usage is above 10MB."
+          runbook_url: "https://wiki.example.com/runbook/high-memory"
+
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[1m]) > 0.001
+        for: 30s
+        labels:
+          severity: warning
+          team: platform
+          environment: production
+        annotations:
+          summary: "High CPU usage on {{ $labels.job }}"
+          description: "Process {{ $labels.job }} ({{ $labels.instance }}) CPU usage is elevated."
+
+      - alert: TargetDown
+        expr: up == 0
+        for: 15s
+        labels:
+          severity: critical
+          team: platform
+          environment: production
+        annotations:
+          summary: "Target {{ $labels.job }} is down"
+          description: "{{ $labels.job }} target {{ $labels.instance }} has been down for more than 15s."
+
+      - alert: HighScrapeLatency
+        expr: scrape_duration_seconds > 0.5
+        for: 30s
+        labels:
+          severity: warning
+          team: observability
+          environment: production
+        annotations:
+          summary: "High scrape latency for {{ $labels.job }}"
+          description: "Scrape duration for {{ $labels.job }} ({{ $labels.instance }}) is above 500ms."
+
+      - alert: ScrapeSampleLimit
+        expr: scrape_samples_scraped > 500
+        for: 30s
+        labels:
+          severity: info
+          team: observability
+          environment: production
+        annotations:
+          summary: "High sample count from {{ $labels.job }}"
+          description: "{{ $labels.job }} ({{ $labels.instance }}) is scraping more than 500 samples."
+
+  - name: prometheus-health
+    rules:
+      - alert: PrometheusStorageUsage
+        expr: prometheus_tsdb_head_chunks > 100
+        for: 30s
+        labels:
+          severity: warning
+          team: observability
+          environment: production
+        annotations:
+          summary: "Prometheus TSDB has many head chunks"
+          description: "Prometheus has {{ $value }} head chunks, which may indicate high cardinality."
+
+      - alert: PrometheusRuleEvalSlow
+        expr: prometheus_rule_group_last_duration_seconds > 0.01
+        for: 30s
+        labels:
+          severity: info
+          team: observability
+          environment: production
+        annotations:
+          summary: "Slow rule evaluation"
+          description: "Rule group {{ $labels.rule_group }} is taking {{ $value }}s to evaluate."
+
+      - alert: PrometheusNotificationsDropped
+        expr: rate(prometheus_notifications_dropped_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          team: observability
+          environment: production
+        annotations:
+          summary: "Prometheus is dropping alert notifications"
+          description: "Prometheus is failing to deliver notifications to Alertmanager."
+
+  - name: avalanche-metrics
+    rules:
+      - alert: AvalancheHighGaugeValue
+        expr: avalanche_gauge_metric_mmmmm_0_0{label_key_0="label_val_0"} > 0
+        for: 30s
+        labels:
+          severity: info
+          team: app-backend
+          environment: staging
+        annotations:
+          summary: "Avalanche gauge metric elevated"
+          description: "Gauge metric from avalanche is above threshold."
+
+      - alert: AvalancheCounterGrowing
+        expr: rate(avalanche_counter_metric_mmmmm_0_0[2m]) > 0
+        for: 30s
+        labels:
+          severity: info
+          team: app-backend
+          environment: staging
+        annotations:
+          summary: "Avalanche counter is increasing"
+          description: "Counter metric from avalanche is actively incrementing."
+
+      - alert: AvalancheHistogramP99
+        expr: histogram_quantile(0.99, rate(avalanche_histogram_metric_mmmmm_0_0_bucket[2m])) > 0
+        for: 30s
+        labels:
+          severity: warning
+          team: app-backend
+          environment: staging
+        annotations:
+          summary: "Avalanche histogram p99 elevated"
+          description: "P99 of avalanche histogram is above threshold."
+
+      - alert: AvalancheHighCardinality
+        expr: count(avalanche_gauge_metric_mmmmm_0_0) > 5
+        for: 30s
+        labels:
+          severity: warning
+          team: platform
+          environment: staging
+        annotations:
+          summary: "High cardinality from avalanche metrics"
+          description: "Avalanche is producing more than 5 series for a single metric."
+
+  - name: severity-coverage
+    rules:
+      - alert: DiskSpaceCritical
+        expr: prometheus_tsdb_head_chunks > 0
+        for: 15s
+        labels:
+          severity: critical
+          team: platform
+          environment: production
+        annotations:
+          summary: "Disk space critically low"
+          description: "Root partition usage exceeds 95%."
+          runbook_url: "https://wiki.example.com/runbook/disk-critical"
+
+      - alert: APILatencyHigh
+        expr: rate(process_cpu_seconds_total[1m]) >= 0
+        for: 15s
+        labels:
+          severity: high
+          team: app-backend
+          environment: production
+        annotations:
+          summary: "API latency above SLO threshold"
+          description: "P99 API latency exceeds 500ms for the last 5 minutes."
+
+      - alert: CertificateExpiringSoon
+        expr: prometheus_tsdb_head_chunks > 0
+        for: 15s
+        labels:
+          severity: warning
+          team: security
+          environment: production
+        annotations:
+          summary: "TLS certificate expiring within 7 days"
+          description: "Certificate for the service will expire soon."
+
+      - alert: ServiceErrorRate
+        expr: rate(process_cpu_seconds_total[1m]) >= 0
+        for: 15s
+        labels:
+          severity: error
+          team: app-backend
+          environment: production
+        annotations:
+          summary: "Service error rate above threshold"
+          description: "Error rate for the service exceeds 5% over the last 5 minutes."
+
+      - alert: LogVolumeIncreased
+        expr: scrape_samples_scraped > 0
+        for: 15s
+        labels:
+          severity: info
+          team: observability
+          environment: staging
+        annotations:
+          summary: "Log ingestion volume increased"
+          description: "Log volume is 20% above the 7-day average."
+
+      - alert: DebugEndpointActive
+        expr: up > 0
+        for: 15s
+        labels:
+          severity: debug
+          team: app-backend
+          environment: staging
+        annotations:
+          summary: "Debug endpoint is active"
+          description: "A debug/pprof endpoint is exposed and responding."
+
+      - alert: TraceExporterBackpressure
+        expr: scrape_samples_scraped > 0
+        for: 15s
+        labels:
+          severity: trace
+          team: observability
+          environment: staging
+        annotations:
+          summary: "Trace exporter experiencing backpressure"
+          description: "Trace export queue depth is above normal levels."
+
+      - alert: UnknownMetricSource
+        expr: prometheus_tsdb_head_chunks > 0
+        for: 15s
+        labels:
+          severity: unknown
+          team: platform
+          environment: production
+        annotations:
+          summary: "Metrics from unrecognized source"
+          description: "Metrics are arriving from an unregistered scrape target."
+
+      - alert: DeprecatedConfigUsed
+        expr: up > 0
+        for: 15s
+        labels:
+          severity: other
+          team: platform
+          environment: staging
+        annotations:
+          summary: "Deprecated configuration flag in use"
+          description: "A deprecated config option is still set in the running configuration."
+
+      - alert: DatabaseConnectionPoolNearLimit
+        expr: prometheus_tsdb_head_chunks > 0
+        for: 15s
+        labels:
+          severity: high
+          team: app-backend
+          environment: staging
+        annotations:
+          summary: "Database connection pool at 85% capacity"
+          description: "Connection pool is approaching its limit."
+
+      - alert: MemoryLeakSuspected
+        expr: process_resident_memory_bytes > 0
+        for: 15s
+        labels:
+          severity: low
+          team: app-backend
+          environment: production
+        annotations:
+          summary: "Possible memory leak detected"
+          description: "Resident memory has been steadily increasing over the past hour."

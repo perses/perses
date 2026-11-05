@@ -1,0 +1,40 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: perses-user-role
+rules:
+  - apiGroups:
+      - "perses.dev"
+    resources:
+      - perses
+      - persesdashboards
+      - persesdatasources
+      - persesglobaldatasources
+    verbs:
+      - "*"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: user-list-namespaces
+subjects:
+  - kind: ServiceAccount
+    name: user
+    namespace: perses
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: namespace-list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: user-all-perses
+subjects:
+  - kind: ServiceAccount
+    name: user
+    namespace: perses
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: perses-user-role

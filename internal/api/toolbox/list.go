@@ -1,0 +1,206 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package toolbox
+
+import (
+	"encoding/json"
+	"fmt"
+	"slices"
+	"strings"
+
+	"github.com/brunoga/deep"
+	"github.com/labstack/echo/v4"
+	"github.com/perses/common/async"
+	apiInterface "github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/pkg/model/api"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/role"
+	"github.com/perses/spec/go/common"
+	"github.com/tidwall/gjson"
+)
+
+func buildMapFromList[T api.Entity](list []T) map[string]T {
+	result := make(map[string]T)
+	for _, item := range list {
+		result[item.GetMetadata().GetName()] = item
+	}
+	return result
+}
+
+func buildRawMapFromList(rows []json.RawMessage) map[string]json.RawMessage {
+	result := make(map[string]json.RawMessage)
+	for _, item := range rows {
+		result[gjson.GetBytes(item, "metadata.name").String()] = item
+	}
+	return result
+}
+
+func (t *toolbox[T, K, V]) list(ctx echo.Context, parameters apiInterface.Parameters, query V) (any, error) {
+	projectQueryParameter := query.GetProjectQueryParam()
+	if len(projectQueryParameter) > 0 {
+		if !t.caseSensitive {
+			projectQueryParameter = strings.ToLower(projectQueryParameter)
+		}
+		if err := common.ValidateID(projectQueryParameter); err != nil {
+			return nil, apiInterface.HandleBadRequestError(fmt.Sprintf("the project name in the query parameter is invalid: %s", err.Error()))
+		}
+		if len(parameters.Project) > 0 && parameters.Project != projectQueryParameter {
+			return nil, apiInterface.HandleBadRequestError(fmt.Sprintf("the project name in the path (%s) and the project name in the query parameter (%s) are different", parameters.Project, projectQueryParameter))
+		}
+		// In case the project name is provided in the query parameter, we should use it.
+		// We set it in the parameter as it is used for check permission and to get the list of the resource the user has access to.
+		parameters.Project = projectQueryParameter
+	}
+	if t.authz.IsEnabled() {
+		// When permission is activated, the list is filtered based on what the user has access to.
+		// It considered multiple different cases, so that's why it's treated in a separated function.
+		return t.listWhenPermissionIsActivated(ctx, parameters, query)
+	}
+	return t.metadataOrFullList(query)
+}
+
+func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, parameters apiInterface.Parameters, q V) (any, error) {
+	scope, err := role.GetScope(string(t.kind))
+	if err != nil {
+		return nil, err
+	}
+
+	if permErr := t.checkPermissionList(ctx, parameters, scope); permErr != nil {
+		return nil, permErr
+	}
+	// Get the list of the project the user has access to, depending on the current scope.
+	projects, err := t.authz.GetUserProjects(ctx, role.ReadAction, *scope)
+	if err != nil {
+		return nil, err
+	}
+
+	// If there is no project associated with the user, then we should just return an empty list.
+	if len(projects) == 0 {
+		return []api.Entity{}, nil
+	}
+
+	// Special case if the user is getting the list of the project, as "project" is not considered has a global scope.
+	// More explanation about why it's not a global scope available here: https://github.com/perses/perses/blob/611b7993257dcadb18d48de945ad4def18889bec/pkg/model/api/v1/role/scope.go#L137-L138
+	if *scope == role.ProjectScope {
+		return t.listProjectWhenPermissionIsActivated(projects, q)
+	}
+
+	// In the case the request is done on a specific project, no need to compute resource for all other authorized projects.
+	if len(parameters.Project) > 0 {
+		return t.metadataOrFullList(q)
+	}
+
+	// The wildcard means global access and must never be forwarded to the database as a literal project name.
+	// It can be returned alone or mixed with real projects (e.g. k8s lists authorized namespaces alongside it).
+	if slices.Contains(projects, modelV1.WildcardProject) {
+		return t.metadataOrFullList(q)
+	}
+
+	result := make([]any, 0, len(projects))
+	asynchronousRequests := make([]async.Future[any], 0, len(projects))
+	for _, project := range projects {
+		asynchronousRequests = append(asynchronousRequests, async.Async(t.asyncMetadataOrFullList(project, q)))
+	}
+	for _, request := range asynchronousRequests {
+		listResult, requestErr := request.Await()
+		if requestErr != nil {
+			return nil, requestErr
+		}
+		switch typedList := listResult.(type) {
+		case []api.Entity:
+			for _, entity := range typedList {
+				result = append(result, entity)
+			}
+		case []K:
+			for _, entity := range typedList {
+				result = append(result, entity)
+			}
+		case []json.RawMessage:
+			for _, entity := range typedList {
+				result = append(result, entity)
+			}
+		}
+	}
+	return result, nil
+}
+
+func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(projects []string, query V) (any, error) {
+	// The wildcard means global access, whether alone or mixed with real projects, so return the complete list.
+	if slices.Contains(projects, modelV1.WildcardProject) {
+		return t.metadataOrFullList(query)
+	}
+
+	// Last case, we want the list of the project that matches what the user has access to.
+	// So we get the list from the database, and then we keep only that one that matches the list extracted from the permission.
+	// The usage of the map is just to avoid having the o(n2) complexity by looping over two lists to make the intersection.
+	projectList, listErr := t.metadataOrFullList(query)
+	if listErr != nil {
+		return nil, listErr
+	}
+
+	switch typedList := projectList.(type) {
+	case []K:
+		result := make([]K, 0, len(typedList))
+		buildMap := buildMapFromList(typedList)
+		for _, project := range projects {
+			if proj, ok := buildMap[project]; ok {
+				result = append(result, proj)
+			}
+		}
+		return result, nil
+	case []api.Entity:
+		result := make([]api.Entity, 0, len(typedList))
+		buildMap := buildMapFromList(typedList)
+		for _, project := range projects {
+			if proj, ok := buildMap[project]; ok {
+				result = append(result, proj)
+			}
+		}
+		return result, nil
+	case []json.RawMessage:
+		result := make([]json.RawMessage, 0, len(typedList))
+		buildMap := buildRawMapFromList(typedList)
+		for _, project := range projects {
+			if proj, ok := buildMap[project]; ok {
+				result = append(result, proj)
+			}
+		}
+		return result, nil
+	}
+	return []any{}, nil
+}
+
+func (t *toolbox[T, K, V]) metadataOrFullList(query V) (any, error) {
+	if query.GetMetadataOnlyQueryParam() {
+		if query.IsRawMetadataQueryAllowed() {
+			return t.service.RawMetadataList(query)
+		}
+		return t.service.MetadataList(query)
+	}
+	if query.IsRawQueryAllowed() {
+		return t.service.RawList(query)
+	}
+	return t.service.List(query)
+}
+
+func (t *toolbox[T, K, V]) asyncMetadataOrFullList(project string, query V) func() (any, error) {
+	return func() (any, error) {
+		q, err := deep.Copy(query)
+		if err != nil {
+			return nil, err
+		}
+		q.SetProjectQueryParam(project)
+		return t.metadataOrFullList(q)
+	}
+}

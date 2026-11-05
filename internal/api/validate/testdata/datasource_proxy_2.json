@@ -1,0 +1,38 @@
+{
+  "kind": "Datasource",
+  "metadata": {
+    "name": "thanos-query",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
+    "version": 0,
+    "project": ""
+  },
+  "spec": {
+    "display": {
+      "name": "Thanos Query",
+      "description": "This is a thanos-query instance with only /query[...] calls allowed."
+    },
+    "default": false,
+    "plugin": {
+      "kind": "PrometheusDatasource",
+      "spec": {
+        "proxy": {
+          "kind": "HTTPProxy",
+          "spec": {
+            "allowedEndpoints": [
+              {
+                "endpointPattern": "/api/v1/query",
+                "method": "POST"
+              },
+              {
+                "endpointPattern": "/api/v1/query_range",
+                "method": "POST"
+              }
+            ],
+            "url": "https://thanos-query-world.mycompany.net"
+          }
+        }
+      }
+    }
+  }
+}

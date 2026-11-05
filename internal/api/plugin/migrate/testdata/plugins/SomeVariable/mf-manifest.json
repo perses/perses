@@ -1,0 +1,12 @@
+{
+  "id": "SomeVariable",
+  "name": "SomeVariable",
+  "metaData": {
+    "name": "SomeVariable",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "0.10.0",
+      "buildName": "@perses-dev/some-variable-plugin"
+    }
+  }
+}
