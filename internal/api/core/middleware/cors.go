@@ -28,8 +28,13 @@ const maxOriginLength = 253 + 3 + 5
 
 // CORS returns the middleware handling the CORS requests according to the given configuration.
 func CORS(conf config.CORSConfig) echo.MiddlewareFunc {
+	allowOrigins := conf.AllowOrigins
+	if len(allowOrigins) == 0 {
+		// Like the configuration (and echo v4), every origin is allowed by default.
+		allowOrigins = []string{"*"}
+	}
 	return echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
-		UnsafeAllowOriginFunc: newOriginMatcher(conf.AllowOrigins).allowOrigin,
+		UnsafeAllowOriginFunc: newOriginMatcher(allowOrigins).allowOrigin,
 		AllowMethods:          conf.AllowMethods,
 		AllowHeaders:          conf.AllowHeaders,
 		AllowCredentials:      conf.AllowCredentials,
