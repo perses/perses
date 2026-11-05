@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/sirupsen/logrus"
@@ -138,6 +139,38 @@ type CORSConfig struct {
 	AllowCredentials bool     `json:"allow_credentials,omitempty" yaml:"allow_credentials,omitempty"`
 	ExposeHeaders    []string `json:"expose_headers,omitempty" yaml:"expose_headers,omitempty"`
 	MaxAge           int      `json:"max_age,omitempty" yaml:"max_age,omitempty"`
+}
+
+func (c *CORSConfig) Verify() error {
+	if !c.Enable {
+		return nil
+	}
+	if len(c.AllowOrigins) == 0 {
+		// Every origin is allowed by default.
+		c.AllowOrigins = []string{"*"}
+	}
+	for _, origin := range c.AllowOrigins {
+		if origin == "*" {
+			if c.AllowCredentials {
+				return errors.New("security.cors.allow_origins cannot contain '*' (the default value) when security.cors.allow_credentials is true, " +
+					"as the browsers reject the requests with credentials in that case. Set security.cors.allow_origins to the list of the allowed origins instead")
+			}
+			continue
+		}
+		if IsCORSOriginPattern(origin) {
+			// TODO: return an error instead in v0.58.0, see https://github.com/perses/perses/issues/4721
+			logrus.Warnf("the entry %q of security.cors.allow_origins is a wildcard pattern. The wildcard patterns are deprecated and will be removed in v0.58.0. "+
+				"List the exact origins instead. See https://github.com/perses/perses/issues/4721", origin)
+		}
+	}
+	return nil
+}
+
+// IsCORSOriginPattern tells if the given allowed origin is a wildcard pattern,
+// where '*' matches 0 or more characters and '?' matches exactly 1 character.
+// The value '*' alone is not a pattern: it allows every origin.
+func IsCORSOriginPattern(origin string) bool {
+	return origin != "*" && strings.ContainsAny(origin, "*?")
 }
 
 type Security struct {

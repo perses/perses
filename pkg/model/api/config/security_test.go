@@ -17,7 +17,10 @@ import (
 	"testing"
 
 	"github.com/perses/common/config"
+	"github.com/sirupsen/logrus"
+	logrustest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestSecurity_VerifyK8s checks that the k8s authz can't be enabled alongside native authz
@@ -256,4 +259,78 @@ cors:
 			}
 		})
 	}
+}
+
+func TestCORSConfig_Verify(t *testing.T) {
+	testSuite := []struct {
+		title            string
+		config           CORSConfig
+		expectedOrigins  []string
+		expectedWarnings int
+		errMessage       string
+	}{
+		{
+			title:  "disabled CORS is not verified",
+			config: CORSConfig{AllowCredentials: true},
+		},
+		{
+			title:           "every origin is allowed by default",
+			config:          CORSConfig{Enable: true},
+			expectedOrigins: []string{"*"},
+		},
+		{
+			title:           "exact origins",
+			config:          CORSConfig{Enable: true, AllowOrigins: []string{"https://perses.dev", "http://localhost:3000"}, AllowCredentials: true},
+			expectedOrigins: []string{"https://perses.dev", "http://localhost:3000"},
+		},
+		{
+			title:            "wildcard patterns are deprecated",
+			config:           CORSConfig{Enable: true, AllowOrigins: []string{"https://*.perses.dev", "https://perses.dev", "https://app?.perses.dev"}},
+			expectedOrigins:  []string{"https://*.perses.dev", "https://perses.dev", "https://app?.perses.dev"},
+			expectedWarnings: 2,
+		},
+		{
+			title:      "'*' cannot be used with credentials",
+			config:     CORSConfig{Enable: true, AllowOrigins: []string{"*"}, AllowCredentials: true},
+			errMessage: "security.cors.allow_origins cannot contain '*' (the default value) when security.cors.allow_credentials is true",
+		},
+		{
+			title:      "the default origin cannot be used with credentials",
+			config:     CORSConfig{Enable: true, AllowCredentials: true},
+			errMessage: "security.cors.allow_origins cannot contain '*' (the default value) when security.cors.allow_credentials is true",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			origHooks := logrus.StandardLogger().ReplaceHooks(make(logrus.LevelHooks))
+			t.Cleanup(func() {
+				logrus.StandardLogger().ReplaceHooks(origHooks)
+			})
+			hook := logrustest.NewLocal(logrus.StandardLogger())
+
+			err := test.config.Verify()
+			if test.errMessage != "" {
+				assert.ErrorContains(t, err, test.errMessage)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, test.expectedOrigins, test.config.AllowOrigins)
+			warnings := 0
+			for _, entry := range hook.AllEntries() {
+				if entry.Level == logrus.WarnLevel {
+					assert.Contains(t, entry.Message, "will be removed in v0.58.0")
+					warnings++
+				}
+			}
+			assert.Equal(t, test.expectedWarnings, warnings)
+		})
+	}
+}
+
+func TestIsCORSOriginPattern(t *testing.T) {
+	assert.False(t, IsCORSOriginPattern("*"))
+	assert.False(t, IsCORSOriginPattern("https://perses.dev"))
+	assert.True(t, IsCORSOriginPattern("https://*.perses.dev"))
+	assert.True(t, IsCORSOriginPattern("https://app?.perses.dev"))
+	assert.True(t, IsCORSOriginPattern("http://localhost:*"))
 }
