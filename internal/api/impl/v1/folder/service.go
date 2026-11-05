@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	"github.com/brunoga/deep"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/pkg/model/api"
@@ -37,7 +37,7 @@ func NewService(dao folder.DAO) folder.Service {
 	}
 }
 
-func (s *service) Create(_ echo.Context, entity *v1.Folder) (*v1.Folder, error) {
+func (s *service) Create(_ *echo.Context, entity *v1.Folder) (*v1.Folder, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -54,7 +54,7 @@ func (s *service) create(entity *v1.Folder) (*v1.Folder, error) {
 	return entity, nil
 }
 
-func (s *service) Update(_ echo.Context, entity *v1.Folder, parameters apiInterface.Parameters) (*v1.Folder, error) {
+func (s *service) Update(_ *echo.Context, entity *v1.Folder, parameters apiInterface.Parameters) (*v1.Folder, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -86,7 +86,7 @@ func (s *service) update(entity *v1.Folder, parameters apiInterface.Parameters) 
 	return entity, nil
 }
 
-func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
+func (s *service) Delete(_ *echo.Context, parameters apiInterface.Parameters) error {
 	return s.dao.Delete(parameters.Project, parameters.Name)
 }
 

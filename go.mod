@@ -27,12 +27,12 @@ require (
 	github.com/huandu/go-sqlbuilder v1.44.1
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/kylelemons/godebug v1.1.0
-	github.com/labstack/echo-jwt/v4 v4.4.0
-	github.com/labstack/echo/v4 v4.16.2
+	github.com/labstack/echo-jwt/v5 v5.0.2
+	github.com/labstack/echo/v5 v5.4.4
 	github.com/mholt/archives v0.1.5
 	github.com/nexucis/lamenv v0.5.2
 	github.com/olekukonko/tablewriter v1.1.5
-	github.com/perses/common v0.32.0
+	github.com/perses/common v0.32.1-0.20261105152907-2344031865cc
 	github.com/perses/spec v0.3.0
 	github.com/prometheus/client_golang v1.25.0
 	github.com/prometheus/client_model v0.6.3
@@ -163,7 +163,6 @@ require (
 	github.com/klauspost/compress v1.20.3 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/klauspost/pgzip v1.2.7 // indirect
-	github.com/labstack/gommon v0.5.0 // indirect
 	github.com/lib/pq v1.12.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.1 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect
@@ -212,7 +211,6 @@ require (
 	github.com/ulikunitz/xz v0.5.17 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.40.0 // indirect
-	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect

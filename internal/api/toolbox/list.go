@@ -20,7 +20,7 @@ import (
 	"strings"
 
 	"github.com/brunoga/deep"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/common/async"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/pkg/model/api"
@@ -46,7 +46,7 @@ func buildRawMapFromList(rows []json.RawMessage) map[string]json.RawMessage {
 	return result
 }
 
-func (t *toolbox[T, K, V]) list(ctx echo.Context, parameters apiInterface.Parameters, query V) (any, error) {
+func (t *toolbox[T, K, V]) list(ctx *echo.Context, parameters apiInterface.Parameters, query V) (any, error) {
 	projectQueryParameter := query.GetProjectQueryParam()
 	if len(projectQueryParameter) > 0 {
 		if !t.caseSensitive {
@@ -70,7 +70,7 @@ func (t *toolbox[T, K, V]) list(ctx echo.Context, parameters apiInterface.Parame
 	return t.metadataOrFullList(query)
 }
 
-func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, parameters apiInterface.Parameters, q V) (any, error) {
+func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx *echo.Context, parameters apiInterface.Parameters, q V) (any, error) {
 	scope, err := role.GetScope(string(t.kind))
 	if err != nil {
 		return nil, err

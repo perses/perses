@@ -19,7 +19,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/netguard"
 	"github.com/perses/perses/pkg/model/api/config"

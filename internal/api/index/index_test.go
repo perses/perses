@@ -19,7 +19,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	modelAPI "github.com/perses/perses/pkg/model/api"
@@ -31,7 +31,7 @@ import (
 )
 
 // newDisabledAuthz returns an authorization.Authorization implementation with authorization disabled.
-// When authorization is disabled, the echo.Context parameter is never used by the implementation,
+// When authorization is disabled, the *echo.Context parameter is never used by the implementation,
 // so tests can safely pass nil as the context when calling functions that require it.
 func newDisabledAuthz(t *testing.T) authorization.Authorization {
 	t.Helper()
@@ -261,11 +261,11 @@ func (*wildcardAuthorization) IsEnabled() bool {
 	return true
 }
 
-func (*wildcardAuthorization) HasPermission(_ echo.Context, _ role.Action, _ string, _ role.Scope) bool {
+func (*wildcardAuthorization) HasPermission(_ *echo.Context, _ role.Action, _ string, _ role.Scope) bool {
 	return true
 }
 
-func (*wildcardAuthorization) GetUserProjects(_ echo.Context, _ role.Action, _ role.Scope) ([]string, error) {
+func (*wildcardAuthorization) GetUserProjects(_ *echo.Context, _ role.Action, _ role.Scope) ([]string, error) {
 	return []string{v1.WildcardProject, "project-a"}, nil
 }
 
@@ -294,7 +294,7 @@ func TestClientSearch_wildcardAmongAuthorizedProjects(t *testing.T) {
 }
 
 // TestClientSearch_authorizationDisabled tests the client.search function when authorization is disabled.
-// When it is disabled, the ctx (echo.Context) is not used at all by the authorization service,
+// When it is disabled, the ctx (*echo.Context) is not used at all by the authorization service,
 // so we can safely pass nil as the context.
 func TestClientSearch_authorizationDisabled(t *testing.T) {
 	testsCases := []struct {

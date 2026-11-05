@@ -484,7 +484,10 @@ authenticator_ttl: <duration> | default = 2m  # Optional
 enable: <boolean> | default = false # Optional
 
 # Configure the value of the Access-Control-Allow-Origin response header.
-# The wildcard characters '*' (0+ chars) and '?' (1 char) are supported.
+# Each value is an exact origin (`scheme://host[:port]`, e.g. `https://perses.dev`), or `*` to allow every origin.
+# DEPRECATED: the wildcard patterns, where '*' matches 0 or more characters and '?' matches 1 character
+# (e.g. `https://*.example.com`), are deprecated and will be removed in v0.58.0. List the exact origins instead.
+# See https://github.com/perses/perses/issues/4721.
 # See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin
 allow_origins: <string[]> | default = ["*"] # Optional
 
@@ -499,6 +502,8 @@ allow_methods: <string[]> | default = [] # Optional
 allow_headers: <string[]> | default = [] # Optional
 
 # Configure the value of the Access-Control-Allow-Credentials response header.
+# When it is true, `allow_origins` must list the allowed origins: `*` (the default value of `allow_origins`) is
+# rejected, as the browsers reject the requests with credentials when every origin is allowed.
 # See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials
 allow_credentials: <boolean> | default = false # Optional
 

@@ -16,7 +16,7 @@ package plugin
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/route"
@@ -48,7 +48,7 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 	}
 }
 
-func (e *endpoint) List(ctx echo.Context) error {
+func (e *endpoint) List(ctx *echo.Context) error {
 	d, err := e.svc.List()
 	if err != nil {
 		logrus.WithError(err).Error("unable to list plugins")
@@ -57,7 +57,7 @@ func (e *endpoint) List(ctx echo.Context) error {
 	return ctx.Blob(http.StatusOK, "application/json", d)
 }
 
-func (e *endpoint) PushDevPlugin(ctx echo.Context) error {
+func (e *endpoint) PushDevPlugin(ctx *echo.Context) error {
 	var list []v1.PluginInDevelopment
 	if err := ctx.Bind(&list); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
@@ -65,7 +65,7 @@ func (e *endpoint) PushDevPlugin(ctx echo.Context) error {
 	return e.svc.LoadDevPlugin(list)
 }
 
-func (e *endpoint) RefreshDevPlugin(ctx echo.Context) error {
+func (e *endpoint) RefreshDevPlugin(ctx *echo.Context) error {
 	var pluginMetadata module.Metadata
 	if err := ctx.Bind(&pluginMetadata); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
@@ -77,7 +77,7 @@ func (e *endpoint) RefreshDevPlugin(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-func (e *endpoint) DeleteDevPlugin(ctx echo.Context) error {
+func (e *endpoint) DeleteDevPlugin(ctx *echo.Context) error {
 	var pluginMetadata module.Metadata
 	if err := ctx.Bind(&pluginMetadata); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())

@@ -14,13 +14,13 @@
 package middleware
 
 import (
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/interface"
 )
 
 func HandleError() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			return apiinterface.HandleError(next(c))
 		}
 	}
