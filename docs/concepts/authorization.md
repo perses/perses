@@ -91,6 +91,36 @@ spec:
       name: jane
 ```
 
+### Granting a role to every user
+
+Use the wildcard `*` as the name of a `User` subject to grant a role to every authenticated user, including the users
+created after the binding (for example, at their first login through an OAuth/OIDC provider). It is useful to open a
+project to all users without listing them.
+
+Here is an example of a `RoleBinding` that grants the "viewer" `Role` of the "MySuperProject" project to every user:
+
+```yaml
+kind: RoleBinding
+metadata:
+  name: default-viewer
+  project: MySuperProject
+spec:
+  role: viewer
+  subjects:
+    - kind: User
+      name: "*"
+```
+
+The wildcard must be quoted in YAML, as an unquoted `*` is an alias indicator. A user listed by name in a binding that
+also uses the wildcard gets the permissions of the role only once.
+
+Anyone who can manage the role bindings of a project, like its owners, can open it to every user this way. Make sure the
+role bound to the wildcard only grants the permissions you want to give to everybody.
+
+A `GlobalRoleBinding` using the wildcard grants a `GlobalRole` to every authenticated user, like the `guest_permissions`
+of the [native authorization provider](../configuration/configuration.md#native-provider). Unlike them, it is managed
+through the API and can be changed without restarting Perses.
+
 ### RoleBinding and GlobalRoleBinding update restriction
 
 Once you have created a `RoleBinding` or `GlobalRoleBinding`, you cannot update it to change the role it refers to.

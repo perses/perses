@@ -240,6 +240,29 @@ func newTestDataset(size datasetSize) *testDataset {
 	return ds
 }
 
+// wildcardUserProjectPercents are the percentages of projects opened to every user in the wildcard benchmarks.
+var wildcardUserProjectPercents = []int{10, 100}
+
+// withWildcardUserBindings opens the given percentage of projects (the last ones) to every user, with a binding of
+// their "viewer" role to the wildcard subject. user1 is never a member of the last project.
+func (ds *testDataset) withWildcardUserBindings(projectPercent int) *testDataset {
+	count := ds.size.projectCount * projectPercent / 100
+	for p := ds.size.projectCount - count; p < ds.size.projectCount; p++ {
+		ds.roleBindings = append(ds.roleBindings, &v1.RoleBinding{
+			Kind: v1.KindRoleBinding,
+			Metadata: v1.ProjectMetadata{
+				Metadata:               v1.Metadata{Name: "everyone"},
+				ProjectMetadataWrapper: v1.ProjectMetadataWrapper{Project: testProjectName(p)},
+			},
+			Spec: v1.RoleBindingSpec{
+				Role:     "viewer",
+				Subjects: []v1.Subject{{Kind: v1.KindUser, Name: v1.WildcardUser}},
+			},
+		})
+	}
+	return ds
+}
+
 // claimMappings maps one claim value per project to the "editor" role of that project,
 // plus one claim value to the "admin" GlobalRole. It mimics an organization mapping every team
 // of its IdP to a Perses project.
