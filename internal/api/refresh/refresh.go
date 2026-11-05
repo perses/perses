@@ -15,6 +15,7 @@ package refresh
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/perses/common/async"
@@ -38,8 +39,7 @@ type task struct {
 func (r *task) Execute(_ context.Context, _ context.CancelFunc) error {
 	lastUpdateTime, err := r.persesDAO.GetLatestUpdateTime(r.listToCheck)
 	if err != nil {
-		logrus.WithError(err).Error("failed to retrieve last update time")
-		return nil
+		return fmt.Errorf("failed to retrieve last update time: %w", err)
 	}
 
 	// If tables have never been updated, using older date than now and that can't be wrong with any timezones
@@ -50,15 +50,13 @@ func (r *task) Execute(_ context.Context, _ context.CancelFunc) error {
 
 	lastUpdateTimeParsed, err := time.Parse("2006-01-02 15:04:05", *lastUpdateTime)
 	if err != nil {
-		logrus.WithError(err).Error("failed to parse last update time")
-		return nil
+		return fmt.Errorf("failed to parse last update time: %w", err)
 	}
 
 	if r.lastRefreshTime.Before(lastUpdateTimeParsed) {
 		logrus.Debugf("refreshing cache, previous last refresh time %v", r.lastRefreshTime)
 		if refreshErr := r.refresh(); refreshErr != nil {
-			logrus.WithError(refreshErr).Error("failed to refresh cache")
-			return nil
+			return fmt.Errorf("failed to refresh cache: %w", refreshErr)
 		}
 		r.lastRefreshTime = lastUpdateTimeParsed
 	}

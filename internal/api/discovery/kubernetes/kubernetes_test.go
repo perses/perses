@@ -14,12 +14,35 @@
 package kubesd
 
 import (
+	"context"
+	"errors"
 	"testing"
 
+	"github.com/perses/perses/internal/api/discovery/cuetils"
+	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/stretchr/testify/assert"
 )
+
+type failingDiscovery struct {
+	err error
+}
+
+func (f failingDiscovery) discover(_ []*cuetils.Node) ([]*discoveredDatasource, error) {
+	return nil, f.err
+}
+
+func TestExecute_ReturnErrorWhenDiscoveryFails(t *testing.T) {
+	discoverErr := errors.New("kube API unavailable")
+	d := &discovery{
+		cfg:       &config.KubernetesDiscovery{DatasourcePluginKind: "PrometheusDatasource"},
+		discovery: failingDiscovery{err: discoverErr},
+		schema:    schema.New(),
+		name:      "kube",
+	}
+	assert.ErrorIs(t, d.Execute(context.Background(), func() {}), discoverErr)
+}
 
 func TestBuildLabelSelector(t *testing.T) {
 	testSuite := []struct {
