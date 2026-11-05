@@ -127,6 +127,9 @@ plugin: <Plugin config> # Optional
 
 # The configuration of the search feature. You can customize the search engine used and the indexation of the resources.
 search: <Search config> # Optional
+
+# The configuration to export the telemetry (for now, the traces) of the Perses server with the OpenTelemetry protocol (OTLP).
+opentelemetry: <OpenTelemetry config> # Optional
 ```
 
 ### Security config
@@ -1275,4 +1278,82 @@ excluded_chars: <list of strings> # Optional
 # Syntax is available here: https://github.com/tidwall/gjson/blob/master/SYNTAX.md
 index_keys:
   dashboard: <list of strings | default = ["metadata.name", "spec.display.name"]> # Optional
+```
+
+### OpenTelemetry config
+
+The connection to the OTLP receiver (like an OpenTelemetry Collector) is shared by the signals Perses can export.
+Only the traces are exported for now.
+
+When the traces are enabled, Perses creates a span for each HTTP request it receives, and for each request it sends to a
+datasource through the proxy.
+
+The trace context is read from and propagated with the W3C `traceparent` and `baggage` headers, so a request coming
+from a traced application (like a portal embedding Perses panels) and its queries to the datasource are part of the same
+trace.
+
+```yaml
+# The address (host:port) of the OTLP receiver. Required when the traces are enabled, unless traces.endpoint is set.
+# With the http/protobuf protocol, the traces are sent to the path /v1/traces of this address.
+endpoint: <string> # Optional
+
+# The transport used to send the telemetry.
+protocol: <enum = "grpc" | "http/protobuf"> | default = "grpc" # Optional
+
+# Disable TLS when connecting to the endpoint. It can't be used together with tls_config or an authentication.
+insecure: <boolean> | default = false # Optional
+
+# Config used to connect to the endpoint.
+tls_config: <TLS config> # Optional
+
+# The credentials sent with each export request.
+# basic_auth, authorization and oauth are mutually exclusive. Use one of them.
+basic_auth: <Basic Auth specification> # Optional
+authorization: <Authorization specification> # Optional
+oauth: <Oauth specification> # Optional
+
+# Headers sent with each export request. Their values are hidden when the configuration is returned by the API,
+# but prefer basic_auth, authorization or oauth for the credentials.
+headers:
+  <string>: <string> # Optional
+
+# The compression of the export requests.
+compression: <enum = "none" | "gzip"> | default = "none" # Optional
+
+# The maximum duration of an export request, retries included.
+timeout: <duration> | default = 10s # Optional
+
+traces:
+  # Enable the export of the traces.
+  enable: <boolean> | default = false # Optional
+
+  # Overrides the endpoint for the traces.
+  endpoint: <string> # Optional
+
+  # The fraction (between 0 and 1) of the traces started by Perses that are sampled.
+  # A request received as part of a sampled trace is always traced, whatever this ratio.
+  # With the default value, Perses only traces the requests that are part of a sampled trace.
+  sampling_ratio: <float> | default = 0 # Optional
+```
+
+The settings that aren't set in this configuration can be set with the standard `OTEL_EXPORTER_OTLP_*` environment
+variables (like `OTEL_EXPORTER_OTLP_CERTIFICATE` or `OTEL_EXPORTER_OTLP_HEADERS`). A setting present in this
+configuration takes precedence over the environment variable.
+
+The standard environment variables `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` can be used to change the name
+of the service (`perses` by default) or to add attributes to the resource, like the namespace of the service.
+
+Example, with TLS and a bearer token read from a file:
+
+```yaml
+opentelemetry:
+  endpoint: otel-collector.observability:4317
+  tls_config:
+    caFile: /etc/perses/otel/ca.crt
+  authorization:
+    type: Bearer
+    credentialsFile: /etc/perses/otel/token
+  traces:
+    enable: true
+    sampling_ratio: 0.1
 ```

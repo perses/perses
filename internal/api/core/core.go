@@ -47,6 +47,10 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	persesAPI := NewPersesAPI(dependencyManager, conf)
 	persesFrontend := ui.NewPersesFrontend(conf, dependencyManager.Service().GetPlugin())
 	runner := app.NewRunner().WithDefaultHTTPServerAndPrometheusRegisterer(utils.MetricNamespace, registry, registry).SetBanner(banner)
+	// The tracing middleware must be registered before the error handling one, to record the status code of the errors.
+	if err := setupOpenTelemetry(runner, conf.OpenTelemetry); err != nil {
+		return nil, nil, err
+	}
 
 	// enable cleanup of the ephemeral dashboards once their ttl is reached
 	if conf.EphemeralDashboard.Enable {

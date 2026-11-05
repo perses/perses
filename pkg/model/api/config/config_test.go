@@ -99,7 +99,8 @@ func TestJSONMarshalConfig(t *testing.T) {
   },
   "search": {
     "index_keys": {}
-  }
+  },
+  "opentelemetry": {}
 }`,
 		},
 		{
@@ -200,7 +201,8 @@ func TestJSONMarshalConfig(t *testing.T) {
         "spec.display.name"
       ]
     }
-  }
+  },
+  "opentelemetry": {}
 }`,
 		},
 	}
