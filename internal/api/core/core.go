@@ -18,7 +18,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/common/app"
 	"github.com/perses/perses/internal/api/core/middleware"
 	"github.com/perses/perses/internal/api/dashboard"
@@ -103,7 +103,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		HTTPServerBuilder().
 		ActivatePprof(enablePprof).
 		APIRegistration(persesAPI).
-		GzipSkipper(func(c echo.Context) bool {
+		GzipSkipper(func(c *echo.Context) bool {
 			// let's skip the gzip compression when using the proxy and rely on the datasource behind.
 			return strings.HasPrefix(c.Request().URL.Path, fmt.Sprintf("%s/proxy", conf.APIPrefix)) ||
 				// When serving the plugins from a dev server, we don't want to compress the response since it's already compressed by rsbuild.

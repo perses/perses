@@ -18,7 +18,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -30,7 +30,7 @@ func newCORSServer(t *testing.T, conf config.CORSConfig) *echo.Echo {
 	require.NoError(t, conf.Verify())
 	e := echo.New()
 	e.Use(CORS(conf))
-	e.GET("/api/v1/projects", func(c echo.Context) error {
+	e.GET("/api/v1/projects", func(c *echo.Context) error {
 		return c.NoContent(http.StatusOK)
 	})
 	return e

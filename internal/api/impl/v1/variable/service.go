@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	"github.com/brunoga/deep"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/plugin/schema"
@@ -41,7 +41,7 @@ func NewService(dao variable.DAO, sch schema.Schema) variable.Service {
 	}
 }
 
-func (s *service) Create(_ echo.Context, entity *v1.Variable) (*v1.Variable, error) {
+func (s *service) Create(_ *echo.Context, entity *v1.Variable) (*v1.Variable, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -61,7 +61,7 @@ func (s *service) create(entity *v1.Variable) (*v1.Variable, error) {
 	return entity, nil
 }
 
-func (s *service) Update(_ echo.Context, entity *v1.Variable, parameters apiInterface.Parameters) (*v1.Variable, error) {
+func (s *service) Update(_ *echo.Context, entity *v1.Variable, parameters apiInterface.Parameters) (*v1.Variable, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -98,7 +98,7 @@ func (s *service) update(entity *v1.Variable, parameters apiInterface.Parameters
 	return entity, nil
 }
 
-func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
+func (s *service) Delete(_ *echo.Context, parameters apiInterface.Parameters) error {
 	return s.dao.Delete(parameters.Project, parameters.Name)
 }
 

@@ -20,7 +20,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
