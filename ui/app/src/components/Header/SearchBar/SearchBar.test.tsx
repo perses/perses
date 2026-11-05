@@ -310,8 +310,24 @@ describe('SearchBar', () => {
     it('should not show no records found while a list is loading', () => {
       vi.mocked(useProjectList).mockReturnValue({
         data: undefined,
+        isPending: true,
         isLoading: true,
         isFetching: true,
+      } as ReturnType<typeof useProjectList>);
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'XYZ' } });
+
+      expect(screen.queryByTestId(TEST_IDS.noRecordContainer)).not.toBeInTheDocument();
+    });
+
+    it('should not show no records found while the initial fetch of a list is paused', () => {
+      // e.g. when the browser is offline, the fetch is paused: the list has no data yet but is not fetching.
+      vi.mocked(useProjectList).mockReturnValue({
+        data: undefined,
+        isPending: true,
+        isLoading: false,
+        isFetching: false,
       } as ReturnType<typeof useProjectList>);
 
       fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
