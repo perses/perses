@@ -90,7 +90,13 @@ func newTestDashboard(plugin map[string]any) map[string]any {
 
 // withOSPaths uses the path separator of the OS in the positions of the expected CUE errors (e.g. .\dashboard.json on Windows).
 func withOSPaths(expected string) string {
-	return strings.ReplaceAll(expected, "    ./", "    ."+string(filepath.Separator))
+	lines := strings.Split(expected, "\n")
+	for i, line := range lines {
+		if strings.HasPrefix(line, "    ./") {
+			lines[i] = filepath.FromSlash(line)
+		}
+	}
+	return strings.Join(lines, "\n")
 }
 
 func toJSON(t *testing.T, object any) string {
@@ -223,12 +229,15 @@ spec:
 			path := writeFile(t, dir, test.fileName, test.content)
 			data, isJSON, err := file.Read(path)
 			require.NoError(t, err)
-			err = sch.validate(path, data, isJSON)
+			invalidDashboards, err := sch.validate(path, data, isJSON)
+			require.NoError(t, err)
 			if len(test.expected) == 0 {
-				assert.NoError(t, err)
+				assert.Empty(t, invalidDashboards)
 				return
 			}
-			assert.EqualError(t, err, withOSPaths(test.expected))
+			require.Len(t, invalidDashboards, 1)
+			got := fmt.Sprintf("invalid dashboard %q: %s", invalidDashboards[0].name, invalidDashboards[0].err)
+			assert.Equal(t, withOSPaths(test.expected), got)
 		})
 	}
 }
@@ -250,6 +259,10 @@ func TestLintCMDWithSchema(t *testing.T) {
 	t.Chdir(dir)
 	schemaPath := writeFile(t, dir, "schema.cue", string(data))
 	valid := writeFile(t, dir, "valid.json", `{"kind":"Dashboard","metadata":{"name":"demo","project":"perses"},"spec":{"display":{"name":"demo"},"duration":"6h","layouts":[],"panels":{}}}`)
+	invalidDir := filepath.Join(dir, "invalid")
+	require.NoError(t, os.Mkdir(invalidDir, 0o700))
+	writeFile(t, invalidDir, "first.json", `{"kind":"Dashboard","metadata":{"name":"first","project":"perses"},"spec":{"display":{"name":"first"},"durration":"6h","layouts":[],"panels":{}}}`)
+	writeFile(t, invalidDir, "second.json", `{"kind":"Dashboard","metadata":{"name":"second","project":"perses"},"spec":{"dispaly":{"name":"second"},"duration":"6h","layouts":[],"panels":{}}}`)
 	misspelled := writeFile(t, dir, "misspelled.json", `{"kind":"Dashboard","metadata":{"name":"demo","project":"perses"},"spec":{"display":{"name":"demo"},"durration":"6h","layouts":[],"panels":{}}}`)
 	// The panel key is an unquoted number, which the YAML decoder doesn't decode as a string key.
 	numericKey := writeFile(t, dir, "numeric-key.yaml", `kind: Dashboard
@@ -290,7 +303,7 @@ spec:
 			Title:           "variable with an invalid name",
 			Args:            []string{"-f", invalidVariable, "--schema", schemaPath},
 			IsErrorExpected: true,
-			ExpectedMessage: "variable name '123' is not valid",
+			ExpectedMessage: fmt.Sprintf("1 invalid resource(s) found:\n- GlobalVariable \"123\" (file %q): variable name '123' is not valid", invalidVariable),
 		},
 		{
 			Title:           "valid dashboard",
@@ -306,8 +319,19 @@ spec:
 			Title:           "misspelled field",
 			Args:            []string{"-f", misspelled, "--schema", schemaPath},
 			IsErrorExpected: true,
-			ExpectedMessage: withOSPaths(`invalid dashboard "demo": #Dashboard.spec.durration: field not allowed:
+			ExpectedMessage: fmt.Sprintf("1 invalid resource(s) found:\n- Dashboard \"perses/demo\" (file %q): ", misspelled) +
+				withOSPaths(`#Dashboard.spec.durration: field not allowed:
     ./misspelled.json:1:102`),
+		},
+		{
+			Title:           "every invalid dashboard of a directory is reported",
+			Args:            []string{"-d", invalidDir, "--schema", schemaPath},
+			IsErrorExpected: true,
+			ExpectedMessage: "2 invalid resource(s) found:\n" +
+				fmt.Sprintf("- Dashboard \"perses/first\" (file %q): ", filepath.Join(invalidDir, "first.json")) +
+				withOSPaths("#Dashboard.spec.durration: field not allowed:\n    ./invalid/first.json:1:104") + "\n" +
+				fmt.Sprintf("- Dashboard \"perses/second\" (file %q): ", filepath.Join(invalidDir, "second.json")) +
+				withOSPaths("#Dashboard.spec.dispaly: field not allowed:\n    ./invalid/second.json:1:78"),
 		},
 		{
 			Title:           "schema and online are mutually exclusive",
@@ -356,6 +380,11 @@ func TestLintCMDWithSchemaConsistency(t *testing.T) {
 	}
 	oneDefault := writeFile(t, dir, "one-default.json", dashboardWithDatasources(false))
 	twoDefaults := writeFile(t, dir, "two-defaults.json", dashboardWithDatasources(true))
+	// The first dashboard doesn't match the schema, and the second one has the same name but fails the consistency checks.
+	sameName := writeFile(t, dir, "same-name.json", `[{"kind":"Dashboard","metadata":{"name":"demo","project":"perses"},"spec":{"display":{"name":"demo"},"durration":"6h","layouts":[],"panels":{}}},`+dashboardWithDatasources(true)+`]`)
+	noSpec := writeFile(t, dir, "no-spec.json", `{"kind":"Dashboard","metadata":{"name":"demo","project":"perses"}}`)
+	// The item that is not an object doesn't prevent the other resources from being checked.
+	nonObject := writeFile(t, dir, "non-object.json", `[`+dashboardWithDatasources(false)+`,42,`+dashboardWithDatasources(true)+`]`)
 
 	cmdTest.ExecuteSuiteTest(t, NewCMD, []cmdTest.Suite{
 		{
@@ -367,7 +396,30 @@ func TestLintCMDWithSchemaConsistency(t *testing.T) {
 			Title:                "two default datasources of the same kind",
 			Args:                 []string{"-f", twoDefaults, "--schema", schemaPath},
 			IsErrorExpected:      true,
-			ExpectedRegexMessage: `^unexpected error in dashboard "demo": [ab] can not be defined as default datasource: there is already a default defined for kind "PrometheusDatasource"$`,
+			ExpectedRegexMessage: `^1 invalid resource\(s\) found:\n- Dashboard "perses/demo" \(file "[^"]+"\): [ab] can not be defined as default datasource: there is already a default defined for kind "PrometheusDatasource"$`,
+		},
+		{
+			Title:           "only the dashboard not matching the schema skips the consistency checks",
+			Args:            []string{"-f", sameName, "--schema", schemaPath},
+			IsErrorExpected: true,
+			ExpectedRegexMessage: `^2 invalid resource\(s\) found:\n` +
+				`- Dashboard "perses/demo" \(file "[^"]+"\): #Dashboard\.spec\.durration: field not allowed:\n(.+\n)+` +
+				`- Dashboard "perses/demo" \(file "[^"]+"\): [ab] can not be defined as default datasource: there is already a default defined for kind "PrometheusDatasource"$`,
+		},
+		{
+			Title:           "a dashboard without spec is reported once",
+			Args:            []string{"-f", noSpec, "--schema", schemaPath},
+			IsErrorExpected: true,
+			ExpectedRegexMessage: `^1 invalid resource\(s\) found:\n` +
+				`- Dashboard "perses/demo" \(file "[^"]+"\): (.+\n)+objects\[0\]: cannot extract Dashboard, unmarshalling error: spec cannot be empty$`,
+		},
+		{
+			Title:           "the resources around an item that is not an object are checked",
+			Args:            []string{"-f", nonObject, "--schema", schemaPath},
+			IsErrorExpected: true,
+			ExpectedRegexMessage: `^2 invalid resource\(s\) found:\n` +
+				`- objects\[1\] from file "[^"]+" must be an object, got float64\n` +
+				`- Dashboard "perses/demo" \(file "[^"]+"\): [ab] can not be defined as default datasource: there is already a default defined for kind "PrometheusDatasource"$`,
 		},
 	})
 }
