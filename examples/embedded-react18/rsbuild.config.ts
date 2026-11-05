@@ -15,5 +15,21 @@ import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 
 export default defineConfig({
-  plugins: [pluginReact()],
+  plugins: [
+    pluginReact({
+      // React 18 has no built-in compiler runtime: target it explicitly and install `react-compiler-runtime`.
+      reactCompiler: { target: '18' },
+    }),
+  ],
+  tools: {
+    rspack: {
+      module: {
+        rules: [
+          // Perses packages are ESM and default-import CommonJS dependencies (e.g. `mdi-material-ui` icons):
+          // treat dependencies as auto modules so those default imports resolve to `exports.default`.
+          { test: /\.m?js$/, type: 'javascript/auto', resolve: { fullySpecified: false } },
+        ],
+      },
+    },
+  },
 });

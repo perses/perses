@@ -93,6 +93,9 @@ A link is either a URL or a menu of dashboards in the current project. Set `url`
 name: <string> # Optional
 
 # Target URL. Mutually exclusive with tags. May be empty.
+# It must be a relative URL or use one of the following schemes: http, https, mailto, tel, sms, slack, msteams, vscode,
+# vscode-insiders, zoommtg. Any other scheme (e.g. javascript:) is rejected.
+# When the URL contains variables, the URL obtained after the interpolation must follow the same rule, otherwise the link is displayed but cannot be followed.
 url: <string> # Optional
 
 # Text displayed when hovering over the link.

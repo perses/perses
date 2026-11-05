@@ -19,7 +19,6 @@ import (
 	"regexp"
 	"slices"
 	"strconv"
-	"strings"
 
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -30,8 +29,9 @@ import (
 
 // Not similar to variable validation regex (\w*?[^0-9]\w*), because some PromQL expression may need variable name with only number
 // For example in PromQL, in the function `label_replace`, it used the syntax $1, $2, for the placeholder.
-// It also supports the curly braces syntax ${} to align with frontend.
-var variableSyntaxRegexp = regexp.MustCompile(`\$(\w+|{\w+})`)
+// It also supports the curly braces syntax ${var}, including the field path ${var.field} and the format ${var:format},
+// to align with the frontend.
+var variableSyntaxRegexp = regexp.MustCompile(`\$(\w+)|\$\{(\w+)(?:\.[^:^}]+)?(?::[^}]+)?\}`)
 
 type VariableGroup struct {
 	Variables []string
@@ -109,7 +109,7 @@ func buildVariableDependencies(variables []dashboard.Variable, projectVariables 
 		var tmpUndefinedDeps []string
 		for _, match := range matches {
 			// match[0] is the string that is matching the regexp (including the $)
-			// match[1] is the string that is matching the group defined by the regexp. (the string without the $)
+			// match[1] is the name of the variable used, whatever the syntax used (see parseVariableUsed)
 			usedVarName := match[1]
 			if _, ok := variableNames[usedVarName]; !ok {
 				if !slices.Contains(tmpUndefinedDeps, usedVarName) {
@@ -241,7 +241,11 @@ func parseVariableUsed(str string) [][]string {
 	matches := variableSyntaxRegexp.FindAllStringSubmatch(str, -1)
 	var result [][]string
 	for _, match := range matches {
-		match[1] = strings.Trim(match[1], "{}")
+		// match[1] is the variable name when using the syntax $var.
+		// match[2] is the variable name when using the syntax ${var}, ${var.field} or ${var:format}.
+		if len(match[1]) == 0 {
+			match[1] = match[2]
+		}
 		if _, err := strconv.Atoi(match[1]); err != nil {
 			// We want to keep only variables that are not only a number.
 			// A number that represents a variable is not meaningful, and so we don't want to consider it.

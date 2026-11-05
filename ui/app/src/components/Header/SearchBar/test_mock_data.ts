@@ -24,17 +24,10 @@ import type { ConfigModel } from '../../../model/config-client';
 export const MOCK_CLIENT_CONFIG: ConfigModel = {
   api_prefix: '/api',
   database: {},
-  schemas: {
-    panels_path: '/panels',
-    queries_path: '/queries',
-    datasources_path: '/datasources',
-    variables_path: './variables',
-    interval: '30s',
-  },
   datasource: {
     disable_local: true,
-    global: { disable: true },
-    project: { disable: true },
+    global: { disable: false },
+    project: { disable: false },
   },
   ephemeral_dashboard: {
     cleanup_interval: '30m',
@@ -61,8 +54,6 @@ export const MOCK_CLIENT_CONFIG: ConfigModel = {
       providers: { enable_native: false, oauth: [], oidc: [] },
     },
     authorization: {
-      check_latest_update_interval: { seconds: 30 },
-      guest_permissions: [],
       provider: {},
     },
   },

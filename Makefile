@@ -16,8 +16,8 @@ CUE                   ?= cue
 GOCI                  ?= golangci-lint
 GOFMT                 ?= $(GO)fmt
 MDOX                  ?= mdox
-# docs/ is imported by perses/website and rendered with MkDocs Material.
-# mdox formats GitHub Flavored Markdown and can break MkDocs-specific syntax.
+# docs/ is imported by perses/website, which supports syntaxes that are not GitHub Flavored Markdown, like the
+# admonitions of MkDocs (`!!! note`). mdox formats GitHub Flavored Markdown and can break them.
 MDOX_MD_FILES_CMD     = find . -name '*.md' -not -path "./docs/*" -not -path "./internal/cli/cmd/plugin/build/testdata/*" -not -path "./plugins/*" -not -path "./plugins-archive/*" -not -path "./.github/perses-ci/*" -not -path "./ui/node_modules/*" -not -path "./ui/app/node_modules/*" -not -path "./ui/storybook/node_modules/*" -print
 GOOS                  ?= $(shell $(GO) env GOOS)
 GOARCH                ?= $(shell $(GO) env GOARCH)
@@ -61,6 +61,8 @@ checkformat:
 checkdocs:
 	@echo ">> Check mdox-managed markdown documents"
 	$(MDOX) fmt --check --soft-wraps -l $$($(MDOX_MD_FILES_CMD)) --links.validate.config-file=./.mdox.validate.yaml
+	@echo ">> Check the navigation of the documentation (docs/nav.yaml)"
+	$(GO) run ./scripts/check-docs-nav
 
 .PHONY: checkunused
 checkunused:

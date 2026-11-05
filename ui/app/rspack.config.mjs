@@ -121,9 +121,8 @@ export default defineConfig({
                   tsx: true,
                 },
                 transform: {
-                  // React 18 needs the `react-compiler-runtime` package; switch the target to '19' when upgrading React.
                   reactCompiler: {
-                    target: '18',
+                    target: '19',
                   },
                   react: {
                     runtime: 'automatic',

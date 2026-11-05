@@ -303,8 +303,10 @@ func TestUnmarshalJSONConfig(t *testing.T) {
   },
   "plugin": {
     "path": "plugins",
-    "archive_path": "plugins-archive"
-	},
+    "archive_paths": [
+      "plugins-archive"
+    ]
+  },
   "provisioning": {
     "folders": [
       "dev/data"
@@ -396,8 +398,8 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 					},
 				},
 				Plugin: Plugin{
-					Path:        "plugins",
-					ArchivePath: "plugins-archive",
+					Path:         "plugins",
+					ArchivePaths: []string{"plugins-archive"},
 				},
 				Provisioning: ProvisioningConfig{
 					Folders: []string{
@@ -495,7 +497,8 @@ ephemeral_dashboard:
 
 plugin:
   path: "custom/plugins"
-  archive_path: "custom/plugins/archive"
+  archive_paths:
+    - "custom/plugins/archive"
 `,
 			result: Config{
 				Security: Security{
@@ -1085,6 +1088,38 @@ datasource:
 			}
 			assert.NoError(t, err)
 			assert.Equal(t, test.expected, resolvedConfig.Datasource.Proxy.HTTP)
+		})
+	}
+}
+
+func TestEphemeralDashboardVerify(t *testing.T) {
+	testSuite := []struct {
+		title           string
+		ephemeralConfig EphemeralDashboard
+		expectedErrMsg  string
+	}{
+		{
+			title:           "no max ttl",
+			ephemeralConfig: EphemeralDashboard{Enable: true},
+		},
+		{
+			title:           "positive max ttl",
+			ephemeralConfig: EphemeralDashboard{Enable: true, MaxTTL: common.Duration(24 * time.Hour)},
+		},
+		{
+			title:           "negative max ttl",
+			ephemeralConfig: EphemeralDashboard{Enable: true, MaxTTL: common.Duration(-time.Hour)},
+			expectedErrMsg:  "max_ttl cannot be negative",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			err := test.ephemeralConfig.Verify()
+			if len(test.expectedErrMsg) > 0 {
+				assert.EqualError(t, err, test.expectedErrMsg)
+				return
+			}
+			assert.NoError(t, err)
 		})
 	}
 }

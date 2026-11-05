@@ -22,14 +22,6 @@ import buildURL from './url-builder';
 
 const resource = 'config';
 
-export interface ConfigSchemasModel {
-  panels_path: string;
-  queries_path: string;
-  datasources_path: string;
-  variables_path: string;
-  interval: string;
-}
-
 export interface DatabaseFile {
   folder: string;
   extension: 'yaml' | 'json';
@@ -93,14 +85,6 @@ export interface ProvisioningConfig {
 }
 
 export interface AuthorizationConfig {
-  /**
-   * @deprecated use provider.native.check_latest_update_interval instead
-   */
-  check_latest_update_interval: Duration;
-  /**
-   * @deprecated use provider.native.guest_permissions instead
-   */
-  guest_permissions: Permission[];
   provider: {
     native?: NativeAuthorizationProvider;
     kubernetes?: KubernetesAuthorizationProvider;
@@ -260,7 +244,6 @@ export interface ConfigModel {
   api_prefix?: string;
   security: SecurityConfig;
   database: Database;
-  schemas: ConfigSchemasModel;
   provisioning?: ProvisioningConfig;
   datasource: DatasourceConfig;
   variable: VariableConfig;

@@ -99,6 +99,15 @@ Note for the release shepherd:
   ```bash
   make bump-version
   ```
+- When cutting the final release (`v<X.Y>.0` or a patch release), make sure no prerelease (`alpha`, `beta`, `rc`) version
+  of the shared packages, the plugins or the specification remains pinned: point the plugins to their final versions in
+  `scripts/plugin/plugin.yaml`, the `@perses-dev/*` dependencies to their final versions, and the examples and the
+  embedding documentation back to `latest`. The following command must print nothing:
+
+  ```bash
+  grep -rnE -- '-(alpha|beta|rc)\.[0-9]+' scripts/plugin/plugin.yaml ui/app/package.json ui/e2e/package.json \
+    internal/cli/cmd/plugin/generate/templates/module/package.json.tmpl examples/*/package.json docs/embedding-panels.md
+  ```
 - Push the branch to GitHub and create a pull request with the release branch as the base. This gives others the
   opportunity to chime in on the release, in general, and on the addition to the changelog, in particular.
   - It's also helpful to drop a link to the release PR in #perses-dev on Matrix to get extra visibility.
