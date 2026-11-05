@@ -23,6 +23,7 @@ import (
 	"mime"
 	"net/http"
 	"net/http/httputil"
+	"os"
 	"path"
 	"path/filepath"
 	"regexp"
@@ -126,7 +127,7 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 	devEnvironment := loaded.DevEnvironment
 	if devEnvironment == nil {
 		// In that case, we need to read the requested files from the file system.
-		// The first thing to do is to replace the URL path with the local path of the plugin.
+		// The local path of the requested file is resolved to verify it is in the plugin directory.
 		localPath := filepath.Join(loaded.LocalPath, filepath.FromSlash(relPath))
 
 		// Ensure the resolved path is contained within the plugin's directory
@@ -144,14 +145,17 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 		c.Response().Header().Set("X-Content-Type-Options", "nosniff")
 		// Plugin bundles built with rsbuild/module federation are content-hashed (e.g. __mf/js/main.f55169be.js),
 		// so they can be cached indefinitely. Everything else (mf-manifest.json, schemas, ...) has a stable name
-		// and must be revalidated. `c.File` relies on http.ServeContent, which sets Last-Modified and honors
+		// and must be revalidated. The file is served with http.ServeContent, which sets Last-Modified and honors
 		// If-Modified-Since / Range requests, so revalidation is answered with a cheap 304.
 		if isHashedAsset(relPath) {
 			c.Response().Header().Set("Cache-Control", cacheControlImmutable)
 		} else {
 			c.Response().Header().Set("Cache-Control", cacheControlRevalidate)
 		}
-		return c.File(localPath)
+		// The file is opened from a file system rooted at the plugin directory instead of using its absolute path,
+		// because echo v5 only serves with c.File the absolute paths located under the working directory.
+		// In the container image, the plugins are in /etc/perses/plugins while the working directory is /perses.
+		return echo.StaticFileHandler(relPath, os.DirFS(loaded.LocalPath))(c)
 	}
 	// Otherwise, it means we are in a dev environment, and we need to proxy the request to the dev server.
 	// When developing a plugin, you will be able to serve the files of the plugin using a dev server (with rsbuild).
