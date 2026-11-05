@@ -143,6 +143,11 @@ export function useIsLockModeAvailable(): boolean {
   return config.frontend.enable_lock_mode ?? false;
 }
 
+export function useLogoURL(): string | undefined {
+  const { config } = useConfigContext();
+  return config.frontend.logo_url;
+}
+
 export function useIsEphemeralDashboardEnabled(): boolean {
   const { config } = useConfigContext();
   return config.ephemeral_dashboard.enable;

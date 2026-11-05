@@ -1111,6 +1111,10 @@ important_dashboards:
 # The markdown content to be displayed on the UI home page
 information: <string> # Optional
 
+# URL of a custom logo displayed in the navigation bar and on the sign-in page instead of the Perses logo.
+# It can be an absolute URL or a data URI.
+logo_url: <string> # Optional
+
 # TimeRange configuration
 time_range: <TimeRange config> # Optional
 

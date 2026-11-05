@@ -20,7 +20,7 @@ import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { GlobalProject, useHasPartialPermission } from '../../context/Authorization';
-import { useIsAuthEnabled, useIsExplorerEnabled } from '../../context/Config';
+import { useIsAuthEnabled, useIsExplorerEnabled, useLogoURL } from '../../context/Config';
 import { AdminRoute, ConfigRoute } from '../../model/route';
 import { useIsLaptopSize, useIsMobileSize } from '../../utils/browser-size';
 import { BannerInfo } from '../BannerInfo';
@@ -30,6 +30,14 @@ import { AccountMenu } from './AccountMenu';
 import { SearchBar } from './SearchBar/SearchBar';
 import { ThemeSwitch } from './ThemeSwitch';
 import { ToolMenu } from './ToolMenu';
+
+function HeaderLogo({ isLaptopSize }: { isLaptopSize: boolean }): ReactElement {
+  const logoURL = useLogoURL();
+  if (logoURL) {
+    return <Box component="img" src={logoURL} alt="Logo" sx={{ height: 32, maxWidth: isLaptopSize ? 130 : 32 }} />;
+  }
+  return isLaptopSize ? <WhitePersesLogo /> : <PersesLogoCropped color="white" width={32} height={32} />;
+}
 
 export default function Header(): ReactElement {
   const isLaptopSize = useIsLaptopSize();
@@ -74,7 +82,7 @@ export default function Header(): ReactElement {
               padding: 0,
             }}
           >
-            {isLaptopSize ? <WhitePersesLogo /> : <PersesLogoCropped color="white" width={32} height={32} />}
+            <HeaderLogo isLaptopSize={isLaptopSize} />
           </Button>
           <Divider
             orientation="vertical"
