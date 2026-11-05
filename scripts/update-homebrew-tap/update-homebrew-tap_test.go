@@ -317,6 +317,30 @@ func TestUpdateTap(t *testing.T) {
 	}
 }
 
+func TestUpdateTapFailsBeforeWritingWithInvalidFormula(t *testing.T) {
+	formula := readTestData(t, "perses.rb")
+	// Only the last formula can't be updated, as the checksum of one of its archives is missing.
+	invalidName := formulae[len(formulae)-1]
+	invalidFormula := strings.ReplaceAll(formula, "_linux_arm64.tar.gz", "_linux_riscv64.tar.gz")
+	root := newTap(t, formula)
+	require.NoError(t, root.WriteFile(invalidName, []byte(invalidFormula), 0600))
+	fetchChecksums := func(context.Context, string) (map[string]string, error) {
+		return readChecksums(t), nil
+	}
+
+	err := updateTap(t.Context(), root, releaseVersion, fetchChecksums)
+	assert.ErrorContains(t, err, fmt.Sprintf("unable to update the formula %q", invalidName))
+	for _, name := range formulae {
+		expected := formula
+		if name == invalidName {
+			expected = invalidFormula
+		}
+		data, readErr := root.ReadFile(name)
+		require.NoError(t, readErr)
+		assert.Equal(t, expected, string(data), "formula %s", name)
+	}
+}
+
 func TestRun(t *testing.T) {
 	// The tap already provides the release, so nothing is downloaded.
 	tapDir := newTap(t, readTestData(t, "perses.expected.rb")).Name()

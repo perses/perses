@@ -202,12 +202,17 @@ func updateTap(ctx context.Context, root *os.Root, version string, fetchChecksum
 	if err != nil {
 		return err
 	}
+	// Every formula is updated before writing any of them, so the tap is left untouched if one of them can't be updated.
+	updated := make([]string, 0, len(outdated))
 	for _, formula := range outdated {
-		updated, err := updateFormula(formula.content, version, checksums)
+		content, err := updateFormula(formula.content, version, checksums)
 		if err != nil {
 			return fmt.Errorf("unable to update the formula %q: %w", formula.name, err)
 		}
-		if err := root.WriteFile(formula.name, []byte(updated), formula.perm); err != nil {
+		updated = append(updated, content)
+	}
+	for i, formula := range outdated {
+		if err := root.WriteFile(formula.name, []byte(updated[i]), formula.perm); err != nil {
 			return fmt.Errorf("unable to write the formula %q: %w", formula.name, err)
 		}
 		logrus.Infof("formula %s updated from version %s to %s", formula.name, formula.version, version)
