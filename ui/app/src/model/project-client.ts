@@ -192,7 +192,7 @@ export function useDeleteProjectMutation(): UseMutationResult<ProjectResource, S
 
 /**
  * Used to merge the results of multiple queries.
- * It is returning the first result being loading or in error. Otherwise, it returns the first result.
+ * It is returning the first result being pending or in error. Otherwise, it returns the first result.
  *
  * Pending queries have no data yet, including disabled queries waiting for a dependency.
  *

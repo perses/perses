@@ -224,7 +224,7 @@ function RenderProjectGrid(props: RenderProjectGridProps): ReactElement {
 }
 
 export function Projects(): ReactElement {
-  const { data: projectRows, isLoading } = useProjectsWithDashboards();
+  const { data: projectRows, isPending } = useProjectsWithDashboards();
 
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -339,7 +339,7 @@ export function Projects(): ReactElement {
           )}
         </Stack>
 
-        {isLoading ? (
+        {isPending ? (
           <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
             <CircularProgress />
           </Stack>

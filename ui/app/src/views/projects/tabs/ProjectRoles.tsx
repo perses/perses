@@ -33,7 +33,7 @@ interface ProjectRolesProps {
 export function ProjectRoles(props: ProjectRolesProps): ReactElement {
   const { projectName, id } = props;
 
-  const { data, isLoading } = useRoleList(projectName);
+  const { data, isPending } = useRoleList(projectName);
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const createRoleMutation = useCreateRoleMutation(projectName);
@@ -98,7 +98,7 @@ export function ProjectRoles(props: ProjectRolesProps): ReactElement {
     <Card id={id}>
       <RoleList
         data={data ?? []}
-        isLoading={isLoading}
+        isLoading={isPending}
         onCreate={handleRoleCreate}
         onUpdate={handleRoleUpdate}
         onDelete={handleRoleDelete}

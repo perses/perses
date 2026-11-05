@@ -32,7 +32,7 @@ interface GlobalRolesProps {
 export function GlobalRoles(props: GlobalRolesProps): ReactElement {
   const { id } = props;
 
-  const { data, isLoading } = useGlobalRoleList();
+  const { data, isPending } = useGlobalRoleList();
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const createRoleMutation = useCreateGlobalRoleMutation();
@@ -97,7 +97,7 @@ export function GlobalRoles(props: GlobalRolesProps): ReactElement {
     <Card id={id}>
       <RoleList
         data={data ?? []}
-        isLoading={isLoading}
+        isLoading={isPending}
         onCreate={handleGlobalRoleCreate}
         onUpdate={handleGlobalRoleUpdate}
         onDelete={handleGlobalRoleDelete}

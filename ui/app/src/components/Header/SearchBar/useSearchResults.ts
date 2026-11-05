@@ -58,7 +58,7 @@ function countByProject(resources: Array<{ metadata: { project: string } }> | un
 // isPending covers an initial fetch paused while offline, and isFetching the refetch of cached data (e.g. after an
 // invalidation), so that "No records found" is not displayed before the latest data is received.
 // A section is only displayed when its query is enabled, so isPending cannot be stuck on a disabled query.
-function isPending(query: { isPending: boolean; isFetching: boolean }): boolean {
+function isSectionLoading(query: { isPending: boolean; isFetching: boolean }): boolean {
   return query.isPending || query.isFetching;
 }
 
@@ -129,15 +129,20 @@ export function useSearchResults(query: string, activeTypes: Set<ResourceType>, 
   );
 
   const sections: SearchResultSection[] = [
-    { type: 'dashboards', results: dashboardResults, isLoading: isPending(dashboards), error: dashboards.error },
-    { type: 'projects', results: projectResults, isLoading: isPending(projects), error: projects.error },
+    { type: 'dashboards', results: dashboardResults, isLoading: isSectionLoading(dashboards), error: dashboards.error },
+    { type: 'projects', results: projectResults, isLoading: isSectionLoading(projects), error: projects.error },
     {
       type: 'globalDatasources',
       results: globalDatasourceResults,
-      isLoading: isPending(globalDatasources),
+      isLoading: isSectionLoading(globalDatasources),
       error: globalDatasources.error,
     },
-    { type: 'datasources', results: datasourceResults, isLoading: isPending(datasources), error: datasources.error },
+    {
+      type: 'datasources',
+      results: datasourceResults,
+      isLoading: isSectionLoading(datasources),
+      error: datasources.error,
+    },
   ];
 
   return { sections: sections.filter(({ type }) => isActive(type)), dashboardCounts, datasourceCounts };

@@ -57,7 +57,7 @@ vi.mock('../../model/project-client', () => ({
 }));
 
 vi.mock('../../model/global-variable-client', () => ({
-  useGlobalVariableList: (): object => ({ data: [], isLoading: false }),
+  useGlobalVariableList: (): object => ({ data: [], isPending: false }),
 }));
 
 vi.mock('../../utils/browser-size', () => ({
