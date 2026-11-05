@@ -90,11 +90,17 @@ func TestDashboardSpecLinks(t *testing.T) {
 			spec: dashboard.Spec{
 				Links: []dashboard.Link{{URL: "https://perses.dev"}, {URL: "/projects/perses"}},
 				Panels: map[string]*dashboard.Panel{
-					"a":    panelWithLinks(dashboard.Link{URL: "$target"}),
-					"b":    panelWithLinks(),
-					"null": nil,
+					"a": panelWithLinks(dashboard.Link{URL: "$target"}),
+					"b": panelWithLinks(),
 				},
 			},
+		},
+		{
+			title: "null panel entry",
+			spec: dashboard.Spec{
+				Panels: map[string]*dashboard.Panel{"null": nil},
+			},
+			expectedErr: `panel "null" must not be null`,
 		},
 		{
 			title: "javascript URL in a dashboard link",

@@ -202,6 +202,10 @@ func (s *completeSchema) ValidatePanels(panels map[string]*dashboard.Panel) erro
 	var errs []error
 	for panelName, panel := range panels {
 		logrus.Tracef("Panel to validate: %s", panelName)
+		if panel == nil {
+			errs = append(errs, fmt.Errorf("panel %q must not be null", panelName))
+			continue
+		}
 		if err := s.ValidatePanel(panel.Spec.Plugin, panelName); err != nil {
 			errs = append(errs, err)
 			continue

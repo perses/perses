@@ -234,6 +234,49 @@ func TestValidateDashboardEndpoint_PathTraversal(t *testing.T) {
 	}
 }
 
+// TestValidateDashboardEndpoint_NullEntries ensures a null panel entry is rejected with a 400 instead of
+// panicking during validation, while a null local datasource entry remains valid and does not return a 500.
+func TestValidateDashboardEndpoint_NullEntries(t *testing.T) {
+	testSuite := []struct {
+		title           string
+		path            string
+		value           any
+		expectedStatus  int
+		expectedMessage string
+	}{
+		{
+			title:           "null panel entry",
+			path:            "spec.panels.p1",
+			value:           nil,
+			expectedStatus:  http.StatusBadRequest,
+			expectedMessage: `panel "p1" must not be null`,
+		},
+		{
+			title:          "null datasource entry",
+			path:           "spec.datasources.d1",
+			value:          nil,
+			expectedStatus: http.StatusOK,
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, _ dependency.Manager) []modelAPI.Entity {
+				dash := setRawDashboardValue(t, loadRawDashboard(t), test.path, test.value)
+
+				response := expect.POST(validateDashboardPath()).
+					WithBytes(dash).
+					WithHeader("Content-Type", "application/json").
+					Expect().
+					Status(test.expectedStatus)
+				if test.expectedMessage != "" {
+					response.JSON().Object().Value("message").String().Contains(test.expectedMessage)
+				}
+				return []modelAPI.Entity{}
+			})
+		})
+	}
+}
+
 // TestValidateDashboardEndpoint_ValidProjectNames ensures that legitimate project names containing
 // characters allowed by the ID regexp (dots in the middle, dashes, underscores) are still accepted.
 func TestValidateDashboardEndpoint_ValidProjectNames(t *testing.T) {
