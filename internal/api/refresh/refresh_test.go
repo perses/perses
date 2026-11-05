@@ -33,10 +33,15 @@ func (f *fakeDAO) GetLatestUpdateTime(_ []modelV1.Kind) (*string, error) {
 	return f.latestUpdateTime, f.err
 }
 
+func TestString_IdentifyTheRefreshedCache(t *testing.T) {
+	task := New("search index", &fakeDAO{}, func() error { return nil }, []modelV1.Kind{modelV1.KindDashboard})
+	assert.Equal(t, "search index refresh", task.String())
+}
+
 func TestExecute_ReturnErrorWhenLatestUpdateTimeFails(t *testing.T) {
 	dbErr := errors.New("database unavailable")
 	refreshCalls := 0
-	task := New(&fakeDAO{err: dbErr}, func() error {
+	task := New("search index", &fakeDAO{err: dbErr}, func() error {
 		refreshCalls++
 		return nil
 	}, []modelV1.Kind{modelV1.KindDashboard})
@@ -48,7 +53,7 @@ func TestExecute_ReturnErrorWhenLatestUpdateTimeFails(t *testing.T) {
 
 func TestExecute_ReturnErrorWhenLatestUpdateTimeIsInvalid(t *testing.T) {
 	invalidTime := "not a time"
-	task := New(&fakeDAO{latestUpdateTime: &invalidTime}, func() error {
+	task := New("search index", &fakeDAO{latestUpdateTime: &invalidTime}, func() error {
 		return nil
 	}, []modelV1.Kind{modelV1.KindDashboard})
 
@@ -59,7 +64,7 @@ func TestExecute_RefreshAgainAfterAFailure(t *testing.T) {
 	refreshErr := errors.New("refresh failed")
 	latestUpdateTime := "2026-11-05 10:00:00"
 	refreshCalls := 0
-	task := New(&fakeDAO{latestUpdateTime: &latestUpdateTime}, func() error {
+	task := New("search index", &fakeDAO{latestUpdateTime: &latestUpdateTime}, func() error {
 		refreshCalls++
 		if refreshCalls == 1 {
 			return refreshErr
@@ -68,7 +73,9 @@ func TestExecute_RefreshAgainAfterAFailure(t *testing.T) {
 	}, []modelV1.Kind{modelV1.KindDashboard})
 
 	// The refresh fails, so the error is returned to be logged by the task runner.
-	assert.ErrorIs(t, task.Execute(context.Background(), func() {}), refreshErr)
+	err := task.Execute(context.Background(), func() {})
+	assert.ErrorIs(t, err, refreshErr)
+	assert.ErrorContains(t, err, "search index")
 	// The previous refresh failed, so it is done again at the next execution.
 	assert.NoError(t, task.Execute(context.Background(), func() {}))
 	assert.Equal(t, 2, refreshCalls)

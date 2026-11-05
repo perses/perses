@@ -18,30 +18,73 @@ import (
 	"errors"
 	"testing"
 
+	"cuelang.org/go/cue/build"
+	"cuelang.org/go/cue/parser"
 	"github.com/perses/perses/internal/api/discovery/cuetils"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
 )
 
-type failingDiscovery struct {
-	err error
+// fakeSchema returns an instance built from cueSource, whatever the plugin requested.
+type fakeSchema struct {
+	schema.Schema
+	cueSource string
 }
 
-func (f failingDiscovery) discover(_ []*cuetils.Node) ([]*discoveredDatasource, error) {
+func (f fakeSchema) GetInstance(_ plugin.Kind, _ string) (*build.Instance, error) {
+	file, err := parser.ParseFile("schema.cue", f.cueSource)
+	if err != nil {
+		return nil, err
+	}
+	instance := build.NewContext().NewInstance("", nil)
+	if addErr := instance.AddSyntax(file); addErr != nil {
+		return nil, addErr
+	}
+	return instance, nil
+}
+
+type fakeDiscovery struct {
+	err           error
+	called        bool
+	decodedSchema []*cuetils.Node
+}
+
+func (f *fakeDiscovery) discover(decodedSchema []*cuetils.Node) ([]*discoveredDatasource, error) {
+	f.called = true
+	f.decodedSchema = decodedSchema
 	return nil, f.err
 }
 
 func TestExecute_ReturnErrorWhenDiscoveryFails(t *testing.T) {
 	discoverErr := errors.New("kube API unavailable")
+	fd := &fakeDiscovery{err: discoverErr}
 	d := &discovery{
 		cfg:       &config.KubernetesDiscovery{DatasourcePluginKind: "PrometheusDatasource"},
-		discovery: failingDiscovery{err: discoverErr},
-		schema:    schema.New(),
-		name:      "kube",
+		discovery: fd,
+		schema: fakeSchema{cueSource: `
+kind: "PrometheusDatasource"
+spec: directUrl: string
+`},
+		name: "kube",
 	}
 	assert.ErrorIs(t, d.Execute(context.Background(), func() {}), discoverErr)
+	assert.NotEmpty(t, fd.decodedSchema, "the discovery must receive the decoded schema")
+}
+
+func TestExecute_ReturnErrorWhenSchemaCannotBeDecoded(t *testing.T) {
+	fd := &fakeDiscovery{}
+	d := &discovery{
+		cfg:       &config.KubernetesDiscovery{DatasourcePluginKind: "PrometheusDatasource"},
+		discovery: fd,
+		// A plugin schema must be a struct with a kind and a spec.
+		schema: fakeSchema{cueSource: `"PrometheusDatasource"`},
+		name:   "kube",
+	}
+	assert.ErrorContains(t, d.Execute(context.Background(), func() {}), "failed to decode schema")
+	assert.False(t, fd.called, "the discovery must not run without a valid schema")
 }
 
 func TestBuildLabelSelector(t *testing.T) {
