@@ -84,7 +84,9 @@ func (e *nativeEndpoint) auth(ctx echo.Context) error {
 	if !crypto.ComparePasswords(usr.Spec.NativeProvider.Password, body.Password) {
 		return apiinterface.HandleBadRequestError("wrong login or password ")
 	}
-	login := body.Login
+	// Use the login from the stored user so that tokens and role bindings use the canonical
+	// casing when the database is case-insensitive.
+	login := usr.GetMetadata().GetName()
 	providerInfo := crypto.ProviderInfo{
 		ProviderKind: utils.AuthnKindNative,
 		ProviderID:   "", // no provider ID needed for native auth
