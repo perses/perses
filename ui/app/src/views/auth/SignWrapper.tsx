@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { Theme } from '@mui/material';
-import { alpha, Divider, Stack, useTheme } from '@mui/material';
+import { alpha, Box, Divider, Stack, useTheme } from '@mui/material';
 import Bitbucket from 'mdi-material-ui/Bitbucket';
 import type { ReactElement, ReactNode } from 'react';
 import { useMemo } from 'react';
@@ -44,7 +44,7 @@ import DarkThemePersesLogo from '../../components/logo/DarkThemePersesLogo';
 import LightThemePersesLogo from '../../components/logo/LightThemePersesLogo';
 import PersesLogoCropped from '../../components/logo/PersesLogoCropped';
 import { PERSES_APP_CONFIG } from '../../config';
-import { useConfigContext, useIsNativeAuthnProviderEnabled } from '../../context/Config';
+import { useConfigContext, useIsNativeAuthnProviderEnabled, useLogoURL } from '../../context/Config';
 import { useDarkMode } from '../../context/DarkMode';
 import { buildRedirectQueryString, useRedirectQueryParam } from '../../model/auth/auth-client';
 import { useIsLaptopSize } from '../../utils/browser-size';
@@ -129,6 +129,11 @@ export function PersesLogo({
   isLaptopSize: boolean;
   isDarkModeEnabled: boolean;
 }): ReactElement {
+  const logoURL = useLogoURL();
+  if (logoURL) {
+    return <Box component="img" src={logoURL} alt="Logo" sx={{ maxWidth: isLaptopSize ? 394 : 120, maxHeight: 120 }} />;
+  }
+
   if (!isLaptopSize) {
     return <PersesLogoCropped />;
   }

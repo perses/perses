@@ -276,6 +276,8 @@ type Frontend struct {
 	// Explorer is activating the different kind of explorer supported.
 	// Be sure you have installed an associated plugin for each explorer type.
 	Explorer Explorer `json:"explorer" yaml:"explorer"`
+	// LogoURL is the URL of a custom logo displayed in the navigation bar and on the sign-in page instead of the Perses logo.
+	LogoURL string `json:"logo_url,omitempty" yaml:"logo_url,omitempty"`
 	// Information contains Markdown content to be display on the home page
 	Information string `json:"information,omitempty" yaml:"information,omitempty"`
 	// ImportantDashboards contains grouped important dashboard selectors.

@@ -17,8 +17,9 @@ import { fireEvent, render, screen } from '@testing-library/react';
 
 import { SignWrapper } from './SignWrapper';
 
-const { mockUseQueryParam } = vi.hoisted(() => ({
+const { mockUseQueryParam, mockUseLogoURL } = vi.hoisted(() => ({
   mockUseQueryParam: vi.fn(),
+  mockUseLogoURL: vi.fn(),
 }));
 
 vi.mock('use-query-params', async (importOriginal) => ({
@@ -55,15 +56,19 @@ vi.mock('../../context/Config', () => ({
     },
   }),
   useIsNativeAuthnProviderEnabled: (): boolean => false,
+  useLogoURL: mockUseLogoURL,
 }));
 
-function signInWithKeycloak(): void {
-  const theme = createTheme();
+function renderSignWrapper(): void {
   render(
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={createTheme()}>
       <SignWrapper>{null}</SignWrapper>
     </ThemeProvider>,
   );
+}
+
+function signInWithKeycloak(): void {
+  renderSignWrapper();
 
   fireEvent.click(screen.getByText('Sign in with Keycloak'));
 }
@@ -74,6 +79,24 @@ describe('SignWrapper', () => {
       value: { href: '' },
       writable: true,
     });
+    mockUseLogoURL.mockReturnValue(undefined);
+  });
+
+  it('does not display a custom logo by default', () => {
+    mockUseQueryParam.mockReturnValue([undefined]);
+
+    renderSignWrapper();
+
+    expect(screen.queryByRole('img', { name: 'Logo' })).not.toBeInTheDocument();
+  });
+
+  it('displays the custom logo when frontend.logo_url is set', () => {
+    mockUseQueryParam.mockReturnValue([undefined]);
+    mockUseLogoURL.mockReturnValue('https://example.com/logo.svg');
+
+    renderSignWrapper();
+
+    expect(screen.getByRole('img', { name: 'Logo' })).toHaveAttribute('src', 'https://example.com/logo.svg');
   });
 
   // rd must carry the absolute path (including api_prefix), since the backend's OIDC redirect is a raw

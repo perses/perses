@@ -194,6 +194,7 @@ export interface FrontendConfig {
   enable_lock_mode?: boolean;
   important_dashboards?: ImportantDashboardGroupConfig[];
   information?: string;
+  logo_url?: string;
   explorer: ExplorerConfig;
   time_range?: TimeRangeConfig;
   auto_refresh?: AutoRefreshConfig;
