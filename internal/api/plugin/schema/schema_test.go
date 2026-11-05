@@ -344,6 +344,20 @@ func TestValidatePanels(t *testing.T) {
 			},
 			expectedErrorStr: "invalid query n°1: spec.datasource.kind: conflicting values \"CustomDatasource\" and \"SQLDatasource\"",
 		},
+		{
+			title: "dashboard with a null panel entry",
+			dashboard: &v1.Dashboard{
+				Kind:     v1.KindDashboard,
+				Metadata: metadata,
+				Spec: dashboard.Spec{
+					Duration: "6h",
+					Panels: map[string]*dashboard.Panel{
+						"MyNullPanel": nil,
+					},
+				},
+			},
+			expectedErrorStr: `panel "MyNullPanel" must not be null`,
+		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {

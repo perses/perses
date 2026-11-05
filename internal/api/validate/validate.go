@@ -161,6 +161,11 @@ func validateDashboardSpec(spec dashboard.Spec, sch schema.Schema, proxyCfg *con
 		return err
 	}
 
+	for panelName, panel := range spec.Panels {
+		if panel == nil {
+			return fmt.Errorf("panel %q must not be null", panelName)
+		}
+	}
 	if sch != nil {
 		if err := sch.ValidateDashboardVariables(spec.Variables); err != nil {
 			return err

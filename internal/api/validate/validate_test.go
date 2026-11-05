@@ -259,17 +259,24 @@ func TestDashboardSpec_localDatasourceTimeout(t *testing.T) {
 
 // TestDashboardSpecWithoutSchema runs the checks that need neither the plugin schemas nor the server configuration.
 func TestDashboardSpecWithoutSchema(t *testing.T) {
+	// A nil panel or datasource entry used to make the validation panic, and had to be rejected with a clear error instead.
 	prometheus := func(isDefault bool) *datasourceSpec.Spec {
 		return &datasourceSpec.Spec{Default: isDefault, Plugin: specPlugin.Plugin{Kind: "PrometheusDatasource"}}
 	}
 	testSuites := []struct {
 		title       string
+		panels      map[string]*dashboard.Panel
 		datasources map[string]*datasourceSpec.Spec
 		expectedErr string
 	}{
 		{
 			title:       "null local datasource",
 			datasources: map[string]*datasourceSpec.Spec{"a": nil, "b": prometheus(true)},
+		},
+		{
+			title:       "null panel",
+			panels:      map[string]*dashboard.Panel{"p1": nil},
+			expectedErr: `panel "p1" must not be null`,
 		},
 		{
 			title:       "two default datasources of the same kind",
@@ -279,7 +286,7 @@ func TestDashboardSpecWithoutSchema(t *testing.T) {
 	}
 	for _, test := range testSuites {
 		t.Run(test.title, func(t *testing.T) {
-			err := DashboardSpec(dashboard.Spec{Datasources: test.datasources}, nil, nil)
+			err := DashboardSpec(dashboard.Spec{Panels: test.panels, Datasources: test.datasources}, nil, nil)
 			if len(test.expectedErr) == 0 {
 				assert.NoError(t, err)
 			} else {
@@ -287,4 +294,24 @@ func TestDashboardSpecWithoutSchema(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestDashboardSpec_nullPanelEntryWithSchema ensures a null panel entry is rejected before the schema-based validation,
+// which used to panic when dereferencing the nil panel.
+func TestDashboardSpec_nullPanelEntryWithSchema(t *testing.T) {
+	projectPath := testUtils.GetRepositoryPath()
+
+	pl := plugin.New(config.Plugin{
+		Path:         filepath.Join(projectPath, config.DefaultPluginPath),
+		ArchivePaths: []string{filepath.Join(projectPath, config.DefaultArchivePluginPath)},
+	})
+	if err := pl.UnzipArchives(); err != nil {
+		t.Fatalf("failed to unzip archives: %s", err)
+	}
+	if err := pl.Load(); err != nil {
+		t.Fatalf("failed to load plugin: %s", err)
+	}
+
+	err := DashboardSpec(dashboard.Spec{Panels: map[string]*dashboard.Panel{"p1": nil}}, pl.Schema(), &config.HTTPProxyConfig{})
+	assert.ErrorContains(t, err, `panel "p1" must not be null`)
 }
