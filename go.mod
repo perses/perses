@@ -32,7 +32,7 @@ require (
 	github.com/mholt/archives v0.1.5
 	github.com/nexucis/lamenv v0.5.2
 	github.com/olekukonko/tablewriter v1.1.5
-	github.com/perses/common v0.32.1-0.20261105131718-10e0c53784f5
+	github.com/perses/common v0.32.1-0.20261105150120-44d46106ebac
 	github.com/perses/spec v0.3.0
 	github.com/prometheus/client_golang v1.25.0
 	github.com/prometheus/client_model v0.6.3
