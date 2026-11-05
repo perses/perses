@@ -66,6 +66,24 @@ func TestCORS_AllowedOrigin(t *testing.T) {
 			origin:       "https://other.example.com",
 		},
 		{
+			name:           "exact origin before '*'",
+			allowOrigins:   []string{"https://app.example.com", "*"},
+			origin:         "https://app.example.com",
+			expectedOrigin: "https://app.example.com",
+		},
+		{
+			name:           "origin only matched by '*' after an exact origin",
+			allowOrigins:   []string{"https://app.example.com", "*"},
+			origin:         "https://other.example.com",
+			expectedOrigin: "*",
+		},
+		{
+			name:           "exact origin after '*'",
+			allowOrigins:   []string{"*", "https://app.example.com"},
+			origin:         "https://app.example.com",
+			expectedOrigin: "*",
+		},
+		{
 			name:         "the exact origins are case-sensitive",
 			allowOrigins: []string{"https://app.example.com"},
 			origin:       "https://APP.example.com",
@@ -87,6 +105,13 @@ func TestCORS_AllowedOrigin(t *testing.T) {
 			allowOrigins:   []string{"https://*.example.com"},
 			origin:         "https://a.b.example.com",
 			expectedOrigin: "https://a.b.example.com",
+		},
+		{
+			// This is one of the reasons why the patterns are deprecated.
+			name:           "'*' label ignores the labels on its left",
+			allowOrigins:   []string{"https://admin.*.example.com"},
+			origin:         "https://victim.example.com",
+			expectedOrigin: "https://victim.example.com",
 		},
 		{
 			name:         "'*' pattern on a subdomain doesn't match the parent domain",
@@ -137,18 +162,48 @@ func TestCORS_AllowedOrigin(t *testing.T) {
 }
 
 func TestCORS_Credentials(t *testing.T) {
-	e := newCORSServer(t, config.CORSConfig{
-		AllowOrigins:     []string{"https://*.example.com"},
-		AllowCredentials: true,
-		ExposeHeaders:    []string{"Content-Encoding"},
-	})
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/projects", nil)
-	req.Header.Set(echo.HeaderOrigin, "https://app.example.com")
-	rec := httptest.NewRecorder()
-	e.ServeHTTP(rec, req)
-	assert.Equal(t, "https://app.example.com", rec.Header().Get(echo.HeaderAccessControlAllowOrigin))
-	assert.Equal(t, "true", rec.Header().Get(echo.HeaderAccessControlAllowCredentials))
-	assert.Equal(t, "Content-Encoding", rec.Header().Get(echo.HeaderAccessControlExposeHeaders))
+	tests := []struct {
+		name           string
+		allowOrigins   []string
+		origin         string
+		expectedOrigin string
+	}{
+		{
+			name:           "wildcard pattern",
+			allowOrigins:   []string{"https://*.example.com"},
+			origin:         "https://app.example.com",
+			expectedOrigin: "https://app.example.com",
+		},
+		{
+			name:           "exact origin before '*'",
+			allowOrigins:   []string{"https://app.example.com", "*"},
+			origin:         "https://app.example.com",
+			expectedOrigin: "https://app.example.com",
+		},
+		{
+			// The browsers reject the requests with credentials answered with 'Access-Control-Allow-Origin: *'.
+			name:           "origin only matched by '*' after an exact origin",
+			allowOrigins:   []string{"https://app.example.com", "*"},
+			origin:         "https://other.example.com",
+			expectedOrigin: "*",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := newCORSServer(t, config.CORSConfig{
+				AllowOrigins:     tt.allowOrigins,
+				AllowCredentials: true,
+				ExposeHeaders:    []string{"Content-Encoding"},
+			})
+			req := httptest.NewRequest(http.MethodGet, "/api/v1/projects", nil)
+			req.Header.Set(echo.HeaderOrigin, tt.origin)
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
+			assert.Equal(t, tt.expectedOrigin, rec.Header().Get(echo.HeaderAccessControlAllowOrigin))
+			assert.Equal(t, "true", rec.Header().Get(echo.HeaderAccessControlAllowCredentials))
+			assert.Equal(t, "Content-Encoding", rec.Header().Get(echo.HeaderAccessControlExposeHeaders))
+		})
+	}
 }
 
 func TestCORS_Preflight(t *testing.T) {
