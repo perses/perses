@@ -53,7 +53,7 @@ jobs:
         with:
           enable_go: true
       - name: install mdox
-        run: go install github.com/bwplotka/mdox@latest
+        run: go install github.com/bwplotka/mdox@v0.10.0
       - name: check docs
         run: make checkdocs
   gofmt:
