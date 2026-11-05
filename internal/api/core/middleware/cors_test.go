@@ -136,6 +136,20 @@ func TestCORS_AllowedOrigin(t *testing.T) {
 	}
 }
 
+func TestCORS_DefaultOriginWithoutVerifiedConfig(t *testing.T) {
+	// The middleware doesn't rely on the default set when the configuration is verified.
+	e := echo.New()
+	e.Use(CORS(config.CORSConfig{Enable: true}))
+	e.GET("/api/v1/projects", func(c *echo.Context) error {
+		return c.NoContent(http.StatusOK)
+	})
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/projects", nil)
+	req.Header.Set(echo.HeaderOrigin, "https://app.example.com")
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	assert.Equal(t, "*", rec.Header().Get(echo.HeaderAccessControlAllowOrigin))
+}
+
 func TestCORS_Credentials(t *testing.T) {
 	e := newCORSServer(t, config.CORSConfig{
 		AllowOrigins:     []string{"https://*.example.com"},
