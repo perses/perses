@@ -311,6 +311,7 @@ describe('SearchBar', () => {
       vi.mocked(useProjectList).mockReturnValue({
         data: undefined,
         isLoading: true,
+        isFetching: true,
       } as ReturnType<typeof useProjectList>);
 
       fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));

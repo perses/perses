@@ -55,12 +55,6 @@ function countByProject(resources: Array<{ metadata: { project: string } }> | un
   return counts;
 }
 
-// isLoading is false while cached data is refetched, e.g. after an invalidation. isFetching is checked too,
-// so that "No records found" is not displayed before the latest data is received.
-function isPending(query: { isLoading: boolean; isFetching: boolean }): boolean {
-  return query.isLoading || query.isFetching;
-}
-
 function useFilteredList(query: string, list: SearchItem[] | undefined): Array<KVSearchResult<SearchItem>> {
   return useMemo(() => (list ? kvSearch.filter(query, list) : []), [query, list]);
 }
@@ -127,16 +121,18 @@ export function useSearchResults(query: string, activeTypes: Set<ResourceType>, 
     [isProjectsActive, datasources.data],
   );
 
+  // isFetching also covers refetches of cached data (e.g. after an invalidation), so that "No records found" is not
+  // displayed before the latest data is received.
   const sections: SearchResultSection[] = [
-    { type: 'dashboards', results: dashboardResults, isLoading: isPending(dashboards), error: dashboards.error },
-    { type: 'projects', results: projectResults, isLoading: isPending(projects), error: projects.error },
+    { type: 'dashboards', results: dashboardResults, isLoading: dashboards.isFetching, error: dashboards.error },
+    { type: 'projects', results: projectResults, isLoading: projects.isFetching, error: projects.error },
     {
       type: 'globalDatasources',
       results: globalDatasourceResults,
-      isLoading: isPending(globalDatasources),
+      isLoading: globalDatasources.isFetching,
       error: globalDatasources.error,
     },
-    { type: 'datasources', results: datasourceResults, isLoading: isPending(datasources), error: datasources.error },
+    { type: 'datasources', results: datasourceResults, isLoading: datasources.isFetching, error: datasources.error },
   ];
 
   return { sections: sections.filter(({ type }) => isActive(type)), dashboardCounts, datasourceCounts };
