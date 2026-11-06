@@ -92,19 +92,31 @@ type index[T api.Metadata] struct {
 	matcher *matcher
 }
 
+// match returns the field matching the text with the best score.
+// In case of equal scores, the first field is kept, so the order of the index keys gives the priority between the fields.
 func (idx *index[T]) match(text string) *SearchResult {
+	var best *SearchResult
 	for _, field := range idx.fields {
 		result := idx.matcher.match(text, field.value)
-		if result != nil {
-			result.Metadata = idx.metadata
-			result.DisplayName = idx.displayName
-			result.Key = field.key
-			// The path is copied, so that the result doesn't share the memory of the index.
-			result.Path = slices.Clone(field.path)
-			return result
+		isBetterMatch := result != nil && (best == nil || result.Score > best.Score)
+		if !isBetterMatch {
+			continue
+		}
+		result.Key = field.key
+		result.Path = field.path
+		best = result
+		if best.Score == perfectMatchScore {
+			// No other field can get a better score.
+			break
 		}
 	}
-	return nil
+	if best != nil {
+		best.Metadata = idx.metadata
+		best.DisplayName = idx.displayName
+		// The path is copied, so that the result doesn't share the memory of the index.
+		best.Path = slices.Clone(best.Path)
+	}
+	return best
 }
 
 // indexedKey is a key to index, split into steps to determine the path of the values.
