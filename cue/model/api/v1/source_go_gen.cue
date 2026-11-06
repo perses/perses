@@ -15,7 +15,7 @@ package v1
 
 // DiscoverySource identifies the datasource discovery configuration that created a datasource.
 #DiscoverySource: {
-	name: string        @go(Name)
+	name: string         @go(Name)
 	type: #DiscoveryType @go(Type)
 }
 
