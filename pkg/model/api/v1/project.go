@@ -29,6 +29,7 @@ type Project struct {
 	Kind     Kind        `json:"kind" yaml:"kind"`
 	Metadata Metadata    `json:"metadata" yaml:"metadata"`
 	Spec     ProjectSpec `json:"spec,omitempty" yaml:"spec,omitempty"`
+	Source   *Source     `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 func (p *Project) GetMetadata() modelAPI.Metadata {
@@ -41,6 +42,14 @@ func (p *Project) GetKind() string {
 
 func (p *Project) GetSpec() any {
 	return p.Spec
+}
+
+func (p *Project) GetSource() *Source {
+	return p.Source
+}
+
+func (p *Project) SetSource(s *Source) {
+	p.Source = s
 }
 
 func (p *Project) UnmarshalJSON(data []byte) error {

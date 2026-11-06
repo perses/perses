@@ -28,6 +28,9 @@ type Query struct {
 	Kind string `query:"kind"`
 	// Default will filter the list of datasource and return only the default datasource, whatever the kind of the datasource is.
 	Default *bool `query:"default"`
+	// SourceFolder filters the list to only resources whose source.provisioning.folder matches this value.
+	// It is not exposed as a query parameter and is only used internally by the provisioning subsystem.
+	SourceFolder string `query:"-"`
 }
 
 func (q *Query) GetMetadataOnlyQueryParam() bool {

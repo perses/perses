@@ -7,13 +7,15 @@ package v1
 #SecretSpec: _
 
 #GlobalSecret: {
-	kind:     #Kind       @go(Kind)
-	metadata: #Metadata   @go(Metadata)
-	spec:     #SecretSpec @go(Spec)
+	kind:     #Kind          @go(Kind)
+	metadata: #Metadata      @go(Metadata)
+	spec:     #SecretSpec    @go(Spec)
+	source?:  null | #Source @go(Source,*Source)
 }
 
 #Secret: {
 	kind:     #Kind            @go(Kind)
 	metadata: #ProjectMetadata @go(Metadata)
 	spec:     #SecretSpec      @go(Spec)
+	source?:  null | #Source   @go(Source,*Source)
 }

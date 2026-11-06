@@ -163,6 +163,7 @@ type GlobalRoleBinding struct {
 	Kind     Kind            `json:"kind" yaml:"kind"`
 	Metadata Metadata        `json:"metadata" yaml:"metadata"`
 	Spec     RoleBindingSpec `json:"spec" yaml:"spec"`
+	Source   *Source         `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 func (g *GlobalRoleBinding) UnmarshalJSON(data []byte) error {
@@ -217,12 +218,21 @@ func (g *GlobalRoleBinding) GetSpec() any {
 	return g.Spec
 }
 
+func (g *GlobalRoleBinding) GetSource() *Source {
+	return g.Source
+}
+
+func (g *GlobalRoleBinding) SetSource(s *Source) {
+	g.Source = s
+}
+
 // RoleBinding will be the roleBinding you can define in your project/namespace
 // This is a resource that won't be shared across projects.
 type RoleBinding struct {
 	Kind     Kind            `json:"kind" yaml:"kind"`
 	Metadata ProjectMetadata `json:"metadata" yaml:"metadata"`
 	Spec     RoleBindingSpec `json:"spec" yaml:"spec"`
+	Source   *Source         `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 func (r *RoleBinding) UnmarshalJSON(data []byte) error {
@@ -271,4 +281,12 @@ func (r *RoleBinding) GetKind() string {
 
 func (r *RoleBinding) GetSpec() any {
 	return r.Spec
+}
+
+func (r *RoleBinding) GetSource() *Source {
+	return r.Source
+}
+
+func (r *RoleBinding) SetSource(s *Source) {
+	r.Source = s
 }
