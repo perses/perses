@@ -33,7 +33,7 @@ import (
 // newDisabledAuthz returns an authorization.Authorization implementation with authorization disabled.
 // When authorization is disabled, the echo.Context parameter is never used by the implementation,
 // so tests can safely pass nil as the context when calling functions that require it.
-func newDisabledAuthz(t *testing.T) authorization.Authorization {
+func newDisabledAuthz(t testing.TB) authorization.Authorization {
 	t.Helper()
 	authz, err := authorization.New(nil, nil, nil, nil, nil, config.Config{})
 	require.NoError(t, err)
@@ -71,9 +71,9 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "mydashboard",
-						fields: []string{
-							"mydashboard",
-							"myproject",
+						fields: []indexedField{
+							{key: "metadata.name", path: []string{"metadata", "name"}, value: "mydashboard"},
+							{key: "metadata.project", path: []string{"metadata", "project"}, value: "myproject"},
 						},
 						matcher: &matcher{},
 					},
@@ -107,10 +107,10 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "My Fancy Dashboard",
-						fields: []string{
-							"mydashboard",
-							"myproject",
-							"My Fancy Dashboard",
+						fields: []indexedField{
+							{key: "metadata.name", path: []string{"metadata", "name"}, value: "mydashboard"},
+							{key: "metadata.project", path: []string{"metadata", "project"}, value: "myproject"},
+							{key: "spec.display.name", path: []string{"spec", "display", "name"}, value: "My Fancy Dashboard"},
 						},
 						matcher: &matcher{},
 					},
@@ -140,8 +140,8 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "mydashboard",
-						fields: []string{
-							"mydashboard",
+						fields: []indexedField{
+							{key: "metadata.name", path: []string{"metadata", "name"}, value: "mydashboard"},
 						},
 						matcher: &matcher{},
 					},
@@ -208,9 +208,9 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "mydashboard",
-						fields: []string{
-							"simple line chart",
-							"another line chart",
+						fields: []indexedField{
+							{key: "spec.panels.@dig:display.name", path: []string{"spec", "panels", "MyPanel", "spec", "display", "name"}, value: "simple line chart"},
+							{key: "spec.panels.@dig:display.name", path: []string{"spec", "panels", "MyOtherPanel", "spec", "display", "name"}, value: "another line chart"},
 						},
 						matcher: &matcher{},
 					},
@@ -226,6 +226,17 @@ func TestClientAdd(t *testing.T) {
 			assert.Equal(t, tc.expectedProjectIdx, c.dashboards.idx)
 		})
 	}
+}
+
+func TestClientAdd_unsupportedKeyOnlyReturnsTheKey(t *testing.T) {
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.tags|@reverse"}}}, newDisabledAuthz(t), nil).(*client)
+	require.NoError(t, c.add([]byte(pathTestDocument)))
+
+	fields := c.dashboards.idx["myproject"]["mydashboard"].fields
+	assert.ElementsMatch(t, []indexedField{
+		{key: "metadata.tags|@reverse", value: "kubernetes"},
+		{key: "metadata.tags|@reverse", value: "production"},
+	}, fields)
 }
 
 func Test_client_add_multipleProjectsAreIndexedSeparately(t *testing.T) {
@@ -357,6 +368,55 @@ func TestClientSearch_authorizationDisabled(t *testing.T) {
 	}
 }
 
+func TestClientSearch_returnsKeyAndPathOfMatchingField(t *testing.T) {
+	testsCases := []struct {
+		title            string
+		text             string
+		expectedOriginal string
+		expectedKey      string
+		expectedPath     []string
+	}{
+		{
+			title:            "match on the display name",
+			text:             "fancy",
+			expectedOriginal: "My Fancy Dashboard",
+			expectedKey:      "spec.display.name",
+			expectedPath:     []string{"spec", "display", "name"},
+		},
+		{
+			title:            "match on the name",
+			text:             "mydash",
+			expectedOriginal: "mydashboard",
+			expectedKey:      "metadata.name",
+			expectedPath:     []string{"metadata", "name"},
+		},
+		{
+			title:            "match on a tag",
+			text:             "production",
+			expectedOriginal: "production",
+			expectedKey:      "metadata.tags",
+			expectedPath:     []string{"metadata", "tags", "1"},
+		},
+	}
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name", "spec.display.name", "metadata.tags"}}}, newDisabledAuthz(t), nil).(*client)
+	require.NoError(t, c.add(json.RawMessage(`{
+		"kind": "Dashboard",
+		"metadata": {"name": "mydashboard", "project": "myproject", "tags": ["kubernetes", "production"]},
+		"spec": {"display": {"name": "My Fancy Dashboard"}}
+	}`)))
+
+	for _, tc := range testsCases {
+		t.Run(tc.title, func(t *testing.T) {
+			results, err := c.Search(nil, v1.KindDashboard, "", tc.text)
+			require.NoError(t, err)
+			require.Len(t, results, 1)
+			assert.Equal(t, tc.expectedOriginal, results[0].Original)
+			assert.Equal(t, tc.expectedKey, results[0].Key)
+			assert.Equal(t, tc.expectedPath, results[0].Path)
+		})
+	}
+}
+
 func TestRefreshDropsDashboardsMissingFromDatabase(t *testing.T) {
 	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name"}}}, newDisabledAuthz(t), nil).(*client)
 	keep := dashboardRaw("keep")
@@ -445,3 +505,50 @@ var (
 	_ databaseModel.DAO = (*streamDAO)(nil)
 	_ io.Closer         = (*streamDAO)(nil)
 )
+
+var benchmarkIndexKeys = []string{"spec.display.name", "metadata.name", "metadata.tags", "spec.panels.@dig:display.name"}
+
+// newBenchmarkDashboard returns a dashboard with the given number of panels, each of them with a display name.
+func newBenchmarkDashboard(tb testing.TB, project string, name string, panels int) json.RawMessage {
+	tb.Helper()
+	panelsSpec := make(map[string]any, panels)
+	for i := range panels {
+		panelsSpec[fmt.Sprintf("panel-%d", i)] = map[string]any{
+			"kind": "Panel",
+			"spec": map[string]any{"display": map[string]any{"name": fmt.Sprintf("Panel number %d", i)}},
+		}
+	}
+	raw, err := json.Marshal(map[string]any{
+		"kind":     "Dashboard",
+		"metadata": map[string]any{"name": name, "project": project, "tags": []string{"kubernetes", "production"}},
+		"spec":     map[string]any{"display": map[string]any{"name": "Dashboard " + name}, "panels": panelsSpec},
+	})
+	require.NoError(tb, err)
+	return raw
+}
+
+func BenchmarkProjectIndexerAddTo(b *testing.B) {
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: benchmarkIndexKeys}}, newDisabledAuthz(b), nil).(*client)
+	raw := newBenchmarkDashboard(b, "myproject", "mydashboard", 100)
+	dst := make(map[string]map[string]index[*v1.ProjectMetadata])
+	b.ReportAllocs()
+	for b.Loop() {
+		if err := c.dashboards.addTo(dst, raw); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkClientSearch(b *testing.B) {
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: benchmarkIndexKeys}}, newDisabledAuthz(b), nil).(*client)
+	for i := range 1000 {
+		require.NoError(b, c.add(newBenchmarkDashboard(b, fmt.Sprintf("project-%d", i%10), fmt.Sprintf("dashboard-%d", i), 20)))
+	}
+	b.ReportAllocs()
+	for b.Loop() {
+		// The query only matches the display name of some panels.
+		if _, err := c.Search(nil, v1.KindDashboard, "", "panel 1"); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
