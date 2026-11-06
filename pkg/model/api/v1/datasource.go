@@ -45,6 +45,7 @@ type GlobalDatasource struct {
 	Kind     Kind            `json:"kind" yaml:"kind"`
 	Metadata Metadata        `json:"metadata" yaml:"metadata"`
 	Spec     datasource.Spec `json:"spec" yaml:"spec"`
+	Source   *Source         `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 func (d *GlobalDatasource) UnmarshalJSON(data []byte) error {
