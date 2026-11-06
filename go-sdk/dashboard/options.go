@@ -19,6 +19,7 @@ import (
 
 	"github.com/perses/perses/go-sdk/annotation"
 	"github.com/perses/perses/go-sdk/datasource"
+	"github.com/perses/perses/go-sdk/link"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
 	"github.com/perses/perses/go-sdk/variable"
 	variablegroup "github.com/perses/perses/go-sdk/variable-group"
@@ -254,6 +255,30 @@ func AddDatasource(name string, options ...datasource.Option) Option {
 			builder.Dashboard.Spec.Datasources = make(map[string]*datasourceSpec.Spec)
 		}
 		builder.Dashboard.Spec.Datasources[name] = &ds.Spec
+		return nil
+	}
+}
+
+// AddLink adds a URL link to the dashboard.
+func AddLink(url string, options ...link.Option) Option {
+	return func(builder *Builder) error {
+		l, err := link.New(url, options...)
+		if err != nil {
+			return err
+		}
+		builder.Dashboard.Spec.Links = append(builder.Dashboard.Spec.Links, l.Link)
+		return nil
+	}
+}
+
+// AddTagLink adds a menu of dashboards in the current project that carry every tag.
+func AddTagLink(name string, tags []string, options ...link.Option) Option {
+	return func(builder *Builder) error {
+		l, err := link.NewTagMenu(name, tags, options...)
+		if err != nil {
+			return err
+		}
+		builder.Dashboard.Spec.Links = append(builder.Dashboard.Spec.Links, l.Link)
 		return nil
 	}
 }
