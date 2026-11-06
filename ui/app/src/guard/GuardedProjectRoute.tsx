@@ -26,7 +26,7 @@ interface ProjectRouteContentProps {
 function ProjectRouteContent({ projectName }: ProjectRouteContentProps): ReactElement {
   const navigate = useNavigate();
   const { exceptionSnackbar } = useSnackbar();
-  const { error, isLoading } = useProject(projectName);
+  const { error, isPending } = useProject(projectName);
 
   useEffect(() => {
     if (error) {
@@ -35,7 +35,7 @@ function ProjectRouteContent({ projectName }: ProjectRouteContentProps): ReactEl
     }
   }, [error, exceptionSnackbar, navigate]);
 
-  if (isLoading || error) {
+  if (isPending || error) {
     return <LinearProgress />;
   }
 

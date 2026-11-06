@@ -65,7 +65,7 @@ function VersionInfo({
 }
 
 export default function Footer(): ReactElement {
-  const { data, isLoading } = useHealth();
+  const { data, isPending } = useHealth();
 
   return (
     <Box component="footer" sx={style}>
@@ -81,7 +81,7 @@ export default function Footer(): ReactElement {
           </a>
         </li>
         <li>
-          <VersionInfo isLoading={isLoading} data={data} />
+          <VersionInfo isLoading={isPending} data={data} />
         </li>
       </ul>
     </Box>

@@ -24,8 +24,8 @@ interface ProjectDashboardsProps extends BoxProps {
   projectName: string;
 }
 export function ProjectDashboards({ projectName, ...props }: ProjectDashboardsProps): ReactElement {
-  const { data, isLoading } = useSearchDashboards(projectName);
-  const { data: folderList, isLoading: isLoadingFolderList } = useFolderList({ project: projectName });
+  const { data, isPending } = useSearchDashboards(projectName);
+  const { data: folderList, isPending: isFolderListPending } = useFolderList({ project: projectName });
   const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
 
   return (
@@ -33,7 +33,7 @@ export function ProjectDashboards({ projectName, ...props }: ProjectDashboardsPr
       <DashboardList
         dashboardList={data ?? []}
         folderList={folderList ?? []}
-        isLoading={isLoading || isLoadingFolderList}
+        isLoading={isPending || isFolderListPending}
         isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
       />
     </Box>

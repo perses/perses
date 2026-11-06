@@ -32,7 +32,7 @@ interface GlobalRoleBindingsProps {
 export function GlobalRoleBindings(props: GlobalRoleBindingsProps): ReactElement {
   const { id } = props;
 
-  const { data, isLoading } = useGlobalRoleBindingList();
+  const { data, isPending } = useGlobalRoleBindingList();
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const createRoleBindingMutation = useCreateGlobalRoleBindingMutation();
@@ -97,7 +97,7 @@ export function GlobalRoleBindings(props: GlobalRoleBindingsProps): ReactElement
     <Card id={id}>
       <RoleBindingList
         data={data ?? []}
-        isLoading={isLoading}
+        isLoading={isPending}
         onCreate={handleGlobalRoleBindingCreate}
         onUpdate={handleGlobalRoleBindingUpdate}
         onDelete={handleGlobalRoleBindingDelete}

@@ -39,8 +39,8 @@ func TestAssetHandlerContentType(t *testing.T) {
 	testFS := fstest.MapFS{
 		"app/dist/main.abc12345.css": &fstest.MapFile{Data: []byte("body { background: url(PREFIX_PATH_PLACEHOLDER/font.woff2); }")},
 		"app/dist/main.abc12345.js":  &fstest.MapFile{Data: []byte("console.log('PREFIX_PATH_PLACEHOLDER')")},
-		"app/dist/image.png":       &fstest.MapFile{Data: []byte("fake-png-data")},
-		"app/dist/index.html":      &fstest.MapFile{Data: []byte("<html></html>")},
+		"app/dist/image.png":         &fstest.MapFile{Data: []byte("fake-png-data")},
+		"app/dist/index.html":        &fstest.MapFile{Data: []byte("<html></html>")},
 	}
 	asts = http.FS(testFS)
 
@@ -99,7 +99,7 @@ func TestAssetHandlerCacheControl(t *testing.T) {
 	testFS := fstest.MapFS{
 		"app/dist/main.abc12345.css": &fstest.MapFile{Data: []byte("body {}")},
 		"app/dist/main.abc12345.js":  &fstest.MapFile{Data: []byte("console.log('ok')")},
-		"app/dist/image.png":       &fstest.MapFile{Data: []byte("fake-png-data")},
+		"app/dist/image.png":         &fstest.MapFile{Data: []byte("fake-png-data")},
 	}
 	asts = http.FS(testFS)
 
@@ -519,6 +519,7 @@ func TestServePluginFilesPathTraversal(t *testing.T) {
 }
 
 func TestServePluginFilesCacheControl(t *testing.T) {
+	// The plugin directory is an absolute path outside the working directory, like /etc/perses/plugins in the container image.
 	pluginDir := t.TempDir()
 	require.NoError(t, os.WriteFile(filepath.Join(pluginDir, "mf-manifest.json"), []byte(`{"name":"test"}`), 0o600))
 	require.NoError(t, os.MkdirAll(filepath.Join(pluginDir, "__mf", "js"), 0o750))
@@ -540,16 +541,19 @@ func TestServePluginFilesCacheControl(t *testing.T) {
 		name                 string
 		path                 string
 		expectedCacheControl string
+		expectedBody         string
 	}{
 		{
 			name:                 "manifest must be revalidated",
 			path:                 "/plugins/testplugin/mf-manifest.json",
 			expectedCacheControl: "no-cache",
+			expectedBody:         `{"name":"test"}`,
 		},
 		{
 			name:                 "hashed bundle is cached long term",
 			path:                 "/plugins/testplugin/__mf/js/main.f55169be.js",
 			expectedCacheControl: "public, max-age=31536000, immutable",
+			expectedBody:         "console.log('ok')",
 		},
 	}
 	for _, tt := range tests {
@@ -559,10 +563,10 @@ func TestServePluginFilesCacheControl(t *testing.T) {
 			rec := httptest.NewRecorder()
 			require.NoError(t, f.servePluginFiles(e.NewContext(req, rec)))
 			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, tt.expectedBody, rec.Body.String())
 			assert.Equal(t, tt.expectedCacheControl, rec.Header().Get("Cache-Control"))
 			assert.Equal(t, "nosniff", rec.Header().Get("X-Content-Type-Options"))
 			assert.NotEmpty(t, rec.Header().Get("Last-Modified"))
 		})
 	}
 }
-
