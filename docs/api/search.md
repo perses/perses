@@ -15,6 +15,9 @@ URL query parameters:
 
 - `query` = `<string>`: the text to search. When empty, every dashboard is returned, without any matching information.
 - `project` = `<string>`: searches only the dashboards of the given project.
+- `sorted` = `asc` | `desc`: sorts the results by score, in ascending or descending order. The results with the same
+  score are sorted alphabetically by display name (case-insensitive), whatever the order. Without this parameter, the
+  results are not sorted.
 
 The response is a list of search results:
 
