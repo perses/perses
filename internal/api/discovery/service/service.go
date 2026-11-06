@@ -85,7 +85,7 @@ func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 			continue
 		}
 		if existing.Source == nil || existing.Source.Discovery == nil {
-			logrus.Debugf("skipping update of globaldatasource %q: not a discovery-managed datasource", entity.Metadata.Name)
+			logrus.Warnf("skipping update of globaldatasource %q: not a discovery-managed datasource", entity.Metadata.Name)
 			continue
 		}
 
