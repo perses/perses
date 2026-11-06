@@ -21,6 +21,23 @@ import (
 
 const methodAny = "all"
 
+// anyMethods are the HTTP methods accepted by the routes registered with Group.ANY (like the ones of the datasource proxy).
+// It is the list of methods registered by Echo.Any in echo v4. As echo v5 accepts every method in Echo.Any,
+// the list is explicit to keep rejecting the other methods (with a 405) instead of forwarding them to the datasources.
+var anyMethods = []string{
+	http.MethodConnect,
+	http.MethodDelete,
+	http.MethodGet,
+	http.MethodHead,
+	http.MethodOptions,
+	http.MethodPatch,
+	http.MethodPost,
+	echo.PROPFIND,
+	http.MethodPut,
+	http.MethodTrace,
+	echo.REPORT,
+}
+
 type Endpoint interface {
 	CollectRoutes(g *Group)
 }
@@ -37,7 +54,7 @@ type Route struct {
 
 func (r *Route) Register(g *echo.Group, middleware ...echo.MiddlewareFunc) {
 	if r.Method == methodAny {
-		g.Any(r.Path, r.Handler, middleware...)
+		g.Match(anyMethods, r.Path, r.Handler, middleware...)
 	} else {
 		g.Add(r.Method, r.Path, r.Handler, middleware...)
 	}

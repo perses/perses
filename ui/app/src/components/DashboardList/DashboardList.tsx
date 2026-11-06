@@ -90,10 +90,10 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
   const deleteDashboardMutation = useDeleteDashboardMutation();
   // TODO: a temporary copy creates an 'EphemeralDashboard', which has its own 'create' permission.
   // The projects are currently filtered on the 'Dashboard' permission only; the backend still enforces RBAC.
-  const { data: dashboardCreateAllowedProjects, isLoading: isDashboardCreateAllowedProjectsLoading } =
+  const { data: dashboardCreateAllowedProjects, isPending: isDashboardCreateAllowedProjectsPending } =
     useDashboardCreateAllowedProjects();
   let duplicationDisabledReason: string | undefined;
-  if (isDashboardCreateAllowedProjectsLoading) {
+  if (isDashboardCreateAllowedProjectsPending) {
     duplicationDisabledReason = 'Loading projects...';
   } else if (dashboardCreateAllowedProjects.length === 0) {
     duplicationDisabledReason = "Missing 'create' permission in any project for 'Dashboard' kind";

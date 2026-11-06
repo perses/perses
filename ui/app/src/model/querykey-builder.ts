@@ -23,7 +23,7 @@ export interface QueryKeyParams {
  * The query key is designed to store a resource in the cache, to be reused or invalidated.
  * This function is used to build a query key for a resource, with the following format: [resource, parent?, name?].
  * Invalidating a query key invalidates every query whose key starts with it.
- * Ref: https://tanstack.com/query/v4/docs/framework/react/guides/query-invalidation#query-matching-with-invalidatequeries
+ * Ref: https://tanstack.com/query/v5/docs/framework/react/guides/query-invalidation#query-matching-with-invalidatequeries
  *
  * e.g:
  *   When you do PUT /api/v1/projects/myProject/variables/myVar, invalidating the query key [variables, myProject]

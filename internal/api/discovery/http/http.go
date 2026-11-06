@@ -26,7 +26,6 @@ import (
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/spec/go/common"
-	"github.com/sirupsen/logrus"
 )
 
 func NewDiscovery(Name string, refreshInterval common.Duration, cfg *config.HTTPDiscovery, svc *service.ApplyService) (taskhelper.Helper, error) {
@@ -56,8 +55,7 @@ func (d *discovery) Execute(_ context.Context, _ context.CancelFunc) error {
 		Object(&result)
 
 	if err != nil {
-		logrus.Errorf("failed to execute http discovery %q: %v", d.name, err)
-		return nil
+		return fmt.Errorf("failed to execute http discovery %q: %w", d.name, err)
 	}
 	d.svc.Apply(result)
 	return nil

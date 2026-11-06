@@ -77,7 +77,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 
 	// Enable the refresh of the RBAC permissions if the native provider is enabled.
 	if conf.Security.Authorization.Provider.Native.Enable {
-		rbacTask := refresh.New(persesDAO,
+		rbacTask := refresh.New("RBAC permissions", persesDAO,
 			dependencyManager.Service().GetAuthorization().RefreshPermissionsAndRoles,
 			[]modelV1.Kind{modelV1.KindRole, modelV1.KindRoleBinding, modelV1.KindGlobalRole, modelV1.KindGlobalRoleBinding},
 		)
@@ -85,7 +85,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	}
 
 	// Enable the refresh of the search index.
-	runner.WithTimerTasks(time.Duration(conf.Search.CheckLatestUpdateInterval), refresh.New(persesDAO, dependencyManager.Service().GetIndex().Refresh, []modelV1.Kind{modelV1.KindDashboard}))
+	runner.WithTimerTasks(time.Duration(conf.Search.CheckLatestUpdateInterval), refresh.New("search index", persesDAO, dependencyManager.Service().GetIndex().Refresh, []modelV1.Kind{modelV1.KindDashboard}))
 
 	// Extract the plugin archives and load the plugins.
 	// Loading plugin is not mandatory, so we don't return an error if the plugin can't be loaded.

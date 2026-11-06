@@ -44,7 +44,7 @@ vi.mock('../../model/project-client', () => ({
 
 vi.mock('../../model/dashboard-client', () => ({
   useImportantDashboardGroupsData: (): {
-    isLoading: boolean;
+    isPending: boolean;
     data: Array<{
       title: string;
       description: string;
@@ -55,7 +55,7 @@ vi.mock('../../model/dashboard-client', () => ({
     }>;
     error: null;
   } => ({
-    isLoading: false,
+    isPending: false,
     data: [
       {
         title: 'Operations',

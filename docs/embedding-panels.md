@@ -16,9 +16,9 @@ application.
 
 # Install Perses dependencies (React 18 and React 19+ are both supported)
 # React 19 requires the v0.56 Perses packages: until v0.56.0 is released, install the versions below instead of `latest`.
-npm i --save @perses-dev/client@0.56.0-beta.0 @perses-dev/spec @perses-dev/components@0.56.0-beta.0 \
-  @perses-dev/plugin-system@0.56.0-beta.0 @perses-dev/timeseries-chart-plugin@0.15.0-beta.0 \
-  @perses-dev/prometheus-plugin@0.60.0-beta.0 @perses-dev/dashboards@0.56.0-beta.0 \
+npm i --save @perses-dev/client@0.56.0-beta.1 @perses-dev/spec @perses-dev/components@0.56.0-beta.1 \
+  @perses-dev/plugin-system@0.56.0-beta.1 @perses-dev/timeseries-chart-plugin@0.15.0-beta.1 \
+  @perses-dev/prometheus-plugin@0.60.0-beta.1 @perses-dev/dashboards@0.56.0-beta.1 \
   @tanstack/react-query \
   @mui/material @mui/system \
   @emotion/styled @hookform/resolvers \

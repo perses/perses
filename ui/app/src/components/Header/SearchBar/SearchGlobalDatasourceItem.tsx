@@ -15,7 +15,6 @@ import { Chip, Stack, Typography } from '@mui/material';
 import type { SxProps, Theme } from '@mui/material';
 import type { GlobalDatasourceResource } from '@perses-dev/client';
 import type { HTTPProxy } from '@perses-dev/spec';
-import DatabaseIcon from 'mdi-material-ui/Database';
 import type { ReactElement } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
@@ -103,7 +102,6 @@ export const SearchGlobalDatasourceItem = (props: SearchGlobalDatasourceItemProp
         direction="row"
         data-testid={`${GLOBAL_DATASOURCE_RESOURCE_TEST_IDS.dsName}-${spec.display?.name || name}`}
       >
-        <DatabaseIcon fontSize="small" />
         <HighlightedMatch value={value} intervals={intervals} sx={STATIC_SX.name} />
       </Stack>
       <Stack sx={STATIC_SX.right} color="inherit" direction="row">
