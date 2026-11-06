@@ -71,6 +71,7 @@ export interface DashboardListRow {
 }
 
 export interface DashboardListProperties {
+  projectName: string;
   dashboardList: SearchProjectResource[];
   folderList: FolderResource[];
   isLoading: boolean;
@@ -79,13 +80,14 @@ export interface DashboardListProperties {
 
 /**
  * Display dashboards in a tree style.
+ * @param props.projectName Project the dashboards belong to, used to remember which folders are open
  * @param props.dashboardList Contains all dashboards to display
  * @param props.isLoading Display a loading circle if enabled
  * @param props.isEphemeralDashboardEnabled Display switch button if ephemeral dashboards are enabled in copy dialog.
  */
 export function DashboardList(props: DashboardListProperties): ReactElement {
   const navigate = useNavigate();
-  const { dashboardList, folderList, isLoading, isEphemeralDashboardEnabled } = props;
+  const { projectName, dashboardList, folderList, isLoading, isEphemeralDashboardEnabled } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const deleteDashboardMutation = useDeleteDashboardMutation();
   // TODO: a temporary copy creates an 'EphemeralDashboard', which has its own 'create' permission.
@@ -249,6 +251,9 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
   return (
     <Stack width="100%">
       <DashboardTreeList
+        // remount per project: the list reads its project's saved folders on mount
+        key={projectName}
+        projectName={projectName}
         folderList={folderList}
         dashboardsMap={dashboardsMap}
         handleRenameButtonClick={handleRenameButtonClick}
