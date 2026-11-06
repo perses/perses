@@ -61,17 +61,17 @@ func (d *dao) List(q *globaldatasource.Query) ([]*v1.GlobalDatasource, error) {
 func applyListFilter(result []*v1.GlobalDatasource, q *globaldatasource.Query) []*v1.GlobalDatasource {
 	var filteredResult []*v1.GlobalDatasource
 	for _, datasource := range result {
-		// filter results for source, if specified
-		if q.Source != "" && datasource.Metadata.Source != q.Source {
-			continue
-		}
 		// filter results for discovery name, if specified
-		if q.DiscoveryName != "" && q.DiscoveryName != datasource.Metadata.DiscoveryName {
-			continue
+		if q.DiscoveryName != "" {
+			if datasource.Source == nil || datasource.Source.Discovery == nil || datasource.Source.Discovery.Name != q.DiscoveryName {
+				continue
+			}
 		}
 		// filter results for discovery type, if specified
-		if q.DiscoveryType != "" && q.DiscoveryType != datasource.Metadata.DiscoveryType {
-			continue
+		if q.DiscoveryType != "" {
+			if datasource.Source == nil || datasource.Source.Discovery == nil || datasource.Source.Discovery.Type != q.DiscoveryType {
+				continue
+			}
 		}
 		filteredResult = append(filteredResult, datasource)
 	}

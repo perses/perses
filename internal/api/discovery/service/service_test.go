@@ -80,20 +80,19 @@ func (f *fakeGlobalDatasourceService) List(q *globaldatasource.Query) ([]*v1.Glo
 		result = append(result, ds)
 	}
 	// apply the same filters that persistence.go applies
-	if q.Source == "" {
-		return result, nil
-	}
 	var filtered []*v1.GlobalDatasource
 	for _, ds := range result {
-		if q.DiscoveryName != "" && ds.Metadata.DiscoveryName != q.DiscoveryName {
-			continue
+		if q.DiscoveryName != "" {
+			if ds.Source == nil || ds.Source.Discovery == nil || ds.Source.Discovery.Name != q.DiscoveryName {
+				continue
+			}
 		}
-		if q.DiscoveryType != "" && ds.Metadata.DiscoveryType != q.DiscoveryType {
-			continue
+		if q.DiscoveryType != "" {
+			if ds.Source == nil || ds.Source.Discovery == nil || ds.Source.Discovery.Type != q.DiscoveryType {
+				continue
+			}
 		}
-		if ds.Metadata.Source == q.Source {
-			filtered = append(filtered, ds)
-		}
+		filtered = append(filtered, ds)
 	}
 	return filtered, nil
 }
@@ -115,19 +114,20 @@ func (f *fakeGlobalDatasourceService) RawMetadataList(_ *globaldatasource.Query)
 func makeEntity(name string) *v1.GlobalDatasource {
 	return &v1.GlobalDatasource{
 		Kind:     v1.KindGlobalDatasource,
-		Metadata: v1.DatasourceMetadata{Metadata: v1.Metadata{Name: name}},
+		Metadata: v1.Metadata{Name: name},
 		Spec:     datasourceSpec.Spec{},
 	}
 }
 
 func storeEntity(name string, discoveryName string) *v1.GlobalDatasource {
 	return &v1.GlobalDatasource{
-		Kind: v1.KindGlobalDatasource,
-		Metadata: v1.DatasourceMetadata{
-			Metadata:      v1.Metadata{Name: name},
-			Source:        v1.DiscoverySource,
-			DiscoveryName: discoveryName,
-			DiscoveryType: v1.KubernetesType,
+		Kind:     v1.KindGlobalDatasource,
+		Metadata: v1.Metadata{Name: name},
+		Source: &v1.Source{
+			Discovery: &v1.DiscoverySource{
+				Name: discoveryName,
+				Type: v1.KubernetesType,
+			},
 		},
 		Spec: datasourceSpec.Spec{},
 	}
@@ -153,9 +153,10 @@ func TestApply_StampsSourceAndDiscoveryName(t *testing.T) {
 	for _, name := range []string{"ds-a1", "ds-a2"} {
 		ds, ok := fake.store[name]
 		require.True(t, ok)
-		assert.Equal(t, v1.DiscoverySource, ds.Metadata.Source)
-		assert.Equal(t, "kube-prod", ds.Metadata.DiscoveryName)
-		assert.Equal(t, v1.KubernetesType, ds.Metadata.DiscoveryType)
+		require.NotNil(t, ds.Source)
+		require.NotNil(t, ds.Source.Discovery)
+		assert.Equal(t, "kube-prod", ds.Source.Discovery.Name)
+		assert.Equal(t, v1.KubernetesType, ds.Source.Discovery.Type)
 	}
 }
 

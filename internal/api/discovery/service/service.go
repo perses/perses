@@ -55,9 +55,12 @@ func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 
 	var currentNames []string
 	for _, entity := range entities {
-		entity.Metadata.Source = v1.DiscoverySource
-		entity.Metadata.DiscoveryName = a.discoveryName
-		entity.Metadata.DiscoveryType = a.discoveryType
+		entity.Source = &v1.Source{
+			Discovery: &v1.DiscoverySource{
+				Name: a.discoveryName,
+				Type: a.discoveryType,
+			},
+		}
 		entity.GetMetadata().Flatten(a.caseSensitive)
 		_, createErr := a.svc.Create(nil, entity)
 		if createErr == nil {
@@ -81,8 +84,8 @@ func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 			logrus.WithError(getErr).Errorf("unable to get the globaldatasource %q", entity.Metadata.Name)
 			continue
 		}
-		if existing.Metadata.Source != v1.DiscoverySource {
-			logrus.Debugf("skipping update of globaldatasource %q: stored source is %q, not discovery", entity.Metadata.Name, existing.Metadata.Source)
+		if existing.Source == nil || existing.Source.Discovery == nil {
+			logrus.Debugf("skipping update of globaldatasource %q: not a discovery-managed datasource", entity.Metadata.Name)
 			continue
 		}
 
@@ -94,7 +97,6 @@ func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 
 	foundDatasources, err := a.svc.List(
 		&globaldatasource.Query{
-			Source:        v1.DiscoverySource,
 			DiscoveryName: a.discoveryName,
 			DiscoveryType: a.discoveryType,
 		})

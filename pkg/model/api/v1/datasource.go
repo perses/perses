@@ -42,9 +42,10 @@ type DatasourceInterface interface {
 // GlobalDatasource is the struct representing the datasource shared to everybody.
 // Any Dashboard can reference it.
 type GlobalDatasource struct {
-	Kind     Kind               `json:"kind" yaml:"kind"`
-	Metadata DatasourceMetadata `json:"metadata" yaml:"metadata"`
-	Spec     datasource.Spec    `json:"spec" yaml:"spec"`
+	Kind     Kind            `json:"kind" yaml:"kind"`
+	Metadata Metadata        `json:"metadata" yaml:"metadata"`
+	Spec     datasource.Spec `json:"spec" yaml:"spec"`
+	Source   *Source         `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 func (d *GlobalDatasource) UnmarshalJSON(data []byte) error {
@@ -84,7 +85,7 @@ func (d *GlobalDatasource) validate() error {
 }
 
 func (d *GlobalDatasource) GetMetadata() modelAPI.Metadata {
-	return &d.Metadata.Metadata
+	return &d.Metadata
 }
 
 func (d *GlobalDatasource) GetKind() string {

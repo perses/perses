@@ -75,10 +75,8 @@ func TestUnmarshalJSONDatasource(t *testing.T) {
 `,
 			result: GlobalDatasource{
 				Kind: KindGlobalDatasource,
-				Metadata: DatasourceMetadata{
-					Metadata: Metadata{
-						Name: "PrometheusDemo",
-					},
+				Metadata: Metadata{
+					Name: "PrometheusDemo",
 				},
 				Spec: datasourceSpec.Spec{
 					Default: true,
@@ -141,10 +139,8 @@ spec:
 `,
 			result: GlobalDatasource{
 				Kind: KindGlobalDatasource,
-				Metadata: DatasourceMetadata{
-					Metadata: Metadata{
-						Name: "PrometheusDemo",
-					},
+				Metadata: Metadata{
+					Name: "PrometheusDemo",
 				},
 				Spec: datasourceSpec.Spec{
 					Default: true,

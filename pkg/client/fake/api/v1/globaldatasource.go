@@ -32,10 +32,8 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 	initialList := []*modelV1.GlobalDatasource{
 		{
 			Kind: modelV1.KindGlobalDatasource,
-			Metadata: modelV1.DatasourceMetadata{
-				Metadata: modelV1.Metadata{
-					Name: "PrometheusDemo",
-				},
+			Metadata: modelV1.Metadata{
+				Name: "PrometheusDemo",
 			},
 			Spec: datasourceSpec.Spec{
 				Default: false,
@@ -54,10 +52,8 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 		},
 		{
 			Kind: modelV1.KindGlobalDatasource,
-			Metadata: modelV1.DatasourceMetadata{
-				Metadata: modelV1.Metadata{
-					Name: "PrometheusDemoBrowser",
-				},
+			Metadata: modelV1.Metadata{
+				Name: "PrometheusDemoBrowser",
 			},
 			Spec: datasourceSpec.Spec{
 				Default: false,
@@ -71,10 +67,8 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 		},
 		{
 			Kind: modelV1.KindGlobalDatasource,
-			Metadata: modelV1.DatasourceMetadata{
-				Metadata: modelV1.Metadata{
-					Name: "PrometheusLocal",
-				},
+			Metadata: modelV1.Metadata{
+				Name: "PrometheusLocal",
 			},
 			Spec: datasourceSpec.Spec{
 				Default: false,
@@ -120,10 +114,8 @@ func (c *globalDatasource) Delete(_ string) error {
 func (c *globalDatasource) Get(name string) (*modelV1.GlobalDatasource, error) {
 	return &modelV1.GlobalDatasource{
 		Kind: modelV1.KindGlobalDatasource,
-		Metadata: modelV1.DatasourceMetadata{
-			Metadata: modelV1.Metadata{
-				Name: name,
-			},
+		Metadata: modelV1.Metadata{
+			Name: name,
 		},
 		Spec: datasourceSpec.Spec{},
 	}, nil

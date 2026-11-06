@@ -22,24 +22,26 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func newDS(name string, source v1.MetadataSource, discoveryName string) *v1.GlobalDatasource {
-	return &v1.GlobalDatasource{
-		Kind: v1.KindGlobalDatasource,
-		Metadata: v1.DatasourceMetadata{
-			Metadata:      v1.Metadata{Name: name},
-			Source:        source,
-			DiscoveryName: discoveryName,
-		},
-		Spec: datasourceSpec.Spec{},
+func newDS(name string, discoveryName string) *v1.GlobalDatasource {
+	ds := &v1.GlobalDatasource{
+		Kind:     v1.KindGlobalDatasource,
+		Metadata: v1.Metadata{Name: name},
+		Spec:     datasourceSpec.Spec{},
 	}
+	if discoveryName != "" {
+		ds.Source = &v1.Source{
+			Discovery: &v1.DiscoverySource{Name: discoveryName},
+		}
+	}
+	return ds
 }
 
-func TestList_SourceAndDiscoveryNameFiltering(t *testing.T) {
+func TestList_DiscoveryNameFiltering(t *testing.T) {
 	all := []*v1.GlobalDatasource{
-		newDS("ds-a1", v1.DiscoverySource, "kube-prod"),
-		newDS("ds-a2", v1.DiscoverySource, "kube-prod"),
-		newDS("ds-b1", v1.DiscoverySource, "kube-staging"),
-		newDS("ds-manual", v1.ManualSource, ""),
+		newDS("ds-a1", "kube-prod"),
+		newDS("ds-a2", "kube-prod"),
+		newDS("ds-b1", "kube-staging"),
+		newDS("ds-manual", ""),
 	}
 
 	tests := []struct {
@@ -53,24 +55,14 @@ func TestList_SourceAndDiscoveryNameFiltering(t *testing.T) {
 			expectedNames: []string{"ds-a1", "ds-a2", "ds-b1", "ds-manual"},
 		},
 		{
-			name:          "source=discovery returns all discovery entries",
-			query:         globaldatasource.Query{Source: v1.DiscoverySource},
-			expectedNames: []string{"ds-a1", "ds-a2", "ds-b1"},
-		},
-		{
-			name:          "source=discovery and discovery_name=kube-prod returns only kube-prod entries",
-			query:         globaldatasource.Query{Source: v1.DiscoverySource, DiscoveryName: "kube-prod"},
+			name:          "discovery_name=kube-prod returns only kube-prod entries",
+			query:         globaldatasource.Query{DiscoveryName: "kube-prod"},
 			expectedNames: []string{"ds-a1", "ds-a2"},
 		},
 		{
-			name:          "source=discovery and discovery_name=kube-staging returns only kube-staging entries",
-			query:         globaldatasource.Query{Source: v1.DiscoverySource, DiscoveryName: "kube-staging"},
+			name:          "discovery_name=kube-staging returns only kube-staging entries",
+			query:         globaldatasource.Query{DiscoveryName: "kube-staging"},
 			expectedNames: []string{"ds-b1"},
-		},
-		{
-			name:          "source=manual returns only manual entries",
-			query:         globaldatasource.Query{Source: v1.ManualSource},
-			expectedNames: []string{"ds-manual"},
 		},
 	}
 
