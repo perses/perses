@@ -1,0 +1,35 @@
+import type { VariablePlugin } from '@perses-dev/plugin-system';
+import { replaceVariables } from '@perses-dev/plugin-system';
+
+import { DEFAULT_DATASOURCE } from './constants';
+import type { {{ .PluginPascalName }}Spec, QueryDatasourceClient } from './{{ .PluginName }}-types';
+
+export const getVariableOptions: VariablePlugin<{{ .PluginPascalName }}Spec>['getVariableOptions'] = async (
+  spec,
+  context,
+) => {
+  // return no option if the query is empty
+  if (spec.query === undefined || spec.query === null || spec.query === '') {
+    return { data: [] };
+  }
+
+  const query = replaceVariables(spec.query, context.variables);
+
+  const client = await context.datasourceStore.getDatasourceClient<QueryDatasourceClient>(
+    // A default datasource will be selected by matching the kind of datasource if not provided
+    spec.datasource ?? DEFAULT_DATASOURCE,
+  );
+
+  const { start, end } = context.timeRange;
+
+  const response = await client.query({
+    start: start.getTime().toString(),
+    end: end.getTime().toString(),
+    query,
+  });
+
+  // TODO: map your data to the options of the variable
+  return {
+    data: response.data.map((value) => ({ label: value, value })),
+  };
+};
