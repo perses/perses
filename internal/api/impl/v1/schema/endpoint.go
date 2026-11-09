@@ -17,7 +17,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
+	"cuelang.org/go/encoding/jsonschema"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 
@@ -35,6 +37,8 @@ const (
 	versionQueryParam  = "version"
 	registryQueryParam = "registry"
 	contentType        = "text/x-cue"
+	jsonContentType    = "application/schema+json"
+	schemaType         = "schemaType"
 )
 
 type endpoint struct {
@@ -76,6 +80,7 @@ func (e *endpoint) PluginDefinition(ctx echo.Context) error {
 	pluginName := ctx.Param(pluginNameParam)
 	version := ctx.QueryParam(versionQueryParam)
 	registry := ctx.QueryParam(registryQueryParam)
+	schemaType := ctx.QueryParam(schemaType)
 
 	if version == "" {
 		version = specPlugin.LatestVersion
@@ -89,11 +94,24 @@ func (e *endpoint) PluginDefinition(ctx echo.Context) error {
 		return apiinterface.HandleNotFoundError(fmt.Sprintf("plugin %q not found", pluginName))
 	}
 
-	data, err := generateCUEbytes([]schema.LoadSchema{ls})
+	var data []byte
+	var err error
+	responseContentType := contentType
+
+	switch schemaType {
+	case "json":
+		responseContentType = jsonContentType
+		data, err = generateJSONSchemaBytes(ls)
+	case "", "cue":
+		data, err = generateCUEbytes([]schema.LoadSchema{ls})
+	default:
+		return echo.NewHTTPError(http.StatusBadRequest, "unsupported schema type")
+	}
+
 	if err != nil {
 		return err
 	}
-	return ctx.Blob(http.StatusOK, contentType, data)
+	return ctx.Blob(http.StatusOK, responseContentType, data)
 }
 
 func (e *endpoint) PluginList(ctx echo.Context) error {
@@ -123,4 +141,38 @@ func generateCUEbytes(ls []schema.LoadSchema) ([]byte, error) {
 		return nil, apiinterface.InternalError
 	}
 	return data, nil
+}
+
+func generateJSONSchemaFromValue(value cue.Value) ([]byte, error) {
+
+	expr, err := jsonschema.Generate(value, &jsonschema.GenerateConfig{
+		NamesFunc: func(refs []*jsonschema.CUERef) {
+			for i, ref := range refs {
+				ref.Name = fmt.Sprintf("definition_%d", i)
+			}
+		},
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return cuecontext.New().BuildExpr(expr).MarshalJSON()
+}
+
+func generateJSONSchemaBytes(
+	ls schema.LoadSchema,
+) ([]byte, error) {
+	cuectx := cuecontext.New()
+
+	cueValue := cuectx.BuildInstance(
+		ls.Instance,
+		cue.InferBuiltins(true),
+	)
+
+	if err := cueValue.Err(); err != nil {
+		return nil, err
+	}
+
+	return generateJSONSchemaFromValue(cueValue)
 }
