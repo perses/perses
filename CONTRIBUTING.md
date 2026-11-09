@@ -169,7 +169,7 @@ The secure way to configure your monitoring.               <\
                                                             //
                                                            </
 
-⇨ http server started on [::]:8080
+INFO[2025-01-04T11:40:04Z] http server started on [::]:8080
 
 ```
 

@@ -16,7 +16,7 @@ Perses is configured via command-line flags and a configuration file
   -pprof
     	Enable pprof
   -web.hide-port
-    	If true, it will not be print on stdout the port listened to receive the HTTP request
+    	If true, the address listened to receive the HTTP requests is not logged when the server starts
   -web.listen-address string
     	The address to listen on for HTTP requests, web interface and telemetry. (default ":8080")
   -web.telemetry-path string
