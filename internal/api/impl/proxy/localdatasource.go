@@ -42,7 +42,7 @@ func (e *endpoint) proxyUnsavedDashboardDatasource(ctx *echo.Context) error {
 	projectName := ctx.Param(utils.ParamProject)
 	body := &unsavedProxyBody{}
 	if err := ctx.Bind(body); err != nil {
-		return err
+		return handleBindError(err)
 	}
 
 	if err := e.checkPermission(ctx, projectName, role.DatasourceScope, role.CreateAction); err != nil {

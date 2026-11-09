@@ -41,7 +41,7 @@ func (e *endpoint) proxyGlobalDatasource(ctx *echo.Context, datasourceName, tran
 func (e *endpoint) proxyUnsavedGlobalDatasource(ctx *echo.Context) error {
 	body := &unsavedProxyBody{}
 	if err := ctx.Bind(body); err != nil {
-		return err
+		return handleBindError(err)
 	}
 
 	if err := e.checkPermission(ctx, v1.WildcardProject, role.GlobalDatasourceScope, role.CreateAction); err != nil {
