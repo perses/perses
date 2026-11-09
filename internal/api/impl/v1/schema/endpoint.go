@@ -17,7 +17,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
+	"cuelang.org/go/encoding/jsonschema"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 
@@ -54,6 +56,7 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 	group.GET("/dashboards", e.DashboardSchema, true)
 	group.GET("/plugins", e.PluginList, true)
 	group.GET(fmt.Sprintf("/plugins/:%s", pluginNameParam), e.PluginDefinition, true)
+	group.GET(fmt.Sprintf("/plugins/:%s/json-schema", pluginNameParam), e.PluginJSONSchema, true)
 }
 
 func (e *endpoint) DashboardSchema(ctx echo.Context) error {
@@ -109,6 +112,35 @@ func (e *endpoint) PluginList(ctx echo.Context) error {
 	return ctx.Blob(http.StatusOK, contentType, data)
 }
 
+func (e *endpoint) PluginJSONSchema(ctx echo.Context) error {
+	pluginName := ctx.Param(pluginNameParam)
+	version := ctx.QueryParam(versionQueryParam)
+	registry := ctx.QueryParam(registryQueryParam)
+
+	if version == "" {
+		version = specPlugin.LatestVersion
+	}
+
+	if registry == "" {
+		registry = specPlugin.DefaultRegistry
+	}
+
+	ls, ok := e.pluginSvc.Schema().GetSchema(pluginName, version, registry)
+
+	if !ok {
+		return apiinterface.HandleNotFoundError(fmt.Sprintf("plugin %q not found", pluginName))
+	}
+
+	data, err := generateJSONSchemaBytes(ls)
+
+	if err != nil {
+		logrus.WithError(err).Error("unable to generate plugin JSON schema")
+		return apiinterface.InternalError
+	}
+
+	return ctx.Blob(http.StatusOK, echo.MIMEApplicationJSON, data)
+}
+
 func generateCUEbytes(ls []schema.LoadSchema) ([]byte, error) {
 	cueCtx := cuecontext.New()
 	list, err := schema.GenerateSchemaDefinitions(cueCtx, ls)
@@ -123,4 +155,32 @@ func generateCUEbytes(ls []schema.LoadSchema) ([]byte, error) {
 		return nil, apiinterface.InternalError
 	}
 	return data, nil
+}
+
+func generateJSONSchemaBytes(
+	ls schema.LoadSchema,
+) ([]byte, error) {
+	cuectx := cuecontext.New()
+
+	logrus.Info("Building original CUE instance")
+
+	plugin := cuectx.BuildInstance(
+		ls.Instance,
+		cue.InferBuiltins(true),
+	)
+
+	if err := plugin.Err(); err != nil {
+		return nil, err
+	}
+
+	logrus.Info("Starting direct JSON Schema generation")
+
+	expr, err := jsonschema.Generate(plugin, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	logrus.Info("JSON Schema generation completed")
+
+	return cuectx.BuildExpr(expr).MarshalJSON()
 }
