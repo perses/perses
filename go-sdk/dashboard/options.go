@@ -160,10 +160,17 @@ func AddPanelGroup(title string, options ...panelgroup.Option) Option {
 
 		gridLayoutSpec.Display.Collapse = buildCollapsedSpec(r.IsCollapsed)
 
+		// Same layout as the CUE SDK (cue/dac-utils/panelgroup): panels wrap to a new line
+		// after panelsPerLine panels, so a line never exceeds the 24 columns of the grid.
+		panelsPerLine := r.PanelsPerLine
+		if panelsPerLine == 0 {
+			panelsPerLine = 24 / r.PanelsWidth
+		}
+
 		for i := range r.Panels {
 			panelRef := fmt.Sprintf("%d_%d", len(builder.Dashboard.Spec.Layouts), i)
-			x := (len(gridLayoutSpec.Items) * r.PanelsWidth) % 24
-			y := (len(gridLayoutSpec.Items) * r.PanelsWidth) / 24 * r.PanelsHeight
+			x := (i % panelsPerLine) * r.PanelsWidth
+			y := (i / panelsPerLine) * r.PanelsHeight
 			gridLayoutSpec.Items = append(gridLayoutSpec.Items, dashboard.GridItem{
 				X:      x,
 				Y:      y,
