@@ -30,6 +30,7 @@ import (
 )
 
 type receivedRequest struct {
+	called          bool
 	body            string
 	contentEncoding string
 	contentLength   int64
@@ -43,6 +44,7 @@ func newForwardingServer(t *testing.T) (*echo.Echo, func() receivedRequest) {
 		body, err := io.ReadAll(r.Body)
 		require.NoError(t, err)
 		received = receivedRequest{
+			called:          true,
 			body:            string(body),
 			contentEncoding: r.Header.Get(echo.HeaderContentEncoding),
 			contentLength:   r.ContentLength,
@@ -142,4 +144,24 @@ func TestDecompress(t *testing.T) {
 		assert.Equal(t, "br", received().contentEncoding)
 		assert.Equal(t, int64(len(body)), received().contentLength)
 	})
+
+	for _, test := range []struct {
+		name string
+		body []byte
+	}{
+		{name: "a body that is not a gzip stream is rejected", body: []byte(body)},
+		{name: "a body with a truncated gzip header is rejected", body: gzipBody(t, body)[:5]},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			e, received := newForwardingServer(t)
+
+			req := httptest.NewRequest(http.MethodPost, "/proxy", bytes.NewReader(test.body))
+			req.Header.Set(echo.HeaderContentEncoding, "gzip")
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, http.StatusBadRequest, rec.Code)
+			assert.False(t, received().called)
+		})
+	}
 }
