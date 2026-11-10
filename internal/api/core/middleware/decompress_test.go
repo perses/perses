@@ -25,6 +25,7 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v5"
+	echoMiddleware "github.com/labstack/echo/v5/middleware"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -162,6 +163,37 @@ func TestDecompress(t *testing.T) {
 
 			assert.Equal(t, http.StatusBadRequest, rec.Code)
 			assert.False(t, received().called)
+		})
+	}
+
+	// The errors of the rest of the chain can look like the ones of an invalid gzip stream, but they don't come from
+	// the gzip reader: they must not be answered with 400.
+	for _, test := range []struct {
+		name    string
+		handler echo.HandlerFunc
+	}{
+		{
+			name:    "an error of the next handlers is returned untouched",
+			handler: func(*echo.Context) error { return io.ErrUnexpectedEOF },
+		},
+		{
+			name:    "a panic recovered in the next handlers is answered with 500",
+			handler: func(*echo.Context) error { panic(io.ErrUnexpectedEOF) },
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			e := echo.New()
+			e.Pre(Decompress())
+			// Like in perses/common, the panics are recovered after the pre-middlewares.
+			e.Use(echoMiddleware.Recover())
+			e.POST("/", test.handler)
+
+			req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(gzipBody(t, body)))
+			req.Header.Set(echo.HeaderContentEncoding, "gzip")
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, http.StatusInternalServerError, rec.Code)
 		})
 	}
 }
