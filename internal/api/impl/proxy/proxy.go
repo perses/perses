@@ -21,7 +21,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/internal/api/impl/proxy/common"
@@ -82,7 +82,18 @@ func (u *unsavedProxyBody) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (u *unsavedProxyBody) setRequestParams(ctx echo.Context) {
+// handleBindError returns the error of echo.Context.Bind with the reason why the body is invalid as message, like the
+// validation errors of UnmarshalJSON (e.g. "missing field 'method'"). echo wraps this reason in an *echo.HTTPError
+// whose message is only "Bad Request", and its error handler doesn't send the wrapped errors to the client.
+func handleBindError(err error) error {
+	var httpErr *echo.HTTPError
+	if errors.As(err, &httpErr) && httpErr.Unwrap() != nil {
+		return echo.NewHTTPError(httpErr.Code, httpErr.Unwrap().Error())
+	}
+	return err
+}
+
+func (u *unsavedProxyBody) setRequestParams(ctx *echo.Context) {
 	req := ctx.Request()
 	req.Method = u.Method
 
@@ -162,7 +173,7 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 	}
 }
 
-func (e *endpoint) checkPermission(ctx echo.Context, projectName string, scope role.Scope, action role.Action) error {
+func (e *endpoint) checkPermission(ctx *echo.Context, projectName string, scope role.Scope, action role.Action) error {
 	if !e.authz.IsEnabled() {
 		return nil
 	}
@@ -198,7 +209,7 @@ func (e *endpoint) forwardCallerAuthorization() bool {
 // proxy serves a request to a datasource. There is one implementation per kind of datasource proxy
 // (see the httpproxy and sqlproxy packages).
 type proxy interface {
-	Serve(c echo.Context) error
+	Serve(c *echo.Context) error
 }
 
 // newProxy builds the proxy matching the kind of the datasource.

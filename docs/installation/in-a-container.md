@@ -39,7 +39,7 @@ time="2025-01-04T11:40:04Z" level=warning msg="encryption_key is not provided an
 \___/                 \_|  \___|_|  |___/\___||___/  [PERSES_VERSION]
 __________________________________________________________
 
-⇨ http server started on [::]:8080
+time="2025-01-04T11:40:04Z" level=info msg="http server started on [::]:8080"
 ```
 
 ### Tags

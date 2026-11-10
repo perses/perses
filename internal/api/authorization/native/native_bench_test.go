@@ -20,7 +20,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 )
@@ -95,7 +95,7 @@ func BenchmarkConcurrentRefreshPermissionsAndRoles(b *testing.B) {
 
 type benchPermissionRequest struct {
 	name     string
-	ctx      echo.Context
+	ctx      *echo.Context
 	action   v1Role.Action
 	project  string
 	scope    v1Role.Scope
@@ -247,7 +247,7 @@ func BenchmarkNativeGetUserProjects(b *testing.B) {
 		n := ds.newNative(b, true)
 		scenarios := []struct {
 			name string
-			ctx  echo.Context
+			ctx  *echo.Context
 		}{
 			{name: "global-admin", ctx: newTestContext(testUserName(0), nil)},
 			{name: "project-member", ctx: newTestContext(testUserName(1), nil)},
@@ -277,7 +277,7 @@ func BenchmarkNativeGetPermissions(b *testing.B) {
 		n := ds.newNative(b, true)
 		scenarios := []struct {
 			name string
-			ctx  echo.Context
+			ctx  *echo.Context
 		}{
 			{name: "global-admin", ctx: newTestContext(testUserName(0), nil)},
 			{name: "project-member", ctx: newTestContext(testUserName(1), nil)},

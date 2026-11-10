@@ -14,12 +14,18 @@
 package proxy
 
 import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/impl/proxy/http"
 	"github.com/perses/perses/internal/api/impl/proxy/proxytest"
+	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/perses/spec/go/common"
 	datasourceSpec "github.com/perses/spec/go/datasource"
@@ -52,6 +58,52 @@ func TestEndpoint_forwardCallerAuthorization(t *testing.T) {
 			e := &endpoint{authz: test.authz}
 			assert.Equal(t, test.expected, e.forwardCallerAuthorization())
 		})
+	}
+}
+
+// TestEndpoint_proxyUnsaved_invalidBody ensures the client receives the reason why the body of a request to an unsaved
+// datasource is invalid, as echo only answers "Bad Request" for the errors of Bind.
+func TestEndpoint_proxyUnsaved_invalidBody(t *testing.T) {
+	handlers := []struct {
+		name    string
+		handler func(*endpoint, *echo.Context) error
+	}{
+		{name: "global datasource", handler: (*endpoint).proxyUnsavedGlobalDatasource},
+		{name: "project datasource", handler: (*endpoint).proxyUnsavedProjectDatasource},
+		{name: "dashboard datasource", handler: (*endpoint).proxyUnsavedDashboardDatasource},
+	}
+	bodies := []struct {
+		name            string
+		contentType     string
+		body            string
+		expectedStatus  int
+		expectedMessage string
+	}{
+		{name: "missing method", contentType: echo.MIMEApplicationJSON, body: `{}`, expectedStatus: http.StatusBadRequest, expectedMessage: "missing field 'method'"},
+		{name: "invalid method", contentType: echo.MIMEApplicationJSON, body: `{"method":"PATCH"}`, expectedStatus: http.StatusBadRequest, expectedMessage: `invalid method "PATCH"`},
+		{name: "invalid JSON", contentType: echo.MIMEApplicationJSON, body: `{`, expectedStatus: http.StatusBadRequest, expectedMessage: "unexpected end of JSON input"},
+		{name: "unsupported media type", contentType: echo.MIMETextPlain, body: `{"method":"GET"}`, expectedStatus: http.StatusUnsupportedMediaType, expectedMessage: http.StatusText(http.StatusUnsupportedMediaType)},
+	}
+	for _, h := range handlers {
+		for _, test := range bodies {
+			t.Run(h.name+"/"+test.name, func(t *testing.T) {
+				req := httptest.NewRequest(http.MethodPost, "/proxy/unsaved", strings.NewReader(test.body))
+				req.Header.Set(echo.HeaderContentType, test.contentType)
+				rec := httptest.NewRecorder()
+				c := echo.New().NewContext(req, rec)
+
+				// The body is checked before anything else, so the endpoint doesn't need any dependency.
+				err := h.handler(&endpoint{}, c)
+				require.Error(t, err)
+				// Like the Perses server: the middleware HandleError, then the error handler of perses/common.
+				echo.DefaultHTTPErrorHandler(false)(c, apiinterface.HandleError(err))
+
+				assert.Equal(t, test.expectedStatus, rec.Code)
+				var response map[string]string
+				require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &response))
+				assert.Equal(t, test.expectedMessage, response["message"])
+			})
+		}
 	}
 }
 

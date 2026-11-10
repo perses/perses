@@ -23,9 +23,9 @@ import (
 	"sync/atomic"
 
 	"github.com/golang-jwt/jwt/v5"
-	echojwt "github.com/labstack/echo-jwt/v4"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	echojwt "github.com/labstack/echo-jwt/v5"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/perses/perses/internal/api/crypto"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
@@ -140,7 +140,25 @@ func (n *native) IsNativeAuthz() bool {
 	return true
 }
 
-func (n *native) GetUser(ctx echo.Context) (any, error) {
+// userContext gives access to the values stored in the context of a request, like the user set by the JWT middleware.
+// It is implemented by *echo.Context. It allows the tests to control when a request reads its user.
+type userContext interface {
+	Get(key string) any
+}
+
+// toUserContext converts the echo context to a userContext, keeping a nil context nil.
+func toUserContext(ctx *echo.Context) userContext {
+	if ctx == nil {
+		return nil
+	}
+	return ctx
+}
+
+func (n *native) GetUser(ctx *echo.Context) (any, error) {
+	return n.getUser(toUserContext(ctx))
+}
+
+func (n *native) getUser(ctx userContext) (any, error) {
 	// Context can be nil when the function is called outside the request context.
 	// For example, the provisioning service is calling every service without any context.
 	if ctx == nil {
@@ -159,8 +177,12 @@ func (n *native) GetUser(ctx echo.Context) (any, error) {
 	return token.Claims, nil
 }
 
-func (n *native) GetUsername(ctx echo.Context) (string, error) {
-	usr, err := n.GetUser(ctx)
+func (n *native) GetUsername(ctx *echo.Context) (string, error) {
+	return n.getUsername(toUserContext(ctx))
+}
+
+func (n *native) getUsername(ctx userContext) (string, error) {
+	usr, err := n.getUser(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -170,7 +192,7 @@ func (n *native) GetUsername(ctx echo.Context) (string, error) {
 	return usr.(*crypto.JWTClaims).GetSubject()
 }
 
-func (n *native) GetProviderInfo(ctx echo.Context) (crypto.ProviderInfo, error) {
+func (n *native) GetProviderInfo(ctx *echo.Context) (crypto.ProviderInfo, error) {
 	usr, err := n.GetUser(ctx)
 	if err != nil {
 		return crypto.ProviderInfo{}, err
@@ -181,7 +203,7 @@ func (n *native) GetProviderInfo(ctx echo.Context) (crypto.ProviderInfo, error) 
 	return usr.(*crypto.JWTClaims).ProviderInfo, nil
 }
 
-func (n *native) GetPublicUser(ctx echo.Context) (*v1.PublicUser, error) {
+func (n *native) GetPublicUser(ctx *echo.Context) (*v1.PublicUser, error) {
 	username, err := n.GetUsername(ctx)
 	if err != nil {
 		return nil, err
@@ -198,7 +220,7 @@ func (n *native) GetPublicUser(ctx echo.Context) (*v1.PublicUser, error) {
 func (n *native) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 	jwtMiddlewareConfig := echojwt.Config{
 		Skipper: skipper,
-		BeforeFunc: func(c echo.Context) {
+		BeforeFunc: func(c *echo.Context) {
 			// Merge the JWT cookies if they exist to create the token,
 			// and then set the header Authorization with the complete token.
 			payloadCookie, err := c.Cookie(crypto.CookieKeyJWTPayload)
@@ -213,7 +235,7 @@ func (n *native) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 			}
 			c.Request().Header.Set("Authorization", fmt.Sprintf("Bearer %s.%s", payloadCookie.Value, signatureCookie.Value))
 		},
-		NewClaimsFunc: func(_ echo.Context) jwt.Claims {
+		NewClaimsFunc: func(_ *echo.Context) jwt.Claims {
 			return &crypto.JWTClaims{}
 		},
 		SigningMethod: jwt.SigningMethodHS512.Name,
@@ -238,7 +260,7 @@ func projectsWithPermission(projectPermissions map[string][]*v1Role.Permission, 
 	return projects
 }
 
-func (n *native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, requestScope v1Role.Scope) ([]string, error) {
+func (n *native) GetUserProjects(ctx *echo.Context, requestAction v1Role.Action, requestScope v1Role.Scope) ([]string, error) {
 	if listHasPermission(n.guestPermissions, requestAction, requestScope) {
 		return []string{v1.WildcardProject}, nil
 	}
@@ -267,7 +289,7 @@ func (n *native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, 
 	return projectsWithPermission(c.permissions[username], requestAction, requestScope), nil
 }
 
-func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
+func (n *native) HasPermission(ctx *echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
 	// If the context is nil, it means the function is called internally without a request context.
 	// And in this case, we assume we want to bypass the authorization check.
 	if ctx == nil {
@@ -313,12 +335,16 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 }
 
 // For native auth, creating a project requires a global permission.
-func (n *native) HasCreateProjectPermission(ctx echo.Context, projectName string) bool {
+func (n *native) HasCreateProjectPermission(ctx *echo.Context, projectName string) bool {
 	return n.HasPermission(ctx, v1Role.CreateAction, v1.WildcardProject, v1Role.ProjectScope)
 }
 
-func (n *native) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permission, error) {
-	username, err := n.GetUsername(ctx)
+func (n *native) GetPermissions(ctx *echo.Context) (map[string][]*v1Role.Permission, error) {
+	return n.getPermissions(toUserContext(ctx))
+}
+
+func (n *native) getPermissions(ctx userContext) (map[string][]*v1Role.Permission, error) {
+	username, err := n.getUsername(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -327,7 +353,7 @@ func (n *native) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permissi
 		logrus.Error("No username found in the context, this should not happen in a native RBAC implementation")
 		return nil, apiInterface.InternalError
 	}
-	usr, err := n.GetUser(ctx)
+	usr, err := n.getUser(ctx)
 	if err != nil {
 		return nil, err
 	}
