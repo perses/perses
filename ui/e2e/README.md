@@ -55,6 +55,7 @@ Check out [Playwright's documentation](https://playwright.dev/docs/writing-tests
 ### Guidelines
 
 - Tests live in `ui/e2e/src/tests` and follow the `testName.spec.ts` naming scheme.
+- Import `test` and `expect` from the `persesTest` fixture (or from a fixture extending it, like `dashboardTest`) instead of `@playwright/test`, so the test fails on Content-Security-Policy violations (see below).
 - Tests should be able to run in parallel. Do not write tests that depend on specific order.
 - Tests should not be flaky! Flaky tests are frustrating, waste time, and lead to decreased trust in the entire test suite. Ask for help if you are having trouble writing a non-flaky test for specific functionality.
 - Use [Page Object Models](https://playwright.dev/docs/pom) to reduce code duplication and improve test maintenance.
@@ -72,3 +73,7 @@ Check out [Playwright's documentation](https://playwright.dev/docs/writing-tests
 ### Tests complaining about console errors
 
 Tests that use the `dashboardTest` fixture check for console errors and fail tests when they are found because they are often a sign of a subtle bug we have not accounted for. When debugging these issues, it can be helpful to run the e2e tests with a headed browser (using [headed mode](https://playwright.dev/docs/debug#headed-mode) or using the vcode extension with "show browser" checked) with the debugger console open. This will often provide you with a more detailed error message and a stack trace.
+
+### Tests complaining about Content-Security-Policy violations
+
+The Perses server sends a `Content-Security-Policy` header with the pages of the UI. The `persesTest` fixture, used by every test, fails a test when a page reports a violation of this policy, as it means the UI or a plugin does something the browser blocks for the users (e.g. an inline script or a `javascript:` URL). The error lists the violated directive and the source location of each violation.

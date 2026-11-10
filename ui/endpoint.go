@@ -79,15 +79,21 @@ var (
 
 type frontend struct {
 	echoUtils.Register
-	apiPrefix     string
-	pluginService plugin.Plugin
+	apiPrefix string
+	// contentSecurityPolicy is the Content-Security-Policy sent with the HTML pages. It's empty when it's disabled.
+	contentSecurityPolicy string
+	pluginService         plugin.Plugin
 }
 
 func NewPersesFrontend(cfg config.Config, pluginService plugin.Plugin) echoUtils.Register {
-	return &frontend{
+	f := &frontend{
 		apiPrefix:     cfg.APIPrefix,
 		pluginService: pluginService,
 	}
+	if !cfg.Security.ContentSecurityPolicy.Disable {
+		f.contentSecurityPolicy = cfg.Security.ContentSecurityPolicy.Policy
+	}
+	return f
 }
 
 func (f *frontend) RegisterRoute(e *echo.Echo) {
@@ -243,7 +249,7 @@ func (f *frontend) assetHandler() echo.HandlerFunc {
 		if contentType == "" {
 			contentType = http.DetectContentType(data)
 		}
-		return serveContent(c, fileName, contentType, data)
+		return f.serveContent(c, fileName, contentType, data)
 	}
 }
 
@@ -253,14 +259,19 @@ func (f *frontend) assetHandler() echo.HandlerFunc {
 //     (If-None-Match) is answered with 304 Not Modified instead of the full body.
 //   - X-Content-Type-Options: nosniff to prevent MIME sniffing.
 //
+// An HTML page also gets the Content-Security-Policy header, when it's enabled: the policy only applies to documents.
+//
 // It relies on http.ServeContent, which handles conditional requests (If-None-Match / If-Modified-Since),
 // HEAD requests and Range requests for us.
-func serveContent(c *echo.Context, name string, contentType string, data []byte) error {
+func (f *frontend) serveContent(c *echo.Context, name string, contentType string, data []byte) error {
 	sum := sha256.Sum256(data)
 	header := c.Response().Header()
 	header.Set("ETag", `"`+hex.EncodeToString(sum[:16])+`"`)
 	header.Set("Content-Type", contentType)
 	header.Set("X-Content-Type-Options", "nosniff")
+	if len(f.contentSecurityPolicy) > 0 && strings.HasPrefix(contentType, "text/html") {
+		header.Set("Content-Security-Policy", f.contentSecurityPolicy)
+	}
 	// The zero modtime tells ServeContent not to emit Last-Modified: the embedded FS has no meaningful
 	// modification time, and the ETag is a stronger validator anyway.
 	http.ServeContent(c.Response(), c.Request(), name, time.Time{}, bytes.NewReader(data))
@@ -328,7 +339,7 @@ func (f *frontend) serveASTFiles(c *echo.Context) error {
 	// revalidated to avoid serving a stale page that points at assets no longer being served.
 	// With the ETag set by serveContent, the revalidation is answered with a 304 when nothing changed.
 	c.Response().Header().Set("Cache-Control", cacheControlRevalidate)
-	return serveContent(c, "index.html", "text/html; charset=utf-8", idx)
+	return f.serveContent(c, "index.html", "text/html; charset=utf-8", idx)
 }
 
 // parsePluginPath parses a URL path of the form:

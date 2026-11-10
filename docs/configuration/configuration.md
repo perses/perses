@@ -166,6 +166,9 @@ encryption_key_file: <filename> # Optional
 # Configuration for CORS (cross-origin resource sharing).
 cors: <CORS config> # Optional
 
+# Configuration of the Content-Security-Policy header sent with the pages of the UI.
+content_security_policy: <Content Security Policy config> # Optional
+
 # List of absolute directories from which Secrets and GlobalSecrets are allowed to read files
 # (basicAuth.passwordFile, authorization.credentialsFile, oauth.clientSecretFile, tlsConfig.caFile/certFile/keyFile).
 # Symlinks are resolved, and the file must remain inside one of these directories.
@@ -521,6 +524,20 @@ expose_headers: <string[]> | default = [] # Optional
 
 # Configure how long (in seconds) the results of a preflight request can be cached.
 max_age: <integer> | default = 0 # Optional
+```
+
+#### Content Security Policy config
+
+```yaml
+# Stop sending the Content-Security-Policy header with the pages of the UI.
+# See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP
+disable: <boolean> | default = false # Optional
+
+# The value of the Content-Security-Policy header. It can be written on several lines.
+# The default policy only allows the scripts served by Perses (the UI and the plugins) to run: the inline scripts,
+# the inline event handlers and the javascript: URLs are blocked.
+# See the security considerations (https://perses.dev/perses/docs/security/) for the details of the default policy.
+policy: <string> | default = "script-src 'self' 'unsafe-eval'; object-src 'none'; base-uri 'self'" # Optional
 ```
 
 ### Database config

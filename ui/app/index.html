@@ -26,10 +26,6 @@
         padding: 0;
         background-color: light-dark(#ffffff, #151721);
       }
-
-      .dark-theme {
-        color-scheme: dark;
-      }
     </style>
   </head>
   <body>
@@ -87,12 +83,6 @@
           </path>
         </svg>
       </div>
-      <script>
-        const isDarkTheme = localStorage.getItem('perses-dark-theme-enabled') === 'true';
-        if (isDarkTheme) {
-          document.getElementById('loader').classList.add('dark-theme');
-        }
-      </script>
     </div>
   </body>
 </html>

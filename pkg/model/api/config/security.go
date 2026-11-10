@@ -30,6 +30,15 @@ import (
 
 const (
 	defaultEncryptionKey = "e=dz;`M'5Pjvy^Sq3FVBkTC@N9?H/gua"
+	// DefaultContentSecurityPolicy is the Content-Security-Policy sent with the pages of the UI when no policy is
+	// configured:
+	//   - script-src 'self' 'unsafe-eval': only the scripts served by Perses (the UI and the plugins) can run.
+	//     It blocks the inline scripts, the inline event handlers and the javascript: URLs, which is how a script
+	//     injected in the content of a dashboard would run. 'unsafe-eval' is allowed as the module federation runtime,
+	//     which loads the plugins, relies on it.
+	//   - object-src 'none': no <object> or <embed> element can load content.
+	//   - base-uri 'self': a <base> element can't change the URL against which the relative URLs are resolved.
+	DefaultContentSecurityPolicy = "script-src 'self' 'unsafe-eval'; object-src 'none'; base-uri 'self'"
 )
 
 type SameSite http.SameSite
@@ -182,6 +191,30 @@ func IsCORSOriginPattern(origin string) bool {
 	return origin != "*" && strings.ContainsAny(origin, "*?")
 }
 
+// ContentSecurityPolicy is the configuration of the Content-Security-Policy header sent with the pages of the UI.
+// The header restricts what the browser is allowed to run in the Perses origin, as a second layer of protection
+// against a script injected in the content of a dashboard.
+type ContentSecurityPolicy struct {
+	// Disable stops sending the Content-Security-Policy header with the pages of the UI.
+	Disable bool `json:"disable" yaml:"disable"`
+	// Policy is the value of the Content-Security-Policy header. When empty, DefaultContentSecurityPolicy is used.
+	// The policy can be written on several lines: consecutive whitespaces, including newlines, are replaced by a single
+	// space.
+	Policy string `json:"policy,omitempty" yaml:"policy,omitempty"`
+}
+
+func (c *ContentSecurityPolicy) Verify() error {
+	if c.Disable {
+		return nil
+	}
+	// A header value can't contain a newline, and the whitespaces are not significant in a policy.
+	c.Policy = strings.Join(strings.Fields(c.Policy), " ")
+	if len(c.Policy) == 0 {
+		c.Policy = DefaultContentSecurityPolicy
+	}
+	return nil
+}
+
 type Security struct {
 	// Readonly will deactivate any HTTP POST, PUT, DELETE endpoint
 	Readonly bool `json:"readonly" yaml:"readonly"`
@@ -204,6 +237,8 @@ type Security struct {
 	Authentication AuthenticationConfig `json:"authentication,omitempty" yaml:"authentication,omitempty"`
 	// Configuration for the CORS middleware.
 	CORS CORSConfig `json:"cors,omitempty" yaml:"cors"`
+	// ContentSecurityPolicy is the configuration of the Content-Security-Policy header sent with the pages of the UI.
+	ContentSecurityPolicy ContentSecurityPolicy `json:"content_security_policy" yaml:"content_security_policy"`
 	// SecretFileAllowedDirectories is the list of absolute directories from which the Secrets and GlobalSecrets
 	// are allowed to read files (basicAuth.passwordFile, authorization.credentialsFile, oauth.clientSecretFile,
 	// tlsConfig.caFile/certFile/keyFile).

@@ -25,11 +25,44 @@ import (
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/spec/go/module"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestNewPersesFrontendContentSecurityPolicy(t *testing.T) {
+	tests := []struct {
+		name           string
+		cfg            config.ContentSecurityPolicy
+		expectedPolicy string
+	}{
+		{
+			name:           "policy is sent by default",
+			cfg:            config.ContentSecurityPolicy{Policy: config.DefaultContentSecurityPolicy},
+			expectedPolicy: config.DefaultContentSecurityPolicy,
+		},
+		{
+			name:           "custom policy",
+			cfg:            config.ContentSecurityPolicy{Policy: "script-src 'self'"},
+			expectedPolicy: "script-src 'self'",
+		},
+		{
+			name:           "policy is not sent when disabled",
+			cfg:            config.ContentSecurityPolicy{Disable: true, Policy: config.DefaultContentSecurityPolicy},
+			expectedPolicy: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := config.Config{Security: config.Security{ContentSecurityPolicy: tt.cfg}}
+			f, ok := NewPersesFrontend(cfg, nil).(*frontend)
+			require.True(t, ok)
+			assert.Equal(t, tt.expectedPolicy, f.contentSecurityPolicy)
+		})
+	}
+}
 
 func TestAssetHandlerContentType(t *testing.T) {
 	// Override the package-level embedded filesystem with test data.
@@ -178,6 +211,73 @@ func TestAssetHandlerConditionalRequest(t *testing.T) {
 	rec = httptest.NewRecorder()
 	require.NoError(t, other.assetHandler()(e.NewContext(req, rec)))
 	assert.NotEqual(t, etag, rec.Header().Get("ETag"))
+}
+
+func TestServeContentSecurityPolicy(t *testing.T) {
+	// Override the package-level embedded filesystem with test data.
+	originalAsts := asts
+	t.Cleanup(func() { asts = originalAsts })
+
+	testFS := fstest.MapFS{
+		"app/dist/index.html":       &fstest.MapFile{Data: []byte("<html><head></head><body></body></html>")},
+		"app/dist/main.abc12345.js": &fstest.MapFile{Data: []byte("console.log('ok')")},
+	}
+	asts = http.FS(testFS)
+
+	const policy = "script-src 'self'; object-src 'none'"
+
+	tests := []struct {
+		name           string
+		policy         string
+		serve          func(f *frontend, c *echo.Context) error
+		path           string
+		expectedPolicy string
+	}{
+		{
+			name:           "page of a React route",
+			policy:         policy,
+			serve:          (*frontend).serveASTFiles,
+			path:           "/projects/demo",
+			expectedPolicy: policy,
+		},
+		{
+			name:   "index.html requested as a static file",
+			policy: policy,
+			serve: func(f *frontend, c *echo.Context) error {
+				return f.assetHandler()(c)
+			},
+			path:           "/app/dist/index.html",
+			expectedPolicy: policy,
+		},
+		{
+			name:   "the policy only applies to documents",
+			policy: policy,
+			serve: func(f *frontend, c *echo.Context) error {
+				return f.assetHandler()(c)
+			},
+			path:           "/app/dist/main.abc12345.js",
+			expectedPolicy: "",
+		},
+		{
+			name:           "no policy when it's disabled",
+			policy:         "",
+			serve:          (*frontend).serveASTFiles,
+			path:           "/projects/demo",
+			expectedPolicy: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f := &frontend{contentSecurityPolicy: tt.policy}
+			e := echo.New()
+			req := httptest.NewRequest(http.MethodGet, tt.path, nil)
+			rec := httptest.NewRecorder()
+
+			require.NoError(t, tt.serve(f, e.NewContext(req, rec)))
+			require.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, tt.expectedPolicy, rec.Header().Get("Content-Security-Policy"))
+		})
+	}
 }
 
 func TestIsHashedAsset(t *testing.T) {
