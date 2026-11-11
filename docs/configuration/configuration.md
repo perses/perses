@@ -1124,6 +1124,9 @@ important_dashboards:
 # The markdown content to be displayed on the UI home page
 information: <string> # Optional
 
+# The images to display in place of the Perses logo
+logo: <Logo config> # Optional
+
 # TimeRange configuration
 time_range: <TimeRange config> # Optional
 
@@ -1144,6 +1147,23 @@ default_user_preferences:
 severity: <enum | possibleValue = 'info' | 'warning' | 'error'> | default = info # Optional
 # The content of the information to be displayed in the banner. It can be html content.
 message: <string>
+```
+
+#### Logo config
+
+Each image replaces the Perses logo at one place of the UI. When a URL is not set, the Perses logo is kept at this place.
+A URL can be an `http` or `https` URL, a path starting with `/` (e.g. `/static/logo.svg`, served by a reverse proxy in
+front of Perses), or a `data` URL that embeds the image in the configuration (e.g. `data:image/svg+xml;base64,...`).
+The browsers of the users load the image directly from this URL.
+
+```yaml
+# URL of the image displayed in the navigation bar, at the top left of every page.
+# The image is scaled to fit in 130x32 pixels and is displayed on the dark blue background of the bar.
+navbar_url: <string> # Optional
+
+# URL of the image displayed on the sign-in and sign-up pages.
+# The image is scaled to fit in 394x116 pixels.
+sign_in_url: <string> # Optional
 ```
 
 #### Explorer config

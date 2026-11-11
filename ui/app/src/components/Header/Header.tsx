@@ -20,7 +20,7 @@ import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { GlobalProject, useHasPartialPermission } from '../../context/Authorization';
-import { useIsAuthEnabled, useIsExplorerEnabled } from '../../context/Config';
+import { useIsAuthEnabled, useIsExplorerEnabled, useLogo } from '../../context/Config';
 import { AdminRoute, ConfigRoute } from '../../model/route';
 import { useIsLaptopSize, useIsMobileSize } from '../../utils/browser-size';
 import { BannerInfo } from '../BannerInfo';
@@ -30,6 +30,19 @@ import { AccountMenu } from './AccountMenu';
 import { SearchBar } from './SearchBar/SearchBar';
 import { ThemeSwitch } from './ThemeSwitch';
 import { ToolMenu } from './ToolMenu';
+
+function NavbarLogo({ isLaptopSize }: { isLaptopSize: boolean }): ReactElement {
+  const logo = useLogo();
+  if (logo?.navbar_url) {
+    return (
+      <Box component="img" src={logo.navbar_url} alt="Home" sx={{ height: 32, maxWidth: 130, objectFit: 'contain' }} />
+    );
+  }
+  if (isLaptopSize) {
+    return <WhitePersesLogo />;
+  }
+  return <PersesLogoCropped color="white" width={32} height={32} />;
+}
 
 export default function Header(): ReactElement {
   const isLaptopSize = useIsLaptopSize();
@@ -74,7 +87,7 @@ export default function Header(): ReactElement {
               padding: 0,
             }}
           >
-            {isLaptopSize ? <WhitePersesLogo /> : <PersesLogoCropped color="white" width={32} height={32} />}
+            <NavbarLogo isLaptopSize={isLaptopSize} />
           </Button>
           <Divider
             orientation="vertical"

@@ -16,7 +16,9 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"slices"
+	"strings"
 	"time"
 	_ "time/tzdata"
 
@@ -77,6 +79,48 @@ func (b *Banner) Verify() error {
 		return fmt.Errorf("frontend.banner.message is required when banner is filled")
 	}
 	return nil
+}
+
+// Logo contains the images displayed in place of the Perses logo.
+type Logo struct {
+	// NavbarURL is the URL of the image displayed in the navigation bar.
+	NavbarURL string `json:"navbar_url,omitempty" yaml:"navbar_url,omitempty"`
+	// SignInURL is the URL of the image displayed on the sign-in and sign-up pages.
+	SignInURL string `json:"sign_in_url,omitempty" yaml:"sign_in_url,omitempty"`
+}
+
+func (l *Logo) Verify() error {
+	if err := validateLogoURL(l.NavbarURL); err != nil {
+		return fmt.Errorf("invalid frontend.logo.navbar_url: %w", err)
+	}
+	if err := validateLogoURL(l.SignInURL); err != nil {
+		return fmt.Errorf("invalid frontend.logo.sign_in_url: %w", err)
+	}
+	return nil
+}
+
+// validateLogoURL accepts an http(s) URL, a data URL or an absolute path. A relative path is rejected, as it would be
+// resolved against the URL of the current page and the image would only be found on some pages.
+// An empty URL is accepted as well, the Perses logo is then kept.
+func validateLogoURL(rawURL string) error {
+	if len(rawURL) == 0 {
+		return nil
+	}
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return err
+	}
+	switch u.Scheme {
+	case "http", "https", "data":
+		return nil
+	case "":
+		if !strings.HasPrefix(rawURL, "/") {
+			return fmt.Errorf("%q is a relative path, it must start with '/'", rawURL)
+		}
+		return nil
+	default:
+		return fmt.Errorf("unsupported scheme %q, it must be one of: http, https, data", u.Scheme)
+	}
 }
 
 type TimeRange struct {
@@ -276,6 +320,8 @@ type Frontend struct {
 	// Explorer is activating the different kind of explorer supported.
 	// Be sure you have installed an associated plugin for each explorer type.
 	Explorer Explorer `json:"explorer" yaml:"explorer"`
+	// Logo contains the images displayed in place of the Perses logo
+	Logo *Logo `json:"logo,omitempty" yaml:"logo,omitempty"`
 	// Information contains Markdown content to be display on the home page
 	Information string `json:"information,omitempty" yaml:"information,omitempty"`
 	// ImportantDashboards contains grouped important dashboard selectors.
