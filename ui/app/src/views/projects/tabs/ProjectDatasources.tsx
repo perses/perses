@@ -107,6 +107,7 @@ export function ProjectDatasources(props: ProjectDatasourcesProps): ReactElement
         onUpdate={handleDatasourceUpdate}
         onDelete={handleDatasourceDelete}
         isLoading={isPending}
+        storageKey="Datasource"
         initialState={{
           columns: {
             columnVisibilityModel: {

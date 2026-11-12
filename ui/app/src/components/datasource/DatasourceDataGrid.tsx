@@ -26,6 +26,7 @@ import {
   PAGE_SIZE_OPTIONS,
   DATA_GRID_STYLES,
   DATA_GRID_SLOT_PROPS,
+  usePersistedDataGridState,
 } from '../datagrid';
 
 // https://mui.com/x/react-data-grid/performance/
@@ -56,7 +57,7 @@ const getRowId = (row: Row): string => row.name;
 
 export function DatasourceDataGrid(props: DataGridPropertiesWithCallback<Row>): ReactElement {
   const defaultRowsPerPage = useDefaultRowsPerPage();
-  const { columns, rows, initialState, hideToolbar, isLoading, onRowClick } = props;
+  const { columns, rows, initialState, storageKey, hideToolbar, isLoading, onRowClick } = props;
 
   // Merging default initial state with the props initial state (props initial state will overwrite properties)
   const mergedInitialState = useMemo(() => {
@@ -65,6 +66,7 @@ export function DatasourceDataGrid(props: DataGridPropertiesWithCallback<Row>): 
       ...initialState,
     } as GridInitialStateCommunity;
   }, [defaultRowsPerPage, initialState]);
+  const persistedState = usePersistedDataGridState(storageKey, mergedInitialState);
 
   const handleRowClick = useCallback(
     (params: GridRowParams<Row>): void => {
@@ -84,7 +86,7 @@ export function DatasourceDataGrid(props: DataGridPropertiesWithCallback<Row>): 
         loading={isLoading}
         slots={hideToolbar ? SLOTS_WITHOUT_TOOLBAR : SLOTS_WITH_TOOLBAR}
         pageSizeOptions={PAGE_SIZE_OPTIONS}
-        initialState={mergedInitialState}
+        {...persistedState}
         slotProps={DATA_GRID_SLOT_PROPS}
         sx={DATA_GRID_STYLES}
       />

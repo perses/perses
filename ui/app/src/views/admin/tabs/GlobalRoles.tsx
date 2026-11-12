@@ -101,6 +101,7 @@ export function GlobalRoles(props: GlobalRolesProps): ReactElement {
         onCreate={handleGlobalRoleCreate}
         onUpdate={handleGlobalRoleUpdate}
         onDelete={handleGlobalRoleDelete}
+        storageKey="GlobalRole"
         initialState={{
           columns: {
             columnVisibilityModel: {

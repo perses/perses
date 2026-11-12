@@ -111,6 +111,7 @@ export function GlobalDatasources(props: GlobalDatasourcesProps): ReactElement {
         onUpdate={handleDatasourceUpdate}
         onDelete={handleDatasourceDelete}
         isLoading={isPending}
+        storageKey="GlobalDatasource"
         initialState={{
           columns: {
             columnVisibilityModel: {

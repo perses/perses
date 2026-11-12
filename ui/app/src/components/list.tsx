@@ -188,6 +188,8 @@ export const TAGS_COL_DEF: GridColDef = {
 export interface ListProperties {
   hideToolbar?: boolean;
   initialState?: GridInitialStateCommunity;
+  // Identifies the list to save its settings in the local storage, see usePersistedDataGridState.
+  storageKey?: string;
   isLoading?: boolean;
 }
 

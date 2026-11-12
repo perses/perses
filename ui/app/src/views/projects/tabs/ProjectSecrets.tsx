@@ -102,6 +102,7 @@ export function ProjectSecrets(props: ProjectSecretsProps): ReactElement {
         onCreate={handleSecretCreate}
         onUpdate={handleSecretUpdate}
         onDelete={handleSecretDelete}
+        storageKey="Secret"
         initialState={{
           columns: {
             columnVisibilityModel: {

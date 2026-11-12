@@ -46,10 +46,11 @@ import { DatasourceDrawer } from './DatasourceDrawer';
  * @param props.onUpdate Event received when an 'update' action has been requested
  * @param props.onDelete Event received when a 'delete' action has been requested
  * @param props.initialState Provide a way to override default initialState
+ * @param props.storageKey Identifies the list to save its settings in the local storage
  * @param props.isLoading Display a loading circle if enabled
  */
 export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCallbacks<T>): ReactElement {
-  const { data, hideToolbar, onCreate, onUpdate, onDelete, initialState, isLoading } = props;
+  const { data, hideToolbar, onCreate, onUpdate, onDelete, initialState, storageKey, isLoading } = props;
   const isReadonly = useIsReadonly();
 
   const findDatasource = useCallback(
@@ -201,6 +202,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
         rows={rows}
         columns={columns}
         initialState={initialState}
+        storageKey={storageKey}
         hideToolbar={hideToolbar}
         isLoading={isLoading}
         onRowClick={handleRowClick}

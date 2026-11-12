@@ -74,6 +74,30 @@ test.describe('ProjectView', () => {
     await expect(projectPage.variableList).toContainText('$list_var');
   });
 
+  test('keeps the settings of the variable list', async ({ page }) => {
+    const projectPage = new AppProjectPage(page);
+    await projectPage.goto(project);
+
+    await projectPage.gotoVariablesTab();
+
+    const displayNameHeader = projectPage.variableList.getByRole('columnheader', { name: 'Display Name' });
+    const versionHeader = projectPage.variableList.getByRole('columnheader', { name: 'Version' });
+    await expect(displayNameHeader).toHaveAttribute('aria-sort', 'ascending');
+    await expect(versionHeader).toBeHidden();
+
+    await displayNameHeader.click();
+    await expect(displayNameHeader).toHaveAttribute('aria-sort', 'descending');
+    await projectPage.variableList.getByRole('button', { name: 'Columns' }).click();
+    await page.getByRole('checkbox', { name: 'Version' }).check();
+    await page.keyboard.press('Escape');
+    await expect(versionHeader).toBeVisible();
+
+    await page.reload();
+
+    await expect(displayNameHeader).toHaveAttribute('aria-sort', 'descending');
+    await expect(versionHeader).toBeVisible();
+  });
+
   test('can create a secret', async ({ page }) => {
     const projectPage = new AppProjectPage(page);
     await projectPage.goto(project);
