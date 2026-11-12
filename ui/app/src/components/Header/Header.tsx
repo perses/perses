@@ -43,7 +43,7 @@ function NavbarLogo({ isLaptopSize }: { isLaptopSize: boolean }): ReactElement {
         src={navbarURL}
         alt="Home"
         onError={() => setFailedURL(navbarURL)}
-        sx={{ width: 130, height: 32, objectFit: 'contain', objectPosition: 'left' }}
+        sx={{ width: isLaptopSize ? 130 : 64, height: 32, objectFit: 'contain', objectPosition: 'left' }}
       />
     );
   }

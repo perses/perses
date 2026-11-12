@@ -1165,7 +1165,7 @@ If an image can't be loaded, the Perses logo is displayed instead.
 
 ```yaml
 # URL of the image displayed in the navigation bar, at the top left of every page.
-# The image is scaled to fit in 130x32 pixels and is displayed on the dark blue background of the bar.
+# The image is scaled to fit in 130x32 pixels (64x32 pixels on small screens) and is displayed on the dark blue background of the bar.
 navbar_url: <string> # Optional
 
 # URL of the image displayed on the sign-in, sign-up and authentication error pages.
