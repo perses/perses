@@ -31,6 +31,10 @@ const loaderThemeHash = createHash('sha256')
   .slice(0, 16);
 const loaderThemeFile = `loader-theme.${loaderThemeHash}.js`;
 
+// The default Content-Security-Policy of the Perses server (DefaultContentSecurityPolicy in
+// pkg/model/api/config/security.go). The dev server sends it too, so the violations show up during the development.
+const defaultContentSecurityPolicy = "script-src 'self' 'unsafe-eval'; object-src 'none'; base-uri 'self'";
+
 // When SHARED_DEV=true, resolve shared packages from an adjacent perses/shared checkout (see that repo for linking instructions).
 const sharedPackagesPath = process.env.SHARED_PACKAGES_PATH ?? resolve(import.meta.dirname, '../../../shared');
 const nodeModulesPath = resolve(import.meta.dirname, '../node_modules');
@@ -157,6 +161,7 @@ export default defineConfig({
         liveReload: false,
         port: parseInt(process.env.PORT ?? '3000'),
         allowedHosts: 'all',
+        headers: { 'Content-Security-Policy': defaultContentSecurityPolicy },
         proxy: [
           {
             context: ['/api', '/proxy', '/plugins'],

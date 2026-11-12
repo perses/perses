@@ -211,6 +211,14 @@ func TestRegisterRouteContentSecurityPolicyRevalidation(t *testing.T) {
 	}
 }
 
+// The rspack dev server sends the default policy too (ui/app/rspack.config.mjs), so the violations show up during the
+// development of the UI: both must stay the same.
+func TestDevServerContentSecurityPolicy(t *testing.T) {
+	rspackConfig, err := os.ReadFile(filepath.Join("app", "rspack.config.mjs"))
+	require.NoError(t, err)
+	assert.Contains(t, string(rspackConfig), config.DefaultContentSecurityPolicy)
+}
+
 func TestAssetHandlerContentType(t *testing.T) {
 	// Override the package-level embedded filesystem with test data.
 	originalAsts := asts
