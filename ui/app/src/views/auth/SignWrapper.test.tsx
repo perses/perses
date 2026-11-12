@@ -128,4 +128,14 @@ describe('PersesLogo', () => {
     expect(screen.queryByRole('img', { name: 'Logo' })).not.toBeInTheDocument();
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
+
+  it('falls back to the Perses logo when the custom sign-in logo fails to load', () => {
+    mockUseLogo.mockReturnValue({ sign_in_url: 'https://example.com/sign-in-logo.png' });
+
+    const { container } = render(<PersesLogo isLaptopSize={true} isDarkModeEnabled={false} />);
+    fireEvent.error(screen.getByRole('img', { name: 'Logo' }));
+
+    expect(screen.queryByRole('img', { name: 'Logo' })).not.toBeInTheDocument();
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
 });

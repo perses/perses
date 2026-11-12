@@ -85,7 +85,7 @@ func (b *Banner) Verify() error {
 type Logo struct {
 	// NavbarURL is the URL of the image displayed in the navigation bar.
 	NavbarURL string `json:"navbar_url,omitempty" yaml:"navbar_url,omitempty"`
-	// SignInURL is the URL of the image displayed on the sign-in and sign-up pages.
+	// SignInURL is the URL of the image displayed on the sign-in, sign-up and authentication error pages.
 	SignInURL string `json:"sign_in_url,omitempty" yaml:"sign_in_url,omitempty"`
 }
 

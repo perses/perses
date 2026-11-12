@@ -15,7 +15,7 @@ import type { Theme } from '@mui/material';
 import { alpha, Box, Divider, Stack, useTheme } from '@mui/material';
 import Bitbucket from 'mdi-material-ui/Bitbucket';
 import type { ReactElement, ReactNode } from 'react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import * as React from 'react';
 import {
   AmazonLoginButton,
@@ -130,9 +130,18 @@ export function PersesLogo({
   isDarkModeEnabled: boolean;
 }): ReactElement {
   const logo = useLogo();
-  if (logo?.sign_in_url) {
+  // Keep the URL that failed to load, so the Perses logo is used as a fallback until the configured URL changes.
+  const [failedURL, setFailedURL] = useState<string>();
+  if (logo?.sign_in_url && logo.sign_in_url !== failedURL) {
+    const signInURL = logo.sign_in_url;
     return (
-      <Box component="img" src={logo.sign_in_url} alt="Logo" sx={{ maxWidth: 'min(394px, 85%)', maxHeight: 116 }} />
+      <Box
+        component="img"
+        src={signInURL}
+        alt="Logo"
+        onError={() => setFailedURL(signInURL)}
+        sx={{ width: 'min(394px, 85%)', height: 116, objectFit: 'contain' }}
+      />
     );
   }
 

@@ -13,7 +13,7 @@
 
 import { ThemeProvider } from '@mui/material';
 import { getTheme } from '@perses-dev/components';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 
@@ -100,6 +100,16 @@ describe('Header', () => {
     mockUseLogo.mockReturnValue({ sign_in_url: 'https://example.com/sign-in-logo.png' });
 
     const container = renderHeader();
+
+    expect(screen.queryByRole('img', { name: 'Home' })).not.toBeInTheDocument();
+    expect(container.querySelector('a[href="/"] svg')).toBeInTheDocument();
+  });
+
+  it('falls back to the Perses logo when the custom navbar logo fails to load', () => {
+    mockUseLogo.mockReturnValue({ navbar_url: 'https://example.com/navbar-logo.png' });
+
+    const container = renderHeader();
+    fireEvent.error(screen.getByRole('img', { name: 'Home' }));
 
     expect(screen.queryByRole('img', { name: 'Home' })).not.toBeInTheDocument();
     expect(container.querySelector('a[href="/"] svg')).toBeInTheDocument();

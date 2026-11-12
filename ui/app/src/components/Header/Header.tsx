@@ -16,7 +16,7 @@ import Cog from 'mdi-material-ui/Cog';
 import Compass from 'mdi-material-ui/Compass';
 import ShieldStar from 'mdi-material-ui/ShieldStar';
 import type { ReactElement } from 'react';
-import React from 'react';
+import React, { useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { GlobalProject, useHasPartialPermission } from '../../context/Authorization';
@@ -33,9 +33,18 @@ import { ToolMenu } from './ToolMenu';
 
 function NavbarLogo({ isLaptopSize }: { isLaptopSize: boolean }): ReactElement {
   const logo = useLogo();
-  if (logo?.navbar_url) {
+  // Keep the URL that failed to load, so the Perses logo is used as a fallback until the configured URL changes.
+  const [failedURL, setFailedURL] = useState<string>();
+  if (logo?.navbar_url && logo.navbar_url !== failedURL) {
+    const navbarURL = logo.navbar_url;
     return (
-      <Box component="img" src={logo.navbar_url} alt="Home" sx={{ height: 32, maxWidth: 130, objectFit: 'contain' }} />
+      <Box
+        component="img"
+        src={navbarURL}
+        alt="Home"
+        onError={() => setFailedURL(navbarURL)}
+        sx={{ width: 130, height: 32, objectFit: 'contain', objectPosition: 'left' }}
+      />
     );
   }
   if (isLaptopSize) {
