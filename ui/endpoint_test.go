@@ -38,9 +38,9 @@ func TestRegisterRouteContentSecurityPolicy(t *testing.T) {
 	t.Cleanup(func() { asts = originalAsts })
 
 	testFS := fstest.MapFS{
-		"app/dist/index.html":       &fstest.MapFile{Data: []byte("<html><head></head><body></body></html>")},
-		"app/dist/main.abc12345.js": &fstest.MapFile{Data: []byte("console.log('ok')")},
-		"app/dist/loader-theme.js":  &fstest.MapFile{Data: []byte("console.log('ok')")},
+		"app/dist/index.html":                       &fstest.MapFile{Data: []byte("<html><head></head><body></body></html>")},
+		"app/dist/main.abc12345.js":                 &fstest.MapFile{Data: []byte("console.log('ok')")},
+		"app/dist/loader-theme.5dd25442f11b4136.js": &fstest.MapFile{Data: []byte("console.log('ok')")},
 	}
 	asts = http.FS(testFS)
 
@@ -81,7 +81,7 @@ func TestRegisterRouteContentSecurityPolicy(t *testing.T) {
 		{
 			name:           "the policy only applies to documents: script of the loading screen",
 			csp:            defaultPolicy,
-			path:           "/loader-theme.js",
+			path:           "/loader-theme.5dd25442f11b4136.js",
 			expectedPolicy: "",
 		},
 		{
@@ -367,6 +367,8 @@ func TestIsHashedAsset(t *testing.T) {
 	}{
 		{"/app/dist/main.daecaaf558591aab.js", true},
 		{"/app/dist/main.184a811c682450f7.css", true},
+		// The script of the loading screen, blocking the first paint: it must not be revalidated on each page load.
+		{"/app/dist/loader-theme.5dd25442f11b4136.js", true},
 		{"__mf/js/main.f55169be.js", true},
 		{"__mf/js/async/463.85c2cbf6.css", true},
 		{"__mf/js/TimeSeriesChart.b9caac04.js", true},
