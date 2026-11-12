@@ -117,6 +117,10 @@ also uses the wildcard gets the permissions of the role only once.
 Anyone who can manage the role bindings of a project, like its owners, can open it to every user this way. Make sure the
 role bound to the wildcard only grants the permissions you want to give to everybody.
 
+Everybody includes the users who sign up by themselves: when the [native provider](./authentication.md#native-provider)
+is enabled, anyone who can reach Perses can create an account and get the role, unless the sign-up is disabled with
+`disable_sign_up: true` in the [authentication configuration](../configuration/configuration.md#authentication-config).
+
 A `GlobalRoleBinding` using the wildcard grants a `GlobalRole` to every authenticated user, like the `guest_permissions`
 of the [native authorization provider](../configuration/configuration.md#native-provider). Unlike them, it is managed
 through the API and can be changed without restarting Perses.
