@@ -180,6 +180,11 @@ export default defineConfig({
           to: 'locales',
           noErrorOnMissing: true,
         },
+        // Loaded by index.html as is, see the file for the details.
+        {
+          from: 'loader-theme.js',
+          to: 'loader-theme.js',
+        },
       ],
     }),
     isDev ? new ReactRefreshRspackPlugin() : null,
