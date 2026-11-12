@@ -23,7 +23,7 @@ import type { ReactElement } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
 
 import { PersesLoader } from '../components/PersesLoader';
-import type { Banner, ConfigModel, ImportantDashboardGroupConfig } from '../model/config-client';
+import type { Banner, ConfigModel, ImportantDashboardGroupConfig, LogoConfig } from '../model/config-client';
 import { useConfig } from '../model/config-client';
 import { UserPreferencesContextProvider } from './UserPreferences';
 
@@ -176,6 +176,11 @@ export function useImportantDashboardGroups(): ImportantDashboardGroupConfig[] {
   const { config } = useConfigContext();
 
   return useMemo(() => config.frontend.important_dashboards ?? [], [config.frontend.important_dashboards]);
+}
+
+export function useLogo(): LogoConfig | undefined {
+  const { config } = useConfigContext();
+  return config.frontend.logo;
 }
 
 export function useInformation(): string {

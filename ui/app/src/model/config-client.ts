@@ -189,10 +189,16 @@ export interface ImportantDashboardGroupConfig {
   dashboards?: ImportantDashboardSelectorConfig[];
 }
 
+export interface LogoConfig {
+  navbar_url?: string;
+  sign_in_url?: string;
+}
+
 export interface FrontendConfig {
   enable_keyboard_shortcuts?: boolean;
   enable_lock_mode?: boolean;
   important_dashboards?: ImportantDashboardGroupConfig[];
+  logo?: LogoConfig;
   information?: string;
   explorer: ExplorerConfig;
   time_range?: TimeRangeConfig;
