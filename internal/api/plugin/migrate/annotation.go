@@ -14,6 +14,9 @@
 package migrate
 
 import (
+	"maps"
+	"slices"
+
 	"cuelang.org/go/cue/build"
 	"github.com/perses/spec/go/dashboard"
 	"github.com/perses/spec/go/plugin"
@@ -22,6 +25,7 @@ import (
 
 // grafanaColors maps the names of the colors of the Grafana palette to their hexadecimal value.
 // Other colors (hexadecimal, rgb(), CSS names) are kept as they are.
+// The values come from the Grafana palette (createVisualizationColors.ts in the Grafana repository).
 var grafanaColors = map[string]string{
 	"dark-red":           "#c4162a",
 	"semi-dark-red":      "#e02f44",
@@ -65,6 +69,8 @@ func migrateAnnotationColor(iconColor string) string {
 
 func (m *completeMigration) migrateAnnotations(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) []dashboard.AnnotationSpec {
 	var result []dashboard.AnnotationSpec
+	// The Perses UI identifies an annotation by its name, so only the first annotation with a given name is kept.
+	names := make(map[string]struct{})
 	for _, a := range grafanaDashboard.Annotations.List {
 		// The built-in annotation queries the annotations and alerts stored by Grafana, which have no equivalent in Perses.
 		if a.BuiltIn == 1 {
@@ -75,16 +81,21 @@ func (m *completeMigration) migrateAnnotations(grafanaDashboard *SimplifiedDashb
 			logrus.Debug("annotation without name skipped during the migration")
 			continue
 		}
+		if _, ok := names[a.Name]; ok {
+			logrus.Debugf("annotation %q skipped during the migration, as another annotation already has this name", a.Name)
+			continue
+		}
 		// Unlike for the variables and the panels, there is no placeholder plugin for an annotation that can't be migrated:
 		// such an annotation is not kept, as it would only fail or display nothing.
 		annotationPlugin := migrateAnnotation(m.devMig.annotations, a)
 		if annotationPlugin == nil {
 			annotationPlugin = migrateAnnotation(m.mig.annotations, a)
-			if annotationPlugin == nil {
-				logrus.Debugf("no migration script matches the annotation %q, so it is not migrated", a.Name)
-				continue
-			}
 		}
+		if annotationPlugin == nil {
+			logrus.Debugf("no migration script matches the annotation %q, so it is not migrated", a.Name)
+			continue
+		}
+		names[a.Name] = struct{}{}
 		if useDefaultDatasource {
 			removeDatasourceName(annotationPlugin)
 		}
@@ -103,9 +114,9 @@ func (m *completeMigration) migrateAnnotations(grafanaDashboard *SimplifiedDashb
 
 func migrateAnnotation(annotationInstances map[string]*build.Instance, a GrafanaAnnotation) *plugin.Plugin {
 	// Like for the variables, nothing in the Grafana annotation indicates which migration script to use.
-	// So we execute all of them and keep the first one that returns a non-empty plugin.
-	for _, annotationInstance := range annotationInstances {
-		annotationPlugin, isEmpty, err := ExecuteAnnotationScript(annotationInstance, a.RawMessage)
+	// So we execute all of them, in a stable order, and keep the first one that returns a non-empty plugin.
+	for _, kind := range slices.Sorted(maps.Keys(annotationInstances)) {
+		annotationPlugin, isEmpty, err := ExecuteAnnotationScript(annotationInstances[kind], a.RawMessage)
 		if err != nil {
 			logrus.WithError(err).Debug("failed to execute annotation migration script")
 			continue

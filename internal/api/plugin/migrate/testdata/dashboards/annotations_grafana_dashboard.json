@@ -59,6 +59,15 @@
         "enable": true,
         "expr": "unnamed_total",
         "name": ""
+      },
+      {
+        "datasource": {
+          "type": "exotic-tsdb",
+          "uid": "exotic-ds"
+        },
+        "enable": true,
+        "expr": "other_deployments_total",
+        "name": "Deployments"
       }
     ]
   },

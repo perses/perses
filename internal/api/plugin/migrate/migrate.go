@@ -555,6 +555,7 @@ func (m *mig) loadAnnotation(schemaPath string, instance *build.Instance, module
 	data, err := os.ReadFile(filepath.Join(schemaPath, "migrate.cue")) //nolint: gosec
 	if err != nil {
 		logrus.WithError(err).Warnf("unable to read migrate script from %q", schemaPath)
+		return
 	}
 	for _, group := range kindRegexp.FindAllStringSubmatch(string(data), -1) {
 		if len(group) < 2 {
@@ -562,7 +563,7 @@ func (m *mig) loadAnnotation(schemaPath string, instance *build.Instance, module
 		}
 		kind := group[1]
 		for _, plg := range module.Spec.Plugins {
-			if plg.Spec.Name == kind {
+			if plg.Kind == plugin.KindAnnotation && plg.Spec.Name == kind {
 				m.annotations[kind] = instance
 				return
 			}

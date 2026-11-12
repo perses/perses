@@ -134,7 +134,7 @@ func TestSimplifiedDashboardUnmarshal(t *testing.T) {
 			},
 		},
 		{
-			title: "Annotations that can't be decoded are ignored",
+			title: "Annotations that are not objects are ignored, and fields with an unexpected type are left empty",
 			data:  `{"title": "Test Dashboard", "annotations": {"list": ["not an annotation", {"name": 1, "enable": "yes", "expr": "up"}]}}`,
 			expected: &SimplifiedDashboard{
 				Title: "Test Dashboard",

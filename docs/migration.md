@@ -18,8 +18,9 @@ plugin. Therefore, the migration is in best-effort basis. However we are working
   learn why, and how to filter the values of a migrated variable again.
 
 - A Grafana annotation is migrated only when one of the plugins provides a migration script for it. The other
-  annotations are not kept, as well as the built-in annotation of Grafana ("Annotations & Alerts"), which queries the
-  annotations stored by Grafana itself.
+  annotations are not kept, and neither is the built-in annotation of Grafana ("Annotations & Alerts"), which queries
+  the annotations stored by Grafana itself. The panel filter of an annotation (`filter`) is not migrated: a migrated
+  annotation applies to every panel. Annotations sharing the same name are not all kept: only the first one is.
 
 ## Prerequisites
 

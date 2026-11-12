@@ -246,6 +246,10 @@ package migrate
 if (*#grafanaAnnotation.datasource.type | null) == "prometheus" {
 	kind: "PrometheusPromQLAnnotation"
 	spec: {
+		datasource: {
+			kind: "PrometheusDatasource"
+			name: #grafanaAnnotation.datasource.uid
+		}
 		expr: #grafanaAnnotation.expr
 		if #grafanaAnnotation.titleFormat != _|_ {
 			title: #grafanaAnnotation.titleFormat
