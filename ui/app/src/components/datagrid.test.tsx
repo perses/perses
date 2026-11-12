@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { GridCallbackDetails, GridColDef } from '@mui/x-data-grid';
-import { DataGrid, useGridApiRef } from '@mui/x-data-grid';
+import type { GridApi, GridCallbackDetails, GridColDef } from '@mui/x-data-grid';
+import { DataGrid } from '@mui/x-data-grid';
 import type { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { act, render, renderHook } from '@testing-library/react';
-import type { ReactElement } from 'react';
+import type { ReactElement, RefObject } from 'react';
+import { createRef } from 'react';
 
 import {
   getDataGridInitialStateSortByDisplayName,
@@ -25,7 +26,9 @@ import {
 
 const STORAGE_KEY = 'PERSES_DATA_GRID_SETTINGS_V1_Variable';
 
-const details = { api: { getAllColumns: () => [{ field: 'version' }, { field: 'createdAt' }, { field: 'name' }] } };
+const details = {
+  api: { getAllColumns: (): Array<{ field: string }> => [{ field: 'version' }, { field: 'createdAt' }, { field: 'name' }] },
+};
 const callbackDetails = details as unknown as GridCallbackDetails;
 
 const initialState: GridInitialStateCommunity = {
@@ -134,7 +137,7 @@ describe('usePersistedDataGridState with a data grid', () => {
   const COLUMNS = [{ field: 'name' }, { field: 'version' }, { field: 'extra' }];
   const ROWS = Array.from({ length: 30 }, (_, i) => ({ id: i, name: `row${i}`, version: i, extra: i }));
 
-  let apiRef: ReturnType<typeof useGridApiRef>;
+  const apiRef = createRef<GridApi>() as RefObject<GridApi>;
 
   function PersistedDataGrid({
     state,
@@ -143,7 +146,6 @@ describe('usePersistedDataGridState with a data grid', () => {
     state: GridInitialStateCommunity;
     columns?: GridColDef[];
   }): ReactElement {
-    apiRef = useGridApiRef();
     const persisted = usePersistedDataGridState('Variable', state);
     return (
       <DataGrid

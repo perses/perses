@@ -29,7 +29,7 @@ import {
 import type { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import type { Kind } from '@perses-dev/client';
 import type { ReactElement } from 'react';
-import { useCallback, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 export const getDataGridInitialStateSortByName = (pageSize: number): GridInitialStateCommunity => ({
   columns: {
