@@ -23,6 +23,57 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestContentSecurityPolicy_Verify(t *testing.T) {
+	testSuite := []struct {
+		title    string
+		yaml     string
+		expected ContentSecurityPolicy
+	}{
+		{
+			title:    "default policy",
+			yaml:     "",
+			expected: ContentSecurityPolicy{Policy: DefaultContentSecurityPolicy},
+		},
+		{
+			title: "custom policy",
+			yaml: `
+content_security_policy:
+  policy: "script-src 'self'; object-src 'none'"
+`,
+			expected: ContentSecurityPolicy{Policy: "script-src 'self'; object-src 'none'"},
+		},
+		{
+			title: "policy written on several lines",
+			yaml: `
+content_security_policy:
+  policy: |
+    script-src 'self' 'unsafe-eval';
+    object-src   'none'
+`,
+			expected: ContentSecurityPolicy{Policy: "script-src 'self' 'unsafe-eval'; object-src 'none'"},
+		},
+		{
+			title: "disabled policy",
+			yaml: `
+content_security_policy:
+  disable: true
+`,
+			expected: ContentSecurityPolicy{Disable: true},
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			security := Security{}
+			require.NoError(t, config.NewResolver[Security]().
+				SetConfigData([]byte(test.yaml)).
+				Resolve(&security).
+				Verify())
+			assert.Equal(t, test.expected, security.ContentSecurityPolicy)
+		})
+	}
+}
+
 // TestSecurity_VerifyK8s checks that the k8s authz can't be enabled alongside native authz
 func TestSecurity_VerifyK8s(t *testing.T) {
 	testSuite := []struct {

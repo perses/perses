@@ -93,4 +93,15 @@ export class AppHomePage {
   async searchDashboardOrProject(search: string): Promise<void> {
     await this.page.getByLabel('Search a Project or a Dashboard').locator('input').fill(search);
   }
+
+  /**
+   * Switches to the other theme with the button of the header, displayed when the authentication is disabled.
+   * @param theme - The theme to switch to.
+   */
+  async switchTheme(theme: 'light' | 'dark'): Promise<void> {
+    const themeButton = this.page.getByRole('button', { name: 'Theme', exact: true });
+    await themeButton.click();
+    // The icon of the button shows the theme in use.
+    await themeButton.locator(`#${theme}`).waitFor();
+  }
 }

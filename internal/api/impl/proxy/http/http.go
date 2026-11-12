@@ -158,6 +158,10 @@ func (h *Proxy) Serve(c *echo.Context) error {
 	req := c.Request()
 	res := c.Response()
 
+	if isScriptDestination(req) {
+		return apiinterface.HandleForbiddenError("the response of a datasource cannot be loaded as a script")
+	}
+
 	isAllowed := false
 	for _, allowedEndpoint := range h.Config.AllowedEndpoints {
 		if allowedEndpoint.Method == req.Method && len(allowedEndpoint.EndpointPattern.FindAllString(h.Path, -1)) > 0 {

@@ -7,6 +7,7 @@
     <meta name="theme-color" content="#000000" />
     <meta name="description" content="Perses" />
     <title>Perses</title>
+    <script src="<%= htmlRspackPlugin.files.publicPath %><%= loaderThemeFile %>"></script>
     <style>
       body {
         margin: 0;
@@ -25,8 +26,13 @@
         background-color: light-dark(#ffffff, #151721);
       }
 
-      .dark-theme {
+      /* Set by loader-theme.js when a theme is chosen in Perses, to use it instead of the theme of the OS. */
+      [data-loader-theme='dark'] .loading {
         color-scheme: dark;
+      }
+
+      [data-loader-theme='light'] .loading {
+        color-scheme: light;
       }
     </style>
   </head>
@@ -85,12 +91,6 @@
           </path>
         </svg>
       </div>
-      <script>
-        const isDarkTheme = localStorage.getItem('perses-dark-theme-enabled') === 'true';
-        if (isDarkTheme) {
-          document.getElementById('loader').classList.add('dark-theme');
-        }
-      </script>
     </div>
   </body>
 </html>

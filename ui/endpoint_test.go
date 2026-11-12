@@ -25,11 +25,199 @@ import (
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/spec/go/module"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestRegisterRouteContentSecurityPolicy(t *testing.T) {
+	// Override the package-level embedded filesystem with test data.
+	originalAsts := asts
+	t.Cleanup(func() { asts = originalAsts })
+
+	testFS := fstest.MapFS{
+		"app/dist/index.html":                       &fstest.MapFile{Data: []byte("<html><head></head><body></body></html>")},
+		"app/dist/main.abc12345.js":                 &fstest.MapFile{Data: []byte("console.log('ok')")},
+		"app/dist/loader-theme.5dd25442f11b4136.js": &fstest.MapFile{Data: []byte("console.log('ok')")},
+	}
+	asts = http.FS(testFS)
+
+	const customPolicy = "script-src 'self'"
+	defaultPolicy := config.ContentSecurityPolicy{Policy: config.DefaultContentSecurityPolicy}
+
+	tests := []struct {
+		name           string
+		apiPrefix      string
+		csp            config.ContentSecurityPolicy
+		path           string
+		expectedPolicy string
+	}{
+		{
+			name:           "root page",
+			csp:            defaultPolicy,
+			path:           "/",
+			expectedPolicy: config.DefaultContentSecurityPolicy,
+		},
+		{
+			name:           "page of a React route",
+			csp:            defaultPolicy,
+			path:           "/projects/demo",
+			expectedPolicy: config.DefaultContentSecurityPolicy,
+		},
+		{
+			name:           "index.html requested as a static file",
+			csp:            defaultPolicy,
+			path:           "/index.html",
+			expectedPolicy: config.DefaultContentSecurityPolicy,
+		},
+		{
+			name:           "the policy only applies to documents: JS bundle",
+			csp:            defaultPolicy,
+			path:           "/main.abc12345.js",
+			expectedPolicy: "",
+		},
+		{
+			name:           "the policy only applies to documents: script of the loading screen",
+			csp:            defaultPolicy,
+			path:           "/loader-theme.5dd25442f11b4136.js",
+			expectedPolicy: "",
+		},
+		{
+			name:           "custom policy",
+			csp:            config.ContentSecurityPolicy{Policy: customPolicy},
+			path:           "/projects/demo",
+			expectedPolicy: customPolicy,
+		},
+		{
+			name:           "no policy when it's disabled",
+			csp:            config.ContentSecurityPolicy{Disable: true, Policy: config.DefaultContentSecurityPolicy},
+			path:           "/projects/demo",
+			expectedPolicy: "",
+		},
+		{
+			name:           "root page with an API prefix",
+			apiPrefix:      "/perses",
+			csp:            defaultPolicy,
+			path:           "/perses",
+			expectedPolicy: config.DefaultContentSecurityPolicy,
+		},
+		{
+			name:           "page of a React route with an API prefix",
+			apiPrefix:      "/perses",
+			csp:            defaultPolicy,
+			path:           "/perses/projects/demo",
+			expectedPolicy: config.DefaultContentSecurityPolicy,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := config.Config{
+				APIPrefix: tt.apiPrefix,
+				Security:  config.Security{ContentSecurityPolicy: tt.csp},
+			}
+			e := echo.New()
+			NewPersesFrontend(cfg, nil).RegisterRoute(e)
+			req := httptest.NewRequest(http.MethodGet, tt.path, nil)
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			require.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, tt.expectedPolicy, rec.Header().Get("Content-Security-Policy"))
+		})
+	}
+}
+
+// A browser keeps the Content-Security-Policy of the page it cached when the revalidation of the page is answered with a
+// 304 that doesn't have the header: changing or disabling the policy must change the ETag of the pages.
+func TestRegisterRouteContentSecurityPolicyRevalidation(t *testing.T) {
+	// Override the package-level embedded filesystem with test data.
+	originalAsts := asts
+	t.Cleanup(func() { asts = originalAsts })
+
+	testFS := fstest.MapFS{
+		"app/dist/index.html": &fstest.MapFile{Data: []byte("<html><head></head><body></body></html>")},
+	}
+	asts = http.FS(testFS)
+
+	enabled := config.ContentSecurityPolicy{Policy: config.DefaultContentSecurityPolicy}
+	disabled := config.ContentSecurityPolicy{Disable: true, Policy: config.DefaultContentSecurityPolicy}
+	custom := config.ContentSecurityPolicy{Policy: "script-src 'self'"}
+
+	// requestPage requests a page of the UI to a server configured with the given policy.
+	requestPage := func(t *testing.T, csp config.ContentSecurityPolicy, ifNoneMatch string) *httptest.ResponseRecorder {
+		t.Helper()
+		e := echo.New()
+		NewPersesFrontend(config.Config{Security: config.Security{ContentSecurityPolicy: csp}}, nil).RegisterRoute(e)
+		req := httptest.NewRequest(http.MethodGet, "/projects/demo", nil)
+		if len(ifNoneMatch) > 0 {
+			req.Header.Set("If-None-Match", ifNoneMatch)
+		}
+		rec := httptest.NewRecorder()
+		e.ServeHTTP(rec, req)
+		return rec
+	}
+
+	tests := []struct {
+		name           string
+		cachedWith     config.ContentSecurityPolicy
+		servedWith     config.ContentSecurityPolicy
+		expectedStatus int
+		expectedPolicy string
+	}{
+		{
+			name:           "same policy",
+			cachedWith:     enabled,
+			servedWith:     enabled,
+			expectedStatus: http.StatusNotModified,
+			expectedPolicy: config.DefaultContentSecurityPolicy,
+		},
+		{
+			name:           "policy disabled",
+			cachedWith:     enabled,
+			servedWith:     disabled,
+			expectedStatus: http.StatusOK,
+			expectedPolicy: "",
+		},
+		{
+			name:           "policy changed",
+			cachedWith:     enabled,
+			servedWith:     custom,
+			expectedStatus: http.StatusOK,
+			expectedPolicy: "script-src 'self'",
+		},
+		{
+			name:           "policy enabled",
+			cachedWith:     disabled,
+			servedWith:     enabled,
+			expectedStatus: http.StatusOK,
+			expectedPolicy: config.DefaultContentSecurityPolicy,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cached := requestPage(t, tt.cachedWith, "")
+			require.Equal(t, http.StatusOK, cached.Code)
+			etag := cached.Header().Get("ETag")
+			require.NotEmpty(t, etag)
+
+			rec := requestPage(t, tt.servedWith, etag)
+
+			assert.Equal(t, tt.expectedStatus, rec.Code)
+			assert.Equal(t, tt.expectedPolicy, rec.Header().Get("Content-Security-Policy"))
+		})
+	}
+}
+
+// The rspack dev server sends the default policy too (ui/app/rspack.config.mjs), so the violations show up during the
+// development of the UI: both must stay the same.
+func TestDevServerContentSecurityPolicy(t *testing.T) {
+	rspackConfig, err := os.ReadFile(filepath.Join("app", "rspack.config.mjs"))
+	require.NoError(t, err)
+	assert.Contains(t, string(rspackConfig), config.DefaultContentSecurityPolicy)
+}
 
 func TestAssetHandlerContentType(t *testing.T) {
 	// Override the package-level embedded filesystem with test data.
@@ -187,6 +375,8 @@ func TestIsHashedAsset(t *testing.T) {
 	}{
 		{"/app/dist/main.daecaaf558591aab.js", true},
 		{"/app/dist/main.184a811c682450f7.css", true},
+		// The script of the loading screen, blocking the first paint: it must not be revalidated on each page load.
+		{"/app/dist/loader-theme.5dd25442f11b4136.js", true},
 		{"__mf/js/main.f55169be.js", true},
 		{"__mf/js/async/463.85c2cbf6.css", true},
 		{"__mf/js/TimeSeriesChart.b9caac04.js", true},
