@@ -135,8 +135,8 @@ The default policy is
   federation runtime, which loads the plugins, relies on it.
 - `object-src 'none'`: the `<object>` and `<embed>` elements can't load
   anything.
-- `base-uri 'self'`: a `<base>` element can't change the URL against which the
-  relative URLs are resolved.
+- `base-uri 'self'`: a `<base>` element can only use a URL of the Perses
+  origin, so it can't make the relative URLs point to another website.
 
 The policy can be changed, or disabled, with
 `security.content_security_policy` (see the

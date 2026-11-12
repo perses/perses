@@ -37,7 +37,8 @@ const (
 	//     injected in the content of a dashboard would run. 'unsafe-eval' is allowed as the module federation runtime,
 	//     which loads the plugins, relies on it.
 	//   - object-src 'none': no <object> or <embed> element can load content.
-	//   - base-uri 'self': a <base> element can't change the URL against which the relative URLs are resolved.
+	//   - base-uri 'self': a <base> element can only use a URL of the Perses origin, so it can't make the relative URLs
+	//     point to another website.
 	DefaultContentSecurityPolicy = "script-src 'self' 'unsafe-eval'; object-src 'none'; base-uri 'self'"
 )
 
