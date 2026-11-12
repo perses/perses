@@ -18,7 +18,7 @@ import (
 	"net/http"
 
 	"cuelang.org/go/cue/cuecontext"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/sirupsen/logrus"
 
 	apiCue "github.com/perses/perses/internal/api/cue"
@@ -56,7 +56,7 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 	group.GET(fmt.Sprintf("/plugins/:%s", pluginNameParam), e.PluginDefinition, true)
 }
 
-func (e *endpoint) DashboardSchema(ctx echo.Context) error {
+func (e *endpoint) DashboardSchema(ctx *echo.Context) error {
 
 	result, err := e.pluginSvc.Schema().GenerateDashboardSchema()
 	if err != nil {
@@ -72,7 +72,7 @@ func (e *endpoint) DashboardSchema(ctx echo.Context) error {
 	return ctx.Blob(http.StatusOK, contentType, data)
 }
 
-func (e *endpoint) PluginDefinition(ctx echo.Context) error {
+func (e *endpoint) PluginDefinition(ctx *echo.Context) error {
 	pluginName := ctx.Param(pluginNameParam)
 	version := ctx.QueryParam(versionQueryParam)
 	registry := ctx.QueryParam(registryQueryParam)
@@ -96,7 +96,7 @@ func (e *endpoint) PluginDefinition(ctx echo.Context) error {
 	return ctx.Blob(http.StatusOK, contentType, data)
 }
 
-func (e *endpoint) PluginList(ctx echo.Context) error {
+func (e *endpoint) PluginList(ctx *echo.Context) error {
 	schemas := e.pluginSvc.Schema().GetAllSchemas()
 	if len(schemas) == 0 {
 		return ctx.Blob(http.StatusOK, contentType, []byte("{}"))

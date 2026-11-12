@@ -18,8 +18,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/labstack/echo/v4"
-	databaseModel "github.com/perses/perses/internal/api/database/model"
+	"github.com/labstack/echo/v5"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/pkg/model/api"
@@ -45,20 +44,17 @@ func newFakeService(initial ...*v1.GlobalDatasource) *fakeGlobalDatasourceServic
 	return &fakeGlobalDatasourceService{store: store}
 }
 
-func (f *fakeGlobalDatasourceService) Create(_ echo.Context, entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
-	if _, exists := f.store[entity.Metadata.Name]; exists {
-		return nil, &databaseModel.Error{Code: databaseModel.ErrorCodeConflict, Key: entity.Metadata.Name}
-	}
+func (f *fakeGlobalDatasourceService) Create(_ *echo.Context, entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
 	f.store[entity.Metadata.Name] = entity
 	return entity, nil
 }
 
-func (f *fakeGlobalDatasourceService) Update(_ echo.Context, entity *v1.GlobalDatasource, _ apiInterface.Parameters) (*v1.GlobalDatasource, error) {
+func (f *fakeGlobalDatasourceService) Update(_ *echo.Context, entity *v1.GlobalDatasource, _ apiInterface.Parameters) (*v1.GlobalDatasource, error) {
 	f.store[entity.Metadata.Name] = entity
 	return entity, nil
 }
 
-func (f *fakeGlobalDatasourceService) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
+func (f *fakeGlobalDatasourceService) Delete(_ *echo.Context, parameters apiInterface.Parameters) error {
 	delete(f.store, parameters.Name)
 	return nil
 }

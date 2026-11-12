@@ -23,7 +23,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/project"
@@ -77,7 +77,7 @@ func CheckParameter(svc project.Service, apiPrefix string) echo.MiddlewareFunc {
 	// that accepts percent-encoded names. Built once to avoid formatting it on every request.
 	userPermissionsRoute := fmt.Sprintf("%s/%s/:%s/%s", apiV1Prefix, utils.PathUser, utils.ParamName, utils.PathPermissions)
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			// This middleware is only used for the REST API (/api/v1). So we will skip any other route that doesn't start with the API prefix.
 			// This is required because other routes such as the proxy are using the same `name` path parameter, but for the dashboard-local datasources
 			// the name is a free-form key of `dashboard.spec.datasources` (it can contain spaces for example) and must not be rejected.

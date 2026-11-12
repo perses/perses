@@ -31,6 +31,7 @@ COVER_PROFILE         := coverage.txt
 PKG_LDFLAGS           := github.com/prometheus/common/version
 LDFLAGS               := -s -w -X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}
 GORELEASER_PARALLEL   ?= 0
+HOMEBREW_TAP_DIR      ?= ../homebrew-tap
 IMAGE_REGISTRY_DEV    ?= localhost:5000
 IMAGE_REPO_DEV        ?= persesdev
 IMAGE_VERSION_DEV     ?= $(shell git describe --tags)
@@ -186,6 +187,10 @@ generate: assets-compress install-default-plugins
 .PHONY: extract-changelog
 extract-changelog:
 	$(GO) run ./scripts/extract-changelog/extract-changelog.go --version="${VERSION}"
+
+.PHONY: update-homebrew-tap
+update-homebrew-tap:
+	$(GO) run ./scripts/update-homebrew-tap/update-homebrew-tap.go --version="${VERSION}" --tap-dir="${HOMEBREW_TAP_DIR}"
 
 .PHONY: generate-changelog
 generate-changelog:

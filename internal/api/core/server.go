@@ -14,7 +14,7 @@
 package core
 
 import (
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	echoUtils "github.com/perses/common/echo"
 	"github.com/perses/perses/internal/api/core/middleware"
 	"github.com/perses/perses/internal/api/dependency"
@@ -118,7 +118,7 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 			persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto(),
 			secretfile.New(cfg.Security.SecretFileAllowedDirectories), serviceManager.GetProxyGuard(), serviceManager.GetAuthorization(),
 			tokenRefresher),
-		authorizationMiddlware: serviceManager.GetAuthorization().Middleware(func(_ echo.Context) bool {
+		authorizationMiddlware: serviceManager.GetAuthorization().Middleware(func(_ *echo.Context) bool {
 			return !cfg.Security.EnableAuth
 		}),
 		apiPrefix: cfg.APIPrefix,

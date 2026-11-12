@@ -15,10 +15,12 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 
-import { SignWrapper } from './SignWrapper';
+import type { LogoConfig } from '../../model/config-client';
+import { PersesLogo, SignWrapper } from './SignWrapper';
 
-const { mockUseQueryParam } = vi.hoisted(() => ({
+const { mockUseQueryParam, mockUseLogo } = vi.hoisted(() => ({
   mockUseQueryParam: vi.fn(),
+  mockUseLogo: vi.fn<() => LogoConfig | undefined>(),
 }));
 
 vi.mock('use-query-params', async (importOriginal) => ({
@@ -55,6 +57,7 @@ vi.mock('../../context/Config', () => ({
     },
   }),
   useIsNativeAuthnProviderEnabled: (): boolean => false,
+  useLogo: mockUseLogo,
 }));
 
 function signInWithKeycloak(): void {
@@ -70,6 +73,7 @@ function signInWithKeycloak(): void {
 
 describe('SignWrapper', () => {
   beforeEach(() => {
+    mockUseLogo.mockReturnValue(undefined);
     Object.defineProperty(window, 'location', {
       value: { href: '' },
       writable: true,
@@ -94,5 +98,44 @@ describe('SignWrapper', () => {
     expect(window.location.href).toEqual(
       '/perses/api/auth/providers/oidc/keycloak/login?rd=%2Fperses%2Fexplore%3Fexplorer%3DPrometheus-PrometheusExplorer',
     );
+  });
+});
+
+describe('PersesLogo', () => {
+  it('displays the Perses logo when no custom logo is configured', () => {
+    mockUseLogo.mockReturnValue(undefined);
+
+    const { container } = render(<PersesLogo isLaptopSize={true} isDarkModeEnabled={false} />);
+
+    expect(screen.queryByRole('img', { name: 'Logo' })).not.toBeInTheDocument();
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('displays the custom sign-in logo when it is configured', () => {
+    mockUseLogo.mockReturnValue({ sign_in_url: 'https://example.com/sign-in-logo.png' });
+
+    const { container } = render(<PersesLogo isLaptopSize={true} isDarkModeEnabled={false} />);
+
+    expect(screen.getByRole('img', { name: 'Logo' })).toHaveAttribute('src', 'https://example.com/sign-in-logo.png');
+    expect(container.querySelector('svg')).not.toBeInTheDocument();
+  });
+
+  it('keeps the Perses logo when only the navbar logo is configured', () => {
+    mockUseLogo.mockReturnValue({ navbar_url: 'https://example.com/navbar-logo.png' });
+
+    const { container } = render(<PersesLogo isLaptopSize={false} isDarkModeEnabled={false} />);
+
+    expect(screen.queryByRole('img', { name: 'Logo' })).not.toBeInTheDocument();
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('falls back to the Perses logo when the custom sign-in logo fails to load', () => {
+    mockUseLogo.mockReturnValue({ sign_in_url: 'https://example.com/sign-in-logo.png' });
+
+    const { container } = render(<PersesLogo isLaptopSize={true} isDarkModeEnabled={false} />);
+    fireEvent.error(screen.getByRole('img', { name: 'Logo' }));
+
+    expect(screen.queryByRole('img', { name: 'Logo' })).not.toBeInTheDocument();
+    expect(container.querySelector('svg')).toBeInTheDocument();
   });
 });

@@ -21,7 +21,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/internal/api/impl/proxy/proxytest"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -67,7 +67,8 @@ func TestHTTPProxy_prepareRequest_headerPolicies(t *testing.T) {
 		"X-Configured":      {"configured-value"},
 		"X-Forwarded-For":   {"192.0.2.2"},
 		"X-Forwarded-Proto": {"http"},
-		"X-Real-Ip":         {"192.0.2.2"},
+		// The address of the peer (192.0.2.1 with httptest): the X-Forwarded-For header sent by the client is not trusted.
+		"X-Real-Ip": {"192.0.2.1"},
 	}
 	droppedHeaders := defaultHeaders.Clone()
 	droppedHeaders.Del("Origin")
@@ -242,7 +243,7 @@ func TestHTTPProxy_getToken_honorsTLSConfig(t *testing.T) {
 
 func TestHTTPProxy_prepareRequest_OAuthPassThrough(t *testing.T) {
 	refresher := func(token string) crypto.TokenRefresher {
-		return func(_ echo.Context) string { return token }
+		return func(_ *echo.Context) string { return token }
 	}
 	testSuite := []struct {
 		name              string

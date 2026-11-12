@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	"github.com/brunoga/deep"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
@@ -70,7 +70,7 @@ func NewService(dao project.DAO,
 	}
 }
 
-func (s *service) Create(ctx echo.Context, entity *v1.Project) (*v1.Project, error) {
+func (s *service) Create(ctx *echo.Context, entity *v1.Project) (*v1.Project, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -78,7 +78,7 @@ func (s *service) Create(ctx echo.Context, entity *v1.Project) (*v1.Project, err
 	return s.create(ctx, copyEntity)
 }
 
-func (s *service) create(ctx echo.Context, entity *v1.Project) (*v1.Project, error) {
+func (s *service) create(ctx *echo.Context, entity *v1.Project) (*v1.Project, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
@@ -95,7 +95,7 @@ func (s *service) create(ctx echo.Context, entity *v1.Project) (*v1.Project, err
 }
 
 // Create default roles and role bindings for the project
-func (s *service) createProjectRoleAndRoleBinding(ctx echo.Context, projectName string) error {
+func (s *service) createProjectRoleAndRoleBinding(ctx *echo.Context, projectName string) error {
 	owner := utils.DefaultOwnerRole(projectName)
 	editor := utils.DefaultEditorRole(projectName)
 	viewer := utils.DefaultViewerRole(projectName)
@@ -122,7 +122,7 @@ func (s *service) createProjectRoleAndRoleBinding(ctx echo.Context, projectName 
 	return s.authz.RefreshPermissionsAndRoles()
 }
 
-func (s *service) Update(_ echo.Context, entity *v1.Project, parameters apiInterface.Parameters) (*v1.Project, error) {
+func (s *service) Update(_ *echo.Context, entity *v1.Project, parameters apiInterface.Parameters) (*v1.Project, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -148,7 +148,7 @@ func (s *service) update(entity *v1.Project, parameters apiInterface.Parameters)
 	return entity, nil
 }
 
-func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
+func (s *service) Delete(_ *echo.Context, parameters apiInterface.Parameters) error {
 	projectName := parameters.Name
 	if err := s.folderDAO.DeleteAll(projectName); err != nil {
 		logrus.WithError(err).Error("unable to delete all folders")

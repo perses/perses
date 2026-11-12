@@ -35,7 +35,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	proxyCommon "github.com/perses/perses/internal/api/impl/proxy/common"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/netguard"
@@ -116,7 +116,7 @@ func (s *Proxy) logWithDefaultEntry() *logrus.Entry {
 
 // Serve executes the SQL query sent in the body of the request of c (a POST request, see sqlQuery),
 // and writes its result to c as JSON (see SQLResponse).
-func (s *Proxy) Serve(c echo.Context) error {
+func (s *Proxy) Serve(c *echo.Context) error {
 	r := c.Request()
 
 	// if this isn't a POST request don't perform the SQL query
@@ -459,7 +459,7 @@ type SQLResponse struct {
 	Rows    []SQLRow            `json:"rows"`
 }
 
-func writeJSONResponse(c echo.Context, rows *sql.Rows, datasourceName, projectName string) error {
+func writeJSONResponse(c *echo.Context, rows *sql.Rows, datasourceName, projectName string) error {
 	logFields := map[string]interface{}{
 		proxyCommon.DatasourceFieldLog: datasourceName,
 		proxyCommon.ProjectFieldLog:    proxyCommon.ProjectForLog(projectName),
