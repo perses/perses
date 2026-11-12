@@ -20,6 +20,7 @@ import (
 type PanelGroup struct {
 	Title          string
 	PanelsWidth    int
+	PanelsPerLine  int
 	PanelsHeight   int
 	IsCollapsed    *bool
 	RepeatVariable string

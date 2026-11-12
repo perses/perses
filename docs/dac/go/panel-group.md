@@ -37,7 +37,8 @@ import "github.com/perses/perses/go-sdk/panel-group"
 panelgroup.PanelWidth(6)
 ```
 
-Define the panel width. The value must be between 1 and 24.
+Define the panel width. The value must be between 1 and 24. Panels start a new line when the next one would not fit
+in the 24 columns of the grid.
 
 ### PanelsPerLine
 
@@ -47,7 +48,8 @@ import "github.com/perses/perses/go-sdk/panel-group"
 panelgroup.PanelsPerLine(4)
 ```
 
-Helper for defining panel width instead of PanelWidth. The value must be between 1 and 24.
+Helper for defining panel width instead of PanelWidth. The value must be between 1 and 24. The panel width is 24
+divided by this value, rounded down, and panels start a new line after this many panels, like `#cols` in the CUE SDK.
 
 ### PanelHeight
 
