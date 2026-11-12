@@ -122,7 +122,7 @@ func (d *DAO) generateSelectQueryWithSource(tableName string, project string, na
 		queryBuilder.Where(queryBuilder.Equal(colProject, p))
 	}
 	if len(sourceFolder) > 0 {
-		queryBuilder.Where(fmt.Sprintf("JSON_EXTRACT(%s, '$.source.provisioning.folder') = ?", colDoc), sourceFolder)
+		queryBuilder.Where(fmt.Sprintf("JSON_EXTRACT(%s, '$.source.provisioning.folder') = %s", colDoc, queryBuilder.Var(sourceFolder)))
 	}
 	return queryBuilder.Build()
 }
@@ -188,7 +188,7 @@ func (d *DAO) generateDeleteQueryWithSource(tableName string, project string, na
 		queryBuilder.Where(queryBuilder.Equal(colProject, p))
 	}
 	if len(sourceFolder) > 0 {
-		queryBuilder.Where(fmt.Sprintf("JSON_EXTRACT(%s, '$.source.provisioning.folder') = ?", colDoc), sourceFolder)
+		queryBuilder.Where(fmt.Sprintf("JSON_EXTRACT(%s, '$.source.provisioning.folder') = %s", colDoc, queryBuilder.Var(sourceFolder)))
 	}
 	return queryBuilder.Build()
 }
