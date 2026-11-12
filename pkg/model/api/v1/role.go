@@ -36,6 +36,7 @@ type GlobalRole struct {
 	Kind     Kind     `json:"kind" yaml:"kind"`
 	Metadata Metadata `json:"metadata" yaml:"metadata"`
 	Spec     RoleSpec `json:"spec" yaml:"spec"`
+	Source   *Source  `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 func (g *GlobalRole) UnmarshalJSON(data []byte) error {
@@ -90,12 +91,21 @@ func (g *GlobalRole) GetSpec() any {
 	return g.Spec
 }
 
+func (g *GlobalRole) GetSource() *Source {
+	return g.Source
+}
+
+func (g *GlobalRole) SetSource(s *Source) {
+	g.Source = s
+}
+
 // Role will be the role you can define in your project/namespace
 // This is a resource that won't be shared across projects.
 type Role struct {
 	Kind     Kind            `json:"kind" yaml:"kind"`
 	Metadata ProjectMetadata `json:"metadata" yaml:"metadata"`
 	Spec     RoleSpec        `json:"spec" yaml:"spec"`
+	Source   *Source         `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 func (r *Role) UnmarshalJSON(data []byte) error {
@@ -153,4 +163,12 @@ func (r *Role) GetKind() string {
 
 func (r *Role) GetSpec() any {
 	return r.Spec
+}
+
+func (r *Role) GetSource() *Source {
+	return r.Source
+}
+
+func (r *Role) SetSource(s *Source) {
+	r.Source = s
 }
