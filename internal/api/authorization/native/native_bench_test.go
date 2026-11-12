@@ -380,6 +380,32 @@ func BenchmarkNativeGetPermissions(b *testing.B) {
 	}
 }
 
+// BenchmarkNativeGetPermissionsWithWildcardUser measures the computation of the full permission map of a user when some
+// projects are opened to every user through the wildcard subject: their permissions are added to the ones of the user.
+func BenchmarkNativeGetPermissionsWithWildcardUser(b *testing.B) {
+	silenceTestLogs(b)
+	for _, size := range datasetSizes {
+		for _, projectPercent := range wildcardUserProjectPercents {
+			n := newTestDataset(size).withWildcardUserBindings(projectPercent).newNative(b, false)
+			ctx := newTestContext(testUserName(1), nil)
+			openedProject := testProjectName(size.projectCount - 1)
+			b.Run(fmt.Sprintf("%s,wildcardProjectPercent=%d/project-member", size, projectPercent), func(b *testing.B) {
+				permissions, err := n.GetPermissions(ctx)
+				if err != nil {
+					b.Fatal(err)
+				}
+				if _, ok := permissions[openedProject]; !ok {
+					b.Fatalf("the permissions of the project %q opened to every user are missing", openedProject)
+				}
+				b.ReportAllocs()
+				for b.Loop() {
+					_, _ = n.GetPermissions(ctx)
+				}
+			})
+		}
+	}
+}
+
 // BenchmarkClaimPermissions measures the resolution of the permissions granted by the JWT claims,
 // depending on the number of mappings configured and the number of claim values the user has.
 func BenchmarkClaimPermissions(b *testing.B) {
