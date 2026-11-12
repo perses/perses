@@ -4,6 +4,8 @@
 
 package v1
 
+#WildcardUser: "*"
+
 _#maxSubjectsForLinearDeduplication: 16
 
 #RoleBindingInterface: _
