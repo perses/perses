@@ -1,0 +1,90 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "datasource": {
+          "type": "exotic-tsdb",
+          "uid": "exotic-ds"
+        },
+        "enable": true,
+        "expr": "deployments_total",
+        "iconColor": "dark-red",
+        "name": "Deployments"
+      },
+      {
+        "datasource": {
+          "type": "exotic-tsdb",
+          "uid": "exotic-ds"
+        },
+        "enable": false,
+        "expr": "restarts_total",
+        "iconColor": "rgba(255, 96, 96, 1)",
+        "name": "Restarts"
+      },
+      {
+        "datasource": {
+          "type": "exotic-tsdb",
+          "uid": "exotic-ds"
+        },
+        "expr": "incidents_total",
+        "name": "Incidents"
+      },
+      {
+        "datasource": {
+          "type": "loki",
+          "uid": "loki-ds"
+        },
+        "enable": true,
+        "expr": "{app=\"api\"} |= \"error\"",
+        "iconColor": "blue",
+        "name": "Errors"
+      },
+      {
+        "datasource": {
+          "type": "exotic-tsdb",
+          "uid": "exotic-ds"
+        },
+        "enable": true,
+        "expr": "unnamed_total",
+        "name": ""
+      },
+      {
+        "datasource": {
+          "type": "exotic-tsdb",
+          "uid": "exotic-ds"
+        },
+        "enable": true,
+        "expr": "other_deployments_total",
+        "name": "Deployments"
+      }
+    ]
+  },
+  "editable": true,
+  "links": [],
+  "panels": [],
+  "schemaVersion": 39,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "Dashboard with annotations",
+  "uid": "annotations",
+  "version": 1
+}

@@ -186,6 +186,76 @@ func (v *TemplateVar) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// GrafanaAnnotation is an entry of the list of annotations of a Grafana dashboard.
+type GrafanaAnnotation struct {
+	Name string `json:"name"`
+	// BuiltIn is 1 for the annotation that Grafana adds to every dashboard ("Annotations & Alerts"),
+	// that queries the annotations stored by Grafana itself.
+	BuiltIn int `json:"builtIn"`
+	// Enable is false when the annotation is not shown by default on the dashboard. Grafana considers it true when it's not set.
+	Enable    *bool  `json:"enable"`
+	IconColor string `json:"iconColor"`
+	json.RawMessage
+}
+
+// Custom unmarshal to both store fields and keep raw data (used by the CUE-based migration logic).
+// A field with an unexpected type is ignored instead of making the whole migration fail.
+func (a *GrafanaAnnotation) UnmarshalJSON(data []byte) error {
+	var tmp map[string]json.RawMessage
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+	annotation := GrafanaAnnotation{}
+	if name, ok := tmp["name"]; ok {
+		_ = json.Unmarshal(name, &annotation.Name)
+	}
+	if builtIn, ok := tmp["builtIn"]; ok {
+		_ = json.Unmarshal(builtIn, &annotation.BuiltIn)
+	}
+	if enable, ok := tmp["enable"]; ok {
+		// Decoded apart, so a value that is not a boolean leaves the field unset instead of setting it to false.
+		var value *bool
+		if json.Unmarshal(enable, &value) == nil {
+			annotation.Enable = value
+		}
+	}
+	if iconColor, ok := tmp["iconColor"]; ok {
+		_ = json.Unmarshal(iconColor, &annotation.IconColor)
+	}
+	var err error
+	annotation.RawMessage, err = json.Marshal(tmp)
+	if err != nil {
+		return err
+	}
+	*a = annotation
+	return nil
+}
+
+// GrafanaAnnotations is the annotations section of a Grafana dashboard, e.g. {"list": [...]}.
+type GrafanaAnnotations struct {
+	List []GrafanaAnnotation `json:"list"`
+}
+
+// UnmarshalJSON decodes the annotations best-effort: an annotation that can't be decoded is ignored, and an
+// annotations section that is not an object leaves the list empty, instead of making the whole migration fail.
+func (a *GrafanaAnnotations) UnmarshalJSON(data []byte) error {
+	var tmp struct {
+		List []json.RawMessage `json:"list"`
+	}
+	if json.Unmarshal(data, &tmp) != nil {
+		return nil
+	}
+	var list []GrafanaAnnotation
+	for _, rawAnnotation := range tmp.List {
+		var annotation GrafanaAnnotation
+		if json.Unmarshal(rawAnnotation, &annotation) == nil {
+			list = append(list, annotation)
+		}
+	}
+	a.List = list
+	return nil
+}
+
 func (v *TemplateVar) getDefaultValue() *variable.DefaultValue {
 	if v.Current == nil {
 		return nil
@@ -231,6 +301,7 @@ type SimplifiedDashboard struct {
 	Templating struct {
 		List []TemplateVar `json:"list"`
 	} `json:"templating"`
+	Annotations GrafanaAnnotations `json:"annotations"`
 	// Time is the default time range of the dashboard. It is nil when the dashboard has none.
 	Time *GrafanaTimeRange `json:"time"`
 	// Refresh is the default auto-refresh interval of the dashboard, e.g. "1m". It is empty when auto-refresh is off.

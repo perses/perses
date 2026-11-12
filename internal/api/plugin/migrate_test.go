@@ -27,6 +27,7 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/dashboard"
+	"github.com/perses/spec/go/plugin"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
@@ -128,6 +129,11 @@ func TestMig_Migrate(t *testing.T) {
 			inputGrafanaDashboardFile:   "panel_repeat_only_grafana_dashboard.json",
 			expectedPersesDashboardFile: "panel_repeat_only_perses_dashboard.json",
 		},
+		{
+			title:                       "dashboard with annotations should migrate the ones a plugin can migrate",
+			inputGrafanaDashboardFile:   "annotations_grafana_dashboard.json",
+			expectedPersesDashboardFile: "annotations_perses_dashboard.json",
+		},
 	}
 
 	pl := loadDefaultTestPlugins()
@@ -221,6 +227,35 @@ func TestMig_MigrateTimeSettings(t *testing.T) {
 			assert.NoError(t, json.Unmarshal(testUtils.JSONMarshalStrict(persesDashboard), &v1.Dashboard{}))
 		})
 	}
+}
+
+func TestMig_MigrateAnnotationsWithDefaultDatasource(t *testing.T) {
+	pl := loadDefaultTestPlugins()
+	input := `{"uid": "annotations", "title": "Annotations", "annotations": {"list": [
+		{"datasource": {"type": "exotic-tsdb", "uid": "exotic-ds"}, "enable": true, "expr": "deployments_total", "name": "Deployments"}
+	]}}`
+	grafanaDashboard := &migrate.SimplifiedDashboard{}
+	if unmarshallErr := json.Unmarshal([]byte(input), grafanaDashboard); unmarshallErr != nil {
+		t.Fatal(unmarshallErr)
+	}
+	persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, []dashboard.AnnotationSpec{
+		{
+			Display: dashboard.AnnotationDisplay{Name: "Deployments"},
+			Plugin: plugin.Plugin{
+				Kind: "SomeAnnotation",
+				Spec: map[string]any{
+					"datasource": map[string]any{"kind": "ExoticTSDB"},
+					"expr":       "deployments_total",
+				},
+			},
+		},
+	}, persesDashboard.Spec.Annotations)
+	// Decoding the migrated dashboard runs the validation of a Perses dashboard.
+	assert.NoError(t, json.Unmarshal(testUtils.JSONMarshalStrict(persesDashboard), &v1.Dashboard{}))
 }
 
 func TestMig_MigrateVariableAllValue(t *testing.T) {
