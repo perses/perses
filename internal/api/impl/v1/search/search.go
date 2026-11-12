@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/index"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/route"
@@ -40,7 +40,7 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 	group.GET(fmt.Sprintf("/%s", utils.PathDashboard), e.Dashboard, false)
 }
 
-func (e *endpoint) Dashboard(ctx echo.Context) error {
+func (e *endpoint) Dashboard(ctx *echo.Context) error {
 	q := &index.Query{}
 	if err := ctx.Bind(q); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())

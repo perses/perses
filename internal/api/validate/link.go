@@ -30,7 +30,8 @@ var linkURLSchemeRegexp = regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+.\-]*):`)
 // execute a script in the Perses origin when the link is followed.
 // Besides the web and communication schemes, it includes the deep links of applications commonly used from dashboards,
 // which are handed off to the operating system.
-// Keep it aligned with the list of the UI (components/src/utils/url.ts in perses/shared).
+// Keep it aligned with the list of the UI (components/src/utils/url.ts in perses/shared) and with the #linkURL CUE
+// definition used by the plugin schemas (cue/common/url.cue in perses/shared).
 var allowedLinkURLSchemes = []string{
 	"http",
 	"https",

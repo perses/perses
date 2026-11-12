@@ -32,7 +32,7 @@ interface UsersProps {
 export function Users(props: UsersProps): ReactElement {
   const { id } = props;
 
-  const { data, isLoading } = useUserList();
+  const { data, isPending } = useUserList();
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const createUserMutation = useCreateUserMutation();
@@ -97,7 +97,7 @@ export function Users(props: UsersProps): ReactElement {
     <Card id={id}>
       <UserList
         data={data ?? []}
-        isLoading={isLoading}
+        isLoading={isPending}
         onCreate={handleUserCreate}
         onUpdate={handleUserUpdate}
         onDelete={handleUserDelete}

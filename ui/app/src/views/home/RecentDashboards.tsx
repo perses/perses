@@ -28,7 +28,7 @@ import { HomeListCard } from './HomeListCard';
 import { HomeListItem } from './HomeListItem';
 
 export function RecentDashboards(): ReactElement {
-  const { data, isLoading } = useRecentDashboardList();
+  const { data, isPending } = useRecentDashboardList();
   const navHistoryDispatch = useNavHistoryDispatch();
 
   const dashboards = useMemo(() => data ?? [], [data]);
@@ -42,22 +42,22 @@ export function RecentDashboards(): ReactElement {
       icon={<HistoryIcon sx={{ color: 'primary.main' }} />}
       title="Recently Viewed Dashboards"
       description="Jump back into the dashboards you opened most recently."
-      centerContent={dashboards.length === 0 && !isLoading}
+      centerContent={dashboards.length === 0 && !isPending}
     >
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        {isLoading && (
+        {isPending && (
           <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
             <CircularProgress size={24} />
           </Stack>
         )}
-        {!isLoading && dashboards.length === 0 && (
+        {!isPending && dashboards.length === 0 && (
           <EmptyState
             icon={<HistoryIcon sx={{ fontSize: 32, color: 'text.secondary' }} />}
             message="No dashboards viewed yet."
             hint="Your recently viewed dashboards will appear here."
           />
         )}
-        {!isLoading && dashboards.length > 0 && (
+        {!isPending && dashboards.length > 0 && (
           <Box
             id="recent-dashboard-list"
             sx={{ display: 'flex', flexDirection: 'column', maxHeight: 360, overflowY: 'auto' }}

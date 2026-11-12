@@ -16,7 +16,7 @@ package configendpoint
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/pkg/model/api/config"
 )
@@ -35,6 +35,6 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 	g.GET("/config", e.getConfig, true)
 }
 
-func (e *endpoint) getConfig(ctx echo.Context) error {
+func (e *endpoint) getConfig(ctx *echo.Context) error {
 	return ctx.JSON(http.StatusOK, e.cfg)
 }

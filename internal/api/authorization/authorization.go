@@ -14,8 +14,8 @@
 package authorization
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/perses/perses/internal/api/authorization/k8s"
 	"github.com/perses/perses/internal/api/authorization/native"
 	"github.com/perses/perses/internal/api/crypto"
@@ -41,13 +41,13 @@ type Authorization interface {
 	// To check if it is called from an anonymous endpoint, you can use the function utils.IsAnonymous.
 	// In case the context is not empty, and it is not an anonymous endpoint, the user information should be set in the context.
 	// If it is not the case, you should return an error. All further functions are dependent on the results of these decisions.
-	GetUser(ctx echo.Context) (any, error)
+	GetUser(ctx *echo.Context) (any, error)
 	// GetUsername returns the username/the login of the user from the context.
-	GetUsername(ctx echo.Context) (string, error)
+	GetUsername(ctx *echo.Context) (string, error)
 	// GetPublicUser returns the PublicUser of the user from the context.
-	GetPublicUser(ctx echo.Context) (*v1.PublicUser, error)
+	GetPublicUser(ctx *echo.Context) (*v1.PublicUser, error)
 	// GetProviderInfo return some information about the provider used to authenticate the user.
-	GetProviderInfo(ctx echo.Context) (crypto.ProviderInfo, error)
+	GetProviderInfo(ctx *echo.Context) (crypto.ProviderInfo, error)
 	// Middleware returns the middleware function to be used in the echo server.
 	// This middleware is responsible for finding the token in the request, validating it and extracting it in the context.
 	// In case the token is not valid, it will prevent the request from being processed and return an error.
@@ -59,22 +59,22 @@ type Authorization interface {
 	// Be aware that this function cannot be called from an anonymous endpoint.
 	// In case the user information is not found in the context, the implementation should return an error.
 	// Be aware also this function is called after checking if the user has the permission to access to the resource with the requested scope and action, so it is not necessary to check the permission again in this function.
-	GetUserProjects(ctx echo.Context, requestAction v1Role.Action, requestScope v1Role.Scope) ([]string, error)
+	GetUserProjects(ctx *echo.Context, requestAction v1Role.Action, requestScope v1Role.Scope) ([]string, error)
 	// HasPermission checks if the user has the permission to perform the action on the project with the given scope.
 	// In case the endpoint is anonymous, or the context is empty, it will return true.
 	// In case the user information is not found in the context, the implementation should return false.
-	HasPermission(ctx echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool
+	HasPermission(ctx *echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool
 	// HasCreateProjectPermission checks if the user has the permission to create a Perses project.
 	// This is separated from HasPermission because the way project creation permission is evaluated differs
 	// between authorization providers:
 	//   - For native auth, creating a project requires a global permission (i.e. a GlobalRole granting create on ProjectScope).
 	//   - For delegated auth (e.g. k8s), creating a project is driven by having write access to the corresponding
 	//     namespace rather than a global permission, since Perses projects map 1:1 to k8s namespaces.
-	HasCreateProjectPermission(ctx echo.Context, projectName string) bool
+	HasCreateProjectPermission(ctx *echo.Context, projectName string) bool
 	// GetPermissions returns the permissions of the user found in the context.
 	// Be aware that this function cannot be called from an anonymous endpoint.
 	// In case the user information is not found in the context, the implementation should return an error.
-	GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permission, error)
+	GetPermissions(ctx *echo.Context) (map[string][]*v1Role.Permission, error)
 	// RefreshPermissionsAndRoles refreshes the permissions and roles.
 	// We know this method is relative to the implementation and should not appear in the interface.
 	// This is convenient to have it here when the implementation is keeping the permissions and roles in memory.

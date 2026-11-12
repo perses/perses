@@ -13,6 +13,10 @@
 
 import type { KVSearchResult, MatchingInterval, MatchingResult } from '@nexucis/kvsearch';
 import type { DashboardResource, Resource, StatusError } from '@perses-dev/client';
+import ArchiveIcon from 'mdi-material-ui/Archive';
+import DatabaseIcon from 'mdi-material-ui/Database';
+import DashboardIcon from 'mdi-material-ui/ViewDashboard';
+import type { ReactNode } from 'react';
 
 export type ResourceType = 'dashboards' | 'projects' | 'globalDatasources' | 'datasources';
 
@@ -87,4 +91,11 @@ export const getTagDisplayValues = (tags: string[] | undefined, matchingTagValue
     hiddenTagsCount: Math.max(0, orderedTags.length - MAX_VISIBLE_RESOURCE_TAGS),
     hasAnyTags: orderedTags.length > 0,
   };
+};
+
+export const ICON_TO_RESOURCE_TYPE: Record<ResourceType, ReactNode> = {
+  dashboards: <DashboardIcon fontSize="small" />,
+  datasources: <DatabaseIcon fontSize="small" />,
+  projects: <ArchiveIcon fontSize="small" />,
+  globalDatasources: <DatabaseIcon fontSize="small" />,
 };

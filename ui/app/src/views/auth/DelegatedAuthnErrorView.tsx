@@ -56,7 +56,7 @@ function DelegatedAuthnErrorView(): ReactElement {
         sx={{ marginTop: isLaptopSize ? '30vh' : undefined, marginBottom: isLaptopSize ? '30vh' : undefined }}
       />
       <Stack gap={1} sx={{ maxWidth: '85%', minWidth: '200px' }}>
-        {authnCheck.status === 'loading' && <LinearProgress />}
+        {authnCheck.status === 'pending' && <LinearProgress />}
         {authnCheck.status === 'error' && <ErrorAlert error={authnCheck.error} />}
       </Stack>
     </Stack>

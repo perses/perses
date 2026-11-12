@@ -19,12 +19,12 @@ import { useDatasourceList } from './datasource-client';
 import { useGlobalDatasourceList } from './global-datasource-client';
 
 export function useDatasourceApi(): DatasourceApi {
-  const { data: globalDatasources, isLoading: isGlobalDatasourcesPending } = useGlobalDatasourceList();
-  const { data: datasources, isLoading: isDatasourcesPending } = useDatasourceList({});
+  const { data: globalDatasources } = useGlobalDatasourceList();
+  const { data: datasources } = useDatasourceList({});
 
   const getDatasource = useCallback(
     async (project: string, selector: DatasourceSelector) => {
-      if (isDatasourcesPending || !datasources) {
+      if (!datasources) {
         return undefined;
       }
       return datasources.find((datasource) => {
@@ -40,12 +40,12 @@ export function useDatasourceApi(): DatasourceApi {
         return datasource.metadata.name.toLowerCase() === selector.name.toLowerCase();
       });
     },
-    [datasources, isDatasourcesPending],
+    [datasources],
   );
 
   const getGlobalDatasource = useCallback(
     async (selector: DatasourceSelector) => {
-      if (isGlobalDatasourcesPending || !globalDatasources) {
+      if (!globalDatasources) {
         return undefined;
       }
       return globalDatasources.find((datasource) => {
@@ -58,12 +58,12 @@ export function useDatasourceApi(): DatasourceApi {
         return datasource.metadata.name.toLowerCase() === selector.name.toLowerCase();
       });
     },
-    [globalDatasources, isGlobalDatasourcesPending],
+    [globalDatasources],
   );
 
   const listDatasources = useCallback(
     async (project: string, pluginKind?: string) => {
-      if (isDatasourcesPending || !datasources) {
+      if (!datasources) {
         return [];
       }
       return datasources.filter((datasource) => {
@@ -76,12 +76,12 @@ export function useDatasourceApi(): DatasourceApi {
         return true;
       });
     },
-    [datasources, isDatasourcesPending],
+    [datasources],
   );
 
   const listGlobalDatasources = useCallback(
     async (pluginKind?: string) => {
-      if (isGlobalDatasourcesPending || !globalDatasources) {
+      if (!globalDatasources) {
         return [];
       }
       return globalDatasources.filter((datasource) => {
@@ -91,7 +91,7 @@ export function useDatasourceApi(): DatasourceApi {
         return true;
       });
     },
-    [globalDatasources, isGlobalDatasourcesPending],
+    [globalDatasources],
   );
 
   return useMemo(
