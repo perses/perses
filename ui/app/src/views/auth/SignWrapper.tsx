@@ -12,10 +12,10 @@
 // limitations under the License.
 
 import type { Theme } from '@mui/material';
-import { alpha, Divider, Stack, useTheme } from '@mui/material';
+import { alpha, Box, Divider, Stack, useTheme } from '@mui/material';
 import Bitbucket from 'mdi-material-ui/Bitbucket';
 import type { ReactElement, ReactNode } from 'react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import * as React from 'react';
 import {
   AmazonLoginButton,
@@ -44,7 +44,7 @@ import DarkThemePersesLogo from '../../components/logo/DarkThemePersesLogo';
 import LightThemePersesLogo from '../../components/logo/LightThemePersesLogo';
 import PersesLogoCropped from '../../components/logo/PersesLogoCropped';
 import { PERSES_APP_CONFIG } from '../../config';
-import { useConfigContext, useIsNativeAuthnProviderEnabled } from '../../context/Config';
+import { useConfigContext, useIsNativeAuthnProviderEnabled, useLogo } from '../../context/Config';
 import { useDarkMode } from '../../context/DarkMode';
 import { buildRedirectQueryString, useRedirectQueryParam } from '../../model/auth/auth-client';
 import { useIsLaptopSize } from '../../utils/browser-size';
@@ -129,6 +129,22 @@ export function PersesLogo({
   isLaptopSize: boolean;
   isDarkModeEnabled: boolean;
 }): ReactElement {
+  const logo = useLogo();
+  // Keep the URL that failed to load, so the Perses logo is used as a fallback until the configured URL changes.
+  const [failedURL, setFailedURL] = useState<string>();
+  if (logo?.sign_in_url && logo.sign_in_url !== failedURL) {
+    const signInURL = logo.sign_in_url;
+    return (
+      <Box
+        component="img"
+        src={signInURL}
+        alt="Logo"
+        onError={() => setFailedURL(signInURL)}
+        sx={{ width: 'min(394px, 85%)', height: 116, objectFit: 'contain' }}
+      />
+    );
+  }
+
   if (!isLaptopSize) {
     return <PersesLogoCropped />;
   }
