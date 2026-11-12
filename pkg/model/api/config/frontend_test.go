@@ -100,3 +100,68 @@ func TestTimeRange_Verify(t *testing.T) {
 		})
 	}
 }
+
+func TestLogo_Verify(t *testing.T) {
+	testSuite := []struct {
+		title      string
+		logo       Logo
+		errMessage string
+	}{
+		{
+			title: "empty logo is valid",
+			logo:  Logo{},
+		},
+		{
+			title: "http(s) URL and absolute path are valid",
+			logo: Logo{
+				NavbarURL: "https://example.com/navbar-logo.svg",
+				SignInURL: "/static/sign-in-logo.png",
+			},
+		},
+		{
+			title: "data URL is valid",
+			logo: Logo{
+				NavbarURL: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciLz4=",
+			},
+		},
+		{
+			title: "relative path",
+			logo: Logo{
+				NavbarURL: "static/navbar-logo.svg",
+			},
+			errMessage: `invalid frontend.logo.navbar_url: "static/navbar-logo.svg" is a relative path, it must start with '/'`,
+		},
+		{
+			title: "unsupported scheme in the navbar URL",
+			logo: Logo{
+				NavbarURL: "javascript:alert(1)",
+			},
+			errMessage: `invalid frontend.logo.navbar_url: unsupported scheme "javascript", it must be one of: http, https, data`,
+		},
+		{
+			title: "unsupported scheme in the sign-in URL",
+			logo: Logo{
+				SignInURL: "file:///etc/perses/logo.png",
+			},
+			errMessage: `invalid frontend.logo.sign_in_url: unsupported scheme "file", it must be one of: http, https, data`,
+		},
+		{
+			title: "malformed URL",
+			logo: Logo{
+				SignInURL: "https://example.com/%zz",
+			},
+			errMessage: "invalid frontend.logo.sign_in_url",
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			err := test.logo.Verify()
+			if len(test.errMessage) == 0 {
+				assert.NoError(t, err)
+			} else {
+				assert.ErrorContains(t, err, test.errMessage)
+			}
+		})
+	}
+}

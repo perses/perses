@@ -909,6 +909,72 @@ frontend:
 	}
 }
 
+func TestResolveLogo(t *testing.T) {
+	testSuite := []struct {
+		name       string
+		configData string
+		env        map[string]string
+		expected   *Logo
+		errMessage string
+	}{
+		{
+			name:     "no logo by default",
+			expected: nil,
+		},
+		{
+			name: "resolves the logo from the config file",
+			configData: `
+frontend:
+  logo:
+    navbar_url: https://example.com/navbar-logo.svg
+    sign_in_url: /static/sign-in-logo.png
+`,
+			expected: &Logo{
+				NavbarURL: "https://example.com/navbar-logo.svg",
+				SignInURL: "/static/sign-in-logo.png",
+			},
+		},
+		{
+			name: "resolves the logo from the environment variables",
+			env: map[string]string{
+				"PERSES_FRONTEND_LOGO_NAVBAR_URL": "https://example.com/navbar-logo.svg",
+			},
+			expected: &Logo{
+				NavbarURL: "https://example.com/navbar-logo.svg",
+			},
+		},
+		{
+			name: "rejects an unsupported scheme",
+			configData: `
+frontend:
+  logo:
+    navbar_url: javascript:alert(1)
+`,
+			errMessage: "invalid frontend.logo.navbar_url",
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.name, func(t *testing.T) {
+			for key, value := range test.env {
+				t.Setenv(key, value)
+			}
+			resolvedConfig := Config{}
+			err := config.NewResolver[Config]().
+				SetConfigData([]byte(test.configData)).
+				SetEnvPrefix("PERSES").
+				Resolve(&resolvedConfig).
+				Verify()
+			if len(test.errMessage) > 0 {
+				assert.ErrorContains(t, err, test.errMessage)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, test.expected, resolvedConfig.Frontend.Logo)
+		})
+	}
+}
+
 func TestResolveDatasourceHTTPProxy(t *testing.T) {
 	testSuite := []struct {
 		name       string
