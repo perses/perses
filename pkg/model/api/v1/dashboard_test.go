@@ -523,6 +523,37 @@ func TestUnmarshalDashboardError(t *testing.T) {
 `,
 			err: fmt.Errorf("spec cannot be empty"),
 		},
+		{
+			title: "grid item without content",
+			jason: `
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  },
+  "spec": {
+    "duration": "1h",
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 1,
+              "height": 1
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+`,
+			err: fmt.Errorf("item 0 of layout 0 has no content"),
+		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {

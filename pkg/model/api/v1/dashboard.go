@@ -79,10 +79,13 @@ func (d *Dashboard) validate() error {
 
 // verifyAndSetJSONRef will check that each JSON Reference are pointing to an existing object and will set the related pointer in the JSONRef.Object
 func verifyAndSetJSONReferences(layouts []dashboardSpec.Layout, panels map[string]*dashboardSpec.Panel) error {
-	for _, layout := range layouts {
+	for i, layout := range layouts {
 		switch spec := layout.Spec.(type) {
 		case *dashboardSpec.GridLayoutSpec:
-			for _, item := range spec.Items {
+			for j, item := range spec.Items {
+				if item.Content == nil {
+					return fmt.Errorf("item %d of layout %d has no content", j, i)
+				}
 				if err := checkAndSetRef(item.Content, panels); err != nil {
 					return err
 				}
