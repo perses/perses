@@ -85,7 +85,10 @@ export function SecretDataGrid(props: DataGridPropertiesWithCallback<Row>): Reac
         loading={isLoading}
         slots={hideToolbar ? SLOTS_HIDDEN_TOOLBAR : SLOTS}
         pageSizeOptions={PAGE_SIZE_OPTIONS}
-        {...persistedState}
+        initialState={persistedState.initialState}
+        onColumnVisibilityModelChange={persistedState.onColumnVisibilityModelChange}
+        onSortModelChange={persistedState.onSortModelChange}
+        onPaginationModelChange={persistedState.onPaginationModelChange}
         slotProps={DATA_GRID_SLOT_PROPS}
         sx={DATA_GRID_STYLES}
       />

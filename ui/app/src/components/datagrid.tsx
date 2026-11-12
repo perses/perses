@@ -13,6 +13,7 @@
 
 import { Stack } from '@mui/material';
 import type {
+  GridCallbackDetails,
   GridColDef,
   GridColumnVisibilityModel,
   GridPaginationModel,
@@ -26,8 +27,9 @@ import {
   GridToolbarQuickFilter,
 } from '@mui/x-data-grid';
 import type { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+import type { Kind } from '@perses-dev/client';
 import type { ReactElement } from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 export const getDataGridInitialStateSortByName = (pageSize: number): GridInitialStateCommunity => ({
   columns: {
@@ -129,12 +131,15 @@ export interface CommonRow {
   updatedAt: string;
 }
 
+// Identifies a data grid in the local storage: the kind of the resources it lists, or the plugin list.
+export type DataGridStorageKey = Kind | 'Plugin';
+
 export interface DataGridProperties<T extends GridValidRowModel> {
   columns: Array<GridColDef<T>>;
   rows: T[];
   initialState?: GridInitialStateCommunity;
   // Identifies the data grid to save its settings in the local storage, see usePersistedDataGridState.
-  storageKey?: string;
+  storageKey?: DataGridStorageKey;
   hideToolbar?: boolean;
   isLoading?: boolean;
 }
@@ -143,7 +148,8 @@ export interface DataGridPropertiesWithCallback<T extends GridValidRowModel> ext
   onRowClick: (name: string, project?: string) => void;
 }
 
-const DATA_GRID_SETTINGS_KEY_PREFIX = 'PERSES_DATA_GRID_SETTINGS_';
+// The version must be increased when the format or the meaning of the saved settings changes, so the old ones are ignored.
+const DATA_GRID_SETTINGS_KEY_PREFIX = 'PERSES_DATA_GRID_SETTINGS_V1_';
 
 /**
  * Settings of a data grid changed by the user, saved in the local storage.
@@ -181,7 +187,7 @@ function isPageSize(value: unknown): value is number {
 /**
  * Read the settings of a data grid from the local storage, ignoring the ones that are invalid.
  */
-function loadDataGridSettings(storageKey: string): DataGridSettings {
+function loadDataGridSettings(storageKey: DataGridStorageKey): DataGridSettings {
   let value: unknown;
   try {
     value = JSON.parse(window.localStorage.getItem(DATA_GRID_SETTINGS_KEY_PREFIX + storageKey) ?? '{}');
@@ -199,7 +205,7 @@ function loadDataGridSettings(storageKey: string): DataGridSettings {
   };
 }
 
-function saveDataGridSettings(storageKey: string, settings: DataGridSettings): void {
+function saveDataGridSettings(storageKey: DataGridStorageKey, settings: DataGridSettings): void {
   try {
     window.localStorage.setItem(
       DATA_GRID_SETTINGS_KEY_PREFIX + storageKey,
@@ -219,8 +225,14 @@ function applyDataGridSettings(
 ): GridInitialStateCommunity {
   return {
     ...initialState,
-    // The saved model replaces the default one entirely, as a visible column can be either absent from it or `true`.
-    ...(columnVisibilityModel && { columns: { ...initialState.columns, columnVisibilityModel } }),
+    // The saved model has an explicit value for every column known when it was saved, so it is merged over the default
+    // one: only the columns added since then get their default visibility.
+    ...(columnVisibilityModel && {
+      columns: {
+        ...initialState.columns,
+        columnVisibilityModel: { ...initialState.columns?.columnVisibilityModel, ...columnVisibilityModel },
+      },
+    }),
     ...(sortModel && { sorting: { ...initialState.sorting, sortModel } }),
     ...(pageSize !== undefined && {
       pagination: { ...initialState.pagination, paginationModel: { page: 0, pageSize } },
@@ -230,7 +242,7 @@ function applyDataGridSettings(
 
 export interface PersistedDataGridState {
   initialState: GridInitialStateCommunity;
-  onColumnVisibilityModelChange: (model: GridColumnVisibilityModel) => void;
+  onColumnVisibilityModelChange: (model: GridColumnVisibilityModel, details: GridCallbackDetails) => void;
   onSortModelChange: (model: GridSortModel) => void;
   onPaginationModelChange: (model: GridPaginationModel) => void;
 }
@@ -238,45 +250,49 @@ export interface PersistedDataGridState {
 /**
  * Keep the settings of a data grid that the user changes (column visibility, sorting and page size) in the
  * local storage, so they are restored the next time the data grid is displayed.
- * The returned properties are meant to be passed to the DataGrid component.
+ * The returned properties are meant to be passed to the DataGrid component, which must be mounted together with the
+ * component calling this hook.
  * @param storageKey Identifies the data grid in the local storage. The settings are not saved when it is undefined.
+ * It must not change while the data grid is mounted.
  * @param initialState Initial state of the data grid, overridden by the saved settings.
  */
 export function usePersistedDataGridState(
-  storageKey: string | undefined,
+  storageKey: DataGridStorageKey | undefined,
   initialState: GridInitialStateCommunity,
 ): PersistedDataGridState {
   // The data grid only reads its initial state when it is mounted, so the settings are loaded only once.
-  const [settings] = useState(() => (storageKey === undefined ? {} : loadDataGridSettings(storageKey)));
-
-  const persistedInitialState = useMemo(() => applyDataGridSettings(initialState, settings), [initialState, settings]);
-
-  const onColumnVisibilityModelChange = useCallback(
-    (columnVisibilityModel: GridColumnVisibilityModel): void => {
-      if (storageKey !== undefined) {
-        saveDataGridSettings(storageKey, { columnVisibilityModel });
-      }
-    },
-    [storageKey],
+  const [persistedInitialState] = useState(() =>
+    storageKey === undefined ? initialState : applyDataGridSettings(initialState, loadDataGridSettings(storageKey)),
   );
+  // The data grid also calls onPaginationModelChange when only the page changes.
+  const pageSizeRef = useRef(persistedInitialState.pagination?.paginationModel?.pageSize);
 
-  const onSortModelChange = useCallback(
-    (sortModel: GridSortModel): void => {
-      if (storageKey !== undefined) {
-        saveDataGridSettings(storageKey, { sortModel });
-      }
-    },
-    [storageKey],
-  );
+  const onColumnVisibilityModelChange = (model: GridColumnVisibilityModel, { api }: GridCallbackDetails): void => {
+    if (storageKey === undefined) {
+      return;
+    }
+    // "Show all" removes the visible columns from the model: save an explicit value for every column instead.
+    const columnVisibilityModel = Object.fromEntries(
+      api.getAllColumns().map(({ field }) => [field, model[field] !== false]),
+    );
+    saveDataGridSettings(storageKey, { columnVisibilityModel });
+  };
 
-  const onPaginationModelChange = useCallback(
-    ({ pageSize }: GridPaginationModel): void => {
-      if (storageKey !== undefined) {
-        saveDataGridSettings(storageKey, { pageSize });
-      }
-    },
-    [storageKey],
-  );
+  const onSortModelChange = (sortModel: GridSortModel): void => {
+    if (storageKey !== undefined) {
+      saveDataGridSettings(storageKey, { sortModel });
+    }
+  };
+
+  const onPaginationModelChange = ({ pageSize }: GridPaginationModel): void => {
+    if (pageSize === pageSizeRef.current) {
+      return;
+    }
+    pageSizeRef.current = pageSize;
+    if (storageKey !== undefined) {
+      saveDataGridSettings(storageKey, { pageSize });
+    }
+  };
 
   return {
     initialState: persistedInitialState,

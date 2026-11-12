@@ -86,7 +86,10 @@ export function DatasourceDataGrid(props: DataGridPropertiesWithCallback<Row>): 
         loading={isLoading}
         slots={hideToolbar ? SLOTS_WITHOUT_TOOLBAR : SLOTS_WITH_TOOLBAR}
         pageSizeOptions={PAGE_SIZE_OPTIONS}
-        {...persistedState}
+        initialState={persistedState.initialState}
+        onColumnVisibilityModelChange={persistedState.onColumnVisibilityModelChange}
+        onSortModelChange={persistedState.onSortModelChange}
+        onPaginationModelChange={persistedState.onPaginationModelChange}
         slotProps={DATA_GRID_SLOT_PROPS}
         sx={DATA_GRID_STYLES}
       />

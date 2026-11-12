@@ -11,7 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { renderHook } from '@testing-library/react';
+import type { GridCallbackDetails, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, useGridApiRef } from '@mui/x-data-grid';
+import type { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+import { act, render, renderHook } from '@testing-library/react';
+import type { ReactElement } from 'react';
 
 import {
   getDataGridInitialStateSortByDisplayName,
@@ -19,9 +23,12 @@ import {
   usePersistedDataGridState,
 } from './datagrid';
 
-const STORAGE_KEY = 'PERSES_DATA_GRID_SETTINGS_Variable';
+const STORAGE_KEY = 'PERSES_DATA_GRID_SETTINGS_V1_Variable';
 
-const initialState = {
+const details = { api: { getAllColumns: () => [{ field: 'version' }, { field: 'createdAt' }, { field: 'name' }] } };
+const callbackDetails = details as unknown as GridCallbackDetails;
+
+const initialState: GridInitialStateCommunity = {
   ...getDataGridInitialStateSortByName(25),
   columns: { columnVisibilityModel: { version: false, createdAt: false } },
 };
@@ -47,12 +54,13 @@ describe('usePersistedDataGridState', () => {
   it('saves the settings changed by the user', () => {
     const { result } = renderHook(() => usePersistedDataGridState('Variable', initialState));
 
-    result.current.onColumnVisibilityModelChange({ createdAt: false });
+    result.current.onColumnVisibilityModelChange({ createdAt: false }, callbackDetails);
     result.current.onSortModelChange([{ field: 'updatedAt', sort: 'desc' }]);
     result.current.onPaginationModelChange({ page: 2, pageSize: 50 });
 
     expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '')).toEqual({
-      columnVisibilityModel: { createdAt: false },
+      // "Show all" style models, where the visible columns are absent, are saved with an explicit value for each column.
+      columnVisibilityModel: { version: true, createdAt: false, name: true },
       sortModel: [{ field: 'updatedAt', sort: 'desc' }],
       pageSize: 50,
     });
@@ -62,8 +70,7 @@ describe('usePersistedDataGridState', () => {
     window.localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({
-        // A visible column can be absent from the model, e.g. after clicking on "Show all".
-        columnVisibilityModel: { createdAt: false },
+        columnVisibilityModel: { version: true, createdAt: false },
         sortModel: [{ field: 'updatedAt', sort: 'desc' }],
         pageSize: 50,
       }),
@@ -72,7 +79,8 @@ describe('usePersistedDataGridState', () => {
     const { result } = renderHook(() => usePersistedDataGridState('Variable', initialState));
 
     expect(result.current.initialState).toEqual({
-      columns: { columnVisibilityModel: { createdAt: false } },
+      // The saved model is merged over the default one.
+      columns: { columnVisibilityModel: { version: true, createdAt: false } },
       sorting: { sortModel: [{ field: 'updatedAt', sort: 'desc' }] },
       pagination: { paginationModel: { page: 0, pageSize: 50 } },
     });
@@ -119,5 +127,82 @@ describe('usePersistedDataGridState', () => {
 
     expect(result.current.initialState).toEqual(initialState);
     expect(window.localStorage.length).toBe(0);
+  });
+});
+
+describe('usePersistedDataGridState with a data grid', () => {
+  const COLUMNS = [{ field: 'name' }, { field: 'version' }, { field: 'extra' }];
+  const ROWS = Array.from({ length: 30 }, (_, i) => ({ id: i, name: `row${i}`, version: i, extra: i }));
+
+  let apiRef: ReturnType<typeof useGridApiRef>;
+
+  function PersistedDataGrid({
+    state,
+    columns = COLUMNS,
+  }: {
+    state: GridInitialStateCommunity;
+    columns?: GridColDef[];
+  }): ReactElement {
+    apiRef = useGridApiRef();
+    const persisted = usePersistedDataGridState('Variable', state);
+    return (
+      <DataGrid
+        apiRef={apiRef}
+        rows={ROWS}
+        columns={columns}
+        pageSizeOptions={[10, 25, 50]}
+        initialState={persisted.initialState}
+        onColumnVisibilityModelChange={persisted.onColumnVisibilityModelChange}
+        onSortModelChange={persisted.onSortModelChange}
+        onPaginationModelChange={persisted.onPaginationModelChange}
+      />
+    );
+  }
+
+  const state: GridInitialStateCommunity = {
+    ...getDataGridInitialStateSortByName(10),
+    columns: { columnVisibilityModel: { version: false } },
+  };
+
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  it('does not save the page size when only the page changes', () => {
+    render(<PersistedDataGrid state={state} />);
+
+    act(() => apiRef.current?.setPage(1));
+
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull();
+  });
+
+  it('saves the page size when it changes', () => {
+    render(<PersistedDataGrid state={state} />);
+
+    act(() => apiRef.current?.setPageSize(25));
+
+    expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '')).toEqual({ pageSize: 25 });
+  });
+
+  it('keeps the columns hidden by default hidden after "Show all"', () => {
+    const { unmount } = render(<PersistedDataGrid state={state} />);
+
+    act(() => apiRef.current?.setColumnVisibilityModel({}));
+    expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '').columnVisibilityModel).toEqual({
+      name: true,
+      version: true,
+      extra: true,
+    });
+    unmount();
+
+    // A column hidden by default is added after the settings were saved.
+    render(
+      <PersistedDataGrid
+        state={{ ...state, columns: { columnVisibilityModel: { version: false, added: false } } }}
+        columns={[...COLUMNS, { field: 'added' }]}
+      />,
+    );
+
+    expect(apiRef.current?.getVisibleColumns().map(({ field }) => field)).toEqual(['name', 'version', 'extra']);
   });
 });
