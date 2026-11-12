@@ -260,16 +260,24 @@ func (f *frontend) assetHandler() echo.HandlerFunc {
 //   - X-Content-Type-Options: nosniff to prevent MIME sniffing.
 //
 // An HTML page also gets the Content-Security-Policy header, when it's enabled: the policy only applies to documents.
+// The policy is part of the ETag of the page, as a browser keeps the policy of the page it cached when the revalidation
+// is answered with a 304 that doesn't have the header (e.g. once the policy is disabled).
 //
 // It relies on http.ServeContent, which handles conditional requests (If-None-Match / If-Modified-Since),
 // HEAD requests and Range requests for us.
 func (f *frontend) serveContent(c *echo.Context, name string, contentType string, data []byte) error {
-	sum := sha256.Sum256(data)
+	isHTML := strings.HasPrefix(contentType, "text/html")
+	hash := sha256.New()
+	hash.Write(data)
+	if isHTML {
+		hash.Write([]byte(f.contentSecurityPolicy))
+	}
+	sum := hash.Sum(nil)
 	header := c.Response().Header()
 	header.Set("ETag", `"`+hex.EncodeToString(sum[:16])+`"`)
 	header.Set("Content-Type", contentType)
 	header.Set("X-Content-Type-Options", "nosniff")
-	if len(f.contentSecurityPolicy) > 0 && strings.HasPrefix(contentType, "text/html") {
+	if isHTML && len(f.contentSecurityPolicy) > 0 {
 		header.Set("Content-Security-Policy", f.contentSecurityPolicy)
 	}
 	// The zero modtime tells ServeContent not to emit Last-Modified: the embedded FS has no meaningful

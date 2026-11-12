@@ -130,6 +130,87 @@ func TestRegisterRouteContentSecurityPolicy(t *testing.T) {
 	}
 }
 
+// A browser keeps the Content-Security-Policy of the page it cached when the revalidation of the page is answered with a
+// 304 that doesn't have the header: changing or disabling the policy must change the ETag of the pages.
+func TestRegisterRouteContentSecurityPolicyRevalidation(t *testing.T) {
+	// Override the package-level embedded filesystem with test data.
+	originalAsts := asts
+	t.Cleanup(func() { asts = originalAsts })
+
+	testFS := fstest.MapFS{
+		"app/dist/index.html": &fstest.MapFile{Data: []byte("<html><head></head><body></body></html>")},
+	}
+	asts = http.FS(testFS)
+
+	enabled := config.ContentSecurityPolicy{Policy: config.DefaultContentSecurityPolicy}
+	disabled := config.ContentSecurityPolicy{Disable: true, Policy: config.DefaultContentSecurityPolicy}
+	custom := config.ContentSecurityPolicy{Policy: "script-src 'self'"}
+
+	// requestPage requests a page of the UI to a server configured with the given policy.
+	requestPage := func(t *testing.T, csp config.ContentSecurityPolicy, ifNoneMatch string) *httptest.ResponseRecorder {
+		t.Helper()
+		e := echo.New()
+		NewPersesFrontend(config.Config{Security: config.Security{ContentSecurityPolicy: csp}}, nil).RegisterRoute(e)
+		req := httptest.NewRequest(http.MethodGet, "/projects/demo", nil)
+		if len(ifNoneMatch) > 0 {
+			req.Header.Set("If-None-Match", ifNoneMatch)
+		}
+		rec := httptest.NewRecorder()
+		e.ServeHTTP(rec, req)
+		return rec
+	}
+
+	tests := []struct {
+		name           string
+		cachedWith     config.ContentSecurityPolicy
+		servedWith     config.ContentSecurityPolicy
+		expectedStatus int
+		expectedPolicy string
+	}{
+		{
+			name:           "same policy",
+			cachedWith:     enabled,
+			servedWith:     enabled,
+			expectedStatus: http.StatusNotModified,
+			expectedPolicy: config.DefaultContentSecurityPolicy,
+		},
+		{
+			name:           "policy disabled",
+			cachedWith:     enabled,
+			servedWith:     disabled,
+			expectedStatus: http.StatusOK,
+			expectedPolicy: "",
+		},
+		{
+			name:           "policy changed",
+			cachedWith:     enabled,
+			servedWith:     custom,
+			expectedStatus: http.StatusOK,
+			expectedPolicy: "script-src 'self'",
+		},
+		{
+			name:           "policy enabled",
+			cachedWith:     disabled,
+			servedWith:     enabled,
+			expectedStatus: http.StatusOK,
+			expectedPolicy: config.DefaultContentSecurityPolicy,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cached := requestPage(t, tt.cachedWith, "")
+			require.Equal(t, http.StatusOK, cached.Code)
+			etag := cached.Header().Get("ETag")
+			require.NotEmpty(t, etag)
+
+			rec := requestPage(t, tt.servedWith, etag)
+
+			assert.Equal(t, tt.expectedStatus, rec.Code)
+			assert.Equal(t, tt.expectedPolicy, rec.Header().Get("Content-Security-Policy"))
+		})
+	}
+}
+
 func TestAssetHandlerContentType(t *testing.T) {
 	// Override the package-level embedded filesystem with test data.
 	originalAsts := asts
