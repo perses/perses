@@ -22,26 +22,30 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func newDS(name string, discoveryName string) *v1.GlobalDatasource {
+func newDS(name string, discoveryName string, discoveryType v1.DiscoveryType) *v1.GlobalDatasource {
 	ds := &v1.GlobalDatasource{
 		Kind:     v1.KindGlobalDatasource,
 		Metadata: v1.Metadata{Name: name},
 		Spec:     datasourceSpec.Spec{},
 	}
-	if discoveryName != "" {
+	if discoveryName != "" || discoveryType != "" {
 		ds.Source = &v1.Source{
-			Discovery: &v1.DiscoverySource{Name: discoveryName},
+			Discovery: &v1.DiscoverySource{
+				Name: discoveryName,
+				Type: discoveryType,
+			},
 		}
 	}
 	return ds
 }
 
-func TestList_DiscoveryNameFiltering(t *testing.T) {
+func TestFilterByDiscovery(t *testing.T) {
 	all := []*v1.GlobalDatasource{
-		newDS("ds-a1", "kube-prod"),
-		newDS("ds-a2", "kube-prod"),
-		newDS("ds-b1", "kube-staging"),
-		newDS("ds-manual", ""),
+		newDS("ds-kube-prod-1", "kube-prod", v1.DiscoveryTypeKubernetes),
+		newDS("ds-kube-prod-2", "kube-prod", v1.DiscoveryTypeKubernetes),
+		newDS("ds-kube-staging", "kube-staging", v1.DiscoveryTypeKubernetes),
+		newDS("ds-http-prod", "http-prod", v1.DiscoveryTypeHTTP),
+		newDS("ds-manual", "", ""),
 	}
 
 	tests := []struct {
@@ -52,28 +56,49 @@ func TestList_DiscoveryNameFiltering(t *testing.T) {
 		{
 			name:          "no filter returns all",
 			query:         globaldatasource.Query{},
-			expectedNames: []string{"ds-a1", "ds-a2", "ds-b1", "ds-manual"},
+			expectedNames: []string{"ds-kube-prod-1", "ds-kube-prod-2", "ds-kube-staging", "ds-http-prod", "ds-manual"},
 		},
 		{
-			name:          "discovery_name=kube-prod returns only kube-prod entries",
+			name:          "discovery_name=kube-prod",
 			query:         globaldatasource.Query{DiscoveryName: "kube-prod"},
-			expectedNames: []string{"ds-a1", "ds-a2"},
+			expectedNames: []string{"ds-kube-prod-1", "ds-kube-prod-2"},
 		},
 		{
-			name:          "discovery_name=kube-staging returns only kube-staging entries",
+			name:          "discovery_name=kube-staging",
 			query:         globaldatasource.Query{DiscoveryName: "kube-staging"},
-			expectedNames: []string{"ds-b1"},
+			expectedNames: []string{"ds-kube-staging"},
+		},
+		{
+			name:          "discovery_type=kubernetes only",
+			query:         globaldatasource.Query{DiscoveryType: v1.DiscoveryTypeKubernetes},
+			expectedNames: []string{"ds-kube-prod-1", "ds-kube-prod-2", "ds-kube-staging"},
+		},
+		{
+			name:          "discovery_type=http only",
+			query:         globaldatasource.Query{DiscoveryType: v1.DiscoveryTypeHTTP},
+			expectedNames: []string{"ds-http-prod"},
+		},
+		{
+			name:          "discovery_name=kube-prod AND discovery_type=kubernetes",
+			query:         globaldatasource.Query{DiscoveryName: "kube-prod", DiscoveryType: v1.DiscoveryTypeKubernetes},
+			expectedNames: []string{"ds-kube-prod-1", "ds-kube-prod-2"},
+		},
+		{
+			name:          "discovery_name=kube-prod AND discovery_type=http returns nothing",
+			query:         globaldatasource.Query{DiscoveryName: "kube-prod", DiscoveryType: v1.DiscoveryTypeHTTP},
+			expectedNames: []string{},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Call the filter logic directly, bypassing the database client.
-			// This mirrors what dao.List does after d.client.Query populates result.
-			result := applyListFilter(all, &tt.query)
+			result := filterByDiscovery(all, &tt.query)
 			var names []string
 			for _, ds := range result {
 				names = append(names, ds.Metadata.Name)
+			}
+			if tt.expectedNames == nil {
+				tt.expectedNames = []string{}
 			}
 			assert.ElementsMatch(t, tt.expectedNames, names)
 		})
