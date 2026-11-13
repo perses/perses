@@ -145,6 +145,44 @@ func TestPluginGenerateCMD(t *testing.T) {
 				"src/panels/my-test-panel/MyTestPanelComponent.tsx",
 				"src/panels/my-test-panel/MyTestPanelSettingsEditor.tsx"}),
 		},
+		{
+			Title: "Build a variable plugin in an existing module",
+			Args: []string{
+				"--plugin.name", "MyTestVariable",
+				"--plugin.type", "Variable",
+				testFolder,
+			},
+			IsErrorExpected: false,
+			ExpectedMessage: `plugin MyTestVariable generated successfully
+` + getFileList([]string{
+				".gitignore",
+				".oxfmtrc.json",
+				".oxlintrc.json",
+				".swcrc",
+				"LICENSE",
+				"README.md",
+				"cue.mod/module.cue",
+				"package.json",
+				"rsbuild.config.ts",
+				"src/bootstrap.tsx",
+				"src/env.d.ts",
+				"src/getPluginModule.ts",
+				"src/index-federation.ts",
+				"src/index.ts",
+				"src/setup-tests.ts",
+				"tsconfig.build.json",
+				"tsconfig.json",
+				"vitest.config.ts",
+				"schemas/variables/my-test-variable/my-test-variable.cue",
+				"schemas/variables/my-test-variable/my-test-variable.json",
+				"src/variables/index.ts",
+				"src/variables/my-test-variable/constants.ts",
+				"src/variables/my-test-variable/get-variable-options.ts",
+				"src/variables/my-test-variable/index.ts",
+				"src/variables/my-test-variable/my-test-variable-types.ts",
+				"src/variables/my-test-variable/MyTestVariable.tsx",
+				"src/variables/my-test-variable/MyTestVariableEditor.tsx"}),
+		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
 }
@@ -245,4 +283,31 @@ func TestPluginGenerateFailsBeforeWritingWithEmptyRegistry(t *testing.T) {
 
 	assert.NoDirExists(t, filepath.Join(dir, "src", "panels", "my-test-panel"))
 	assert.NoFileExists(t, filepath.Join(dir, "go.mod"))
+}
+
+func TestPluginGenerateEveryPluginType(t *testing.T) {
+	for _, pluginType := range availablePluginTypes {
+		t.Run(string(pluginType), func(t *testing.T) {
+			dir := t.TempDir()
+			pluginName := "MyTest" + string(pluginType)
+
+			cmdTest.ExecuteSuiteTest(t, NewCMD, []cmdTest.Suite{
+				{
+					Title: "Build module with a " + string(pluginType) + " plugin",
+					Args: []string{
+						"--module.name", "MyPluginModule",
+						"--module.org", "MyPluginOrg",
+						"--plugin.name", pluginName,
+						"--plugin.type", string(pluginType),
+						dir,
+					},
+					ExpectedRegexMessage: `plugin ` + pluginName + ` generated successfully`,
+				},
+			})
+
+			pluginPath, err := getPluginPath(pluginName, pluginType)
+			require.NoError(t, err)
+			assert.DirExists(t, filepath.Join(dir, filepath.FromSlash(pluginPath)))
+		})
+	}
 }
