@@ -28,9 +28,9 @@ func New(cfg config.Config, serviceManager dependency.ServiceManager, caseSensit
 	for _, c := range cfg.Datasource.Global.Discovery {
 		var discoveryType v1.DiscoveryType
 		if c.HTTPDiscovery != nil {
-			discoveryType = v1.HTTPType
+			discoveryType = v1.DiscoveryTypeHTTP
 		} else if c.KubernetesDiscovery != nil {
-			discoveryType = v1.KubernetesType
+			discoveryType = v1.DiscoveryTypeKubernetes
 		}
 		svc := service.New(caseSensitive, serviceManager.GetGlobalDatasource(), c.Name, discoveryType)
 		var helper taskhelper.Helper
