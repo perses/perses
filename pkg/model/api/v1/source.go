@@ -47,13 +47,6 @@ type DiscoverySource struct {
 	Type DiscoveryType `json:"type" yaml:"type"`
 }
 
-func (ds *DiscoverySource) validate() error {
-	if ds.Name == "" {
-		return fmt.Errorf("discovery source name must not be empty")
-	}
-	return nil
-}
-
 // Source records where a GlobalDatasource came from.
 // A nil Source means the datasource was not created by a discovery process:
 // it may have been created manually via the API, provisioned via DaC, or
@@ -68,11 +61,4 @@ func (s *Source) GetDiscovery() *DiscoverySource {
 		return nil
 	}
 	return s.Discovery
-}
-
-func (s *Source) validate() error {
-	if s.Discovery != nil {
-		return s.Discovery.validate()
-	}
-	return nil
 }
