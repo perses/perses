@@ -36,6 +36,7 @@ import (
 	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 )
@@ -118,6 +119,8 @@ type Proxy struct {
 	// ForwardCallerAuthorization defines if the Authorization header sent by the caller can be forwarded to the datasource.
 	// The zero value (false) is the safe default: the header is removed.
 	ForwardCallerAuthorization bool
+	// EnableTracing creates a span for the request sent to the datasource and propagates the trace context to it.
+	EnableTracing bool
 }
 
 // New returns the Proxy described by p, once verified it holds the settings required to serve requests safely:
@@ -198,7 +201,7 @@ func (h *Proxy) Serve(c *echo.Context) error {
 	reverseProxy.ModifyResponse = secureResponse
 	// use a dedicated HTTP transport to avoid any TLS encryption issues
 	var transportErr error
-	reverseProxy.Transport, transportErr = h.getTransport()
+	reverseProxy.Transport, transportErr = h.getRoundTripper()
 	if transportErr != nil {
 		return transportErr
 	}
@@ -431,6 +434,20 @@ func (h *Proxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oauth2
 // getTransport returns the transport to reach the datasource.
 // For a saved datasource, the transport is cached so the connections are reused across requests.
 // For an unsaved datasource, a new transport is built for each request.
+// getRoundTripper returns the transport used to reach the datasource.
+// When the tracing is enabled, it creates a span for the request sent to the datasource and propagates the trace context to it.
+// When the tracing is disabled, the request is sent unchanged (including the trace headers received by Perses).
+func (h *Proxy) getRoundTripper() (http.RoundTripper, error) {
+	transport, err := h.getTransport()
+	if err != nil {
+		return nil, err
+	}
+	if h.EnableTracing {
+		return otelhttp.NewTransport(transport), nil
+	}
+	return transport, nil
+}
+
 func (h *Proxy) getTransport() (*http.Transport, error) {
 	if h.Transports == nil || len(h.TransportKey) == 0 {
 		return h.prepareTransport()

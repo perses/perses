@@ -32,7 +32,33 @@ import (
 	"github.com/perses/perses/ui"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 )
+
+// setupOpenTelemetry registers the provider exporting the traces and the middleware tracing the HTTP requests.
+// It does nothing when OpenTelemetry is disabled.
+func setupOpenTelemetry(runner *app.Runner, conf config.OpenTelemetry, apiPrefix string) error {
+	if !conf.Enable {
+		return nil
+	}
+	provider, err := newTracerProvider(conf)
+	if err != nil {
+		return err
+	}
+	// The runner registers the provider globally and shuts it down (flushing the remaining spans) when Perses stops.
+	runner.OTeLProviderBuilder().SetProvider(provider)
+	propagator := propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{})
+	otel.SetTextMapPropagator(propagator)
+	// The provider is registered globally only when the runner starts, so it is given to the middleware directly.
+	runner.HTTPServerBuilder().Middleware(middleware.OpenTelemetryWithConfig(middleware.OpenTelemetryConfig{
+		// The metrics are scraped and the health is checked by the probes very often: tracing them would only be noise.
+		IgnoredRoutes:  []string{"/metrics", apiPrefix + utils.APIV1Prefix + "/health"},
+		TracerProvider: provider,
+		Propagators:    propagator,
+	}))
+	return nil
+}
 
 func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, banner string) (*app.Runner, dependency.Manager, error) {
 	dependencyManager, err := dependency.NewManager(conf)
@@ -46,6 +72,9 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	persesAPI := NewPersesAPI(dependencyManager, conf)
 	persesFrontend := ui.NewPersesFrontend(conf, dependencyManager.Service().GetPlugin())
 	runner := app.NewRunner().WithDefaultHTTPServerAndPrometheusRegisterer(utils.MetricNamespace, registry, registry).SetBanner(banner)
+	if otelErr := setupOpenTelemetry(runner, conf.OpenTelemetry, conf.APIPrefix); otelErr != nil {
+		return nil, nil, otelErr
+	}
 
 	// enable cleanup of the ephemeral dashboards once their ttl is reached
 	if conf.EphemeralDashboard.Enable {
