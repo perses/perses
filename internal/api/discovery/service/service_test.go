@@ -200,7 +200,7 @@ func TestApply_UpdatesExistingOwnedDatasource(t *testing.T) {
 	// ds-a1 is re-discovered; Apply should update it (conflict → Get → ownership match → Update).
 	updated := makeEntity("ds-a1")
 	updated.Spec.Default = true
-	svc.Apply(context.Background(), []*v1.GlobalDatasource{updated})
+	require.NoError(t, svc.Apply(context.Background(), []*v1.GlobalDatasource{updated}))
 
 	ds := fake.store["ds-a1"]
 	require.NotNil(t, ds)
@@ -214,7 +214,8 @@ func TestApply_DoesNotTakeOverAnotherDiscoverysDatasource(t *testing.T) {
 	fake := newFakeService(storeEntity("ds-b1", "kube-staging"))
 	svc := New(false, fake, v1.DiscoverySource{Name: "kube-prod", Type: v1.DiscoveryTypeKubernetes})
 
-	svc.Apply(context.Background(), []*v1.GlobalDatasource{makeEntity("ds-b1")})
+	assert.Error(t, svc.Apply(context.Background(), []*v1.GlobalDatasource{makeEntity("ds-b1")}),
+		"attempting to claim another discovery's datasource should return an error")
 
 	ds := fake.store["ds-b1"]
 	require.NotNil(t, ds)
@@ -227,7 +228,7 @@ func TestApply_AdoptsNilSourceDatasource(t *testing.T) {
 	fake := newFakeService(manual)
 	svc := New(false, fake, v1.DiscoverySource{Name: "kube-prod", Type: v1.DiscoveryTypeKubernetes})
 
-	svc.Apply(context.Background(), []*v1.GlobalDatasource{makeEntity("ds-manual")})
+	require.NoError(t, svc.Apply(context.Background(), []*v1.GlobalDatasource{makeEntity("ds-manual")}))
 
 	ds := fake.store["ds-manual"]
 	require.NotNil(t, ds)
@@ -243,7 +244,7 @@ func TestApplyService_PreservesDefault(t *testing.T) {
 	svc := New(false, fake, v1.DiscoverySource{Name: "kube-prod", Type: v1.DiscoveryTypeKubernetes})
 
 	// The newly discovered entity does NOT have Default set.
-	svc.Apply(context.Background(), []*v1.GlobalDatasource{makeEntity("ds-a1")})
+	require.NoError(t, svc.Apply(context.Background(), []*v1.GlobalDatasource{makeEntity("ds-a1")}))
 
 	ds := fake.store["ds-a1"]
 	require.NotNil(t, ds)
