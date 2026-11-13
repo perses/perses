@@ -141,7 +141,7 @@ func storeNames(svc *fakeGlobalDatasourceService) []string {
 
 func TestApply_StampsSourceAndDiscoveryName(t *testing.T) {
 	fake := newFakeService()
-	svc := New(false, fake, "kube-prod", v1.DiscoveryTypeKubernetes)
+	svc := New(false, fake, v1.DiscoverySource{Name: "kube-prod", Type: v1.DiscoveryTypeKubernetes})
 
 	svc.Apply([]*v1.GlobalDatasource{makeEntity("ds-a1"), makeEntity("ds-a2")})
 
@@ -163,7 +163,7 @@ func TestApply_DeletesStaleEntriesScopedToDiscovery(t *testing.T) {
 		storeEntity("ds-a2", "kube-prod"),
 		storeEntity("ds-b1", "kube-staging"),
 	)
-	svc := New(false, fake, "kube-prod", v1.DiscoveryTypeKubernetes)
+	svc := New(false, fake, v1.DiscoverySource{Name: "kube-prod", Type: v1.DiscoveryTypeKubernetes})
 
 	// kube-prod's new result contains only ds-a1 — ds-a2 has disappeared.
 	svc.Apply([]*v1.GlobalDatasource{makeEntity("ds-a1")})
@@ -178,7 +178,7 @@ func TestApply_NoDeleteWhenListErrors(t *testing.T) {
 		storeEntity("ds-a2", "kube-prod"),
 	)
 	fake.listError = fmt.Errorf("database unavailable")
-	svc := New(false, fake, "kube-prod", v1.DiscoveryTypeKubernetes)
+	svc := New(false, fake, v1.DiscoverySource{Name: "kube-prod", Type: v1.DiscoveryTypeKubernetes})
 
 	// Apply with an empty list — without the guard, this would delete everything.
 	svc.Apply([]*v1.GlobalDatasource{})

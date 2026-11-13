@@ -26,18 +26,14 @@ import (
 func New(cfg config.Config, serviceManager dependency.ServiceManager, caseSensitive bool) ([]taskhelper.Helper, error) {
 	var helpers []taskhelper.Helper
 	for _, c := range cfg.Datasource.Global.Discovery {
-		var discoveryType v1.DiscoveryType
-		if c.HTTPDiscovery != nil {
-			discoveryType = v1.DiscoveryTypeHTTP
-		} else if c.KubernetesDiscovery != nil {
-			discoveryType = v1.DiscoveryTypeKubernetes
-		}
-		svc := service.New(caseSensitive, serviceManager.GetGlobalDatasource(), c.Name, discoveryType)
 		var helper taskhelper.Helper
 		var err error
-		if c.HTTPDiscovery != nil {
+		switch {
+		case c.HTTPDiscovery != nil:
+			svc := service.New(caseSensitive, serviceManager.GetGlobalDatasource(), v1.DiscoverySource{Name: c.Name, Type: v1.DiscoveryTypeHTTP})
 			helper, err = httpsd.NewDiscovery(c.Name, c.RefreshInterval, c.HTTPDiscovery, svc)
-		} else if c.KubernetesDiscovery != nil {
+		case c.KubernetesDiscovery != nil:
+			svc := service.New(caseSensitive, serviceManager.GetGlobalDatasource(), v1.DiscoverySource{Name: c.Name, Type: v1.DiscoveryTypeKubernetes})
 			helper, err = kubesd.NewDiscovery(c.Name, c.RefreshInterval, c.KubernetesDiscovery, svc, serviceManager.GetSchema())
 		}
 		if err != nil {

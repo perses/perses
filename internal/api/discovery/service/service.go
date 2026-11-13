@@ -32,20 +32,18 @@ func containsDatasource(sources []string, name string) bool {
 	return false
 }
 
-func New(caseSensitive bool, svc globaldatasource.Service, discoveryName string, discoveryType v1.DiscoveryType) *ApplyService {
+func New(caseSensitive bool, svc globaldatasource.Service, discoverySource v1.DiscoverySource) *ApplyService {
 	return &ApplyService{
-		caseSensitive: caseSensitive,
-		svc:           svc,
-		discoveryName: discoveryName,
-		discoveryType: discoveryType,
+		caseSensitive:   caseSensitive,
+		svc:             svc,
+		discoverySource: discoverySource,
 	}
 }
 
 type ApplyService struct {
-	caseSensitive bool
-	svc           globaldatasource.Service
-	discoveryName string
-	discoveryType v1.DiscoveryType
+	caseSensitive   bool
+	svc             globaldatasource.Service
+	discoverySource v1.DiscoverySource
 }
 
 func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
@@ -57,8 +55,8 @@ func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 	for _, entity := range entities {
 		entity.Source = &v1.Source{
 			Discovery: &v1.DiscoverySource{
-				Name: a.discoveryName,
-				Type: a.discoveryType,
+				Name: a.discoverySource.Name,
+				Type: a.discoverySource.Type,
 			},
 		}
 		entity.GetMetadata().Flatten(a.caseSensitive)
@@ -97,8 +95,8 @@ func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 
 	foundDatasources, err := a.svc.List(
 		&globaldatasource.Query{
-			DiscoveryName: a.discoveryName,
-			DiscoveryType: a.discoveryType,
+			DiscoveryName: a.discoverySource.Name,
+			DiscoveryType: a.discoverySource.Type,
 		})
 	if err != nil {
 		logrus.WithError(err).Error("unable to get discovered globaldatasources")

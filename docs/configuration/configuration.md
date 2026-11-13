@@ -941,7 +941,7 @@ max_timeout: <duration> | default = default_timeout # Optional
 #### GlobalDatasourceDiscovery config
 
 ```yaml
-# The name of the discovery config. It is used for logging purposes only
+# The name of the discovery config. It uniquely identifies this discovery configuration and is used as the ownership key for datasources managed by it. Must be unique across all discovery entries.
 name: <string>
 
 # Refresh interval to run the discovery

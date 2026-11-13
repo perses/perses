@@ -38,6 +38,13 @@ func (c *GlobalDatasourceConfig) Verify() error {
 	if c.Disable && len(c.Discovery) > 0 {
 		return fmt.Errorf("the global datasource is disabled, you cannot use the discovery feature")
 	}
+	seen := make(map[string]struct{}, len(c.Discovery))
+	for _, d := range c.Discovery {
+		if _, exists := seen[d.Name]; exists {
+			return fmt.Errorf("duplicate discovery name %q: each discovery must have a unique name", d.Name)
+		}
+		seen[d.Name] = struct{}{}
+	}
 	return nil
 }
 
