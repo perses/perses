@@ -144,11 +144,11 @@ func newHTTPTraceExporter(conf config.OpenTelemetry, tokenSource oauth2.TokenSou
 	}
 	// A client of our own only when needed: it replaces the TLS settings of the OTEL_EXPORTER_OTLP_* variables.
 	if conf.TLSConfig != nil || tokenSource != nil {
-		var roundTripper http.RoundTripper
-		roundTripper, err := newTransport(conf)
+		transport, err := newTransport(conf)
 		if err != nil {
 			return nil, err
 		}
+		var roundTripper http.RoundTripper = transport
 		if tokenSource != nil {
 			roundTripper = &oauth2.Transport{Source: tokenSource, Base: roundTripper}
 		}
@@ -170,7 +170,11 @@ func newTransport(conf config.OpenTelemetry) (*http.Transport, error) {
 	if err != nil {
 		return nil, err
 	}
-	transport := http.DefaultTransport.(*http.Transport).Clone()
+	defaultTransport, ok := http.DefaultTransport.(*http.Transport)
+	if !ok {
+		return nil, fmt.Errorf("http.DefaultTransport is not an *http.Transport")
+	}
+	transport := defaultTransport.Clone()
 	transport.TLSClientConfig = tlsConfig
 	return transport, nil
 }
@@ -201,45 +205,71 @@ func newTokenSource(conf config.OpenTelemetry) (oauth2.TokenSource, error) {
 	}
 }
 
+// newBasicAuthTokenSource returns a token source reading the password each time a token is requested,
+// so a rotated passwordFile is taken into account. The password is read once here, to fail at startup when it can't be.
 func newBasicAuthTokenSource(publicBasicAuth *secret.PublicBasicAuth) (oauth2.TokenSource, error) {
 	basicAuth, err := publicBasicAuth.Private()
 	if err != nil {
 		return nil, err
 	}
-	password, err := basicAuth.GetPassword()
+	source := &basicAuthTokenSource{basicAuth: basicAuth}
+	if _, err := source.Token(); err != nil {
+		return nil, err
+	}
+	return source, nil
+}
+
+type basicAuthTokenSource struct {
+	basicAuth *secret.BasicAuth
+}
+
+func (s *basicAuthTokenSource) Token() (*oauth2.Token, error) {
+	password, err := s.basicAuth.GetPassword()
 	if err != nil {
 		return nil, err
 	}
-	return oauth2.StaticTokenSource(&oauth2.Token{
-		AccessToken: base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "%s:%s", basicAuth.Username, password)),
+	return &oauth2.Token{
+		AccessToken: base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "%s:%s", s.basicAuth.Username, password)),
 		TokenType:   "basic",
-	}), nil
+	}, nil
 }
 
+// newAuthorizationTokenSource returns a token source reading the credentials each time a token is requested,
+// so a rotated credentialsFile is taken into account. The credentials are read once here, to fail at startup when they can't be.
 func newAuthorizationTokenSource(publicAuthorization *secret.PublicAuthorization) (oauth2.TokenSource, error) {
 	authorization, err := publicAuthorization.Private()
 	if err != nil {
 		return nil, err
 	}
-	credential, err := authorization.GetCredentials()
+	source := &authorizationTokenSource{authorization: authorization}
+	if _, err := source.Token(); err != nil {
+		return nil, err
+	}
+	return source, nil
+}
+
+type authorizationTokenSource struct {
+	authorization *secret.Authorization
+}
+
+func (s *authorizationTokenSource) Token() (*oauth2.Token, error) {
+	credential, err := s.authorization.GetCredentials()
 	if err != nil {
 		return nil, err
 	}
-	return oauth2.StaticTokenSource(&oauth2.Token{
-		AccessToken: credential,
-		TokenType:   authorization.Type,
-	}), nil
+	return &oauth2.Token{AccessToken: credential, TokenType: s.authorization.Type}, nil
 }
 
 // newOAuthTokenSource returns the token source of the OAuth client credentials. It caches the token and gets a new one when it expires.
+// The client secret is read each time a new token is requested, so a rotated clientSecretFile is taken into account.
 // The token endpoint is reached with the TLS config of the OTLP receiver.
 func newOAuthTokenSource(conf config.OpenTelemetry) (oauth2.TokenSource, error) {
 	oauth, err := conf.OAuth.Private()
 	if err != nil {
 		return nil, err
 	}
-	clientSecret, err := oauth.GetClientSecret()
-	if err != nil {
+	// Read once here, to fail at startup when it can't be.
+	if _, err := oauth.GetClientSecret(); err != nil {
 		return nil, err
 	}
 	transport, err := newTransport(conf)
@@ -250,13 +280,33 @@ func newOAuthTokenSource(conf config.OpenTelemetry) (oauth2.TokenSource, error) 
 		Transport: transport,
 		Timeout:   tokenRequestTimeout,
 	})
-	oauthConfig := &clientcredentials.Config{
-		ClientID:       oauth.ClientID,
-		ClientSecret:   clientSecret,
-		TokenURL:       oauth.TokenURL,
-		Scopes:         oauth.Scopes,
-		EndpointParams: oauth.EndpointParams,
-		AuthStyle:      oauth2.AuthStyle(oauth.AuthStyle),
+	return oauth2.ReuseTokenSource(nil, &oauthTokenSource{
+		ctx:   ctx,
+		oauth: oauth,
+		config: &clientcredentials.Config{
+			ClientID:       oauth.ClientID,
+			TokenURL:       oauth.TokenURL,
+			Scopes:         oauth.Scopes,
+			EndpointParams: oauth.EndpointParams,
+			AuthStyle:      oauth2.AuthStyle(oauth.AuthStyle),
+		},
+	}), nil
+}
+
+// oauthTokenSource gets a new token from the token endpoint, with the client secret read when it is called.
+// It must be wrapped by oauth2.ReuseTokenSource, which caches the token and serializes the calls to Token.
+type oauthTokenSource struct {
+	ctx   context.Context
+	oauth *secret.OAuth
+	// config is kept across the calls, as it caches the auth style detected when the AuthStyle is not set.
+	config *clientcredentials.Config
+}
+
+func (s *oauthTokenSource) Token() (*oauth2.Token, error) {
+	clientSecret, err := s.oauth.GetClientSecret()
+	if err != nil {
+		return nil, err
 	}
-	return oauthConfig.TokenSource(ctx), nil
+	s.config.ClientSecret = clientSecret
+	return s.config.Token(s.ctx)
 }

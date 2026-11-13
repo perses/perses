@@ -1382,6 +1382,19 @@ variable: a path in the URL is used as-is. Only a URL without a path is complete
 The standard environment variables `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` can be used to change the name
 of the service (`perses` by default) or to add attributes to the resource, like the namespace of the service.
 
+The files of the credentials (`credentialsFile`, `passwordFile` and `clientSecretFile`) are read each time a token is
+needed, so a rotated file (like a Kubernetes projected service account token) is taken into account without restarting
+Perses.
+
+The sampling decision of a request received with a `traceparent` header comes from the client. Any client able to reach
+Perses, including with anonymous requests, can force its requests to be traced by sending a sampled `traceparent`
+header, and so increase the volume of traces sent to the receiver. When Perses is exposed publicly, you can limit it in
+your collector, or remove the `traceparent` header in the reverse proxy in front of Perses.
+
+The span of a request sent to a datasource records its URL (`url.full`) with the values of the query parameters
+replaced by `REDACTED`, as they can carry credentials (of the datasource URL or of the query). The path of the URL is
+kept as-is.
+
 Example, with TLS and a bearer token read from a file:
 
 ```yaml

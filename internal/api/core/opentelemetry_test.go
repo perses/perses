@@ -16,10 +16,14 @@ package core
 import (
 	"context"
 	"crypto/tls"
+	"encoding/base64"
+	"encoding/json"
 	"encoding/pem"
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"sync"
 	"testing"
 
@@ -30,6 +34,7 @@ import (
 	"github.com/stretchr/testify/require"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	collectortrace "go.opentelemetry.io/proto/otlp/collector/trace/v1"
+	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
@@ -187,4 +192,109 @@ func TestHTTPTraceExporterWithHTTPEndpoint(t *testing.T) {
 	mutex.Lock()
 	defer mutex.Unlock()
 	assert.Equal(t, []string{"/v1/traces"}, paths)
+}
+
+// newOAuthTokenServer starts a TLS token endpoint (with the same certificate as newOTLPHTTPReceiver) returning,
+// for the client credentials it receives, the token "token-of-<client secret>" that expires immediately.
+func newOAuthTokenServer(t *testing.T) *httptest.Server {
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		clientID, clientSecret, ok := r.BasicAuth()
+		if !ok || clientID != "perses" || r.FormValue("grant_type") != "client_credentials" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{"access_token": "token-of-" + clientSecret, "token_type": "Bearer", "expires_in": 1})
+	}))
+	t.Cleanup(server.Close)
+	return server
+}
+
+func TestHTTPTraceExporterUsesOAuth(t *testing.T) {
+	server, ca, requests := newOTLPHTTPReceiver(t)
+	tokenServer := newOAuthTokenServer(t)
+	exportOneSpan(t, config.OpenTelemetry{
+		Enable:    true,
+		Endpoint:  common.MustParseURL(server.URL),
+		Protocol:  config.OTLPProtocolHTTPProtobuf,
+		TLSConfig: &secret.PublicTLSConfig{CA: secret.Hidden(ca)},
+		OAuth: &secret.PublicOAuth{
+			ClientID:     "perses",
+			ClientSecret: "secret", //nolint:gosec // G101: test value, not a real credential
+			TokenURL:     tokenServer.URL,
+			AuthStyle:    int(oauth2.AuthStyleInHeader),
+		},
+	})
+	received := requests()
+	require.Len(t, received, 1)
+	assert.Equal(t, "Bearer token-of-secret", received[0].headers.Get("Authorization"))
+}
+
+// The credentials files can be rotated (like a Kubernetes projected service account token):
+// they are read each time a token is requested, and once when the token source is created.
+func TestTokenSourceReadsRotatedFiles(t *testing.T) {
+	_, ca, _ := newOTLPHTTPReceiver(t)
+	tokenServer := newOAuthTokenServer(t)
+	testSuite := []struct {
+		title     string
+		conf      func(file string) config.OpenTelemetry
+		tokenOfV1 string
+		tokenOfV2 string
+	}{
+		{
+			title: "authorization credentialsFile",
+			conf: func(file string) config.OpenTelemetry {
+				return config.OpenTelemetry{Authorization: &secret.PublicAuthorization{Type: "Bearer", CredentialsFile: file}}
+			},
+			tokenOfV1: "Bearer v1",
+			tokenOfV2: "Bearer v2",
+		},
+		{
+			title: "basic_auth passwordFile",
+			conf: func(file string) config.OpenTelemetry {
+				return config.OpenTelemetry{BasicAuth: &secret.PublicBasicAuth{Username: "perses", PasswordFile: file}}
+			},
+			tokenOfV1: "Basic " + base64.StdEncoding.EncodeToString([]byte("perses:v1")),
+			tokenOfV2: "Basic " + base64.StdEncoding.EncodeToString([]byte("perses:v2")),
+		},
+		{
+			title: "oauth clientSecretFile",
+			conf: func(file string) config.OpenTelemetry {
+				return config.OpenTelemetry{
+					TLSConfig: &secret.PublicTLSConfig{CA: secret.Hidden(ca)},
+					OAuth: &secret.PublicOAuth{
+						ClientID:         "perses",
+						ClientSecretFile: file,
+						TokenURL:         tokenServer.URL,
+						AuthStyle:        int(oauth2.AuthStyleInHeader),
+					},
+				}
+			},
+			tokenOfV1: "Bearer token-of-v1",
+			tokenOfV2: "Bearer token-of-v2",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			file := filepath.Join(t.TempDir(), "credentials")
+			require.NoError(t, os.WriteFile(file, []byte("v1"), 0o600))
+			tokenSource, err := newTokenSource(test.conf(file))
+			require.NoError(t, err)
+			assertToken(t, tokenSource, test.tokenOfV1)
+
+			require.NoError(t, os.WriteFile(file, []byte("v2"), 0o600))
+			assertToken(t, tokenSource, test.tokenOfV2)
+
+			// A file that can't be read fails at startup.
+			_, err = newTokenSource(test.conf(filepath.Join(t.TempDir(), "missing")))
+			assert.ErrorIs(t, err, os.ErrNotExist)
+		})
+	}
+}
+
+func assertToken(t *testing.T, tokenSource oauth2.TokenSource, expected string) {
+	t.Helper()
+	token, err := tokenSource.Token()
+	require.NoError(t, err)
+	assert.Equal(t, expected, token.Type()+" "+token.AccessToken)
 }

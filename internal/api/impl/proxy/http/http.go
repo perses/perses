@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"slices"
 	"strings"
 	"sync"
@@ -37,6 +38,9 @@ import (
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	// The version used by otelhttp, which records the attribute replaced by redactURLRoundTripper.
+	semconv "go.opentelemetry.io/otel/semconv/v1.43.0"
+	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 )
@@ -431,9 +435,6 @@ func (h *Proxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oauth2
 	return token, err
 }
 
-// getTransport returns the transport to reach the datasource.
-// For a saved datasource, the transport is cached so the connections are reused across requests.
-// For an unsaved datasource, a new transport is built for each request.
 // getRoundTripper returns the transport used to reach the datasource.
 // When the tracing is enabled, it creates a span for the request sent to the datasource and propagates the trace context to it.
 // When the tracing is disabled, the request is sent unchanged (including the trace headers received by Perses).
@@ -443,11 +444,42 @@ func (h *Proxy) getRoundTripper() (http.RoundTripper, error) {
 		return nil, err
 	}
 	if h.EnableTracing {
-		return otelhttp.NewTransport(transport), nil
+		return otelhttp.NewTransport(&redactURLRoundTripper{next: transport}), nil
 	}
 	return transport, nil
 }
 
+// redactURLRoundTripper replaces the url.full attribute recorded by otelhttp on the client span with a URL whose query values
+// are redacted, as the query (of the request or of the datasource URL) can carry credentials, like an api_key parameter.
+// It must be wrapped by otelhttp.NewTransport: otelhttp records url.full before calling it, and setting an attribute again replaces its value.
+type redactURLRoundTripper struct {
+	next http.RoundTripper
+}
+
+func (r *redactURLRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	trace.SpanFromContext(req.Context()).SetAttributes(semconv.URLFull(redactURL(req.URL)))
+	return r.next.RoundTrip(req)
+}
+
+// redactURL returns the URL without its user info, and with the values of its query parameters replaced by REDACTED.
+func redactURL(u *url.URL) string {
+	redacted := *u
+	redacted.User = nil
+	if len(redacted.RawQuery) > 0 {
+		query := redacted.Query()
+		for _, values := range query {
+			for i := range values {
+				values[i] = "REDACTED"
+			}
+		}
+		redacted.RawQuery = query.Encode()
+	}
+	return redacted.String()
+}
+
+// getTransport returns the transport to reach the datasource.
+// For a saved datasource, the transport is cached so the connections are reused across requests.
+// For an unsaved datasource, a new transport is built for each request.
 func (h *Proxy) getTransport() (*http.Transport, error) {
 	if h.Transports == nil || len(h.TransportKey) == 0 {
 		return h.prepareTransport()
