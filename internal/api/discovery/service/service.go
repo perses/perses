@@ -14,6 +14,8 @@
 package service
 
 import (
+	"context"
+	"errors"
 	"strings"
 
 	databaseModel "github.com/perses/perses/internal/api/database/model"
@@ -22,15 +24,6 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
-
-func containsDatasource(sources []string, name string) bool {
-	for _, ds := range sources {
-		if strings.EqualFold(ds, name) {
-			return true
-		}
-	}
-	return false
-}
 
 func New(caseSensitive bool, svc globaldatasource.Service, discoverySource v1.DiscoverySource) *ApplyService {
 	return &ApplyService{
@@ -46,13 +39,17 @@ type ApplyService struct {
 	discoverySource v1.DiscoverySource
 }
 
-func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
+func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasource) error {
 	if len(entities) == 0 {
-		return
+		return nil
 	}
 
 	var currentNames []string
+	var errs []error
 	for _, entity := range entities {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		entity.Source = &v1.Source{
 			Discovery: &v1.DiscoverySource{
 				Name: a.discoverySource.Name,
@@ -67,28 +64,34 @@ func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 		}
 
 		if !databaseModel.IsKeyConflict(createErr) {
-			logrus.WithError(createErr).Errorf("unable to create the globaldatasource %q", entity.Metadata.Name)
+			errs = append(errs, createErr)
 			continue
 		}
 
-		param := apiInterface.Parameters{
-			Name: entity.Metadata.Name,
-		}
-
-		// check for existing global datasources with the same name
-		// if the name exists, but datasource type differs, log and skip update
+		param := apiInterface.Parameters{Name: entity.Metadata.Name}
 		existing, getErr := a.svc.Get(param)
 		if getErr != nil {
-			logrus.WithError(getErr).Errorf("unable to get the globaldatasource %q", entity.Metadata.Name)
+			errs = append(errs, getErr)
 			continue
 		}
-		if existing.Source == nil || existing.Source.Discovery == nil {
-			logrus.Warnf("skipping update of globaldatasource %q: not a discovery-managed datasource", entity.Metadata.Name)
-			continue
+
+		existingDiscovery := existing.Source.GetDiscovery()
+		if existingDiscovery != nil {
+			// Another discovery owns this datasource — skip.
+			if existingDiscovery.Name != a.discoverySource.Name || existingDiscovery.Type != a.discoverySource.Type {
+				errs = append(errs, errors.New("skipping update of globaldatasource "+entity.Metadata.Name+": owned by a different discovery"))
+				continue
+			}
+		} else {
+			// Nil source: datasource predates discovery (created manually, provisioned, or
+			// created before this feature was introduced). Adopt it: stamp the source on first
+			// update so it is managed going forward.
+			logrus.Infof("adopting globaldatasource %q: stamping discovery source %q (%s)", entity.Metadata.Name, a.discoverySource.Name, a.discoverySource.Type)
 		}
 
 		if _, updateError := a.svc.Update(nil, entity, param); updateError != nil {
-			logrus.WithError(updateError).Errorf("unable to update the globaldatasource %q", entity.Metadata.Name)
+			errs = append(errs, updateError)
+			continue
 		}
 		currentNames = append(currentNames, entity.Metadata.Name)
 	}
@@ -100,18 +103,28 @@ func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 		})
 	if err != nil {
 		logrus.WithError(err).Error("unable to get discovered globaldatasources")
-		return
+		return errors.Join(append(errs, err)...)
 	}
 	for _, ds := range foundDatasources {
+		if err := ctx.Err(); err != nil {
+			return errors.Join(append(errs, err)...)
+		}
 		if !containsDatasource(currentNames, ds.Metadata.Name) {
-			deleteParameters := apiInterface.Parameters{
-				Name: ds.Metadata.Name,
-			}
-			err = a.svc.Delete(nil, deleteParameters)
-			if err != nil {
-				logrus.WithError(err).Errorf("unable to delete the globaldatasource %q", ds.Metadata.Name)
+			deleteParameters := apiInterface.Parameters{Name: ds.Metadata.Name}
+			if deleteErr := a.svc.Delete(nil, deleteParameters); deleteErr != nil {
+				errs = append(errs, deleteErr)
 			}
 		}
 	}
 
+	return errors.Join(errs...)
+}
+
+func containsDatasource(sources []string, name string) bool {
+	for _, ds := range sources {
+		if strings.EqualFold(ds, name) {
+			return true
+		}
+	}
+	return false
 }

@@ -48,7 +48,7 @@ type discovery struct {
 	name       string
 }
 
-func (d *discovery) Execute(_ context.Context, _ context.CancelFunc) error {
+func (d *discovery) Execute(ctx context.Context, _ context.CancelFunc) error {
 	var result []*v1.GlobalDatasource
 	err := d.restClient.Get().
 		Do().
@@ -57,7 +57,9 @@ func (d *discovery) Execute(_ context.Context, _ context.CancelFunc) error {
 	if err != nil {
 		return fmt.Errorf("failed to execute http discovery %q: %w", d.name, err)
 	}
-	d.svc.Apply(result)
+	if err := d.svc.Apply(ctx, result); err != nil {
+		return fmt.Errorf("http discovery %q apply failed: %w", d.name, err)
+	}
 	return nil
 }
 
