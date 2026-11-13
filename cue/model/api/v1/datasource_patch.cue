@@ -19,6 +19,7 @@ import (
 	kind:     #KindGlobalDatasource @go(Kind)
 	metadata: #Metadata             @go(Metadata)
 	spec:     datasource.#Spec      @go(Spec)
+	source?:  null | #Source        @go(Source,*Source)
 }
 
 #Datasource: {
