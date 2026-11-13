@@ -4,14 +4,17 @@
 
 package v1
 
-#DiscoveryType: string // #enumDiscoveryType
+#DiscoveryType: _ // #enumDiscoveryType
 
 #enumDiscoveryType:
-	#KubernetesType |
-	#HTTPType
+	#DiscoveryTypeKubernetes |
+	#DiscoveryTypeHTTP
 
-#KubernetesType: #DiscoveryType & "kubernetes"
-#HTTPType:       #DiscoveryType & "http"
+// DiscoveryTypeKubernetes identifies a datasource discovered via Kubernetes service discovery.
+#DiscoveryTypeKubernetes: #DiscoveryType & "kubernetes"
+
+// DiscoveryTypeHTTP identifies a datasource discovered via HTTP-based service discovery.
+#DiscoveryTypeHTTP: #DiscoveryType & "http"
 
 // DiscoverySource identifies the datasource discovery configuration that created a datasource.
 #DiscoverySource: {
@@ -20,7 +23,9 @@ package v1
 }
 
 // Source records where a GlobalDatasource came from.
-// Nil means the datasource was created manually.
+// A nil Source means the datasource was not created by a discovery process:
+// it may have been created manually via the API, provisioned via DaC, or
+// it was created before datasource discovery was introduced.
 #Source: {
 	discovery?: null | #DiscoverySource @go(Discovery,*DiscoverySource)
 }
