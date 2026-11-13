@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"slices"
 	"strings"
 	"sync"
@@ -36,6 +37,10 @@ import (
 	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	// The version used by otelhttp, which records the attribute replaced by redactURLRoundTripper.
+	semconv "go.opentelemetry.io/otel/semconv/v1.43.0"
+	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 )
@@ -118,6 +123,8 @@ type Proxy struct {
 	// ForwardCallerAuthorization defines if the Authorization header sent by the caller can be forwarded to the datasource.
 	// The zero value (false) is the safe default: the header is removed.
 	ForwardCallerAuthorization bool
+	// EnableTracing creates a span for the request sent to the datasource and propagates the trace context to it.
+	EnableTracing bool
 }
 
 // New returns the Proxy described by p, once verified it holds the settings required to serve requests safely:
@@ -198,7 +205,7 @@ func (h *Proxy) Serve(c *echo.Context) error {
 	reverseProxy.ModifyResponse = secureResponse
 	// use a dedicated HTTP transport to avoid any TLS encryption issues
 	var transportErr error
-	reverseProxy.Transport, transportErr = h.getTransport()
+	reverseProxy.Transport, transportErr = h.getRoundTripper()
 	if transportErr != nil {
 		return transportErr
 	}
@@ -426,6 +433,48 @@ func (h *Proxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oauth2
 	}
 
 	return token, err
+}
+
+// getRoundTripper returns the transport used to reach the datasource.
+// When the tracing is enabled, it creates a span for the request sent to the datasource and propagates the trace context to it.
+// When the tracing is disabled, the request is sent unchanged (including the trace headers received by Perses).
+func (h *Proxy) getRoundTripper() (http.RoundTripper, error) {
+	transport, err := h.getTransport()
+	if err != nil {
+		return nil, err
+	}
+	if h.EnableTracing {
+		return otelhttp.NewTransport(&redactURLRoundTripper{next: transport}), nil
+	}
+	return transport, nil
+}
+
+// redactURLRoundTripper replaces the url.full attribute recorded by otelhttp on the client span with a URL whose query values
+// are redacted, as the query (of the request or of the datasource URL) can carry credentials, like an api_key parameter.
+// It must be wrapped by otelhttp.NewTransport: otelhttp records url.full before calling it, and setting an attribute again replaces its value.
+type redactURLRoundTripper struct {
+	next http.RoundTripper
+}
+
+func (r *redactURLRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	trace.SpanFromContext(req.Context()).SetAttributes(semconv.URLFull(redactURL(req.URL)))
+	return r.next.RoundTrip(req)
+}
+
+// redactURL returns the URL without its user info, and with the values of its query parameters replaced by REDACTED.
+func redactURL(u *url.URL) string {
+	redacted := *u
+	redacted.User = nil
+	if len(redacted.RawQuery) > 0 {
+		query := redacted.Query()
+		for _, values := range query {
+			for i := range values {
+				values[i] = "REDACTED"
+			}
+		}
+		redacted.RawQuery = query.Encode()
+	}
+	return redacted.String()
 }
 
 // getTransport returns the transport to reach the datasource.

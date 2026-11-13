@@ -19,6 +19,7 @@ import (
 	"encoding/pem"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/labstack/echo/v5"
@@ -30,6 +31,12 @@ import (
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/propagation"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func TestNew(t *testing.T) {
@@ -471,4 +478,121 @@ func TestHTTPProxy_serve_removeCallerCredentials(t *testing.T) {
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &headers))
 	assert.NotContains(t, headers, echo.HeaderCookie)
 	assert.NotContains(t, headers, echo.HeaderAuthorization)
+}
+
+// useTestTracing registers a tracer provider recording the spans and the W3C trace context propagator globally,
+// as Perses does when OpenTelemetry is enabled, and restores the previous ones at the end of the test.
+func useTestTracing(t *testing.T) (trace.Tracer, *tracetest.SpanRecorder) {
+	t.Helper()
+	previousProvider, previousPropagator := otel.GetTracerProvider(), otel.GetTextMapPropagator()
+	recorder := tracetest.NewSpanRecorder()
+	provider := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(recorder))
+	otel.SetTracerProvider(provider)
+	otel.SetTextMapPropagator(propagation.TraceContext{})
+	t.Cleanup(func() {
+		otel.SetTracerProvider(previousProvider)
+		otel.SetTextMapPropagator(previousPropagator)
+		_ = provider.Shutdown(context.Background())
+	})
+	return provider.Tracer("test"), recorder
+}
+
+func TestHTTPProxy_serve_tracing(t *testing.T) {
+	const (
+		traceID          = "0af7651916cd43dd8448eb211c80319c"
+		incomingSpanID   = "b7ad6b7169203331"
+		incomingTraceCtx = "00-" + traceID + "-" + incomingSpanID + "-01"
+	)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(r.Header)
+	}))
+	defer server.Close()
+
+	for _, test := range []struct {
+		name          string
+		enableTracing bool
+	}{
+		{name: "tracing enabled: the datasource receives the trace context of the client span", enableTracing: true},
+		{name: "tracing disabled: the trace context received by Perses is forwarded unchanged", enableTracing: false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			tracer, recorder := useTestTracing(t)
+			h := &Proxy{
+				Config:        &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
+				Path:          "/api/v1/query",
+				Guard:         proxytest.NewLoopbackGuard(t),
+				EnableTracing: test.enableTracing,
+			}
+			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/datasource/api/v1/query", nil)
+			req.Header.Set("traceparent", incomingTraceCtx)
+			// The server span created by the OpenTelemetry middleware for the incoming request.
+			ctx := otel.GetTextMapPropagator().Extract(req.Context(), propagation.HeaderCarrier(req.Header))
+			ctx, serverSpan := tracer.Start(ctx, "server")
+			rec := httptest.NewRecorder()
+			require.NoError(t, h.Serve(echo.New().NewContext(req.WithContext(ctx), rec)))
+			serverSpan.End()
+			require.Equal(t, http.StatusOK, rec.Code)
+			var headers http.Header
+			require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &headers))
+
+			if !test.enableTracing {
+				assert.Equal(t, incomingTraceCtx, headers.Get("traceparent"))
+				require.Len(t, recorder.Ended(), 1) // only the server span
+				return
+			}
+			var clientSpans []sdktrace.ReadOnlySpan
+			for _, span := range recorder.Ended() {
+				if span.SpanKind() == trace.SpanKindClient {
+					clientSpans = append(clientSpans, span)
+				}
+			}
+			require.Len(t, clientSpans, 1)
+			assert.Equal(t, serverSpan.SpanContext().SpanID(), clientSpans[0].Parent().SpanID())
+			assert.Equal(t, "00-"+traceID+"-"+clientSpans[0].SpanContext().SpanID().String()+"-01", headers.Get("traceparent"))
+		})
+	}
+}
+
+func TestHTTPProxy_serve_tracingRedactsTheQuery(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+	_, recorder := useTestTracing(t)
+
+	h := &Proxy{
+		Config:        &datasourceHTTP.Config{URL: common.MustParseURL(server.URL + "?api_key=datasource-secret")},
+		Path:          "/api/v1/query",
+		Guard:         proxytest.NewLoopbackGuard(t),
+		EnableTracing: true,
+	}
+	req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/datasource/api/v1/query?query=up&token=query-secret", nil)
+	rec := httptest.NewRecorder()
+	require.NoError(t, h.Serve(echo.New().NewContext(req, rec)))
+	require.Equal(t, http.StatusOK, rec.Code)
+
+	spans := recorder.Ended()
+	require.Len(t, spans, 1)
+	assert.Contains(t, spans[0].Attributes(), attribute.String("url.full", server.URL+"/api/v1/query?api_key=REDACTED&query=REDACTED&token=REDACTED"))
+}
+
+func TestRedactURL(t *testing.T) {
+	testSuite := []struct {
+		title  string
+		url    string
+		result string
+	}{
+		{title: "without query", url: "https://prometheus.example.com/api/v1/query", result: "https://prometheus.example.com/api/v1/query"},
+		{title: "query values are redacted", url: "https://prometheus.example.com/api/v1/query?query=up&api_key=secret", result: "https://prometheus.example.com/api/v1/query?api_key=REDACTED&query=REDACTED"},
+		{title: "every value of a parameter is redacted", url: "https://prometheus.example.com/api/v1/series?match[]=up&match[]=down", result: "https://prometheus.example.com/api/v1/series?match%5B%5D=REDACTED&match%5B%5D=REDACTED"},
+		{title: "user info is removed", url: "https://user:password@prometheus.example.com/api/v1/query", result: "https://prometheus.example.com/api/v1/query"}, //nolint:gosec // G101: test value, not a real credential
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			u, err := url.Parse(test.url)
+			require.NoError(t, err)
+			assert.Equal(t, test.result, redactURL(u))
+		})
+	}
 }

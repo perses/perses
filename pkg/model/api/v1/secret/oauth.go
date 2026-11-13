@@ -45,6 +45,27 @@ func NewPublicOAuth(oauth *OAuth) *PublicOAuth {
 	}
 }
 
+// Private returns the OAuth described by o, with the client ID and secret in clear, once verified it is valid.
+// It is used when the public struct is directly part of a plain configuration (that is never encrypted).
+func (o *PublicOAuth) Private() (*OAuth, error) {
+	if o == nil {
+		return nil, nil
+	}
+	result := &OAuth{
+		ClientID:         string(o.ClientID),
+		ClientSecret:     string(o.ClientSecret),
+		ClientSecretFile: o.ClientSecretFile,
+		TokenURL:         o.TokenURL,
+		Scopes:           o.Scopes,
+		EndpointParams:   o.EndpointParams,
+		AuthStyle:        o.AuthStyle,
+	}
+	if err := result.validate(); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 type OAuth struct {
 	// ClientID is the application's ID.
 	ClientID string `json:"clientID" yaml:"clientID"`

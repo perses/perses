@@ -127,6 +127,9 @@ plugin: <Plugin config> # Optional
 
 # The configuration of the search feature. You can customize the search engine used and the indexation of the resources.
 search: <Search config> # Optional
+
+# The configuration to export the traces of the Perses server with the OpenTelemetry protocol (OTLP).
+opentelemetry: <OpenTelemetry config> # Optional
 ```
 
 ### Security config
@@ -1315,4 +1318,93 @@ excluded_chars: <list of strings> # Optional
 # Syntax is available here: https://github.com/tidwall/gjson/blob/master/SYNTAX.md
 index_keys:
   dashboard: <list of strings | default = ["metadata.name", "spec.display.name"]> # Optional
+```
+
+### OpenTelemetry config
+
+Perses can export the traces of its server with the OpenTelemetry protocol (OTLP), to a receiver like an OpenTelemetry
+Collector.
+
+When enabled, Perses creates a span for each HTTP request it receives (except the `/metrics` and `/api/v1/health`
+endpoints, called very often by Prometheus and the probes), and for each request it sends to a datasource through the
+proxy.
+
+The trace context is read from and propagated with the W3C `traceparent` and `baggage` headers, so a request coming
+from a traced application (like a portal embedding Perses panels) and its queries to the datasource are part of the same
+trace.
+
+```yaml
+# Enable the export of the traces.
+enable: <boolean> | default = false # Optional
+
+# The URL of the OTLP receiver. Required when enabled.
+# With the http scheme, the connection is not encrypted. Use https to connect with TLS.
+# With the http/protobuf protocol, the traces are sent to the path of the URL, or to /v1/traces when the URL has no path.
+endpoint: <url> # Optional
+
+# The transport used to send the telemetry.
+protocol: <enum = "grpc" | "http/protobuf"> | default = "grpc" # Optional
+
+# Config used to connect to an https endpoint.
+tls_config: <TLS config> # Optional
+
+# The credentials sent with each export request. They require an https endpoint.
+# basic_auth, authorization and oauth are mutually exclusive. Use one of them.
+basic_auth: <Basic Auth specification> # Optional
+authorization: <Authorization specification> # Optional
+oauth: <Oauth specification> # Optional
+
+# Headers sent with each export request. Their values are hidden when the configuration is returned by the API,
+# but prefer basic_auth, authorization or oauth for the credentials.
+headers:
+  <string>: <string> # Optional
+
+# Compress the export requests with gzip.
+compression: <boolean> | default = false # Optional
+
+# The maximum duration of an export request, retries included.
+timeout: <duration> | default = 10s # Optional
+
+# The fraction (between 0 and 1) of the traces started by Perses that are sampled.
+# A request received as part of a sampled trace is always traced, whatever this ratio.
+# With the default value, Perses only traces the requests that are part of a sampled trace.
+sampling_ratio: <float> | default = 0 # Optional
+```
+
+The TLS settings, headers and compression that aren't set in this configuration can be set with the standard
+`OTEL_EXPORTER_OTLP_*` environment variables (like `OTEL_EXPORTER_OTLP_CERTIFICATE` or `OTEL_EXPORTER_OTLP_HEADERS`).
+A setting present in this configuration takes precedence over the environment variable. The endpoint and the timeout
+always come from this configuration.
+
+With the http/protobuf protocol, the endpoint is used like the signal-specific `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`
+variable: a path in the URL is used as-is. Only a URL without a path is completed with `/v1/traces`.
+
+The standard environment variables `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` can be used to change the name
+of the service (`perses` by default) or to add attributes to the resource, like the namespace of the service.
+
+The files of the credentials (`credentialsFile`, `passwordFile` and `clientSecretFile`) are read each time a token is
+needed, so a rotated file (like a Kubernetes projected service account token) is taken into account without restarting
+Perses.
+
+The sampling decision of a request received with a `traceparent` header comes from the client. Any client able to reach
+Perses, including with anonymous requests, can force its requests to be traced by sending a sampled `traceparent`
+header, and so increase the volume of traces sent to the receiver. When Perses is exposed publicly, you can limit it in
+your collector, or remove the `traceparent` header in the reverse proxy in front of Perses.
+
+The span of a request sent to a datasource records its URL (`url.full`) with the values of the query parameters
+replaced by `REDACTED`, as they can carry credentials (of the datasource URL or of the query). The path of the URL is
+kept as-is.
+
+Example, with TLS and a bearer token read from a file:
+
+```yaml
+opentelemetry:
+  enable: true
+  endpoint: https://otel-collector.observability:4317
+  tls_config:
+    caFile: /etc/perses/otel/ca.crt
+  authorization:
+    type: Bearer
+    credentialsFile: /etc/perses/otel/token
+  sampling_ratio: 0.1
 ```
