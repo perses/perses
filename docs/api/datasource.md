@@ -195,6 +195,8 @@ URL query parameters:
 - default = `<boolean>` : should be used to filter the list of datasource to only have the default one. You should have
   one default datasource per kind
 - name = `<string>` : should be used to filter the list of datasource based on the prefix name.
+- discovery_name = `<string>` : filter to only return datasources managed by the named discovery configuration. Datasources created manually or via DaC have no discovery name and are excluded.
+- discovery_type = `<string>` : filter by discovery mechanism type. Accepted values: `kubernetes`, `http`.
 
 Example:
 
@@ -203,6 +205,26 @@ The following query should return an empty list or a list containing a single Pr
 ```bash
 GET /api/v1/globaldatasources?kind=Prometheus&default=true
 ```
+
+The following query returns all datasources managed by the `kube-prod` Kubernetes discovery:
+
+```bash
+GET /api/v1/globaldatasources?discovery_name=kube-prod&discovery_type=kubernetes
+```
+
+#### `source` field
+
+`GlobalDatasource` objects carry an optional read-only `source` field set by the server:
+
+```yaml
+source:
+  discovery:
+    name: <string>   # name of the discovery configuration that manages this datasource
+    type: <string>   # discovery type: "kubernetes" or "http"
+```
+
+- **`source` is `null`** — the datasource was not created by a discovery process. It may have been created manually via the API, provisioned via DaC, or it was created before datasource discovery was introduced.
+- **`source` is set** — the datasource is managed by the named discovery configuration. The server stamps and preserves this field automatically; any value sent by clients on create or update is ignored.
 
 #### Get a single `GlobalDatasource`
 

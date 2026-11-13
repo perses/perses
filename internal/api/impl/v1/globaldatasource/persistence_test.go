@@ -1,0 +1,106 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package globaldatasource
+
+import (
+	"testing"
+
+	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+	datasourceSpec "github.com/perses/spec/go/datasource"
+	"github.com/stretchr/testify/assert"
+)
+
+func newDS(name string, discoveryName string, discoveryType v1.DiscoveryType) *v1.GlobalDatasource {
+	ds := &v1.GlobalDatasource{
+		Kind:     v1.KindGlobalDatasource,
+		Metadata: v1.Metadata{Name: name},
+		Spec:     datasourceSpec.Spec{},
+	}
+	if discoveryName != "" || discoveryType != "" {
+		ds.Source = &v1.Source{
+			Discovery: &v1.DiscoverySource{
+				Name: discoveryName,
+				Type: discoveryType,
+			},
+		}
+	}
+	return ds
+}
+
+func TestFilterByDiscovery(t *testing.T) {
+	all := []*v1.GlobalDatasource{
+		newDS("ds-kube-prod-1", "kube-prod", v1.DiscoveryTypeKubernetes),
+		newDS("ds-kube-prod-2", "kube-prod", v1.DiscoveryTypeKubernetes),
+		newDS("ds-kube-staging", "kube-staging", v1.DiscoveryTypeKubernetes),
+		newDS("ds-http-prod", "http-prod", v1.DiscoveryTypeHTTP),
+		newDS("ds-manual", "", ""),
+	}
+
+	tests := []struct {
+		name          string
+		query         globaldatasource.Query
+		expectedNames []string
+	}{
+		{
+			name:          "no filter returns all",
+			query:         globaldatasource.Query{},
+			expectedNames: []string{"ds-kube-prod-1", "ds-kube-prod-2", "ds-kube-staging", "ds-http-prod", "ds-manual"},
+		},
+		{
+			name:          "discovery_name=kube-prod",
+			query:         globaldatasource.Query{DiscoveryName: "kube-prod"},
+			expectedNames: []string{"ds-kube-prod-1", "ds-kube-prod-2"},
+		},
+		{
+			name:          "discovery_name=kube-staging",
+			query:         globaldatasource.Query{DiscoveryName: "kube-staging"},
+			expectedNames: []string{"ds-kube-staging"},
+		},
+		{
+			name:          "discovery_type=kubernetes only",
+			query:         globaldatasource.Query{DiscoveryType: v1.DiscoveryTypeKubernetes},
+			expectedNames: []string{"ds-kube-prod-1", "ds-kube-prod-2", "ds-kube-staging"},
+		},
+		{
+			name:          "discovery_type=http only",
+			query:         globaldatasource.Query{DiscoveryType: v1.DiscoveryTypeHTTP},
+			expectedNames: []string{"ds-http-prod"},
+		},
+		{
+			name:          "discovery_name=kube-prod AND discovery_type=kubernetes",
+			query:         globaldatasource.Query{DiscoveryName: "kube-prod", DiscoveryType: v1.DiscoveryTypeKubernetes},
+			expectedNames: []string{"ds-kube-prod-1", "ds-kube-prod-2"},
+		},
+		{
+			name:          "discovery_name=kube-prod AND discovery_type=http returns nothing",
+			query:         globaldatasource.Query{DiscoveryName: "kube-prod", DiscoveryType: v1.DiscoveryTypeHTTP},
+			expectedNames: []string{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := filterByDiscovery(all, &tt.query)
+			var names []string
+			for _, ds := range result {
+				names = append(names, ds.Metadata.Name)
+			}
+			if tt.expectedNames == nil {
+				tt.expectedNames = []string{}
+			}
+			assert.ElementsMatch(t, tt.expectedNames, names)
+		})
+	}
+}

@@ -106,7 +106,7 @@ type discovery struct {
 	name      string
 }
 
-func (d *discovery) Execute(_ context.Context, _ context.CancelFunc) error {
+func (d *discovery) Execute(ctx context.Context, _ context.CancelFunc) error {
 	decodedSchema, err := d.decodeSchema()
 	if err != nil {
 		return fmt.Errorf("failed to decode schema: %w", err)
@@ -120,7 +120,9 @@ func (d *discovery) Execute(_ context.Context, _ context.CancelFunc) error {
 	for _, r := range resources {
 		entities = append(entities, r.datasource)
 	}
-	d.svc.Apply(entities)
+	if err := d.svc.Apply(ctx, entities); err != nil {
+		return fmt.Errorf("kube discovery %q apply failed: %w", d.name, err)
+	}
 	return nil
 }
 
