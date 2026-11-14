@@ -27,7 +27,9 @@ import {
 const STORAGE_KEY = 'PERSES_DATA_GRID_SETTINGS_V1_Variable';
 
 const details = {
-  api: { getAllColumns: (): Array<{ field: string }> => [{ field: 'version' }, { field: 'createdAt' }, { field: 'name' }] },
+  api: {
+    getAllColumns: (): Array<{ field: string }> => [{ field: 'version' }, { field: 'createdAt' }, { field: 'name' }],
+  },
 };
 const callbackDetails = details as unknown as GridCallbackDetails;
 
