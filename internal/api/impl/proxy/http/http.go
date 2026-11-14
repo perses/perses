@@ -26,7 +26,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/internal/api/impl/proxy/common"
 	apiinterface "github.com/perses/perses/internal/api/interface"
@@ -154,7 +154,7 @@ func (h *Proxy) logPolicyEvent(entry *logrus.Entry, msg string) {
 // Serve forwards the request of c to the datasource, and writes the response of the datasource to c.
 // The response is served under the Perses origin, so the headers that would apply to it are removed or overridden
 // (see secureResponse).
-func (h *Proxy) Serve(c echo.Context) error {
+func (h *Proxy) Serve(c *echo.Context) error {
 	req := c.Request()
 	res := c.Response()
 
@@ -212,10 +212,10 @@ func (h *Proxy) Serve(c echo.Context) error {
 		}
 		// we need to wrap the error with an Echo Error,
 		// otherwise the error will be hidden by the middleware "middleware.HandleError".
-		status := res.Status
-		if status < 400 {
-			// if there is an error and the status code doesn't match the error, then let's use a default one
-			status = 500
+		// If there is an error and the status code doesn't match the error, then let's use a default one.
+		status := http.StatusInternalServerError
+		if resp, unwrapErr := echo.UnwrapResponse(res); unwrapErr == nil && resp.Status >= 400 {
+			status = resp.Status
 		}
 		return echo.NewHTTPError(status, proxyErr.Error())
 	}
@@ -224,7 +224,7 @@ func (h *Proxy) Serve(c echo.Context) error {
 
 const deniedDestinationMsg = "the datasource destination is not allowed by the Perses server configuration ('datasource.proxy')"
 
-func (h *Proxy) prepareRequest(c echo.Context) error {
+func (h *Proxy) prepareRequest(c *echo.Context) error {
 	req := c.Request()
 	// The OAuth passthrough token is stored in the cookies of the caller.
 	// It must be retrieved before the caller's credentials are removed from the request.
@@ -349,7 +349,7 @@ func (h *Proxy) setupAuthentication(req *http.Request, oauthPassthroughToken str
 
 // getOAuthPassthroughToken returns the OIDC/OAuth token of the caller, stored in its cookies.
 // If the token is missing (or empty), it tries to refresh it using the OIDC refresh token also stored in the cookies.
-func (h *Proxy) getOAuthPassthroughToken(c echo.Context) (string, error) {
+func (h *Proxy) getOAuthPassthroughToken(c *echo.Context) (string, error) {
 	var token string
 	if oidcCookie, err := c.Cookie(crypto.CookieKeyOIDCToken); err == nil {
 		token = oidcCookie.Value

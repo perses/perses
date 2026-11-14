@@ -58,3 +58,53 @@ func TestSecret_ENV(t *testing.T) {
 	assert.Equal(t, os.Getenv("PREFIX_SECRET"), `<secret>`)
 	_ = os.Unsetenv("PREFIX_SECRET")
 }
+
+func TestAuthorization_Validate(t *testing.T) {
+	missingErr := "when using authorization, credentials/credentialsFile cannot be empty"
+	exclusiveErr := "at most one of authorization credentials & credentialsFile must be configured"
+
+	testSuite := []struct {
+		title    string
+		jason    string
+		expected *Authorization
+		err      string
+	}{
+		{
+			title: "empty authorization",
+			jason: `{}`,
+			err:   missingErr,
+		},
+		{
+			title: "type-only authorization",
+			jason: `{"type": "Bearer"}`,
+			err:   missingErr,
+		},
+		{
+			title:    "credentials only",
+			jason:    `{"credentials": "token"}`,
+			expected: &Authorization{Type: "Bearer", Credentials: "token"},
+		},
+		{
+			title:    "credentialsFile only",
+			jason:    `{"type": "Basic", "credentialsFile": "/tmp/token"}`,
+			expected: &Authorization{Type: "Basic", CredentialsFile: "/tmp/token"},
+		},
+		{
+			title: "credentials and credentialsFile",
+			jason: `{"credentials": "token", "credentialsFile": "/tmp/token"}`,
+			err:   exclusiveErr,
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result := &Authorization{}
+			err := json.Unmarshal([]byte(test.jason), result)
+			if len(test.err) == 0 {
+				assert.NoError(t, err)
+				assert.Equal(t, test.expected, result)
+			} else {
+				assert.EqualError(t, err, test.err)
+			}
+		})
+	}
+}

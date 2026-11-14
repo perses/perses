@@ -1,0 +1,11 @@
+{
+  "datasource": {
+    "type": "my-datasource",
+    "uid": "my-ds"
+  },
+  "enable": true,
+  "expr": "changes(deployment_generation[5m]) > 0",
+  "iconColor": "red",
+  "name": "Deployments",
+  "titleFormat": "{{deployment}}"
+}

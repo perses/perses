@@ -43,7 +43,7 @@ export function PluginsList(): ReactElement {
   const [selectedPluginModule, setSelectedPluginModule] = useState<PluginModuleResource | null>(null);
   const { exceptionSnackbar } = useSnackbar();
 
-  const { data: pluginModules, isLoading, error } = usePlugins();
+  const { data: pluginModules, isPending, error } = usePlugins();
 
   const rows = useMemo<PluginRow[]>(() => {
     return (pluginModules ?? [])
@@ -129,7 +129,7 @@ export function PluginsList(): ReactElement {
     [],
   );
 
-  if (isLoading || pluginModules === undefined) {
+  if (isPending || pluginModules === undefined) {
     return <PersesLoader />;
   }
 

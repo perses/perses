@@ -28,14 +28,14 @@ export function ProjectEphemeralDashboards({
   hideToolbar,
   ...props
 }: ProjectEphemeralDashboardsProps): ReactElement {
-  const { data, isLoading } = useEphemeralDashboardList(projectName);
+  const { data, isPending } = useEphemeralDashboardList(projectName);
 
   return (
     <Card {...props}>
       <EphemeralDashboardList
         ephemeralDashboardList={data ?? []}
         hideToolbar={hideToolbar}
-        isLoading={isLoading}
+        isLoading={isPending}
         initialState={{
           columns: {
             columnVisibilityModel: {

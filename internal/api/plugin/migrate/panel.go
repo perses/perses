@@ -127,13 +127,8 @@ func (m *completeMigration) migratePanel(grafanaPanel Panel, useDefaultDatasourc
 	// Apply datasource cleaning if the flag is set
 	if useDefaultDatasource {
 		// Clean datasource references on all queries in this panel
-		for _, query := range result.Spec.Queries {
-			if pluginSpec, ok := query.Spec.Plugin.Spec.(map[string]any); ok {
-				if datasourceRef, ok := pluginSpec["datasource"].(map[string]any); ok {
-					// Remove explicit datasource references to use default datasource
-					delete(datasourceRef, "name")
-				}
-			}
+		for i := range result.Spec.Queries {
+			removeDatasourceName(&result.Spec.Queries[i].Spec.Plugin)
 		}
 	}
 

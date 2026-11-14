@@ -233,3 +233,43 @@ spec: {
 
 !!! warning
     Ensure that your file evaluates to an invalid result (error or empty) if the provided `#grafanaVar` value does not match the expected payload.
+
+### Annotation
+
+An annotation migration file looks like the following:
+
+```cue
+package migrate
+
+#grafanaAnnotation: _
+
+if (*#grafanaAnnotation.datasource.type | null) == "prometheus" {
+	kind: "PrometheusPromQLAnnotation"
+	spec: {
+		datasource: {
+			kind: "PrometheusDatasource"
+			name: #grafanaAnnotation.datasource.uid
+		}
+		expr: #grafanaAnnotation.expr
+		if #grafanaAnnotation.titleFormat != _|_ {
+			title: #grafanaAnnotation.titleFormat
+		}
+	}
+}
+```
+
+- The file must be named `migrate.cue`.
+- `#grafanaAnnotation` is the reference used by Perses to inject the Grafana annotation objects to migrate (the entries
+  of `annotations.list` in the Grafana dashboard). You can access the different fields via the
+  `#grafanaAnnotation.field.subfield` syntax. To find the list of available fields, refer to the Grafana data model for
+  the annotations of the relevant datasource (from Grafana repo, or by inspecting the JSON of the dashboard on the
+  Grafana UI).
+- The logic consists of field assignments, using the content of `#grafanaAnnotation`. The end result must match the
+  model of the considered Perses annotation plugin.
+- The display of the annotation is migrated by Perses itself: the `name` of the Grafana annotation becomes its name,
+  its `iconColor` its color, and an annotation that is not enabled (`enable: false`) is hidden.
+- A Grafana annotation that no migration script can migrate is not kept, as well as the built-in annotation of Grafana
+  ("Annotations & Alerts").
+
+!!! warning
+    Ensure that your file evaluates to an invalid result (error or empty) if the provided `#grafanaAnnotation` value does not match the expected payload.

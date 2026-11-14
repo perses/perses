@@ -20,8 +20,8 @@ import (
 	"slices"
 	"time"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/perses/perses/internal/api/crypto"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/utils"
@@ -100,7 +100,7 @@ func (k *k8sImpl) IsNativeAuthz() bool {
 }
 
 // GetUser implements [Authorization]
-func (k *k8sImpl) GetUser(ctx echo.Context) (any, error) {
+func (k *k8sImpl) GetUser(ctx *echo.Context) (any, error) {
 	// Context can be nil when the function is called outside the request context.
 	// For example, the provisioning service is calling every service without any context.
 	if ctx == nil {
@@ -141,7 +141,7 @@ func (k *k8sImpl) GetUser(ctx echo.Context) (any, error) {
 }
 
 // GetUsername implements [Authorization]
-func (k *k8sImpl) GetUsername(ctx echo.Context) (string, error) {
+func (k *k8sImpl) GetUsername(ctx *echo.Context) (string, error) {
 	userStruct, err := k.GetUser(ctx)
 	if err != nil {
 		return "", err
@@ -159,7 +159,7 @@ func (k *k8sImpl) GetUsername(ctx echo.Context) (string, error) {
 }
 
 // GetPublicUser implements [Authorization]
-func (k *k8sImpl) GetPublicUser(ctx echo.Context) (*v1.PublicUser, error) {
+func (k *k8sImpl) GetPublicUser(ctx *echo.Context) (*v1.PublicUser, error) {
 	username, err := k.GetUsername(ctx)
 	if err != nil {
 		return nil, err
@@ -173,7 +173,7 @@ func (k *k8sImpl) GetPublicUser(ctx echo.Context) (*v1.PublicUser, error) {
 }
 
 // GetProviderInfo implements [Authorization]
-func (k *k8sImpl) GetProviderInfo(_ echo.Context) (crypto.ProviderInfo, error) {
+func (k *k8sImpl) GetProviderInfo(_ *echo.Context) (crypto.ProviderInfo, error) {
 	// Provider Info is essentially used to know the original type of authentication provider used when using native authorization model.
 	// For k8s authorization, the authentication is not using provider but k8s, so there won't be any provider info to retrieve.
 	return crypto.ProviderInfo{}, nil
@@ -182,7 +182,7 @@ func (k *k8sImpl) GetProviderInfo(_ echo.Context) (crypto.ProviderInfo, error) {
 // Middleware implements [Authorization]
 func (k *k8sImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(ctx echo.Context) error {
+		return func(ctx *echo.Context) error {
 			if skipper(ctx) {
 				return next(ctx)
 			}
@@ -202,7 +202,7 @@ func (k *k8sImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 }
 
 // GetUserProjects implements [Authorization]
-func (k *k8sImpl) GetUserProjects(ctx echo.Context, action v1Role.Action, scope v1Role.Scope) ([]string, error) {
+func (k *k8sImpl) GetUserProjects(ctx *echo.Context, action v1Role.Action, scope v1Role.Scope) ([]string, error) {
 	if utils.IsAnonymous(ctx) {
 		// This method should not be called if the endpoint is anonymous or the username is not found.
 		logrus.Error("failed to get username from context to list the user projects")
@@ -242,7 +242,7 @@ func (k *k8sImpl) GetUserProjects(ctx echo.Context, action v1Role.Action, scope 
 }
 
 // HasPermission implements [Authorization]
-func (k *k8sImpl) HasPermission(ctx echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
+func (k *k8sImpl) HasPermission(ctx *echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
 	// If the context is nil, it means the function is called internally without a request context.
 	// And in this case, we assume we want to bypass the authorization check.
 	if ctx == nil {
@@ -273,12 +273,12 @@ func (k *k8sImpl) HasPermission(ctx echo.Context, requestAction v1Role.Action, r
 // We check if the user can create a dashboard in the target namespace as a proxy for
 // editor/admin access.
 // HasCreateProjectPermission implements [Authorization]
-func (k *k8sImpl) HasCreateProjectPermission(ctx echo.Context, projectName string) bool {
+func (k *k8sImpl) HasCreateProjectPermission(ctx *echo.Context, projectName string) bool {
 	return k.HasPermission(ctx, v1Role.CreateAction, projectName, v1Role.DashboardScope)
 }
 
 // GetPermissions implements [Authorization]
-func (k *k8sImpl) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permission, error) {
+func (k *k8sImpl) GetPermissions(ctx *echo.Context) (map[string][]*v1Role.Permission, error) {
 	// If the context is nil, it means the function is called internally without a request context.
 	// This function should not be called for such a case
 	if ctx == nil {
@@ -336,7 +336,7 @@ func (k *k8sImpl) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permiss
 	return userPermissions, nil
 }
 
-func (k *k8sImpl) getNamespacePermissions(ctx echo.Context, namespace string, user user.Info, scopes []v1Role.Scope, knownPermissions map[v1Role.Scope][]v1Role.Action) []*v1Role.Permission {
+func (k *k8sImpl) getNamespacePermissions(ctx *echo.Context, namespace string, user user.Info, scopes []v1Role.Scope, knownPermissions map[v1Role.Scope][]v1Role.Action) []*v1Role.Permission {
 	var namespacePermissions []*v1Role.Permission
 	for _, scope := range scopes {
 		permittedActions := k.getPermittedActions(ctx, namespace, user, scope, knownPermissions[scope])
@@ -350,7 +350,7 @@ func (k *k8sImpl) getNamespacePermissions(ctx echo.Context, namespace string, us
 	return namespacePermissions
 }
 
-func (k *k8sImpl) getPermittedActions(ctx echo.Context, namespace string, user user.Info, scope v1Role.Scope, knownActions []v1Role.Action) []v1Role.Action {
+func (k *k8sImpl) getPermittedActions(ctx *echo.Context, namespace string, user user.Info, scope v1Role.Scope, knownActions []v1Role.Action) []v1Role.Action {
 	// We only need to check actions which aren't already permitted
 	actionsToCheck := getUnknownActions(knownActions)
 	var newlyValidActions []v1Role.Action
@@ -397,7 +397,7 @@ func getUnknownActions(knownActions []v1Role.Action) []v1Role.Action {
 	})
 }
 
-func (k *k8sImpl) checkSpecificPermission(ctx echo.Context, namespace string, user user.Info, action v1Role.Action, scope v1Role.Scope) (authorized authorizer.Decision, err error) {
+func (k *k8sImpl) checkSpecificPermission(ctx *echo.Context, namespace string, user user.Info, action v1Role.Action, scope v1Role.Scope) (authorized authorizer.Decision, err error) {
 	if scope == v1Role.ProjectScope {
 		return k.checkNamespaceAccess(ctx, namespace, user, action)
 	}
@@ -438,7 +438,7 @@ func (k *k8sImpl) checkSpecificPermission(ctx echo.Context, namespace string, us
 // a user has directly against a namespace returns a `NoOpinion` verdict. This function is used to determine if
 // the user has access to any perses-related kubernetes resources within the namespace to determine if the
 // user has access to a project, in the perses sense
-func (k *k8sImpl) checkNamespaceAccess(ctx echo.Context, namespace string, user user.Info, action v1Role.Action) (authorized authorizer.Decision, err error) {
+func (k *k8sImpl) checkNamespaceAccess(ctx *echo.Context, namespace string, user user.Info, action v1Role.Action) (authorized authorizer.Decision, err error) {
 	var decision authorizer.Decision
 	for _, scope := range kubernetesResourcesProjectScopesToCheck {
 		decision, err := k.checkSpecificPermission(ctx, namespace, user, action, scope)

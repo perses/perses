@@ -23,7 +23,7 @@ import type { ReactElement } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
 
 import { PersesLoader } from '../components/PersesLoader';
-import type { Banner, ConfigModel, ImportantDashboardGroupConfig } from '../model/config-client';
+import type { Banner, ConfigModel, ImportantDashboardGroupConfig, LogoConfig } from '../model/config-client';
 import { useConfig } from '../model/config-client';
 import { UserPreferencesContextProvider } from './UserPreferences';
 
@@ -34,7 +34,7 @@ interface ConfigContextType {
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 
 export function ConfigContextProvider(props: { children: React.ReactNode }): ReactElement {
-  const { data, isLoading } = useConfig();
+  const { data, isPending } = useConfig();
   const contextValue = useMemo<ConfigContextType | undefined>(() => (data ? { config: data } : undefined), [data]);
   const defaultPreferences = useMemo(
     () => ({ timezone: data?.frontend.default_user_preferences?.timezone ?? 'local' }),
@@ -65,7 +65,7 @@ export function ConfigContextProvider(props: { children: React.ReactNode }): Rea
     });
   }, [data?.frontend.auto_refresh?.options]);
 
-  if (isLoading || data === undefined || contextValue === undefined) {
+  if (isPending || data === undefined || contextValue === undefined) {
     return <PersesLoader />;
   }
   return (
@@ -176,6 +176,11 @@ export function useImportantDashboardGroups(): ImportantDashboardGroupConfig[] {
   const { config } = useConfigContext();
 
   return useMemo(() => config.frontend.important_dashboards ?? [], [config.frontend.important_dashboards]);
+}
+
+export function useLogo(): LogoConfig | undefined {
+  const { config } = useConfigContext();
+  return config.frontend.logo;
 }
 
 export function useInformation(): string {

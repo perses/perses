@@ -32,7 +32,7 @@ interface GlobalVariablesProps {
 export function GlobalVariables(props: GlobalVariablesProps): ReactElement {
   const { id } = props;
 
-  const { data, isLoading } = useGlobalVariableList();
+  const { data, isPending } = useGlobalVariableList();
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const createVariableMutation = useCreateGlobalVariableMutation();
@@ -103,7 +103,7 @@ export function GlobalVariables(props: GlobalVariablesProps): ReactElement {
     <Card id={id}>
       <VariableList
         data={data ?? []}
-        isLoading={isLoading}
+        isLoading={isPending}
         onCreate={handleVariableCreate}
         onUpdate={handleVariableUpdate}
         onDelete={handleVariableDelete}

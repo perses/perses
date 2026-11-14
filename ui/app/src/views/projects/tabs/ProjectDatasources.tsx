@@ -33,7 +33,7 @@ interface ProjectDatasourcesProps {
 
 export function ProjectDatasources(props: ProjectDatasourcesProps): ReactElement {
   const { projectName, hideToolbar, id } = props;
-  const { data, isLoading } = useDatasourceList({ project: projectName });
+  const { data, isPending } = useDatasourceList({ project: projectName });
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
@@ -106,7 +106,7 @@ export function ProjectDatasources(props: ProjectDatasourcesProps): ReactElement
         onCreate={handleDatasourceCreate}
         onUpdate={handleDatasourceUpdate}
         onDelete={handleDatasourceDelete}
-        isLoading={isLoading}
+        isLoading={isPending}
         initialState={{
           columns: {
             columnVisibilityModel: {

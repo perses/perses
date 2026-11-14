@@ -21,13 +21,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -45,39 +45,39 @@ type testRBAC struct {
 	allow bool
 }
 
-func (t *testRBAC) GetUser(_ echo.Context) (any, error) {
+func (t *testRBAC) GetUser(_ *echo.Context) (any, error) {
 	return nil, nil
 }
 
-func (t *testRBAC) GetUsername(_ echo.Context) (string, error) {
+func (t *testRBAC) GetUsername(_ *echo.Context) (string, error) {
 	return "", nil
 }
 
-func (t *testRBAC) GetPublicUser(_ echo.Context) (*v1.PublicUser, error) {
+func (t *testRBAC) GetPublicUser(_ *echo.Context) (*v1.PublicUser, error) {
 	return nil, nil
 }
 
-func (t *testRBAC) GetProviderInfo(_ echo.Context) (crypto.ProviderInfo, error) {
+func (t *testRBAC) GetProviderInfo(_ *echo.Context) (crypto.ProviderInfo, error) {
 	return crypto.ProviderInfo{}, nil
 }
 
 func (t *testRBAC) Middleware(_ middleware.Skipper) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			return next(c)
 		}
 	}
 }
 
-func (t *testRBAC) GetPermissions(_ echo.Context) (map[string][]*role.Permission, error) {
+func (t *testRBAC) GetPermissions(_ *echo.Context) (map[string][]*role.Permission, error) {
 	return map[string][]*role.Permission{}, nil
 }
 
-func (t *testRBAC) HasPermission(_ echo.Context, _ role.Action, _ string, _ role.Scope) bool {
+func (t *testRBAC) HasPermission(_ *echo.Context, _ role.Action, _ string, _ role.Scope) bool {
 	return t.allow
 }
 
-func (t *testRBAC) HasCreateProjectPermission(_ echo.Context, _ string) bool {
+func (t *testRBAC) HasCreateProjectPermission(_ *echo.Context, _ string) bool {
 	return t.allow
 }
 
@@ -93,7 +93,7 @@ func (t *testRBAC) RefreshPermissionsAndRoles() error {
 	return nil
 }
 
-func (t *testRBAC) GetUserProjects(_ echo.Context, _ role.Action, _ role.Scope) ([]string, error) {
+func (t *testRBAC) GetUserProjects(_ *echo.Context, _ role.Action, _ role.Scope) ([]string, error) {
 	panic("unimplemented")
 }
 
@@ -105,15 +105,15 @@ func (*mockDashboardService) Validate(_ *v1.Dashboard) error {
 	panic("unimplemented")
 }
 
-func (*mockDashboardService) Create(_ echo.Context, _ *v1.Dashboard) (*v1.Dashboard, error) {
+func (*mockDashboardService) Create(_ *echo.Context, _ *v1.Dashboard) (*v1.Dashboard, error) {
 	panic("unimplemented")
 }
 
-func (*mockDashboardService) Update(_ echo.Context, _ *v1.Dashboard, _ apiInterface.Parameters) (*v1.Dashboard, error) {
+func (*mockDashboardService) Update(_ *echo.Context, _ *v1.Dashboard, _ apiInterface.Parameters) (*v1.Dashboard, error) {
 	panic("unimplemented")
 }
 
-func (*mockDashboardService) Delete(_ echo.Context, _ apiInterface.Parameters) error {
+func (*mockDashboardService) Delete(_ *echo.Context, _ apiInterface.Parameters) error {
 	panic("unimplemented")
 }
 

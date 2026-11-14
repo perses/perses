@@ -1,0 +1,12 @@
+{
+  "id": "SomeAnnotation",
+  "name": "SomeAnnotation",
+  "metaData": {
+    "name": "SomeAnnotation",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "0.10.0",
+      "buildName": "@perses-dev/some-annotation-plugin"
+    }
+  }
+}

@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
@@ -284,7 +284,7 @@ func (ds *testDataset) newNative(tb testing.TB, withClaimMappings bool) *native 
 
 // newTestContext returns a request context authenticated as the given user, as set by the JWT middleware.
 // The persisted claims are attached to the test OIDC provider.
-func newTestContext(username string, persistedClaims map[string][]string) echo.Context {
+func newTestContext(username string, persistedClaims map[string][]string) *echo.Context {
 	ctx := echo.New().NewContext(httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder())
 	claims := &crypto.JWTClaims{
 		RegisteredClaims: jwt.RegisteredClaims{Subject: username},

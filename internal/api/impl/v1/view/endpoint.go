@@ -16,7 +16,7 @@ package view
 import (
 	"fmt"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
@@ -45,7 +45,7 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 	g.POST(fmt.Sprintf("/%s", utils.PathView), e.view, false)
 }
 
-func (e *endpoint) view(ctx echo.Context) error {
+func (e *endpoint) view(ctx *echo.Context) error {
 	result := v1.View{}
 	if err := ctx.Bind(&result); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())

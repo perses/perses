@@ -206,10 +206,10 @@ export function useRecentDashboardList(
   project?: string,
   maxSize?: number,
 ): {
-  isLoading: false | true;
+  isPending: boolean;
   data: DatedDashboards[];
 } {
-  const { data, isLoading } = useDashboardList({ project: project, metadataOnly: true });
+  const { data, isPending } = useDashboardList({ project: project, metadataOnly: true });
   const history = useNavHistory();
 
   const recentDashboards = useMemo(() => {
@@ -234,7 +234,7 @@ export function useRecentDashboardList(
     return datedDashboards;
   }, [data, history, maxSize]);
 
-  return { data: recentDashboards, isLoading: isLoading };
+  return { data: recentDashboards, isPending };
 }
 
 /**
@@ -242,29 +242,29 @@ export function useRecentDashboardList(
  * Will automatically be refreshed when cache is invalidated or history modified
  */
 export function useImportantDashboardList(project?: string): {
-  isLoading: false | true;
+  isPending: boolean;
   data: DashboardResource[];
   error: StatusError | null;
 } {
-  const { data: dashboards, isLoading, error } = useDashboardList({ project: project, metadataOnly: true });
+  const { data: dashboards, isPending, error } = useDashboardList({ project: project, metadataOnly: true });
   const importantDashboardGroups = useImportantDashboardGroups();
   const shouldNormalizeResourceNames = useShouldNormalizeResourceNames();
 
   const importantDashboards = useMemo(() => {
     return resolveImportantDashboardList(dashboards ?? [], importantDashboardGroups, shouldNormalizeResourceNames);
   }, [dashboards, importantDashboardGroups, shouldNormalizeResourceNames]);
-  return { data: importantDashboards, isLoading: isLoading, error };
+  return { data: importantDashboards, isPending, error };
 }
 
 /**
  * Used to get configured important dashboard groups with their matching dashboards for the home page.
  */
 export function useImportantDashboardGroupsData(): {
-  isLoading: false | true;
+  isPending: boolean;
   data: ImportantDashboardGroupData[];
   error: StatusError | null;
 } {
-  const { data: dashboards, isLoading, error } = useDashboardList({ metadataOnly: true });
+  const { data: dashboards, isPending, error } = useDashboardList({ metadataOnly: true });
   const importantDashboardGroups = useImportantDashboardGroups();
   const shouldNormalizeResourceNames = useShouldNormalizeResourceNames();
 
@@ -272,7 +272,7 @@ export function useImportantDashboardGroupsData(): {
     return resolveImportantDashboardGroups(dashboards ?? [], importantDashboardGroups, shouldNormalizeResourceNames);
   }, [dashboards, importantDashboardGroups, shouldNormalizeResourceNames]);
 
-  return { data: importantDashboardGroupData, isLoading, error };
+  return { data: importantDashboardGroupData, isPending, error };
 }
 
 /**

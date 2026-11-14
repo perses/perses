@@ -22,7 +22,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/stretchr/testify/assert"

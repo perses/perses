@@ -26,7 +26,7 @@ import { HomeListCard } from './HomeListCard';
 import { HomeListItem } from './HomeListItem';
 
 export function ImportantDashboards(): ReactElement {
-  const { data: importantDashboardGroups, isLoading } = useImportantDashboardGroupsData();
+  const { data: importantDashboardGroups, isPending } = useImportantDashboardGroupsData();
   const { data: projects } = useProjectList();
 
   const groups = useMemo(
@@ -44,21 +44,21 @@ export function ImportantDashboards(): ReactElement {
       icon={<StarFourPointsOutline sx={{ color: 'primary.main' }} />}
       title="Important Dashboards"
       description="Curated dashboards configured for quick access."
-      centerContent={groups.length === 0 && !isLoading}
+      centerContent={groups.length === 0 && !isPending}
     >
-      {isLoading && (
+      {isPending && (
         <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
           <CircularProgress size={24} />
         </Stack>
       )}
-      {!isLoading && groups.length === 0 && (
+      {!isPending && groups.length === 0 && (
         <EmptyState
           icon={<StarFourPointsOutline sx={{ fontSize: 32, color: 'text.secondary' }} />}
           message="No important dashboards found."
           hint="Configure important dashboards in your config file."
         />
       )}
-      {!isLoading && groups.length > 0 && (
+      {!isPending && groups.length > 0 && (
         <Box
           data-testid="important-dashboards-mosaic"
           sx={{ display: 'flex', flexDirection: 'column', maxHeight: 360, overflowY: 'auto' }}

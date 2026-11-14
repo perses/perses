@@ -19,7 +19,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
@@ -37,11 +37,11 @@ func (*listAuthorization) IsEnabled() bool {
 	return true
 }
 
-func (*listAuthorization) HasPermission(_ echo.Context, _ role.Action, _ string, _ role.Scope) bool {
+func (*listAuthorization) HasPermission(_ *echo.Context, _ role.Action, _ string, _ role.Scope) bool {
 	return true
 }
 
-func (*listAuthorization) GetUserProjects(_ echo.Context, _ role.Action, _ role.Scope) ([]string, error) {
+func (*listAuthorization) GetUserProjects(_ *echo.Context, _ role.Action, _ role.Scope) ([]string, error) {
 	return []string{"project-1", "project-2"}, nil
 }
 
@@ -119,11 +119,11 @@ func (*wildcardAuthorization) IsEnabled() bool {
 	return true
 }
 
-func (*wildcardAuthorization) HasPermission(_ echo.Context, _ role.Action, _ string, _ role.Scope) bool {
+func (*wildcardAuthorization) HasPermission(_ *echo.Context, _ role.Action, _ string, _ role.Scope) bool {
 	return true
 }
 
-func (*wildcardAuthorization) GetUserProjects(_ echo.Context, _ role.Action, _ role.Scope) ([]string, error) {
+func (*wildcardAuthorization) GetUserProjects(_ *echo.Context, _ role.Action, _ role.Scope) ([]string, error) {
 	return []string{v1.WildcardProject, "project-1"}, nil
 }
 

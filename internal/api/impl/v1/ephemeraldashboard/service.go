@@ -19,7 +19,7 @@ import (
 	"net/http"
 
 	"github.com/brunoga/deep"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
@@ -33,6 +33,7 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceV1 "github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/role"
+	"github.com/perses/spec/go/common"
 	"github.com/sirupsen/logrus"
 )
 
@@ -47,6 +48,8 @@ type service struct {
 	proxyCfg config.HTTPProxyConfig
 	// guard verifies the destinations of the local datasources are allowed.
 	guard *netguard.Guard
+	// maxTTL is the maximum time to live a user can set on an ephemeral dashboard. Zero means no limit.
+	maxTTL common.Duration
 }
 
 func NewService(cfg config.Config, dao ephemeraldashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema, authz authorization.Authorization, guard *netguard.Guard) ephemeraldashboard.Service {
@@ -58,10 +61,11 @@ func NewService(cfg config.Config, dao ephemeraldashboard.DAO, globalVarDAO glob
 		authz:         authz,
 		proxyCfg:      cfg.Datasource.Proxy.HTTP,
 		guard:         guard,
+		maxTTL:        cfg.EphemeralDashboard.MaxTTL,
 	}
 }
 
-func (s *service) Create(ctx echo.Context, entity *v1.EphemeralDashboard) (*v1.EphemeralDashboard, error) {
+func (s *service) Create(ctx *echo.Context, entity *v1.EphemeralDashboard) (*v1.EphemeralDashboard, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -86,7 +90,7 @@ func (s *service) create(entity *v1.EphemeralDashboard) (*v1.EphemeralDashboard,
 	return entity, nil
 }
 
-func (s *service) Update(ctx echo.Context, entity *v1.EphemeralDashboard, parameters apiInterface.Parameters) (*v1.EphemeralDashboard, error) {
+func (s *service) Update(ctx *echo.Context, entity *v1.EphemeralDashboard, parameters apiInterface.Parameters) (*v1.EphemeralDashboard, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -127,7 +131,7 @@ func (s *service) update(entity *v1.EphemeralDashboard, parameters apiInterface.
 	return entity, nil
 }
 
-func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
+func (s *service) Delete(_ *echo.Context, parameters apiInterface.Parameters) error {
 	return s.dao.Delete(parameters.Project, parameters.Name)
 }
 
@@ -151,7 +155,20 @@ func (s *service) RawMetadataList(q *ephemeraldashboard.Query) ([]json.RawMessag
 	return s.dao.RawMetadataList(q)
 }
 
+// validateTTL verifies that the TTL of an ephemeral dashboard does not exceed the maximum allowed by the server.
+// A maxTTL of zero means there is no limit.
+func validateTTL(ttl, maxTTL common.Duration) error {
+	if maxTTL > 0 && ttl > maxTTL {
+		return fmt.Errorf("ttl %s is greater than the maximum allowed by the server (%s)", ttl, maxTTL)
+	}
+	return nil
+}
+
 func (s *service) Validate(entity *v1.EphemeralDashboard) error {
+	if err := validateTTL(entity.Spec.TTL, s.maxTTL); err != nil {
+		return apiInterface.HandleBadRequestError(err.Error())
+	}
+
 	projectVars, projectVarsErr := s.collectProjectVariables(entity.Metadata.Project)
 	if projectVarsErr != nil {
 		return apiInterface.HandleError(projectVarsErr)
@@ -189,7 +206,7 @@ func (s *service) collectGlobalVariables() ([]*v1.GlobalVariable, error) {
 
 // checkSecretPermission ensures that the user that creates/updates a datasource with a secret actually has the secret
 // reader permission.
-func (s *service) checkSecretPermission(ctx echo.Context, dashboard *v1.EphemeralDashboard) error {
+func (s *service) checkSecretPermission(ctx *echo.Context, dashboard *v1.EphemeralDashboard) error {
 	if !s.authz.IsEnabled() {
 		return nil
 	}

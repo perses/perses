@@ -18,14 +18,14 @@ const EMPTY_QUERIES: QueryDefinition[] = [];
 const CONTAINER_SX = { width: '100%' };
 
 function SearchResultsPanel(): ReactElement | null {
-  const { isFetching, isLoading, queryResults } = useDataQueries(QUERY_TYPE);
+  const { isFetching, isPending, queryResults } = useDataQueries(QUERY_TYPE);
 
   // no query executed, show empty panel
   if (queryResults.length === 0) {
     return null;
   }
 
-  if (isLoading || isFetching) {
+  if (isPending || isFetching) {
     return <LoadingOverlay />;
   }
 

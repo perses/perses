@@ -32,7 +32,7 @@ interface GlobalSecretsProps {
 export function GlobalSecrets(props: GlobalSecretsProps): ReactElement {
   const { id } = props;
 
-  const { data, isLoading } = useGlobalSecretList();
+  const { data, isPending } = useGlobalSecretList();
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const createSecretMutation = useCreateGlobalSecretMutation();
@@ -97,7 +97,7 @@ export function GlobalSecrets(props: GlobalSecretsProps): ReactElement {
     <Card id={id}>
       <SecretList
         data={data ?? []}
-        isLoading={isLoading}
+        isLoading={isPending}
         onCreate={handleSecretCreate}
         onUpdate={handleSecretUpdate}
         onDelete={handleSecretDelete}

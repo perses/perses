@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/gorilla/securecookie"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/crypto"
 	apiinterface "github.com/perses/perses/internal/api/interface"
@@ -203,7 +203,7 @@ func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWit
 		logoutRedirectParam = provider.Logout.LogoutRedirectParamName
 	}
 
-	return func(ctx echo.Context) error {
+	return func(ctx *echo.Context) error {
 		endSessionURL := *pEndSessionURL
 		queryParams := endSessionURL.Query()
 		rd := getRootURL(ctx.Request(), apiPrefix)
@@ -283,7 +283,7 @@ func (e *oIDCEndpoint) GetSlugID() string {
 // auth is the http handler on Perses side that triggers the "Authorization Code"
 // flow to the oauth 2.0 provider.
 // It will redirect the user to the provider's "auth" url.
-func (e *oIDCEndpoint) auth(ctx echo.Context) error {
+func (e *oIDCEndpoint) auth(ctx *echo.Context) error {
 	var opts []rp.URLParamOpt
 	for key, val := range e.urlParams {
 		opts = append(opts, rp.WithURLParam(key, val))
@@ -309,7 +309,7 @@ func (e *oIDCEndpoint) auth(ctx echo.Context) error {
 //     "user infos" url
 //   - save the user in database if it's a new user, or update it with the collected information
 //   - ultimately, generate a Perses user session with an access and refresh token
-func (e *oIDCEndpoint) codeExchange(ctx echo.Context) error {
+func (e *oIDCEndpoint) codeExchange(ctx *echo.Context) error {
 	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, _ rp.RelyingParty, info *oidcUserInfo) {
 		redirectURI := decodeOAuthState(state)
 
@@ -354,7 +354,7 @@ func (e *oIDCEndpoint) codeExchange(ctx echo.Context) error {
 // user to login in a browser.
 // Then the client will be responsible to poll the /{slug_id}/token Perses endpoint to generate
 // a proper Perses session.
-func (e *oIDCEndpoint) deviceCode(ctx echo.Context) error {
+func (e *oIDCEndpoint) deviceCode(ctx *echo.Context) error {
 	if e.deviceCodeRelyingParty.GetDeviceAuthorizationEndpoint() == "" {
 		e.logWithError(errors.New("device code flow is not supported by this provider"))
 		return echo.NewHTTPError(http.StatusNotImplemented, "Device code flow is not supported by this provider")
@@ -378,7 +378,7 @@ func (e *oIDCEndpoint) deviceCode(ctx echo.Context) error {
 
 // token is the http handler on Perses side that will generate a proper Perses session.
 // It is used only in case of device code flow and client credentials flow.
-func (e *oIDCEndpoint) token(ctx echo.Context) error {
+func (e *oIDCEndpoint) token(ctx *echo.Context) error {
 	grantType := ctx.FormValue("grant_type")
 
 	var uInfo *oidcUserInfo
@@ -542,7 +542,7 @@ func (e *oIDCEndpoint) retrieveClientCredentialsToken(ctx context.Context, clien
 
 // RefreshOIDCToken refreshes the OIDC token using the stored refresh token and updates the cookies.
 // It returns the new access token, or an empty string if no refresh token is available or if the refresh fails (token may have expired).
-func (e *oIDCEndpoint) RefreshOIDCToken(ctx echo.Context) string {
+func (e *oIDCEndpoint) RefreshOIDCToken(ctx *echo.Context) string {
 	refreshTokenCookie, err := ctx.Cookie(crypto.CookieKeyOIDCRefreshToken)
 	if err != nil {
 		// No OIDC refresh token stored, nothing to refresh

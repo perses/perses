@@ -83,6 +83,12 @@ func (o *option) Complete(args []string) error {
 			return fmt.Errorf("you need to set the flag --directory or --file or to set the output folder for the 'dac' command")
 		}
 	}
+	// If no particular project has been specified through a flag, let's grab the one defined in the CLI config.
+	// Like for the command 'apply', we don't use the Complete method of the ProjectOption
+	// because the project can also come from the metadata of each dashboard.
+	if len(o.Project) == 0 {
+		o.Project = config.Global.Project
+	}
 	apiClient, err := config.Global.GetAPIClient()
 	if err != nil {
 		return err

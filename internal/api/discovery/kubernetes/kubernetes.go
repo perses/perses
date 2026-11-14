@@ -109,13 +109,11 @@ type discovery struct {
 func (d *discovery) Execute(_ context.Context, _ context.CancelFunc) error {
 	decodedSchema, err := d.decodeSchema()
 	if err != nil {
-		logrus.WithError(err).Error("failed to decode schema")
-		return nil
+		return fmt.Errorf("failed to decode schema: %w", err)
 	}
 	resources, err := d.discovery.discover(decodedSchema)
 	if err != nil {
-		logrus.Errorf("failed to execute kube discovery %q: %v", d.name, err)
-		return nil
+		return fmt.Errorf("failed to execute kube discovery %q: %w", d.name, err)
 	}
 	d.setDefaultDatasource(resources)
 	var entities []*v1.GlobalDatasource

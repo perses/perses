@@ -21,7 +21,7 @@ import (
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	pluginpkg "github.com/perses/perses/internal/api/plugin"
 	pluginmigrate "github.com/perses/perses/internal/api/plugin/migrate"
@@ -78,7 +78,7 @@ func (s *stubPluginService) GetLoadedPlugin(_, _, _ string) (*pluginpkg.Loaded, 
 
 // helpers
 
-func newEchoContext(t *testing.T, path string) (echo.Context, *httptest.ResponseRecorder) {
+func newEchoContext(t *testing.T, path string) (*echo.Context, *httptest.ResponseRecorder) {
 	t.Helper()
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, path, nil)
@@ -125,8 +125,7 @@ func TestPluginListWithNoSchemas(t *testing.T) {
 func TestPluginDefinitionWithNoSchemas(t *testing.T) {
 	ep := newEndpointWithSchemas(nil)
 	ctx, _ := newEchoContext(t, "/api/v1/schemas/plugins/AnyPlugin")
-	ctx.SetParamNames(pluginNameParam)
-	ctx.SetParamValues("AnyPlugin")
+	ctx.SetPathValues(echo.PathValues{{Name: pluginNameParam, Value: "AnyPlugin"}})
 
 	err := ep.PluginDefinition(ctx)
 	require.Error(t, err)
@@ -141,8 +140,7 @@ func TestPluginDefinitionPluginDoesNotExist(t *testing.T) {
 
 	ep := newEndpointWithSchemas(schemas)
 	ctx, _ := newEchoContext(t, "/api/v1/schemas/plugins/NonExistent")
-	ctx.SetParamNames(pluginNameParam)
-	ctx.SetParamValues("NonExistent")
+	ctx.SetPathValues(echo.PathValues{{Name: pluginNameParam, Value: "NonExistent"}})
 
 	err := ep.PluginDefinition(ctx)
 	require.Error(t, err)
@@ -156,8 +154,7 @@ func TestPluginDefinitionPluginExists(t *testing.T) {
 
 	ep := newEndpointWithSchemas(schemas)
 	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugins/FirstChart")
-	ctx.SetParamNames(pluginNameParam)
-	ctx.SetParamValues("FirstChart")
+	ctx.SetPathValues(echo.PathValues{{Name: pluginNameParam, Value: "FirstChart"}})
 
 	err := ep.PluginDefinition(ctx)
 	require.NoError(t, err)

@@ -91,6 +91,9 @@ func (a *Authorization) GetCredentials() (string, error) {
 }
 
 func (a *Authorization) validate() error {
+	if len(a.Credentials) == 0 && len(a.CredentialsFile) == 0 {
+		return fmt.Errorf("when using authorization, credentials/credentialsFile cannot be empty")
+	}
 	if len(a.Credentials) > 0 && len(a.CredentialsFile) > 0 {
 		return fmt.Errorf("at most one of authorization credentials & credentialsFile must be configured")
 	}

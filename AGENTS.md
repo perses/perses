@@ -76,10 +76,18 @@ make build
 database services. Use them for broad backend changes when those prerequisites are available. Run `make checkdocs` for
 mdox-managed Markdown changes.
 
+Changes that can affect the performance of the native authorization (`internal/api/authorization/native/`, or the code
+refreshing its permission cache: `internal/api/impl/auth/` and the user, project, role, rolebinding, globalrole and
+globalrolebinding services of `internal/api/impl/v1/`) need a benchmark comparison between the base and the branch.
+Follow the "Native authorization changes" section of `CONTRIBUTING.md`, paste the full `benchstat` output in the pull
+request, and justify every regression. Don't shorten the final comparison (fewer runs, shorter benchmark time, or a
+subset of benchmarks). If you cannot run it, say so in the pull request instead of claiming there is no regression.
+
 ## Completion checklist
 
 - The change is in the correct repository and architectural layer.
 - Public contracts and generated counterparts remain aligned.
 - New behavior and important failures are covered by focused tests.
 - Relevant lint, format, type, test, schema, and documentation checks pass.
+- Native authorization changes include the base versus branch `benchstat` comparison in the pull request.
 - The final diff contains no generated artifacts, credentials, warning-ceiling increases, or unrelated edits.

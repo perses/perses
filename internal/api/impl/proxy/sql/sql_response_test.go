@@ -24,7 +24,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -261,7 +261,9 @@ func TestWriteJSONResponse(t *testing.T) {
 			if test.expectedErr != nil {
 				// The rows read before the error must not be returned as if they were the complete result.
 				assert.Equal(t, test.expectedErr, err)
-				assert.False(t, c.Response().Committed)
+				resp, unwrapErr := echo.UnwrapResponse(c.Response())
+				require.NoError(t, unwrapErr)
+				assert.False(t, resp.Committed)
 				return
 			}
 			require.NoError(t, err)

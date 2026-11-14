@@ -62,7 +62,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
     Object.fromEntries(dashboard.__inputs?.map((input) => [input.name, input.value ?? '']) ?? []),
   );
   const [useDefaultDatasource, setUseDefaultDatasource] = useState(false);
-  const { data, isLoading, error } = useProjectList();
+  const { data, isPending, error } = useProjectList();
   const dashboardMutation = useCreateDashboardMutation((data) => {
     navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
   });
@@ -144,7 +144,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
           {migrateMutation.error.message}
         </Alert>
       )}
-      {!isLoading && data !== undefined && data !== null && migrateMutation.isSuccess && (
+      {!isPending && data !== undefined && data !== null && migrateMutation.isSuccess && (
         <Stack direction="column">
           <Typography variant="h2" sx={{ paddingTop: 2, paddingBottom: 1 }}>
             2. Migration output

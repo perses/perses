@@ -11,43 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Button, Stack, Typography } from '@mui/material';
-import type { KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsearch';
-import { KVSearch } from '@nexucis/kvsearch';
+import { Alert, AlertTitle, Box, Button, Stack, Typography } from '@mui/material';
+import type { KVSearchResult } from '@nexucis/kvsearch';
 import type { DatasourceResource, GlobalDatasourceResource, ProjectResource, Resource } from '@perses-dev/client';
 import { isProjectMetadata } from '@perses-dev/client';
 import type { ReactElement } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 
-import { useDashboardList } from '../../../model/dashboard-client';
-import { useDatasourceList } from '../../../model/datasource-client';
-import { getTagDisplayValues } from './model';
+import { ALL_RESOURCE_TYPES_TITLES, getTagDisplayValues, ICON_TO_RESOURCE_TYPE } from './model';
 import type { HighlightedDashboardResource, SearchItem, SearchListProps } from './model';
 import { SearchDashboardItem } from './SearchDashboardItem';
 import { SearchDatasourceItem } from './SearchDatasourceItem';
 import { SearchGlobalDatasourceItem } from './SearchGlobalDatasourceItem';
 import { SearchProjectItem } from './SearchProjectItem';
 
-const kvSearchConfig: KVSearchConfiguration = {
-  indexedKeys: [
-    ['metadata', 'name'],
-    ['metadata', 'tags'],
-    ['spec', 'display', 'name'],
-  ],
-  shouldSort: true,
-  includeMatches: true,
-  shouldRender: false,
-  excludedChars: [' '],
-  findAllMatches: true,
-};
-
 const SIZE_LIST = 10;
 
 type SearchMatch = NonNullable<KVSearchResult<SearchItem>['matched']>[number];
 
 interface PaginationState {
-  list: SearchItem[];
-  query: string;
+  results: Array<KVSearchResult<SearchItem>>;
   size: number;
 }
 
@@ -80,63 +63,39 @@ const STATIC_SX = {
     marginTop: 0.5,
     marginBottom: 1,
     marginLeft: 0.5,
+    gap: 1,
   },
-  resourceIcon: { marginRight: 0.5 },
+  alert: { margin: 1 },
 };
 
 export function SearchList(props: SearchListProps): ReactElement | null {
-  const { list, query, handleClose, isResource } = props;
-  const [pagination, setPagination] = useState<PaginationState>({ list, query, size: SIZE_LIST });
-  const currentSizeList = pagination.list === list && pagination.query === query ? pagination.size : SIZE_LIST;
-  const kvSearch = useMemo(() => new KVSearch<Resource>(kvSearchConfig), []);
-
-  const { data: dataSourceList } = useDatasourceList({ staleTime: Infinity });
-  const { data: dashboardList } = useDashboardList({ metadataOnly: true, staleTime: Infinity });
-
-  const datasourceCounts = useMemo((): Map<string, number> => {
-    const map = new Map<string, number>();
-    for (const ds of dataSourceList ?? []) {
-      const project = ds.metadata.project;
-      map.set(project, (map.get(project) ?? 0) + 1);
-    }
-    return map;
-  }, [dataSourceList]);
-
-  const dashboardCount = useMemo((): Map<string, number> => {
-    const map = new Map<string, number>();
-    for (const dashboard of dashboardList ?? []) {
-      const project = dashboard.metadata.project;
-      map.set(project, (map.get(project) ?? 0) + 1);
-    }
-    return map;
-  }, [dashboardList]);
-
-  const filteredList: Array<KVSearchResult<SearchItem>> = useMemo(() => {
-    return query ? kvSearch.filter(query, list) : [];
-  }, [kvSearch, list, query]);
-
-  const originalKind = useMemo(() => {
-    if (!filteredList.length) return undefined;
-    return filteredList[0]?.original.kind;
-  }, [filteredList]);
-
-  useEffect(() => {
-    isResource?.(!!filteredList.length);
-  }, [filteredList.length, isResource]);
+  const { type, results: filteredList, error, handleClose, dashboardCounts, datasourceCounts } = props;
+  const [pagination, setPagination] = useState<PaginationState>({ results: filteredList, size: SIZE_LIST });
+  const currentSizeList = pagination.results === filteredList ? pagination.size : SIZE_LIST;
 
   const handleSeeMore = useCallback(() => {
-    setPagination({ list, query, size: currentSizeList + SIZE_LIST });
-  }, [list, query, currentSizeList]);
+    setPagination({ results: filteredList, size: currentSizeList + SIZE_LIST });
+  }, [filteredList, currentSizeList]);
+
+  if (error) {
+    return (
+      <Alert severity="error" sx={STATIC_SX.alert}>
+        <AlertTitle>{`Failed to load ${ALL_RESOURCE_TYPES_TITLES[type].toLowerCase()}`}</AlertTitle>
+        {error.message}
+      </Alert>
+    );
+  }
 
   if (!filteredList.length) return null;
 
   return (
     <Box sx={STATIC_SX.flexColumn}>
       <Box sx={STATIC_SX.flexRow}>
-        <Typography variant="h3">{`${filteredList[0]?.original.kind}s (${filteredList.length})`}</Typography>
+        {ICON_TO_RESOURCE_TYPE[type]}
+        <Typography variant="h3">{`${ALL_RESOURCE_TYPES_TITLES[type]} (${filteredList.length})`}</Typography>
       </Box>
       <Stack display="flex" direction="column">
-        {originalKind === 'Dashboard' &&
+        {type === 'dashboards' &&
           filteredList.slice(0, currentSizeList).map((search) => {
             const matchedTags = getMatchingTagValues(search.matched);
             const tagsDisplayValue = getTagDisplayValues(search.original.metadata.tags, matchedTags);
@@ -150,7 +109,7 @@ export function SearchList(props: SearchListProps): ReactElement | null {
               />
             );
           })}
-        {originalKind === 'Datasource' &&
+        {type === 'datasources' &&
           filteredList.slice(0, currentSizeList).map((search) => {
             return (
               <SearchDatasourceItem
@@ -161,7 +120,7 @@ export function SearchList(props: SearchListProps): ReactElement | null {
               />
             );
           })}
-        {originalKind === 'Project' &&
+        {type === 'projects' &&
           filteredList.slice(0, currentSizeList).map((search) => {
             return (
               <SearchProjectItem
@@ -169,12 +128,12 @@ export function SearchList(props: SearchListProps): ReactElement | null {
                 handleClose={handleClose}
                 key={`${buildBoxSearchKey(search.original)}`}
                 resource={search.original as ProjectResource}
-                datasourceCount={datasourceCounts.get((search.original as ProjectResource).metadata.name) ?? 0}
-                dashboardCount={dashboardCount.get((search.original as ProjectResource).metadata.name) ?? 0}
+                datasourceCount={datasourceCounts?.get((search.original as ProjectResource).metadata.name) ?? 0}
+                dashboardCount={dashboardCounts?.get((search.original as ProjectResource).metadata.name) ?? 0}
               />
             );
           })}
-        {originalKind === 'GlobalDatasource' &&
+        {type === 'globalDatasources' &&
           filteredList.slice(0, currentSizeList).map((search) => {
             return (
               <SearchGlobalDatasourceItem

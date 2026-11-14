@@ -16,7 +16,7 @@ package health
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/route"
 )
@@ -41,7 +41,7 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 }
 
 // Check is the endpoint that provides the health status of the API.
-func (e *endpoint) Check(ctx echo.Context) error {
+func (e *endpoint) Check(ctx *echo.Context) error {
 	healthData := e.service.HealthCheck()
 
 	if !healthData.Database {
