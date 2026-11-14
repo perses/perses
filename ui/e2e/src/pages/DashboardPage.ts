@@ -399,6 +399,9 @@ export class DashboardPage {
         route.continue();
       }
     });
+    // The dashboard fixture navigates before the test can install this route.
+    // Reload so the panels refetch instead of keeping the first empty result.
+    await this.page.reload();
   }
 
   async cleanupMockRequests(): Promise<void> {

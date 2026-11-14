@@ -23,6 +23,7 @@ type PanelGroup struct {
 	PanelsHeight   int
 	IsCollapsed    *bool
 	RepeatVariable string
+	Visibility     *dashboard.Visibility
 	Panels         []dashboard.Panel
 }
 
