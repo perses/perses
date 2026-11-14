@@ -25,6 +25,7 @@ import {
   PAGE_SIZE_OPTIONS,
   DATA_GRID_STYLES,
   DATA_GRID_SLOT_PROPS,
+  usePersistedDataGridState,
 } from '../datagrid';
 
 // https://mui.com/x/react-data-grid/performance/
@@ -60,7 +61,7 @@ const EPHEMERAL_DASHBOARD_GRID_STYLES = {
 
 export function EphemeralDashboardDataGrid(props: DataGridProperties<Row>): ReactElement {
   const defaultRowsPerPage = useDefaultRowsPerPage();
-  const { columns, rows, initialState, hideToolbar, isLoading } = props;
+  const { columns, rows, initialState, storageKey, hideToolbar, isLoading } = props;
 
   // Merging default initial state with the props initial state (props initial state will overwrite properties)
   const mergedInitialState = useMemo(() => {
@@ -69,6 +70,7 @@ export function EphemeralDashboardDataGrid(props: DataGridProperties<Row>): Reac
       ...initialState,
     } as GridInitialStateCommunity;
   }, [defaultRowsPerPage, initialState]);
+  const persistedState = usePersistedDataGridState(storageKey, mergedInitialState);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
@@ -80,7 +82,10 @@ export function EphemeralDashboardDataGrid(props: DataGridProperties<Row>): Reac
         loading={isLoading}
         slots={hideToolbar ? SLOTS_WITHOUT_TOOLBAR : SLOTS_WITH_TOOLBAR}
         pageSizeOptions={PAGE_SIZE_OPTIONS}
-        initialState={mergedInitialState}
+        initialState={persistedState.initialState}
+        onColumnVisibilityModelChange={persistedState.onColumnVisibilityModelChange}
+        onSortModelChange={persistedState.onSortModelChange}
+        onPaginationModelChange={persistedState.onPaginationModelChange}
         slotProps={DATA_GRID_SLOT_PROPS}
         sx={EPHEMERAL_DASHBOARD_GRID_STYLES}
       />

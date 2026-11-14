@@ -26,6 +26,7 @@ import {
   PAGE_SIZE_OPTIONS,
   DATA_GRID_STYLES,
   DATA_GRID_SLOT_PROPS,
+  usePersistedDataGridState,
 } from '../datagrid';
 
 // https://mui.com/x/react-data-grid/performance/
@@ -56,7 +57,7 @@ const SLOTS_HIDDEN_TOOLBAR = { noRowsOverlay: NoSecretsRowOverlay };
 
 export function SecretDataGrid(props: DataGridPropertiesWithCallback<Row>): ReactElement {
   const defaultRowsPerPage = useDefaultRowsPerPage();
-  const { columns, rows, initialState, hideToolbar, isLoading, onRowClick } = props;
+  const { columns, rows, initialState, storageKey, hideToolbar, isLoading, onRowClick } = props;
 
   // Merging default initial state with the props initial state (props initial state will overwrite properties)
   const mergedInitialState = useMemo(() => {
@@ -65,6 +66,7 @@ export function SecretDataGrid(props: DataGridPropertiesWithCallback<Row>): Reac
       ...initialState,
     } as GridInitialStateCommunity;
   }, [defaultRowsPerPage, initialState]);
+  const persistedState = usePersistedDataGridState(storageKey, mergedInitialState);
 
   const handleRowClick = useCallback(
     (params: GridRowParams<Row>): void => {
@@ -83,7 +85,10 @@ export function SecretDataGrid(props: DataGridPropertiesWithCallback<Row>): Reac
         loading={isLoading}
         slots={hideToolbar ? SLOTS_HIDDEN_TOOLBAR : SLOTS}
         pageSizeOptions={PAGE_SIZE_OPTIONS}
-        initialState={mergedInitialState}
+        initialState={persistedState.initialState}
+        onColumnVisibilityModelChange={persistedState.onColumnVisibilityModelChange}
+        onSortModelChange={persistedState.onSortModelChange}
+        onPaginationModelChange={persistedState.onPaginationModelChange}
         slotProps={DATA_GRID_SLOT_PROPS}
         sx={DATA_GRID_STYLES}
       />

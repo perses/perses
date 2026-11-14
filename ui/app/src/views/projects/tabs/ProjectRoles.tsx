@@ -102,6 +102,7 @@ export function ProjectRoles(props: ProjectRolesProps): ReactElement {
         onCreate={handleRoleCreate}
         onUpdate={handleRoleUpdate}
         onDelete={handleRoleDelete}
+        storageKey="Role"
         initialState={{
           columns: {
             columnVisibilityModel: {

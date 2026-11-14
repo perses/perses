@@ -48,10 +48,11 @@ import { VariableDrawer } from './VariableDrawer';
  * @param props.onUpdate Event received when an update action has been requested
  * @param props.onDelete Event received when a delete action has been requested
  * @param props.initialState Provide a way to override default initialState
+ * @param props.storageKey Identifies the list to save its settings in the local storage
  * @param props.isLoading Display a loading circle if enabled
  */
 export function VariableList<T extends VariableType>(props: ListPropertiesWithCallbacks<T>): ReactElement {
-  const { data, hideToolbar, isLoading, initialState, onCreate, onUpdate, onDelete } = props;
+  const { data, hideToolbar, isLoading, initialState, storageKey, onCreate, onUpdate, onDelete } = props;
   const isReadonly = useIsReadonly();
   const { infoSnackbar } = useSnackbar();
 
@@ -222,6 +223,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
           rows={rows}
           onRowClick={handleRowClick}
           initialState={initialState}
+          storageKey={storageKey}
           hideToolbar={hideToolbar}
           isLoading={isLoading}
         ></VariableDataGrid>

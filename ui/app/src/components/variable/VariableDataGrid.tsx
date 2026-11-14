@@ -26,6 +26,7 @@ import {
   PAGE_SIZE_OPTIONS,
   DATA_GRID_STYLES,
   DATA_GRID_SLOT_PROPS,
+  usePersistedDataGridState,
 } from '../datagrid';
 
 // https://mui.com/x/react-data-grid/performance/
@@ -55,7 +56,7 @@ const SLOTS_HIDDEN_TOOLBAR = { noRowsOverlay: NoVariableRowOverlay };
 
 export function VariableDataGrid(props: DataGridPropertiesWithCallback<Row>): ReactElement {
   const defaultRowsPerPage = useDefaultRowsPerPage();
-  const { columns, rows, onRowClick, initialState, hideToolbar, isLoading } = props;
+  const { columns, rows, onRowClick, initialState, storageKey, hideToolbar, isLoading } = props;
 
   // Merging default initial state with the props initial state (props initial state will overwrite properties)
   const mergedInitialState = useMemo(() => {
@@ -64,6 +65,7 @@ export function VariableDataGrid(props: DataGridPropertiesWithCallback<Row>): Re
       ...initialState,
     } as GridInitialStateCommunity;
   }, [defaultRowsPerPage, initialState]);
+  const persistedState = usePersistedDataGridState(storageKey, mergedInitialState);
 
   const handleRowClick = useCallback(
     (params: GridRowParams<Row>): void => onRowClick(params.row.name, params.row.project),
@@ -80,7 +82,10 @@ export function VariableDataGrid(props: DataGridPropertiesWithCallback<Row>): Re
         loading={isLoading}
         slots={hideToolbar ? SLOTS_HIDDEN_TOOLBAR : SLOTS}
         pageSizeOptions={PAGE_SIZE_OPTIONS}
-        initialState={mergedInitialState}
+        initialState={persistedState.initialState}
+        onColumnVisibilityModelChange={persistedState.onColumnVisibilityModelChange}
+        onSortModelChange={persistedState.onSortModelChange}
+        onPaginationModelChange={persistedState.onPaginationModelChange}
         slotProps={DATA_GRID_SLOT_PROPS}
         sx={DATA_GRID_STYLES}
       />

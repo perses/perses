@@ -19,7 +19,13 @@ import type { PluginModuleResource } from '@perses-dev/plugin-system';
 import { useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 
-import { DATA_GRID_SLOT_PROPS, DATA_GRID_STYLES, GridToolbar, PAGE_SIZE_OPTIONS } from '../../components/datagrid';
+import {
+  DATA_GRID_SLOT_PROPS,
+  DATA_GRID_STYLES,
+  GridToolbar,
+  PAGE_SIZE_OPTIONS,
+  usePersistedDataGridState,
+} from '../../components/datagrid';
 import { PersesLoader } from '../../components/PersesLoader';
 import { useDefaultRowsPerPage } from '../../context/Config';
 import { usePlugins } from '../../model/plugin-client';
@@ -38,8 +44,48 @@ function NoPluginRowOverlay(): ReactElement {
   return <NoDataOverlay resource="plugins" />;
 }
 
-export function PluginsList(): ReactElement {
+interface PluginsDataGridProperties {
+  rows: PluginRow[];
+  columns: Array<GridColDef<PluginRow>>;
+}
+
+function PluginsDataGrid({ rows, columns }: PluginsDataGridProperties): ReactElement {
   const defaultRowsPerPage = useDefaultRowsPerPage();
+  const initialState = useMemo(
+    () => ({ pagination: { paginationModel: { pageSize: defaultRowsPerPage, page: 0 } } }),
+    [defaultRowsPerPage],
+  );
+  const persistedState = usePersistedDataGridState('Plugin', initialState);
+
+  return (
+    <DataGrid
+      autoHeight
+      disableRowSelectionOnClick
+      getRowHeight={() => 'auto'}
+      rows={rows}
+      columns={columns}
+      slots={{ toolbar: GridToolbar, noRowsOverlay: NoPluginRowOverlay }}
+      pageSizeOptions={PAGE_SIZE_OPTIONS}
+      initialState={persistedState.initialState}
+      onColumnVisibilityModelChange={persistedState.onColumnVisibilityModelChange}
+      onSortModelChange={persistedState.onSortModelChange}
+      onPaginationModelChange={persistedState.onPaginationModelChange}
+      slotProps={DATA_GRID_SLOT_PROPS}
+      sx={{
+        ...DATA_GRID_STYLES,
+        '& .MuiDataGrid-cell': {
+          display: 'flex',
+          alignItems: 'center',
+        },
+        '& .MuiDataGrid-cell--withRenderer': {
+          py: 0.5,
+        },
+      }}
+    />
+  );
+}
+
+export function PluginsList(): ReactElement {
   const [selectedPluginModule, setSelectedPluginModule] = useState<PluginModuleResource | null>(null);
   const { exceptionSnackbar } = useSnackbar();
 
@@ -139,27 +185,7 @@ export function PluginsList(): ReactElement {
 
   return (
     <Box sx={{ overflow: 'hidden' }}>
-      <DataGrid
-        autoHeight
-        disableRowSelectionOnClick
-        getRowHeight={() => 'auto'}
-        rows={rows}
-        columns={columns}
-        slots={{ toolbar: GridToolbar, noRowsOverlay: NoPluginRowOverlay }}
-        pageSizeOptions={PAGE_SIZE_OPTIONS}
-        initialState={{ pagination: { paginationModel: { pageSize: defaultRowsPerPage, page: 0 } } }}
-        slotProps={DATA_GRID_SLOT_PROPS}
-        sx={{
-          ...DATA_GRID_STYLES,
-          '& .MuiDataGrid-cell': {
-            display: 'flex',
-            alignItems: 'center',
-          },
-          '& .MuiDataGrid-cell--withRenderer': {
-            py: 0.5,
-          },
-        }}
-      />
+      <PluginsDataGrid rows={rows} columns={columns} />
       <PluginDetailsDialog selectedPluginModule={selectedPluginModule} onClose={() => setSelectedPluginModule(null)} />
     </Box>
   );

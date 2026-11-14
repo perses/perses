@@ -101,6 +101,7 @@ export function GlobalSecrets(props: GlobalSecretsProps): ReactElement {
         onCreate={handleSecretCreate}
         onUpdate={handleSecretUpdate}
         onDelete={handleSecretDelete}
+        storageKey="GlobalSecret"
         initialState={{
           columns: {
             columnVisibilityModel: {
