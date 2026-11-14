@@ -15,7 +15,7 @@ import { Box, CircularProgress, Stack } from '@mui/material';
 import type { DashboardResource } from '@perses-dev/client';
 import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/components';
 import type { ExternalVariableDefinition, OnSaveDashboard } from '@perses-dev/dashboards';
-import { DashboardCatalogProvider, ViewDashboard } from '@perses-dev/dashboards';
+import { ViewDashboard } from '@perses-dev/dashboards';
 import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
 import type { DashboardSpec } from '@perses-dev/spec';
 import type { ReactElement } from 'react';
@@ -34,7 +34,6 @@ import { useDatasourceApi } from '../../../model/datasource-api';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
 import { useProject } from '../../../model/project-client';
 import { useRemotePluginLoader } from '../../../model/remote-plugin-loader';
-import { persesDashboardCatalog } from '../../../model/tag-link-catalog';
 import { useVariableList } from '../../../model/variable-client';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
 
@@ -117,35 +116,33 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                 project={project.metadata.name}
                 dashboard={dashboardResource.metadata.name}
               >
-                <DashboardCatalogProvider catalog={persesDashboardCatalog}>
-                  <ViewDashboard
-                    key={`${dashboardResource.metadata.project}/${dashboardResource.metadata.name}`}
-                    dashboardResource={dashboardResource}
-                    datasourceApi={datasourceApi}
-                    externalVariableDefinitions={externalVariableDefinitions}
-                    dashboardTitleComponent={
-                      <ProjectBreadcrumbs
-                        dashboardName={getResourceDisplayName(dashboardResource)}
-                        project={project}
-                        variant={breadcrumbVariant}
-                      />
-                    }
-                    onSave={onSave}
-                    onDiscard={onDiscard}
-                    isInitialVariableSticky={true}
-                    isReadonly={isReadonly}
-                    isAnnotationEnabled={true}
-                    isVariableEnabled={isLocalVariableEnabled}
-                    isDatasourceEnabled={isLocalDatasourceEnabled}
-                    disableShortcuts={!isKeyboardShortcutsEnabled}
-                    isLockModeAvailable={isLockModeAvailable}
-                    isUpdateButtonAvailable={isLockModeAvailable}
-                    isEditing={isEditing}
-                    isCreating={isCreating}
-                    isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
-                    userPreferenceTimezone={userPreferences.timezone}
-                  />
-                </DashboardCatalogProvider>
+                <ViewDashboard
+                  key={`${dashboardResource.metadata.project}/${dashboardResource.metadata.name}`}
+                  dashboardResource={dashboardResource}
+                  datasourceApi={datasourceApi}
+                  externalVariableDefinitions={externalVariableDefinitions}
+                  dashboardTitleComponent={
+                    <ProjectBreadcrumbs
+                      dashboardName={getResourceDisplayName(dashboardResource)}
+                      project={project}
+                      variant={breadcrumbVariant}
+                    />
+                  }
+                  onSave={onSave}
+                  onDiscard={onDiscard}
+                  isInitialVariableSticky={true}
+                  isReadonly={isReadonly}
+                  isAnnotationEnabled={true}
+                  isVariableEnabled={isLocalVariableEnabled}
+                  isDatasourceEnabled={isLocalDatasourceEnabled}
+                  disableShortcuts={!isKeyboardShortcutsEnabled}
+                  isLockModeAvailable={isLockModeAvailable}
+                  isUpdateButtonAvailable={isLockModeAvailable}
+                  isEditing={isEditing}
+                  isCreating={isCreating}
+                  isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
+                  userPreferenceTimezone={userPreferences.timezone}
+                />
               </UsageMetricsProvider>
             </ErrorBoundary>
           </ValidationProvider>
