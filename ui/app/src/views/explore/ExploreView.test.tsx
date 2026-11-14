@@ -19,7 +19,7 @@ import ExploreView from './ExploreView';
 
 let mockProjectParam: string | null | undefined;
 const setProjectParam = vi.fn();
-const viewExplore = vi.fn((_props: { projectName?: string }): null => null);
+const viewExplore = vi.fn((_props: { projectName?: string; tabs?: Array<{ label: string }> }): null => null);
 
 vi.mock('use-query-params', () => ({
   StringParam: {},
@@ -33,7 +33,11 @@ vi.mock('@perses-dev/components', () => ({
 }));
 
 vi.mock('@perses-dev/explore', () => ({
-  ViewExplore: (props: { projectName?: string }): null => viewExplore(props),
+  ViewExplore: (props: { projectName?: string; tabs?: Array<{ label: string }> }): null => viewExplore(props),
+}));
+
+vi.mock('./LogsExplorer', () => ({
+  LogsExplorer: (): null => null,
 }));
 
 vi.mock('@perses-dev/plugin-system', () => ({
@@ -88,5 +92,21 @@ describe('ExploreView project param', () => {
       rerender(createView());
       expect(lastProjectName()).toBe(project);
     }
+  });
+});
+
+describe('ExploreView tabs', () => {
+  it('shows a tab per observability signal', () => {
+    mockProjectParam = undefined;
+    viewExplore.mockClear();
+    render(<ExploreView />);
+    expect(viewExplore.mock.lastCall?.[0]?.tabs?.map((tab) => tab.label)).toEqual([
+      'Metrics',
+      'Logs',
+      'Traces',
+      'Profiling',
+      'Alerts',
+      'Silences',
+    ]);
   });
 });
