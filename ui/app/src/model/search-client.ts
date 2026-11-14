@@ -22,6 +22,8 @@ import buildURL from './url-builder';
 export interface SearchProjectResource {
   metadata: ProjectMetadata;
   displayName: string;
+  // Set by a tag search. Text search leaves this unset.
+  variables?: string[];
 }
 
 export function useSearchDashboards(
@@ -42,6 +44,20 @@ function searchDashboards(project?: string, searchQuery?: string): Promise<Searc
   }
   if (project) {
     queryParams.set('project', project);
+  }
+  const url = buildURL({ resource: 'search/dashboards', queryParams: queryParams });
+  return fetchJson<SearchProjectResource[]>(url, {
+    method: HTTPMethodGET,
+    headers: HTTPHeader,
+  });
+}
+
+// Tag search repeats `tag`. An empty list is the unfiltered search, so callers skip that request.
+export function searchDashboardsByTags(project: string, tags: string[]): Promise<SearchProjectResource[]> {
+  const queryParams = new URLSearchParams();
+  queryParams.set('project', project);
+  for (const tag of tags) {
+    queryParams.append('tag', tag);
   }
   const url = buildURL({ resource: 'search/dashboards', queryParams: queryParams });
   return fetchJson<SearchProjectResource[]>(url, {

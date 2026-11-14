@@ -395,6 +395,31 @@ func TestRefreshKeepsIndexWhenStreamFails(t *testing.T) {
 	assert.ElementsMatch(t, []string{"keep", "also"}, dashboardNames(t, c, "demo"))
 }
 
+func TestClientListByTags(t *testing.T) {
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name"}}}, newDisabledAuthz(t), nil).(*client)
+	docs := []json.RawMessage{
+		json.RawMessage(`{"kind":"Dashboard","metadata":{"name":"current","project":"demo","tags":["traffic"]},"spec":{"display":{"name":"Current"},"variables":[{"spec":{"name":"env"}}]}}`),
+		json.RawMessage(`{"kind":"Dashboard","metadata":{"name":"service-detail","project":"demo","tags":["traffic","api"]},"spec":{"display":{"name":"Service detail"},"variables":[{"spec":{"name":"env"}},{"spec":{"name":"region"}}]}}`),
+		json.RawMessage(`{"kind":"Dashboard","metadata":{"name":"billing","project":"demo","tags":["billing"]},"spec":{"display":{"name":"Billing"}}}`),
+		json.RawMessage(`{"kind":"Dashboard","metadata":{"name":"abroad","project":"other","tags":["traffic"]},"spec":{"display":{"name":"Abroad"}}}`),
+	}
+	for _, doc := range docs {
+		require.NoError(t, c.add(doc))
+	}
+
+	results, err := c.ListByTags(nil, v1.KindDashboard, "demo", []string{" traffic ", "api"})
+	require.NoError(t, err)
+	require.Len(t, results, 1)
+	assert.Equal(t, "service-detail", results[0].Metadata.GetName())
+	assert.Equal(t, "Service detail", results[0].DisplayName)
+	assert.Equal(t, []string{"env", "region"}, results[0].Variables)
+
+	textSearch, err := c.Search(nil, v1.KindDashboard, "demo", "service")
+	require.NoError(t, err)
+	require.NotEmpty(t, textSearch)
+	assert.Empty(t, textSearch[0].Variables)
+}
+
 func dashboardRaw(name string) json.RawMessage {
 	return json.RawMessage(fmt.Sprintf(`{"kind":"Dashboard","metadata":{"name":%q,"project":"demo"},"spec":{}}`, name))
 }
