@@ -417,6 +417,51 @@ func TestClientSearch_returnsKeyAndPathOfMatchingField(t *testing.T) {
 	}
 }
 
+func TestClientSearch_returnsBestMatchingField(t *testing.T) {
+	testsCases := []struct {
+		title            string
+		name             string
+		text             string
+		expectedOriginal string
+		expectedKey      string
+		expectedPath     []string
+	}{
+		{
+			title:            "better match on a field coming after another matching field",
+			name:             "nxoxdxe",
+			text:             "node",
+			expectedOriginal: "Node Exporter",
+			expectedKey:      "spec.display.name",
+			expectedPath:     []string{"spec", "display", "name"},
+		},
+		{
+			title:            "equal scores keep the first field",
+			name:             "nodeexporter",
+			text:             "node",
+			expectedOriginal: "nodeexporter",
+			expectedKey:      "metadata.name",
+			expectedPath:     []string{"metadata", "name"},
+		},
+	}
+	for _, tc := range testsCases {
+		t.Run(tc.title, func(t *testing.T) {
+			c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name", "spec.display.name"}}}, newDisabledAuthz(t), nil).(*client)
+			require.NoError(t, c.add(json.RawMessage(fmt.Sprintf(`{
+		"kind": "Dashboard",
+		"metadata": {"name": %q, "project": "myproject"},
+		"spec": {"display": {"name": "Node Exporter"}}
+	}`, tc.name))))
+
+			results, err := c.Search(nil, v1.KindDashboard, "", tc.text)
+			require.NoError(t, err)
+			require.Len(t, results, 1)
+			assert.Equal(t, tc.expectedOriginal, results[0].Original)
+			assert.Equal(t, tc.expectedKey, results[0].Key)
+			assert.Equal(t, tc.expectedPath, results[0].Path)
+		})
+	}
+}
+
 func TestRefreshDropsDashboardsMissingFromDatabase(t *testing.T) {
 	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name"}}}, newDisabledAuthz(t), nil).(*client)
 	keep := dashboardRaw("keep")

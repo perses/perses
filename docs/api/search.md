@@ -30,7 +30,8 @@ displayName: <string>
 
 # The following fields are only set when a query is provided.
 
-# The value of the field matching the query.
+# The value of the field that best matches the query.
+# When several fields get the same score, the first one, in the order of the index keys, is kept.
 [ original: <string> ]
 
 # The index key, as configured in the search configuration, the matching value has been extracted from.
