@@ -55,9 +55,9 @@ export interface FolderValidationSchema {
  * @param projectName - The project to scope the uniqueness check to.
  */
 export function useFolderValidationSchema(projectName?: string): FolderValidationSchema {
-  const { data: folders, isLoading: isFoldersLoading, isError } = useFolderList({ project: projectName });
+  const { data: folders, isPending: isFoldersPending, isError } = useFolderList({ project: projectName });
   return useMemo((): FolderValidationSchema => {
-    if (isFoldersLoading)
+    if (isFoldersPending)
       return {
         schema: undefined,
         isSchemaLoading: true,
@@ -97,7 +97,7 @@ export function useFolderValidationSchema(projectName?: string): FolderValidatio
     });
 
     return { schema: refinedSchema, isSchemaLoading: false, hasSchemaError: false };
-  }, [folders, isFoldersLoading, isError, projectName]);
+  }, [folders, isFoldersPending, isError, projectName]);
 }
 
 /**

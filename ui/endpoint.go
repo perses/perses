@@ -23,14 +23,15 @@ import (
 	"mime"
 	"net/http"
 	"net/http/httputil"
+	"os"
 	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	echoUtils "github.com/perses/common/echo"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin"
@@ -102,7 +103,7 @@ func (f *frontend) RegisterRoute(e *echo.Echo) {
 	e.GET(f.apiPrefix+"/plugins/*", f.servePluginFiles)
 }
 
-func (f *frontend) servePluginFiles(c echo.Context) error {
+func (f *frontend) servePluginFiles(c *echo.Context) error {
 	// We are going to serve a plugin from a dev environment, let's set up the proxy to redirect the traffic.
 	req := c.Request()
 
@@ -126,7 +127,7 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 	devEnvironment := loaded.DevEnvironment
 	if devEnvironment == nil {
 		// In that case, we need to read the requested files from the file system.
-		// The first thing to do is to replace the URL path with the local path of the plugin.
+		// The local path of the requested file is resolved to verify it is in the plugin directory.
 		localPath := filepath.Join(loaded.LocalPath, filepath.FromSlash(relPath))
 
 		// Ensure the resolved path is contained within the plugin's directory
@@ -144,14 +145,17 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 		c.Response().Header().Set("X-Content-Type-Options", "nosniff")
 		// Plugin bundles built with rsbuild/module federation are content-hashed (e.g. __mf/js/main.f55169be.js),
 		// so they can be cached indefinitely. Everything else (mf-manifest.json, schemas, ...) has a stable name
-		// and must be revalidated. `c.File` relies on http.ServeContent, which sets Last-Modified and honors
+		// and must be revalidated. The file is served with http.ServeContent, which sets Last-Modified and honors
 		// If-Modified-Since / Range requests, so revalidation is answered with a cheap 304.
 		if isHashedAsset(relPath) {
 			c.Response().Header().Set("Cache-Control", cacheControlImmutable)
 		} else {
 			c.Response().Header().Set("Cache-Control", cacheControlRevalidate)
 		}
-		return c.File(localPath)
+		// The file is opened from a file system rooted at the plugin directory instead of using its absolute path,
+		// because echo v5 only serves with c.File the absolute paths located under the working directory.
+		// In the container image, the plugins are in /etc/perses/plugins while the working directory is /perses.
+		return echo.StaticFileHandler(relPath, os.DirFS(loaded.LocalPath))(c)
 	}
 	// Otherwise, it means we are in a dev environment, and we need to proxy the request to the dev server.
 	// When developing a plugin, you will be able to serve the files of the plugin using a dev server (with rsbuild).
@@ -174,17 +178,17 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 	if proxyErr != nil {
 		// we need to wrap the error with an Echo Error,
 		// otherwise the error will be hidden by the middleware "middleware.HandleError".
-		status := res.Status
-		if status < 400 {
-			// if there is an error and the status code doesn't match the error, then let's use a default one
-			status = 500
+		// If there is an error and the status code doesn't match the error, then let's use a default one.
+		status := http.StatusInternalServerError
+		if resp, unwrapErr := echo.UnwrapResponse(res); unwrapErr == nil && resp.Status >= 400 {
+			status = resp.Status
 		}
 		return echo.NewHTTPError(status, proxyErr.Error())
 	}
 	return nil
 }
 
-func proxyPrepareRequest(c echo.Context, devEnvironment *v1.PluginInDevelopment) error {
+func proxyPrepareRequest(c *echo.Context, devEnvironment *v1.PluginInDevelopment) error {
 	req := c.Request()
 	// We have to modify the HOST of the request to match the host of the targetURL
 	// So far I'm not sure to understand exactly why. However, if you are going to remove it, be sure of what you are doing.
@@ -207,7 +211,7 @@ func proxyPrepareRequest(c echo.Context, devEnvironment *v1.PluginInDevelopment)
 // This is the only way to ensure that every asset is served with the proper prefix path.
 // So, at runtime, we need to open the JS files and then replace the placeholder with the actual API prefix.
 func (f *frontend) assetHandler() echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		fileName := c.Request().URL.Path
 		assetFile, err := asts.Open(fileName)
 		if err != nil {
@@ -251,7 +255,7 @@ func (f *frontend) assetHandler() echo.HandlerFunc {
 //
 // It relies on http.ServeContent, which handles conditional requests (If-None-Match / If-Modified-Since),
 // HEAD requests and Range requests for us.
-func serveContent(c echo.Context, name string, contentType string, data []byte) error {
+func serveContent(c *echo.Context, name string, contentType string, data []byte) error {
 	sum := sha256.Sum256(data)
 	header := c.Response().Header()
 	header.Set("ETag", `"`+hex.EncodeToString(sum[:16])+`"`)
@@ -295,7 +299,7 @@ func isHashedAsset(name string) bool {
 // - /api/v1/foo will be served by the last route.
 func (f *frontend) routerMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			for _, route := range reactRoutes {
 				if !strings.HasPrefix(c.Request().URL.Path, f.apiPrefix+route) {
 					continue
@@ -307,7 +311,7 @@ func (f *frontend) routerMiddleware() echo.MiddlewareFunc {
 	}
 }
 
-func (f *frontend) serveASTFiles(c echo.Context) error {
+func (f *frontend) serveASTFiles(c *echo.Context) error {
 	fileOpened, err := asts.Open("/app/dist/index.html")
 	if err != nil {
 		logrus.WithError(err).Error("Unable to open the React index.html")

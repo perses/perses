@@ -44,9 +44,9 @@ const { targetDashboards, noDashboards } = vi.hoisted(() => ({
 }));
 
 vi.mock('../../model/search-client', () => ({
-  useSearchDashboards: (project?: string): { data: SearchProjectResource[]; isLoading: boolean; isError: boolean } => ({
+  useSearchDashboards: (project?: string): { data: SearchProjectResource[]; isPending: boolean; isError: boolean } => ({
     data: project === 'target' ? targetDashboards : noDashboards,
-    isLoading: false,
+    isPending: false,
     isError: false,
   }),
 }));

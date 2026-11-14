@@ -96,11 +96,10 @@ are well formatted and all links are working.
 The `docs/` tree is imported by the [Perses website](https://github.com/perses/website) and rendered with MkDocs
 Material, so it is not formatted with mdox.
 
-To format mdox-managed Markdown, you will have to install the tool mentioned above. An easy way is to run the following
-command:
+To format mdox-managed Markdown, install the same mdox version used in CI:
 
 ```bash
-go install github.com/bwplotka/mdox@latest
+go install github.com/bwplotka/mdox@v0.10.0
 ```
 
 Then to format mdox-managed Markdown, run:
@@ -170,7 +169,7 @@ The secure way to configure your monitoring.               <\
                                                             //
                                                            </
 
-⇨ http server started on [::]:8080
+INFO[2025-01-04T11:40:04Z] http server started on [::]:8080
 
 ```
 

@@ -70,9 +70,9 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
   const pluginLoader = useRemotePluginLoader();
 
   // Collect the Project variables and setup external variables from it
-  const { data: project, isLoading: isLoadingProject } = useProject(dashboardResource.metadata.project);
-  const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
-  const { data: projectVars, isLoading: isLoadingProjectVars } = useVariableList(dashboardResource.metadata.project);
+  const { data: project, isPending: isProjectPending } = useProject(dashboardResource.metadata.project);
+  const { data: globalVars, isPending: isGlobalVarsPending } = useGlobalVariableList();
+  const { data: projectVars, isPending: isProjectVarsPending } = useVariableList(dashboardResource.metadata.project);
   const externalVariableDefinitions: ExternalVariableDefinition[] | undefined = useMemo(
     () => [
       buildProjectVariableDefinition(dashboardResource.metadata.project, projectVars ?? []),
@@ -81,7 +81,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
     [dashboardResource.metadata.project, projectVars, globalVars],
   );
 
-  if (isLoadingProject || isLoadingProjectVars || isLoadingGlobalVars) {
+  if (isProjectPending || isProjectVarsPending || isGlobalVarsPending) {
     return (
       <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress />

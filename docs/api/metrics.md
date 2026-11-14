@@ -242,8 +242,10 @@ groups:
 
 ## Standard Application Metrics
 
-In addition to dashboard usage metrics, Perses also exposes standard Go application metrics:
+In addition to dashboard usage metrics, Perses also exposes standard application metrics:
 
+- `perses_http_requests_total`: Counter of the HTTP requests received by the API, by `code`, `handler` and `method`
+- `perses_http_request_duration_seconds`: Summary of the HTTP request latencies in seconds, by `handler` and `method`
 - `go_*`: Go runtime metrics (goroutines, memory, GC, etc.)
 - `process_*`: Process metrics (CPU, memory, file descriptors, etc.)
 - `promhttp_*`: HTTP handler metrics for the metrics endpoint itself

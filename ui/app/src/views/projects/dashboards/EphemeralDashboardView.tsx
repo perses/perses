@@ -37,7 +37,7 @@ function EphemeralDashboardView(): ReactElement | null {
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const {
     data,
-    isLoading,
+    isPending,
     error: ephemeralDashboardNotFoundError,
   } = useEphemeralDashboard(projectName, ephemeralDashboardName);
   const isReadonly = useIsReadonly();
@@ -77,7 +77,7 @@ function EphemeralDashboardView(): ReactElement | null {
     [exceptionSnackbar, successSnackbar, updateEphemeralDashboardMutation],
   );
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress />
