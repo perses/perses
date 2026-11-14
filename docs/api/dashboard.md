@@ -86,6 +86,8 @@ Links can be defined at the dashboard level (`spec.links`) or on individual pane
 
 A link is either a URL or a menu of dashboards in the current project. Set `url` or `tags`, not both. A link with neither is still accepted: dashboards stored before tag menus used an empty URL. A tag menu needs a `name`, which is the menu title, and at least one tag. A dashboard is listed when it has every tag. The current dashboard is left out.
 
+The Perses UI loads that menu with `GET /api/v1/search/dashboards?project=<project>&tag=<tag>`. Repeat `tag` once per required tag. When any `tag` is set, `query` is ignored. Each hit is metadata, the display name, and the destination variable names. The response does not include dashboard specs.
+
 `renderVariables` interpolates `$var` inside a URL. `keepTime` copies the current time range. `includeVariables` copies variables: a URL receives every current variable, and a tag menu receives the variables whose names exist on the destination.
 
 ```yaml

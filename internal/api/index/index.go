@@ -32,6 +32,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
+	"strings"
 	"sync"
 
 	"github.com/labstack/echo/v4"
@@ -74,6 +75,9 @@ type index[T api.Metadata] struct {
 	metadata T
 	// displayName is the string that will be used for the search display.
 	displayName string
+	// variables are the dashboard variable names. Tag search returns them so a link can
+	// forward only the variables the destination declares, without loading the spec.
+	variables []string
 	// fields is the list of string that has been collected when the index is created.
 	// It is used to know which fields are available for search.
 	fields []string
@@ -168,6 +172,7 @@ func (c *projectIndexer) addTo(dst map[string]map[string]index[*v1.ProjectMetada
 		metadata:    m,
 		fields:      fields,
 		displayName: displayName,
+		variables:   variableNames(customRaw),
 		matcher:     c.matcher,
 	}
 	projectIdx := dst[m.Project]
@@ -263,6 +268,23 @@ func (c *projectIndexer) list(ctx echo.Context, project string) ([]*SearchResult
 	})
 }
 
+func (c *projectIndexer) listByTags(ctx echo.Context, project string, tags []string) ([]*SearchResult, error) {
+	required := normalizeTags(tags)
+	if len(required) == 0 {
+		return make([]*SearchResult, 0), nil
+	}
+	return c.collect(ctx, project, func(idx index[*v1.ProjectMetadata]) *SearchResult {
+		if !hasEveryTag(idx.metadata, required) {
+			return nil
+		}
+		return &SearchResult{
+			Metadata:    idx.metadata,
+			DisplayName: idx.displayName,
+			Variables:   idx.variables,
+		}
+	})
+}
+
 func (c *projectIndexer) search(ctx echo.Context, project string, text string) ([]*SearchResult, error) {
 	return c.collect(ctx, project, func(idx index[*v1.ProjectMetadata]) *SearchResult {
 		return idx.match(text)
@@ -273,6 +295,9 @@ type Client interface {
 	// List is listing all the documents in the index for the given kind and project.
 	// The project parameter can be empty, in that case, the list will be done through all the projects.
 	List(ctx echo.Context, kind v1.Kind, project string) ([]*SearchResult, error)
+	// ListByTags lists indexed dashboards in the project whose metadata contains every tag.
+	// The result is metadata, the display name, and variable names. It does not load dashboard specs.
+	ListByTags(ctx echo.Context, kind v1.Kind, project string, tags []string) ([]*SearchResult, error)
 	// Search is searching through the index for the given kind and project.
 	// The project parameter can be empty, in that case, the search will be done through all the projects.
 	Search(ctx echo.Context, kind v1.Kind, project string, txt string) ([]*SearchResult, error)
@@ -352,6 +377,62 @@ func (c *client) List(ctx echo.Context, kind v1.Kind, project string) ([]*Search
 		logrus.Warnf("kind %s is not supported for listing", kind)
 		return make([]*SearchResult, 0), nil
 	}
+}
+
+func (c *client) ListByTags(ctx echo.Context, kind v1.Kind, project string, tags []string) ([]*SearchResult, error) {
+	switch kind {
+	case v1.KindDashboard:
+		return c.dashboards.listByTags(ctx, project, tags)
+	default:
+		logrus.Warnf("kind %s is not supported for listing", kind)
+		return make([]*SearchResult, 0), nil
+	}
+}
+
+func variableNames(raw rawDocument) []string {
+	values := raw.getField("spec.variables")
+	if !values.IsArray() {
+		return nil
+	}
+	var names []string
+	for _, variable := range values.Array() {
+		name := variable.Get("spec.name").String()
+		if name == "" {
+			continue
+		}
+		names = append(names, name)
+	}
+	return names
+}
+
+func normalizeTags(tags []string) []string {
+	required := make([]string, 0, len(tags))
+	for _, tag := range tags {
+		tag = strings.TrimSpace(tag)
+		if tag != "" {
+			required = append(required, tag)
+		}
+	}
+	return required
+}
+
+func hasEveryTag(metadata *v1.ProjectMetadata, required []string) bool {
+	if metadata == nil {
+		return false
+	}
+	for _, tag := range required {
+		found := false
+		for existing := range metadata.Tags {
+			if existing == tag {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
 }
 
 func (c *client) Refresh() error {
