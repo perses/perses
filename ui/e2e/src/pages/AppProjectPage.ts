@@ -29,6 +29,7 @@ export class AppProjectPage {
 
   readonly addDashboardButton: Locator;
   readonly addFolderButton: Locator;
+  readonly importDashboardButton: Locator;
   readonly createDashboardDialog: Locator;
   readonly createFolderDialog: Locator;
 
@@ -49,6 +50,7 @@ export class AppProjectPage {
 
     this.addDashboardButton = page.getByRole('button', { name: 'Add Dashboard' });
     this.addFolderButton = page.getByRole('button', { name: 'Add Folder' });
+    this.importDashboardButton = page.getByRole('button', { name: 'Import Dashboard' });
     this.createDashboardDialog = page.getByRole('dialog', {
       name: 'Create Dashboard',
     });

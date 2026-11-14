@@ -53,6 +53,7 @@ import { useCreateDatasourceMutation, useDatasourceList } from '../../model/data
 import { useEphemeralDashboardList } from '../../model/ephemeral-dashboard-client';
 import { useCreateRoleMutation, useRoleList } from '../../model/role-client';
 import { useCreateRoleBindingMutation, useRoleBindingList } from '../../model/rolebinding-client';
+import { ImportRoute } from '../../model/route';
 import { useSearchDashboards } from '../../model/search-client';
 import { useCreateSecretMutation, useSecretList } from '../../model/secret-client';
 import { useCreateVariableMutation, useVariableList } from '../../model/variable-client';
@@ -214,6 +215,16 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
               {...props}
             >
               Add Dashboard
+            </CRUDButton>
+            <CRUDButton
+              action="create"
+              scope="Dashboard"
+              project={projectName}
+              variant="contained"
+              onClick={() => navigate(`${ImportRoute}?project=${encodeURIComponent(projectName)}`)}
+              {...props}
+            >
+              Import Dashboard
             </CRUDButton>
           </Box>
           <CreateDashboardDialog

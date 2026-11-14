@@ -26,7 +26,7 @@ import { JSONEditor, useSnackbar } from '@perses-dev/components';
 import AutoFix from 'mdi-material-ui/AutoFix';
 import Import from 'mdi-material-ui/Import';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useIsReadonly } from '../../context/Config';
@@ -50,19 +50,24 @@ interface GrafanaLightDashboard {
 
 interface GrafanaFlowProps {
   dashboard: GrafanaLightDashboard;
+  // Project selected by default to import the migrated dashboard into, if the user has access to it.
+  defaultProject?: string;
 }
 
-function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
+function GrafanaFlow({ dashboard, defaultProject }: GrafanaFlowProps): ReactElement {
   const migrateMutation = useMigrate();
   const navigate = useNavigate();
   const isReadonly = useIsReadonly();
   const { exceptionSnackbar } = useSnackbar();
-  const [projectName, setProjectName] = useState<string>('');
+  const [projectName, setProjectName] = useState<string | null>(defaultProject ?? null);
   const [grafanaInput, setGrafanaInput] = useState<Record<string, string>>(() =>
     Object.fromEntries(dashboard.__inputs?.map((input) => [input.name, input.value ?? '']) ?? []),
   );
   const [useDefaultDatasource, setUseDefaultDatasource] = useState(false);
   const { data, isPending, error } = useProjectList();
+  const projectNames = useMemo(() => (data ?? []).map((project) => project.metadata.name), [data]);
+  // A project that isn't one of the user's projects, like an unknown default project, is ignored.
+  const selectedProject = projectName !== null && projectNames.includes(projectName) ? projectName : null;
   const dashboardMutation = useCreateDashboardMutation((data) => {
     navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
   });
@@ -73,11 +78,11 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
 
   const importOnClick = (): void => {
     const migratedDashboard = migrateMutation.data;
-    if (migratedDashboard === undefined) {
+    if (migratedDashboard === undefined || selectedProject === null) {
       return;
     }
     const dashboardToCreate = structuredClone(migratedDashboard);
-    dashboardToCreate.metadata.project = projectName;
+    dashboardToCreate.metadata.project = selectedProject;
     dashboardMutation.mutate(dashboardToCreate);
   };
 
@@ -156,20 +161,17 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
           <Stack width="100%" gap={1}>
             <Autocomplete
               disablePortal
+              value={selectedProject}
               onChange={(event, value) => {
-                if (value) {
-                  setProjectName(value);
-                }
+                setProjectName(value);
               }}
               renderInput={(params) => <TextField {...params} required label="Project name" />}
-              options={data.map((project) => {
-                return project.metadata.name;
-              })}
+              options={projectNames}
             />
             <Button
               fullWidth
               variant="contained"
-              disabled={dashboardMutation.isPending || projectName.length === 0 || isReadonly}
+              disabled={dashboardMutation.isPending || selectedProject === null || isReadonly}
               startIcon={<Import />}
               onClick={importOnClick}
               sx={{ alignSelf: 'stretch' }}
