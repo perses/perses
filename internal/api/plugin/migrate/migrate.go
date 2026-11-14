@@ -42,6 +42,7 @@ const (
 	grafanaType     = "#grafanaType"
 	migrationFolder = "migrate"
 	varDefID        = "#grafanaVar"
+	annotationDefID = "#grafanaAnnotation"
 )
 
 var kindRegexp = regexp.MustCompile(`(?m)kind\s*:\s*"(\w+)"`)
@@ -129,6 +130,9 @@ func GetPluginKind(migrateFile string) (plugin.Kind, error) {
 	}
 	if strings.Contains(string(data), varDefID) {
 		return plugin.KindVariable, nil
+	}
+	if strings.Contains(string(data), annotationDefID) {
+		return plugin.KindAnnotation, nil
 	}
 	return plugin.KindQuery, nil
 }
@@ -240,14 +244,16 @@ type Migration interface {
 func New() Migration {
 	return &completeMigration{
 		mig: &mig{
-			panels:    make(map[string]*panelInstance),
-			variables: make(map[string]*build.Instance),
-			queries:   make(map[string]*queryInstance),
+			panels:      make(map[string]*panelInstance),
+			variables:   make(map[string]*build.Instance),
+			queries:     make(map[string]*queryInstance),
+			annotations: make(map[string]*build.Instance),
 		},
 		devMig: &mig{
-			panels:    make(map[string]*panelInstance),
-			variables: make(map[string]*build.Instance),
-			queries:   make(map[string]*queryInstance),
+			panels:      make(map[string]*panelInstance),
+			variables:   make(map[string]*build.Instance),
+			queries:     make(map[string]*queryInstance),
+			annotations: make(map[string]*build.Instance),
 		},
 	}
 }
@@ -308,6 +314,7 @@ func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard, useDe
 	result.Spec.Variables = m.migrateVariables(grafanaDashboard)
 	result.Spec.Layouts = m.migrateGrid(grafanaDashboard)
 	result.Spec.Links = m.migrateDashboardLinks(grafanaDashboard)
+	result.Spec.Annotations = m.migrateAnnotations(grafanaDashboard, useDefaultDatasource)
 	return result, nil
 }
 
@@ -443,6 +450,9 @@ type mig struct {
 	// queries is a map that implies we won't allow having two migration scripts for the same query type.
 	// The key is the query instance kind (e.g., PrometheusTimeSeriesQuery).
 	queries map[string]*queryInstance
+	// annotations is a map that implies we won't allow having two migration scripts for the same annotation type.
+	// The key is the annotation instance kind (e.g., PrometheusPromQLAnnotation).
+	annotations map[string]*build.Instance
 }
 
 func (m *mig) load(pluginPath string, module v1.PluginModule) error {
@@ -458,6 +468,8 @@ func (m *mig) load(pluginPath string, module v1.PluginModule) error {
 			m.loadVariable(sch.Name, sch.Instance, module)
 		case plugin.KindPanel:
 			m.loadPanel(sch.Name, sch.Instance, module)
+		case plugin.KindAnnotation:
+			m.loadAnnotation(sch.Name, sch.Instance, module)
 		}
 	}
 	return nil
@@ -543,6 +555,29 @@ func (m *mig) loadVariable(schemaPath string, instance *build.Instance, module v
 	logrus.Infof("unable to recognize the variable kind from the migrate script %q", schemaPath)
 }
 
+func (m *mig) loadAnnotation(schemaPath string, instance *build.Instance, module v1.PluginModule) {
+	// Like for the variables, the annotation instance name is only used to ensure we have a single migration script per annotation kind,
+	// so the migration script of a plugin loaded from the dev environment can override the existing one.
+	data, err := os.ReadFile(filepath.Join(schemaPath, "migrate.cue")) //nolint: gosec
+	if err != nil {
+		logrus.WithError(err).Warnf("unable to read migrate script from %q", schemaPath)
+		return
+	}
+	for _, group := range kindRegexp.FindAllStringSubmatch(string(data), -1) {
+		if len(group) < 2 {
+			continue
+		}
+		kind := group[1]
+		for _, plg := range module.Spec.Plugins {
+			if plg.Kind == plugin.KindAnnotation && plg.Spec.Name == kind {
+				m.annotations[kind] = instance
+				return
+			}
+		}
+	}
+	logrus.Infof("unable to recognize the annotation kind from the migrate script %q", schemaPath)
+}
+
 func (m *mig) loadQuery(schemaPath string, instance *build.Instance, module v1.PluginModule) {
 	// The idea here is to know the query instance name we are dealing with.
 	// Then based on that, we will loop over the plugins listed in the module to get the high level query kind.
@@ -586,7 +621,8 @@ func (m *mig) remove(kind plugin.Kind, name string) {
 			delete(m.panels, name)
 		case plugin.KindVariable:
 			delete(m.variables, name)
-		// TODO: annotations
+		case plugin.KindAnnotation:
+			delete(m.annotations, name)
 		case plugin.KindDatasource, plugin.KindExplore:
 		// No migration script for datasource or explorer, so nothing to remove
 		default:

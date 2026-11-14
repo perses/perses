@@ -23,7 +23,7 @@ import Header from './components/Header/Header';
 import { PersesLoader } from './components/PersesLoader';
 import { ShortcutHelpModal } from './components/ShortcutHelpModal';
 import { useIsKeyboardShortcutsEnabled } from './context/Config';
-import { DelegatedAuthnErrorRoute, SignInRoute, SignUpRoute } from './model/route';
+import { DelegatedAuthnErrorRoute, ExploreRoute, SignInRoute, SignUpRoute } from './model/route';
 import './i18n/i18n';
 
 function isDashboardViewRoute(pathname: string): boolean {
@@ -68,7 +68,7 @@ function App(): ReactElement {
           </Suspense>
         </ReactRouterProvider>
       </Box>
-      {!isDashboardViewRoute(location.pathname) && <Footer />}
+      {!isDashboardViewRoute(location.pathname) && location.pathname !== ExploreRoute && <Footer />}
     </Box>
   );
 }

@@ -17,6 +17,11 @@ plugin. Therefore, the migration is in best-effort basis. However we are working
 - The `Regex` field of the Grafana variables is not migrated. See [Variables with a regex](#variables-with-a-regex) to
   learn why, and how to filter the values of a migrated variable again.
 
+- A Grafana annotation is migrated only when one of the plugins provides a migration script for it. The other
+  annotations are not kept, and neither is the built-in annotation of Grafana ("Annotations & Alerts"), which queries
+  the annotations stored by Grafana itself. The panel filter of an annotation (`filter`) is not migrated: a migrated
+  annotation applies to every panel. Annotations sharing the same name are not all kept: only the first one is.
+
 ## Prerequisites
 
 We are trying to support as many versions of Grafana as possible. But unfortunately, we can't support all of them. 

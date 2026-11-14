@@ -102,6 +102,54 @@ func TestSimplifiedDashboardUnmarshal(t *testing.T) {
 			data:     `{"refresh": {"a": 1}, "timezone": [], "time": [], "uid": "after", "title": "After", "tags": ["x"]}`,
 			expected: &SimplifiedDashboard{UID: "after", Title: "After", Tags: []string{"x"}, Time: &GrafanaTimeRange{}},
 		},
+		{
+			title: "Annotations",
+			data: `{
+    "title": "Test Dashboard",
+    "annotations": {
+      "list": [
+        {"builtIn": 1, "enable": true, "iconColor": "rgba(0, 211, 255, 1)", "name": "Annotations & Alerts"},
+        {"datasource": {"type": "prometheus", "uid": "prom"}, "enable": false, "expr": "up == 0", "name": "Down"}
+      ]
+    }
+  }`,
+			expected: &SimplifiedDashboard{
+				Title: "Test Dashboard",
+				Annotations: GrafanaAnnotations{
+					List: []GrafanaAnnotation{
+						{
+							Name:       "Annotations & Alerts",
+							BuiltIn:    1,
+							Enable:     new(true),
+							IconColor:  "rgba(0, 211, 255, 1)",
+							RawMessage: json.RawMessage(`{"builtIn":1,"enable":true,"iconColor":"rgba(0, 211, 255, 1)","name":"Annotations \u0026 Alerts"}`),
+						},
+						{
+							Name:       "Down",
+							Enable:     new(false),
+							RawMessage: json.RawMessage(`{"datasource":{"type":"prometheus","uid":"prom"},"enable":false,"expr":"up == 0","name":"Down"}`),
+						},
+					},
+				},
+			},
+		},
+		{
+			title: "Annotations that are not objects are ignored, and fields with an unexpected type are left empty",
+			data:  `{"title": "Test Dashboard", "annotations": {"list": ["not an annotation", {"name": 1, "enable": "yes", "expr": "up"}]}}`,
+			expected: &SimplifiedDashboard{
+				Title: "Test Dashboard",
+				Annotations: GrafanaAnnotations{
+					List: []GrafanaAnnotation{
+						{RawMessage: json.RawMessage(`{"enable":"yes","expr":"up","name":1}`)},
+					},
+				},
+			},
+		},
+		{
+			title:    "Annotations with the wrong type don't stop the decoding of the next fields",
+			data:     `{"annotations": [], "uid": "after", "title": "After"}`,
+			expected: &SimplifiedDashboard{UID: "after", Title: "After"},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.title, func(t *testing.T) {

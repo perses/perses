@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/netguard"
@@ -56,7 +56,7 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 	group.POST(fmt.Sprintf("/%s", utils.PathGlobalVariable), e.ValidateGlobalVariable, true)
 }
 
-func (e *endpoint) ValidateDashboard(ctx echo.Context) error {
+func (e *endpoint) ValidateDashboard(ctx *echo.Context) error {
 	entity := &v1.Dashboard{}
 	if err := ctx.Bind(entity); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
@@ -69,23 +69,23 @@ func (e *endpoint) ValidateDashboard(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-func (e *endpoint) ValidateDatasource(ctx echo.Context) error {
+func (e *endpoint) ValidateDatasource(ctx *echo.Context) error {
 	return e.validateDatasource(&v1.Datasource{}, ctx)
 }
 
-func (e *endpoint) ValidateGlobalDatasource(ctx echo.Context) error {
+func (e *endpoint) ValidateGlobalDatasource(ctx *echo.Context) error {
 	return e.validateDatasource(&v1.GlobalDatasource{}, ctx)
 }
 
-func (e *endpoint) ValidateVariable(ctx echo.Context) error {
+func (e *endpoint) ValidateVariable(ctx *echo.Context) error {
 	return validateVariable(&v1.Variable{}, e.sch, ctx)
 }
 
-func (e *endpoint) ValidateGlobalVariable(ctx echo.Context) error {
+func (e *endpoint) ValidateGlobalVariable(ctx *echo.Context) error {
 	return validateVariable(&v1.GlobalVariable{}, e.sch, ctx)
 }
 
-func (e *endpoint) validateDatasource(entity v1.DatasourceInterface, ctx echo.Context) error {
+func (e *endpoint) validateDatasource(entity v1.DatasourceInterface, ctx *echo.Context) error {
 	if err := ctx.Bind(entity); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
@@ -99,7 +99,7 @@ func (e *endpoint) validateDatasource(entity v1.DatasourceInterface, ctx echo.Co
 	return ctx.NoContent(http.StatusOK)
 }
 
-func validateVariable(entity v1.VariableInterface, sch schema.Schema, ctx echo.Context) error {
+func validateVariable(entity v1.VariableInterface, sch schema.Schema, ctx *echo.Context) error {
 	if err := ctx.Bind(entity); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}

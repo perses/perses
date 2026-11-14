@@ -203,7 +203,11 @@ func GenerateSchemaDefinitions(ctx *cue.Context, schemas []LoadSchema) (cue.Valu
 			return cue.Value{}, fmt.Errorf("unable to build instance %s: %w", ls.Name, value.Err())
 		}
 		defPath := cue.MakePath(cue.Def(fmt.Sprintf("#%s", ls.Name)))
-		result = result.FillPath(defPath, value)
+		expr, err := apiCue.ValueToASTExpr(value)
+		if err != nil {
+			return cue.Value{}, err
+		}
+		result = result.FillPath(defPath, expr)
 	}
 	if result.Err() != nil {
 		return cue.Value{}, fmt.Errorf("building schema value: %w", result.Err())

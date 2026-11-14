@@ -31,6 +31,12 @@ func TestPluginTestSchemasCMD(t *testing.T) {
 			ExpectedRegexMessage: `SUCCESS: All of the 6 schema test\(s\) passed`,
 		},
 		{
+			Title:                "Schema tests for an annotation plugin, all succeeding",
+			Args:                 []string{"--plugin.path", filepath.Join(projectPath, "internal", "cli", "cmd", "plugin", "testschemas", "testdata", "my-annotation-plugin")},
+			IsErrorExpected:      false,
+			ExpectedRegexMessage: `SUCCESS: All of the 3 schema test\(s\) passed`,
+		},
+		{
 			Title:           "Schema tests for datasource plugin (multi-plugins), 2 failing",
 			Args:            []string{"--plugin.path", filepath.Join(projectPath, "internal", "cli", "cmd", "plugin", "testschemas", "testdata", "my-datasource-plugin")},
 			IsErrorExpected: true,

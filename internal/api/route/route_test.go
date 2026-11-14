@@ -18,13 +18,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGroupANYMethods(t *testing.T) {
 	g := &Group{Path: "/proxy"}
-	g.ANY("/*", func(c echo.Context) error {
+	g.ANY("/*", func(c *echo.Context) error {
 		return c.NoContent(http.StatusOK)
 	}, false)
 	e := echo.New()

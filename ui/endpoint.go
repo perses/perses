@@ -30,8 +30,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	echoUtils "github.com/perses/common/echo"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin"
@@ -103,7 +103,7 @@ func (f *frontend) RegisterRoute(e *echo.Echo) {
 	e.GET(f.apiPrefix+"/plugins/*", f.servePluginFiles)
 }
 
-func (f *frontend) servePluginFiles(c echo.Context) error {
+func (f *frontend) servePluginFiles(c *echo.Context) error {
 	// We are going to serve a plugin from a dev environment, let's set up the proxy to redirect the traffic.
 	req := c.Request()
 
@@ -178,17 +178,17 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 	if proxyErr != nil {
 		// we need to wrap the error with an Echo Error,
 		// otherwise the error will be hidden by the middleware "middleware.HandleError".
-		status := res.Status
-		if status < 400 {
-			// if there is an error and the status code doesn't match the error, then let's use a default one
-			status = 500
+		// If there is an error and the status code doesn't match the error, then let's use a default one.
+		status := http.StatusInternalServerError
+		if resp, unwrapErr := echo.UnwrapResponse(res); unwrapErr == nil && resp.Status >= 400 {
+			status = resp.Status
 		}
 		return echo.NewHTTPError(status, proxyErr.Error())
 	}
 	return nil
 }
 
-func proxyPrepareRequest(c echo.Context, devEnvironment *v1.PluginInDevelopment) error {
+func proxyPrepareRequest(c *echo.Context, devEnvironment *v1.PluginInDevelopment) error {
 	req := c.Request()
 	// We have to modify the HOST of the request to match the host of the targetURL
 	// So far I'm not sure to understand exactly why. However, if you are going to remove it, be sure of what you are doing.
@@ -211,7 +211,7 @@ func proxyPrepareRequest(c echo.Context, devEnvironment *v1.PluginInDevelopment)
 // This is the only way to ensure that every asset is served with the proper prefix path.
 // So, at runtime, we need to open the JS files and then replace the placeholder with the actual API prefix.
 func (f *frontend) assetHandler() echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		fileName := c.Request().URL.Path
 		assetFile, err := asts.Open(fileName)
 		if err != nil {
@@ -255,7 +255,7 @@ func (f *frontend) assetHandler() echo.HandlerFunc {
 //
 // It relies on http.ServeContent, which handles conditional requests (If-None-Match / If-Modified-Since),
 // HEAD requests and Range requests for us.
-func serveContent(c echo.Context, name string, contentType string, data []byte) error {
+func serveContent(c *echo.Context, name string, contentType string, data []byte) error {
 	sum := sha256.Sum256(data)
 	header := c.Response().Header()
 	header.Set("ETag", `"`+hex.EncodeToString(sum[:16])+`"`)
@@ -299,7 +299,7 @@ func isHashedAsset(name string) bool {
 // - /api/v1/foo will be served by the last route.
 func (f *frontend) routerMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			for _, route := range reactRoutes {
 				if !strings.HasPrefix(c.Request().URL.Path, f.apiPrefix+route) {
 					continue
@@ -311,7 +311,7 @@ func (f *frontend) routerMiddleware() echo.MiddlewareFunc {
 	}
 }
 
-func (f *frontend) serveASTFiles(c echo.Context) error {
+func (f *frontend) serveASTFiles(c *echo.Context) error {
 	fileOpened, err := asts.Open("/app/dist/index.html")
 	if err != nil {
 		logrus.WithError(err).Error("Unable to open the React index.html")

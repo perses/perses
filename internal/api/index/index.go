@@ -35,7 +35,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
@@ -202,7 +202,7 @@ func (c *projectIndexer) delete(metadata *v1.ProjectMetadata) {
 	c.mutex.Unlock()
 }
 
-func (c *projectIndexer) collect(ctx echo.Context, project string, collector func(idx index[*v1.ProjectMetadata]) *SearchResult) ([]*SearchResult, error) {
+func (c *projectIndexer) collect(ctx *echo.Context, project string, collector func(idx index[*v1.ProjectMetadata]) *SearchResult) ([]*SearchResult, error) {
 	var projectList []string
 	if len(project) != 0 {
 		if c.authz.IsEnabled() {
@@ -259,7 +259,7 @@ func (c *projectIndexer) collect(ctx echo.Context, project string, collector fun
 	return results, nil
 }
 
-func (c *projectIndexer) list(ctx echo.Context, project string) ([]*SearchResult, error) {
+func (c *projectIndexer) list(ctx *echo.Context, project string) ([]*SearchResult, error) {
 	return c.collect(ctx, project, func(idx index[*v1.ProjectMetadata]) *SearchResult {
 		return &SearchResult{
 			Metadata:    idx.metadata,
@@ -268,7 +268,7 @@ func (c *projectIndexer) list(ctx echo.Context, project string) ([]*SearchResult
 	})
 }
 
-func (c *projectIndexer) listByTags(ctx echo.Context, project string, tags []string) ([]*SearchResult, error) {
+func (c *projectIndexer) listByTags(ctx *echo.Context, project string, tags []string) ([]*SearchResult, error) {
 	required := normalizeTags(tags)
 	if len(required) == 0 {
 		return make([]*SearchResult, 0), nil
@@ -285,7 +285,7 @@ func (c *projectIndexer) listByTags(ctx echo.Context, project string, tags []str
 	})
 }
 
-func (c *projectIndexer) search(ctx echo.Context, project string, text string) ([]*SearchResult, error) {
+func (c *projectIndexer) search(ctx *echo.Context, project string, text string) ([]*SearchResult, error) {
 	return c.collect(ctx, project, func(idx index[*v1.ProjectMetadata]) *SearchResult {
 		return idx.match(text)
 	})
@@ -294,13 +294,13 @@ func (c *projectIndexer) search(ctx echo.Context, project string, text string) (
 type Client interface {
 	// List is listing all the documents in the index for the given kind and project.
 	// The project parameter can be empty, in that case, the list will be done through all the projects.
-	List(ctx echo.Context, kind v1.Kind, project string) ([]*SearchResult, error)
+	List(ctx *echo.Context, kind v1.Kind, project string) ([]*SearchResult, error)
 	// ListByTags lists indexed dashboards in the project whose metadata contains every tag.
 	// The result is metadata, the display name, and variable names. It does not load dashboard specs.
-	ListByTags(ctx echo.Context, kind v1.Kind, project string, tags []string) ([]*SearchResult, error)
+	ListByTags(ctx *echo.Context, kind v1.Kind, project string, tags []string) ([]*SearchResult, error)
 	// Search is searching through the index for the given kind and project.
 	// The project parameter can be empty, in that case, the search will be done through all the projects.
-	Search(ctx echo.Context, kind v1.Kind, project string, txt string) ([]*SearchResult, error)
+	Search(ctx *echo.Context, kind v1.Kind, project string, txt string) ([]*SearchResult, error)
 	// Refresh is refreshing the index by reloading all the documents from the database.
 	Refresh() error
 	// Add is adding a document to the index. If it already exists, it will be updated. If it doesn't exist, it will be created.
@@ -359,7 +359,7 @@ func (c *client) Delete(kind v1.Kind, metadata api.Metadata) {
 	}
 }
 
-func (c *client) Search(ctx echo.Context, kind v1.Kind, project string, txt string) ([]*SearchResult, error) {
+func (c *client) Search(ctx *echo.Context, kind v1.Kind, project string, txt string) ([]*SearchResult, error) {
 	switch kind {
 	case v1.KindDashboard:
 		return c.dashboards.search(ctx, project, txt)
@@ -369,7 +369,7 @@ func (c *client) Search(ctx echo.Context, kind v1.Kind, project string, txt stri
 	}
 }
 
-func (c *client) List(ctx echo.Context, kind v1.Kind, project string) ([]*SearchResult, error) {
+func (c *client) List(ctx *echo.Context, kind v1.Kind, project string) ([]*SearchResult, error) {
 	switch kind {
 	case v1.KindDashboard:
 		return c.dashboards.list(ctx, project)
@@ -379,7 +379,7 @@ func (c *client) List(ctx echo.Context, kind v1.Kind, project string) ([]*Search
 	}
 }
 
-func (c *client) ListByTags(ctx echo.Context, kind v1.Kind, project string, tags []string) ([]*SearchResult, error) {
+func (c *client) ListByTags(ctx *echo.Context, kind v1.Kind, project string, tags []string) ([]*SearchResult, error) {
 	switch kind {
 	case v1.KindDashboard:
 		return c.dashboards.listByTags(ctx, project, tags)

@@ -16,7 +16,7 @@ Perses is configured via command-line flags and a configuration file
   -pprof
     	Enable pprof
   -web.hide-port
-    	If true, it will not be print on stdout the port listened to receive the HTTP request
+    	If true, the address listened to receive the HTTP requests is not logged when the server starts
   -web.listen-address string
     	The address to listen on for HTTP requests, web interface and telemetry. (default ":8080")
   -web.telemetry-path string
@@ -484,7 +484,13 @@ authenticator_ttl: <duration> | default = 2m  # Optional
 enable: <boolean> | default = false # Optional
 
 # Configure the value of the Access-Control-Allow-Origin response header.
-# The wildcard characters '*' (0+ chars) and '?' (1 char) are supported.
+# Each value is an exact origin (`scheme://host[:port]`, e.g. `https://perses.dev`), or `*` to allow every origin.
+# DEPRECATED: the wildcard patterns, where '*' matches 0 or more characters and '?' matches 1 character
+# (e.g. `https://*.example.com`), are deprecated and will be removed in v0.58.0. List the exact origins instead.
+# The patterns can allow more origins than expected: `https://*example.com` also allows `https://evilexample.com`,
+# and a `*` label matches one or more labels while the labels on its left are ignored, so `https://*.example.com`
+# also allows `https://a.b.example.com` and `https://admin.*.example.com` also allows `https://victim.example.com`.
+# See https://github.com/perses/perses/issues/4721.
 # See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin
 allow_origins: <string[]> | default = ["*"] # Optional
 
@@ -499,6 +505,13 @@ allow_methods: <string[]> | default = [] # Optional
 allow_headers: <string[]> | default = [] # Optional
 
 # Configure the value of the Access-Control-Allow-Credentials response header.
+# The browsers reject the requests with credentials answered with the response header `Access-Control-Allow-Origin: *`.
+# The entries of `allow_origins` are checked in order, and the origins matched by `*` receive this header. Hence, when
+# `enable` and `allow_credentials` are true, Perses refuses to start if `allow_origins` is not set (its default value is
+# `["*"]`) or if its first entry is `*`, as every origin would receive `Access-Control-Allow-Origin: *`.
+# DEPRECATED: `*` placed after other entries of `allow_origins` (e.g. `["https://app.example.com", "*"]`) while
+# `allow_credentials` is true is deprecated and will be rejected in v0.58.0. Only the origins matched by an entry
+# before `*` can send requests with credentials. See https://github.com/perses/perses/issues/4721.
 # See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials
 allow_credentials: <boolean> | default = false # Optional
 
@@ -1111,6 +1124,9 @@ important_dashboards:
 # The markdown content to be displayed on the UI home page
 information: <string> # Optional
 
+# The images to display in place of the Perses logo
+logo: <Logo config> # Optional
+
 # TimeRange configuration
 time_range: <TimeRange config> # Optional
 
@@ -1131,6 +1147,30 @@ default_user_preferences:
 severity: <enum | possibleValue = 'info' | 'warning' | 'error'> | default = info # Optional
 # The content of the information to be displayed in the banner. It can be html content.
 message: <string>
+```
+
+#### Logo config
+
+Each image replaces the Perses logo at one place of the UI. When a URL is not set, the Perses logo is kept at this place.
+A URL can be an `http` or `https` URL, a path starting with `/` (e.g. `/static/logo.svg`, served by a reverse proxy in
+front of Perses), or a `data` URL that embeds the image in the configuration (e.g. `data:image/svg+xml;base64,...`).
+The browsers of the users load the image directly from this URL. A path is used as is, it is not prefixed with
+`api_prefix`: if Perses is served under `/perses` and the reverse proxy serves the image under this prefix, the path
+must include it (e.g. `/perses/static/logo.svg`).
+
+A `data` URL is part of the response of `/api/config`, which the UI loads before displaying anything. Prefer a small
+image for a `data` URL (e.g. an optimized SVG), and use an `http` or `https` URL for a bigger one.
+
+If an image can't be loaded, the Perses logo is displayed instead.
+
+```yaml
+# URL of the image displayed in the navigation bar, at the top left of every page.
+# The image is scaled to fit in 130x32 pixels (64x32 pixels on small screens) and is displayed on the dark blue background of the bar.
+navbar_url: <string> # Optional
+
+# URL of the image displayed on the sign-in, sign-up and authentication error pages.
+# The image is scaled to fit in 394x116 pixels.
+sign_in_url: <string> # Optional
 ```
 
 #### Explorer config

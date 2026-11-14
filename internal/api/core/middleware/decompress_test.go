@@ -24,12 +24,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
+	echoMiddleware "github.com/labstack/echo/v5/middleware"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 type receivedRequest struct {
+	called          bool
 	body            string
 	contentEncoding string
 	contentLength   int64
@@ -43,6 +45,7 @@ func newForwardingServer(t *testing.T) (*echo.Echo, func() receivedRequest) {
 		body, err := io.ReadAll(r.Body)
 		require.NoError(t, err)
 		received = receivedRequest{
+			called:          true,
 			body:            string(body),
 			contentEncoding: r.Header.Get(echo.HeaderContentEncoding),
 			contentLength:   r.ContentLength,
@@ -55,7 +58,7 @@ func newForwardingServer(t *testing.T) (*echo.Echo, func() receivedRequest) {
 
 	e := echo.New()
 	e.Pre(Decompress())
-	e.POST("/proxy", func(c echo.Context) error {
+	e.POST("/proxy", func(c *echo.Context) error {
 		httputil.NewSingleHostReverseProxy(upstreamURL).ServeHTTP(c.Response(), c.Request())
 		return nil
 	})
@@ -89,6 +92,33 @@ func TestDecompress(t *testing.T) {
 		assert.Empty(t, received().contentEncoding)
 	})
 
+	t.Run("the gzip content encoding is case-insensitive", func(t *testing.T) {
+		e, received := newForwardingServer(t)
+
+		req := httptest.NewRequest(http.MethodPost, "/proxy", bytes.NewReader(gzipBody(t, body)))
+		req.Header.Set(echo.HeaderContentEncoding, "GZIP")
+		rec := httptest.NewRecorder()
+		e.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, body, received().body)
+		assert.Empty(t, received().contentEncoding)
+	})
+
+	t.Run("empty gzip body is forwarded without content encoding", func(t *testing.T) {
+		e, received := newForwardingServer(t)
+
+		req := httptest.NewRequest(http.MethodPost, "/proxy", http.NoBody)
+		req.Header.Set(echo.HeaderContentEncoding, "gzip")
+		rec := httptest.NewRecorder()
+		e.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Empty(t, received().body)
+		assert.Empty(t, received().contentEncoding)
+		assert.Equal(t, int64(0), received().contentLength)
+	})
+
 	t.Run("plain body is forwarded untouched", func(t *testing.T) {
 		e, received := newForwardingServer(t)
 
@@ -115,4 +145,55 @@ func TestDecompress(t *testing.T) {
 		assert.Equal(t, "br", received().contentEncoding)
 		assert.Equal(t, int64(len(body)), received().contentLength)
 	})
+
+	for _, test := range []struct {
+		name string
+		body []byte
+	}{
+		{name: "a body that is not a gzip stream is rejected", body: []byte(body)},
+		{name: "a body with a truncated gzip header is rejected", body: gzipBody(t, body)[:5]},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			e, received := newForwardingServer(t)
+
+			req := httptest.NewRequest(http.MethodPost, "/proxy", bytes.NewReader(test.body))
+			req.Header.Set(echo.HeaderContentEncoding, "gzip")
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, http.StatusBadRequest, rec.Code)
+			assert.False(t, received().called)
+		})
+	}
+
+	// The errors of the rest of the chain can look like the ones of an invalid gzip stream, but they don't come from
+	// the gzip reader: they must not be answered with 400.
+	for _, test := range []struct {
+		name    string
+		handler echo.HandlerFunc
+	}{
+		{
+			name:    "an error of the next handlers is returned untouched",
+			handler: func(*echo.Context) error { return io.ErrUnexpectedEOF },
+		},
+		{
+			name:    "a panic recovered in the next handlers is answered with 500",
+			handler: func(*echo.Context) error { panic(io.ErrUnexpectedEOF) },
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			e := echo.New()
+			e.Pre(Decompress())
+			// Like in perses/common, the panics are recovered after the pre-middlewares.
+			e.Use(echoMiddleware.Recover())
+			e.POST("/", test.handler)
+
+			req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(gzipBody(t, body)))
+			req.Header.Set(echo.HeaderContentEncoding, "gzip")
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		})
+	}
 }
