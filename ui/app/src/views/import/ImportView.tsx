@@ -20,12 +20,14 @@ import { useState } from 'react';
 
 import { useIsMobileSize } from '../../utils/browser-size';
 import GrafanaFlow from './GrafanaFlow';
-import type { Dashboard } from './parse-dashboard';
-import { parseDashboard } from './parse-dashboard';
 import PersesFlow from './PersesFlow';
+import { useParsedDashboard } from './use-parsed-dashboard';
 
 function ImportView(): ReactElement {
-  const [dashboard, setDashboard] = useState<Dashboard>();
+  const [definition, setDefinition] = useState('');
+  // Bumped on file upload to remount the editor, as it only uses its value as initial content.
+  const [editorKey, setEditorKey] = useState(0);
+  const dashboard = useParsedDashboard(definition);
   const isMobileSize = useIsMobileSize();
 
   const fileUploadOnChange = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
@@ -35,12 +37,9 @@ function ImportView(): ReactElement {
     }
     const value = await files[0]?.text();
     if (value !== undefined) {
-      completeDashboard(value);
+      setDefinition(value);
+      setEditorKey((key) => key + 1);
     }
-  };
-
-  const completeDashboard = (definition: string | undefined): void => {
-    setDashboard(parseDashboard(definition));
   };
 
   return (
@@ -55,12 +54,13 @@ function ImportView(): ReactElement {
         </Typography>
         <Button fullWidth startIcon={<Upload />} variant="outlined" component="label">
           Upload JSON or YAML file
-          <input type="file" onChange={fileUploadOnChange} hidden style={{ width: '100%' }} />
+          <input type="file" accept=".json,.yaml,.yml" onChange={fileUploadOnChange} hidden style={{ width: '100%' }} />
         </Button>
         <Divider>OR</Divider>
         <YAMLEditor
-          value={dashboard?.data}
-          onChange={(value: string) => completeDashboard(value)}
+          key={editorKey}
+          value={definition}
+          onChange={setDefinition}
           minHeight="10rem"
           maxHeight="30rem"
           width="100%"

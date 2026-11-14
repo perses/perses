@@ -33,15 +33,21 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
- * Parse a dashboard definition given as JSON or YAML (JSON being a subset of YAML).
+ * Parse a dashboard definition given as JSON or YAML.
  * Returns undefined when the definition is invalid or isn't an object.
  */
-export function parseDashboard(definition: string | undefined): Dashboard {
+export function parseDashboard(definition: string): Dashboard {
   let value: unknown;
   try {
-    value = parse(definition ?? '{}');
-  } catch (_) {
-    return undefined;
+    // JSON first: much faster than yaml.parse and keeps JSON semantics (e.g. duplicate keys, last one wins).
+    value = JSON.parse(definition);
+  } catch {
+    try {
+      // logLevel 'error' avoids a console.warn for each YAML warning (e.g. unresolved tags).
+      value = parse(definition, { logLevel: 'error' });
+    } catch {
+      return undefined;
+    }
   }
   if (!isRecord(value)) {
     return undefined;

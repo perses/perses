@@ -44,6 +44,11 @@ describe('parseDashboard', () => {
       definition: JSON.stringify(PERSES_DASHBOARD, null, 2),
       expected: { kind: 'perses', data: PERSES_DASHBOARD },
     },
+    {
+      title: 'keeps JSON semantics for duplicate keys (last one wins)',
+      definition: '{"kind": "Dashboard", "spec": {"duration": "5m", "duration": "1h"}}',
+      expected: { kind: 'perses', data: PERSES_DASHBOARD },
+    },
     { title: 'returns undefined for invalid YAML', definition: ':invalid: yaml: [broken', expected: undefined },
     { title: 'returns undefined for invalid JSON', definition: '{not valid', expected: undefined },
     { title: 'returns undefined for a scalar', definition: 'just a string', expected: undefined },
