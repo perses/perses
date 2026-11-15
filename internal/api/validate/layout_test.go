@@ -14,6 +14,8 @@
 package validate
 
 import (
+	"fmt"
+	"math"
 	"testing"
 
 	"github.com/perses/spec/go/common"
@@ -102,6 +104,16 @@ func TestDashboardSpecGridLayouts(t *testing.T) {
 				},
 			},
 			expectedErr: `layout item #1 of the grid layout #1 doesn't fit the grid: it ends at column 32, but the grid has only 24 columns`,
+		},
+		{
+			title: "item whose position and width overflow the integer range",
+			spec: dashboard.Spec{
+				Panels: map[string]*dashboard.Panel{"a": {}},
+				Layouts: []dashboard.Layout{
+					gridLayout(item("a", math.MaxInt, 0, 1, 6)),
+				},
+			},
+			expectedErr: fmt.Sprintf(`layout item #1 of the grid layout #1 doesn't fit the grid: it ends at column %d, but the grid has only 24 columns`, uint64(math.MaxInt)+1),
 		},
 		{
 			title: "item with a zero height",

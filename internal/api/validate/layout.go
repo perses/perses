@@ -54,8 +54,10 @@ func validateGridItems(items []dashboard.GridItem, itemsOwner string) error {
 		if item.X < 0 || item.Y < 0 {
 			return fmt.Errorf("%s has an invalid position: x %d and y %d, but they cannot be negative", itemName, item.X, item.Y)
 		}
-		if item.X+item.Width > gridColumnsCount {
-			return fmt.Errorf("%s doesn't fit the grid: it ends at column %d, but the grid has only %d columns", itemName, item.X+item.Width, gridColumnsCount)
+		if item.Width > gridColumnsCount-item.X {
+			// X and Width are non-negative here, so their sum cannot overflow uint64
+			endColumn := uint64(item.X) + uint64(item.Width)
+			return fmt.Errorf("%s doesn't fit the grid: it ends at column %d, but the grid has only %d columns", itemName, endColumn, gridColumnsCount)
 		}
 	}
 	return nil
