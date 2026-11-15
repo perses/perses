@@ -15,7 +15,6 @@ package migrate
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/perses/spec/go/dashboard/variable"
@@ -24,6 +23,10 @@ import (
 const (
 	grafanaPanelRowType      = "row"
 	grafanaDashboardAPIGroup = "dashboard.grafana.app/"
+	// grafanaPanelsField is the field of the dashboard and of the rows holding their panels.
+	grafanaPanelsField          = "panels"
+	grafanaConstantVariableType = "constant"
+	grafanaTextboxVariableType  = "textbox"
 )
 
 type GridPosition struct {
@@ -85,7 +88,7 @@ func (p *Panel) UnmarshalJSON(data []byte) error {
 	if collapsed, ok := tmp["collapsed"]; ok {
 		_ = json.Unmarshal(collapsed, &panel.Collapsed)
 	}
-	if innerPanels, ok := tmp["panels"]; ok {
+	if innerPanels, ok := tmp[grafanaPanelsField]; ok {
 		if err := json.Unmarshal(innerPanels, &panel.Panels); err != nil {
 			return err
 		}
@@ -315,7 +318,11 @@ func (d *SimplifiedDashboard) UnmarshalJSON(data []byte) error {
 		APIVersion string `json:"apiVersion"`
 	}
 	if err := json.Unmarshal(data, &header); err == nil && strings.HasPrefix(header.APIVersion, grafanaDashboardAPIGroup) {
-		return fmt.Errorf("the Grafana dashboard schema %q is not supported, please export the dashboard using the classic JSON model", header.APIVersion)
+		classicDashboard, convertErr := convertGrafanaResource(data)
+		if convertErr != nil {
+			return convertErr
+		}
+		data = classicDashboard
 	}
 	tmp := &SimplifiedDashboard{}
 	type plain SimplifiedDashboard

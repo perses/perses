@@ -134,6 +134,12 @@ func TestMig_Migrate(t *testing.T) {
 			inputGrafanaDashboardFile:   "annotations_grafana_dashboard.json",
 			expectedPersesDashboardFile: "annotations_perses_dashboard.json",
 		},
+		{
+			// Same dashboard as the basic one, plus an annotation, but using the schema v2 of Grafana.
+			title:                       "dashboard using the schema v2 of Grafana",
+			inputGrafanaDashboardFile:   "grafana_v2_grafana_dashboard.json",
+			expectedPersesDashboardFile: "grafana_v2_perses_dashboard.json",
+		},
 	}
 
 	pl := loadDefaultTestPlugins()
