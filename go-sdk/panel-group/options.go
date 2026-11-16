@@ -17,6 +17,7 @@ import (
 	"fmt"
 
 	"github.com/perses/perses/go-sdk/panel"
+	"github.com/perses/spec/go/dashboard"
 )
 
 func Title(title string) Option {
@@ -56,6 +57,26 @@ func Collapsed(isCollapsed bool) Option {
 func RepeatVariable(variable string) Option {
 	return func(builder *Builder) error {
 		builder.RepeatVariable = variable
+		return nil
+	}
+}
+
+// Visibility renders the group only when the selected values of the variable satisfy the operator against the values.
+func Visibility(variable string, operator dashboard.VisibilityOperator, values ...string) Option {
+	return func(builder *Builder) error {
+		if variable == "" {
+			return fmt.Errorf("visibility: variable cannot be empty")
+		}
+		switch operator {
+		case dashboard.VisibilityOperatorEquals, dashboard.VisibilityOperatorNotEquals,
+			dashboard.VisibilityOperatorMatches, dashboard.VisibilityOperatorNotMatches:
+		default:
+			return fmt.Errorf("visibility: unknown operator %q", operator)
+		}
+		if len(values) == 0 {
+			return fmt.Errorf("visibility: at least one value is required")
+		}
+		builder.Visibility = &dashboard.Visibility{Variable: variable, Operator: operator, Value: values}
 		return nil
 	}
 }

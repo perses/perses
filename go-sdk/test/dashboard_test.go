@@ -360,6 +360,73 @@ func TestAddCustomPanelGroup(t *testing.T) {
 	})
 }
 
+func TestPanelGroupVisibility(t *testing.T) {
+	expected := &dashboardSpec.Visibility{Variable: "phase", Operator: dashboardSpec.VisibilityOperatorNotEquals, Value: []string{"PRD"}}
+
+	t.Run("AddPanelGroup", func(t *testing.T) {
+		builder, err := dashboard.New("test-dashboard",
+			dashboard.ProjectName("test"),
+			dashboard.AddPanelGroup("Workers",
+				panelgroup.Visibility("phase", dashboardSpec.VisibilityOperatorNotEquals, "PRD"),
+				panelgroup.AddPanel("Panel A"),
+			),
+		)
+		require.NoError(t, err)
+
+		spec, ok := builder.Dashboard.Spec.Layouts[0].Spec.(dashboardSpec.GridLayoutSpec)
+		require.True(t, ok)
+		assert.Equal(t, expected, spec.Display.Visibility)
+	})
+
+	t.Run("AddCustomPanelGroup", func(t *testing.T) {
+		builder, err := dashboard.New("test-dashboard",
+			dashboard.ProjectName("test"),
+			dashboard.AddCustomPanelGroup("Workers",
+				[]dashboard.GridItem{{X: 0, Y: 0, W: 24, H: 6}},
+				panelgroup.Visibility("phase", dashboardSpec.VisibilityOperatorNotEquals, "PRD"),
+				panelgroup.AddPanel("Panel A"),
+			),
+		)
+		require.NoError(t, err)
+
+		spec, ok := builder.Dashboard.Spec.Layouts[0].Spec.(dashboardSpec.GridLayoutSpec)
+		require.True(t, ok)
+		assert.Equal(t, expected, spec.Display.Visibility)
+	})
+
+	t.Run("none by default", func(t *testing.T) {
+		builder, err := dashboard.New("test-dashboard",
+			dashboard.ProjectName("test"),
+			dashboard.AddPanelGroup("Plain", panelgroup.AddPanel("Panel A")),
+		)
+		require.NoError(t, err)
+
+		spec, ok := builder.Dashboard.Spec.Layouts[0].Spec.(dashboardSpec.GridLayoutSpec)
+		require.True(t, ok)
+		assert.Nil(t, spec.Display.Visibility)
+	})
+
+	t.Run("invalid", func(t *testing.T) {
+		_, err := dashboard.New("test-dashboard",
+			dashboard.ProjectName("test"),
+			dashboard.AddPanelGroup("Workers", panelgroup.Visibility("", dashboardSpec.VisibilityOperatorEquals, "DEV")),
+		)
+		require.ErrorContains(t, err, "variable cannot be empty")
+
+		_, err = dashboard.New("test-dashboard",
+			dashboard.ProjectName("test"),
+			dashboard.AddPanelGroup("Workers", panelgroup.Visibility("phase", dashboardSpec.VisibilityOperatorEquals)),
+		)
+		require.ErrorContains(t, err, "at least one value")
+
+		_, err = dashboard.New("test-dashboard",
+			dashboard.ProjectName("test"),
+			dashboard.AddPanelGroup("Workers", panelgroup.Visibility("phase", "like", "DEV")),
+		)
+		require.ErrorContains(t, err, "unknown operator")
+	})
+}
+
 func TestDashboardNewWithInvalidMetadataName(t *testing.T) {
 	inputName := "Space in title"
 
