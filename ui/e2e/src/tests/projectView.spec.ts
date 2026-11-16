@@ -39,6 +39,31 @@ test.describe('ProjectView', () => {
     await projectPage.clickDashboardItemInList(['my_folder', 'Demo'], 'main-dashboard-list');
   });
 
+  test('can import a dashboard into the project', async ({ page }) => {
+    const projectPage = new AppProjectPage(page);
+    await projectPage.goto('testing');
+
+    const importNavigationPromise = page.waitForURL(new RegExp('/import\\?project=testing$'));
+    await projectPage.importDashboardButton.click();
+    await importNavigationPromise;
+
+    // Unique name, so that the test can be retried.
+    const dashboardName = `imported_dashboard_${Date.now()}`;
+    const dashboard = {
+      kind: 'Dashboard',
+      metadata: { name: dashboardName },
+      spec: { duration: '1h', panels: {}, layouts: [] },
+    };
+    await page.getByRole('textbox').fill(JSON.stringify(dashboard));
+
+    // The project of the page the import was started from is selected
+    await expect(page.getByRole('combobox', { name: 'Project name' })).toHaveValue('testing');
+
+    const dashboardNavigationPromise = page.waitForURL(`/projects/testing/dashboards/${dashboardName}`);
+    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    await dashboardNavigationPromise;
+  });
+
   test('can change current tab', async ({ page }) => {
     const projectPage = new AppProjectPage(page);
     await projectPage.goto(project);

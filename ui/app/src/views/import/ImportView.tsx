@@ -18,6 +18,7 @@ import AutoFix from 'mdi-material-ui/AutoFix';
 import Upload from 'mdi-material-ui/Upload';
 import type { ChangeEvent, ReactElement } from 'react';
 import { useState } from 'react';
+import { StringParam, useQueryParam } from 'use-query-params';
 
 import { useIsMobileSize } from '../../utils/browser-size';
 import { getDashboardType } from './dashboard-type';
@@ -38,6 +39,9 @@ interface PersesDashboard {
 
 function ImportView(): ReactElement {
   const [dashboard, setDashboard] = useState<Dashboard>();
+  // Project selected by default in the import step, e.g. when the import is started from a project page.
+  const [projectParam] = useQueryParam('project', StringParam);
+  const defaultProject = projectParam ?? undefined;
   const isMobileSize = useIsMobileSize();
 
   const fileUploadOnChange = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
@@ -86,8 +90,12 @@ function ImportView(): ReactElement {
           width="100%"
           placeholder="Paste your Dashboard JSON here..."
         />
-        {dashboard !== undefined && dashboard.kind === 'grafana' && <GrafanaFlow dashboard={dashboard?.data} />}
-        {dashboard !== undefined && dashboard.kind === 'perses' && <PersesFlow dashboard={dashboard?.data} />}
+        {dashboard !== undefined && dashboard.kind === 'grafana' && (
+          <GrafanaFlow dashboard={dashboard?.data} defaultProject={defaultProject} />
+        )}
+        {dashboard !== undefined && dashboard.kind === 'perses' && (
+          <PersesFlow dashboard={dashboard?.data} defaultProject={defaultProject} />
+        )}
       </Stack>
     </Container>
   );

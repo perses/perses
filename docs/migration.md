@@ -44,7 +44,9 @@ If you are interesting in this, you can track the associated issue: https://gith
 
 ### Using the UI
 
-- On the home page, click on the `Import Dashboard` in the top right corner.
+- On the home page, click on the `Import Dashboard` in the top right corner. You can also click on the
+  `Import Dashboard` button of the `Dashboards` tab of a project: this project is then selected by default when
+  importing the migrated dashboard.
 
 - Then, you can either paste the JSON of your Grafana dashboard or upload the JSON file.
 !!! tip
