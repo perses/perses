@@ -64,7 +64,7 @@ func newTracerProvider(conf config.OpenTelemetry) (*sdktrace.TracerProvider, err
 		return nil, fmt.Errorf("unable to create the OpenTelemetry resource: %w", err)
 	}
 	return sdktrace.NewTracerProvider(
-		sdktrace.WithBatcher(exporter),
+		sdktrace.WithBatcher(exporter, sdktrace.WithExportTimeout(time.Duration(conf.Timeout))),
 		sdktrace.WithResource(res),
 		// Follow the sampling decision of the caller, and sample a ratio of the traces started by Perses.
 		sdktrace.WithSampler(sdktrace.ParentBased(sdktrace.TraceIDRatioBased(conf.SamplingRatio))),
