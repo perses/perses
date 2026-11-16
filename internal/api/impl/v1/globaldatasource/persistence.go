@@ -51,8 +51,6 @@ func (d *dao) Get(name string) (*v1.GlobalDatasource, error) {
 
 func (d *dao) List(q *globaldatasource.Query) ([]*v1.GlobalDatasource, error) {
 	var result []*v1.GlobalDatasource
-	if err := d.client.Query(q, &result); err != nil {
-		return nil, err
-	}
-	return result, nil
+	err := d.client.Query(q, &result)
+	return result, err
 }
