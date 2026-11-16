@@ -18,6 +18,7 @@ import type { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStat
 import type { DispatchWithPromise } from '@perses-dev/components';
 
 import { formatAbsoluteTime, formatRelativeTime } from '../utils/dashboardTableUtils';
+import type { DataGridStorageKey } from './datagrid';
 
 export const PROJECT_COL_DEF: GridColDef = {
   field: 'project',
@@ -188,6 +189,8 @@ export const TAGS_COL_DEF: GridColDef = {
 export interface ListProperties {
   hideToolbar?: boolean;
   initialState?: GridInitialStateCommunity;
+  // Identifies the list to save its settings in the local storage, see usePersistedDataGridState.
+  storageKey?: DataGridStorageKey;
   isLoading?: boolean;
 }
 

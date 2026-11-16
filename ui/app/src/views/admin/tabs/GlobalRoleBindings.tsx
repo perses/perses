@@ -101,6 +101,7 @@ export function GlobalRoleBindings(props: GlobalRoleBindingsProps): ReactElement
         onCreate={handleGlobalRoleBindingCreate}
         onUpdate={handleGlobalRoleBindingUpdate}
         onDelete={handleGlobalRoleBindingDelete}
+        storageKey="GlobalRoleBinding"
         initialState={{
           columns: {
             columnVisibilityModel: {
