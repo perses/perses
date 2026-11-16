@@ -127,6 +127,39 @@ func nextStep(key string) (keyStep, string, error) {
 	return keyStep{kind: fieldStep, raw: raw, name: name.String()}, rest, nil
 }
 
+// fieldPrefix returns the beginning of the steps made of field steps only: the key selecting them, and their names.
+func fieldPrefix(steps []keyStep) (string, []string) {
+	var raws, names []string
+	for _, s := range steps {
+		if s.kind != fieldStep {
+			break
+		}
+		raws = append(raws, s.raw)
+		names = append(names, s.name)
+	}
+	return strings.Join(raws, "."), names
+}
+
+// extractKeyFields appends to fields the scalar values selected by the key in the raw document, with their path.
+func extractKeyFields(raw []byte, k indexedKey, path []string, fields *[]indexedField) {
+	if len(k.prefixPath) == 0 {
+		// The key starts with # or @dig, so the whole document is walked.
+		extractFields(gjson.ParseBytes(raw), k.steps, k.key, path, fields)
+		return
+	}
+	// Unlike gjson.ParseBytes, gjson.GetBytes copies only the value selected by the prefix, not the whole document.
+	value := gjson.GetBytes(raw, k.prefix)
+	rest := k.steps[len(k.prefixPath):]
+	if len(rest) == 0 && !value.IsArray() && !value.IsObject() {
+		if value.Exists() {
+			// The value is already a copy, and its path is the same in every document, so it is shared.
+			*fields = append(*fields, indexedField{key: k.key, path: k.prefixPath, value: value.String()})
+		}
+		return
+	}
+	extractFields(value, rest, k.key, append(path, k.prefixPath...), fields)
+}
+
 // extractFields appends to fields the scalar values selected by the steps in the given value, with their path.
 // The path is used as a stack: the recursive calls share its backing array, so it must be copied before being stored.
 func extractFields(value gjson.Result, steps []keyStep, key string, path []string, fields *[]indexedField) {
@@ -164,12 +197,27 @@ func flattenFields(value gjson.Result, key string, path []string, fields *[]inde
 		})
 		return
 	}
-	// The strings are copied, otherwise they would keep the whole document in memory.
-	clonedPath := make([]string, len(path))
-	for i, p := range path {
-		clonedPath[i] = strings.Clone(p)
+	// The value and the path components are copied in a single string, otherwise they would keep the whole document
+	// in memory.
+	v := value.String()
+	size := len(v)
+	for _, p := range path {
+		size += len(p)
 	}
-	*fields = append(*fields, indexedField{key: key, path: clonedPath, value: strings.Clone(value.String())})
+	var b strings.Builder
+	b.Grow(size)
+	b.WriteString(v)
+	for _, p := range path {
+		b.WriteString(p)
+	}
+	s := b.String()
+	clonedPath := make([]string, len(path))
+	offset := len(v)
+	for i, p := range path {
+		clonedPath[i] = s[offset : offset+len(p)]
+		offset += len(p)
+	}
+	*fields = append(*fields, indexedField{key: key, path: clonedPath, value: s[:len(v)]})
 }
 
 // forEachChild calls fn with the name (the key or the index) of each child of an object or an array.

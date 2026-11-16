@@ -112,16 +112,29 @@ type indexedKey struct {
 	key string
 	// steps is nil when the key uses a syntax for which the path of the values can't be determined.
 	steps []keyStep
+	// prefix is the beginning of the key made of field steps only, and prefixPath the names of these steps.
+	// The value selected by the prefix is got with gjson.GetBytes, which copies only this value instead of the document.
+	prefix     string
+	prefixPath []string
+}
+
+func newIndexedKey(key string) (indexedKey, error) {
+	steps, err := compileKey(key)
+	if err != nil {
+		return indexedKey{key: key}, err
+	}
+	prefix, prefixPath := fieldPrefix(steps)
+	return indexedKey{key: key, steps: steps, prefix: prefix, prefixPath: prefixPath}, nil
 }
 
 func newProjectIndexer(indexedKeys []string, scope role.Scope, authz authorization.Authorization, matcher *matcher) *projectIndexer {
 	keys := make([]indexedKey, 0, len(indexedKeys))
 	for _, k := range indexedKeys {
-		steps, err := compileKey(k)
+		key, err := newIndexedKey(k)
 		if err != nil {
 			logrus.WithError(err).Warnf("the path of the values indexed with the key %q can't be determined, the search results will only contain the key", k)
 		}
-		keys = append(keys, indexedKey{key: k, steps: steps})
+		keys = append(keys, key)
 	}
 	return &projectIndexer{
 		scope:       scope,
@@ -183,16 +196,15 @@ func (c *projectIndexer) add(raw json.RawMessage) error {
 // We are treating the raw JSON instead of the struct because then we can index anything; and we don't need to deal with the Go struct.
 func (c *projectIndexer) addTo(dst map[string]map[string]index[*v1.ProjectMetadata], raw json.RawMessage) error {
 	customRaw := rawDocument(raw)
-	document := gjson.ParseBytes(raw)
 	// The path is pre-allocated, so the appends done while walking the document don't need to allocate.
-	path := make([]string, 0, 32)
+	path := make([]string, 0, 16)
 	var fields []indexedField
 	for _, k := range c.indexedKeys {
 		if k.steps == nil {
 			recursiveDeepExtractFields(customRaw.getFields(k.key), k.key, &fields)
 			continue
 		}
-		extractFields(document, k.steps, k.key, path, &fields)
+		extractKeyFields(raw, k, path, &fields)
 	}
 
 	displayName := customRaw.getDisplayName()

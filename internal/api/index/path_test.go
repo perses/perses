@@ -130,10 +130,10 @@ func TestExtractFields(t *testing.T) {
 	}
 	for _, tc := range testsCases {
 		t.Run(tc.title, func(t *testing.T) {
-			steps, err := compileKey(tc.key)
+			k, err := newIndexedKey(tc.key)
 			require.NoError(t, err)
 			var fields []indexedField
-			extractFields(gjson.Parse(pathTestDocument), steps, tc.key, nil, &fields)
+			extractKeyFields([]byte(pathTestDocument), k, nil, &fields)
 
 			var paths [][]string
 			for _, f := range fields {
@@ -162,12 +162,12 @@ func FuzzExtractFields(f *testing.F) {
 		f.Add(key)
 	}
 	f.Fuzz(func(t *testing.T, key string) {
-		steps, err := compileKey(key)
+		k, err := newIndexedKey(key)
 		if err != nil {
 			return
 		}
 		var fields []indexedField
-		extractFields(gjson.Parse(pathTestDocument), steps, key, nil, &fields)
+		extractKeyFields([]byte(pathTestDocument), k, nil, &fields)
 		assertSameFieldsAsGjson(t, key, fields)
 	})
 }
