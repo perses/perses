@@ -16,6 +16,7 @@ package index
 import (
 	"encoding/json"
 	"fmt"
+	"runtime"
 	"slices"
 	"strings"
 	"testing"
@@ -36,7 +37,8 @@ import (
 //   - the update of a dashboard in the index (Add),
 //   - the search through all the dashboards (Search), with several kinds of queries, and under concurrent requests,
 //   - the listing of the dashboards (List), with and without authorization,
-//   - the rebuild of the whole index from the database (Refresh).
+//   - the rebuild of the whole index from the database (Refresh), also with keys using other syntaxes,
+//   - the memory retained by the index.
 // The matching of a query against a single indexed field is benchmarked in matcher_bench_test.go.
 //
 // Run them with:
@@ -246,6 +248,61 @@ func BenchmarkClientRefresh(b *testing.B) {
 	}
 }
 
+// BenchmarkClientRefreshKeySyntaxes measures the rebuild of the whole index, like BenchmarkClientRefresh, with indexed
+// keys using the syntaxes that the keys of benchIndexKeys don't use.
+func BenchmarkClientRefreshKeySyntaxes(b *testing.B) {
+	size := benchDatasetSizes[1]
+	b.Run(size.String(), func(b *testing.B) {
+		docs := newBenchDataset(b, size)
+		for _, keys := range benchKeySyntaxes {
+			b.Run("keys="+keys.name, func(b *testing.B) {
+				c := newBenchClient(b, keys.extraKeys, newDisabledAuthz(b), nil)
+				c.dao = &streamDAO{docs: docs}
+				if err := c.Refresh(); err != nil {
+					b.Fatal(err)
+				}
+				if count := indexedDashboardCount(c); count != len(docs) {
+					b.Fatalf("%d dashboards indexed, expected %d", count, len(docs))
+				}
+				// The default keys index the name and the display name of the dashboard.
+				expectedFields := 2 + keys.fieldsPerPanel*benchPanelCount
+				name := benchDashboardName(benchDashboardTitles[0])
+				if fields := c.dashboards.idx[benchProjectName(0)][name].fields; len(fields) != expectedFields {
+					b.Fatalf("%d fields indexed, expected %d", len(fields), expectedFields)
+				}
+				b.ReportAllocs()
+				for b.Loop() {
+					if err := c.Refresh(); err != nil {
+						b.Fatal(err)
+					}
+				}
+			})
+		}
+	})
+}
+
+// BenchmarkClientMemory measures the memory retained by the index, which the server keeps as long as it runs: the heap
+// still allocated once the index is built from the database content and the garbage is collected. It is reported per
+// dashboard, in retained-B/dashboard. The allocations are those of the build of the index, whose time is not reported,
+// as BenchmarkClientRefresh measures it.
+func BenchmarkClientMemory(b *testing.B) {
+	size := benchDatasetSizes[2]
+	b.Run(size.String(), func(b *testing.B) {
+		docs := newBenchDataset(b, size)
+		for _, keys := range slices.Concat(benchIndexKeys, benchKeySyntaxes) {
+			b.Run("keys="+keys.name, func(b *testing.B) {
+				retained := 0.0
+				b.ReportAllocs()
+				for b.Loop() {
+					retained += retainedHeap(b, keys.extraKeys, docs)
+				}
+				b.ReportMetric(0, "ns/op")
+				b.ReportMetric(retained/float64(b.N*len(docs)), "retained-B/dashboard")
+			})
+		}
+	})
+}
+
 // benchPanelCount is the number of panels of the dashboards of the datasets.
 const benchPanelCount = 10
 
@@ -313,14 +370,26 @@ var benchDatasetSizes = []benchDatasetSize{
 
 // benchIndexKeys are the configurations of the indexed keys used by the benchmarks: the default one, and the default
 // one plus the display names of the panels, as suggested by the documentation, which multiplies the indexed fields.
-var benchIndexKeys = []struct {
+var benchIndexKeys = []benchKeys{
+	{name: "default"},
+	{name: "with-panels", extraKeys: []string{"spec.panels.@dig:display.name"}, fieldsPerPanel: 1},
+}
+
+// benchKeySyntaxes are configurations of the indexed keys using the syntaxes that the keys of benchIndexKeys don't use:
+// the items of arrays, and values made of arrays and objects, whose values are all indexed.
+var benchKeySyntaxes = []benchKeys{
+	// The reference to the panel of each item of the layouts.
+	{name: "array-items", extraKeys: []string{"spec.layouts.#.spec.items.#.content.$ref"}, fieldsPerPanel: 1},
+	// The queries of the panels: the kinds of the query and of its plugin, and the PromQL expression.
+	{name: "nested-values", extraKeys: []string{"spec.panels.@dig:queries"}, fieldsPerPanel: 3},
+}
+
+// benchKeys is a configuration of the indexed keys: the default keys plus extraKeys.
+type benchKeys struct {
 	name      string
 	extraKeys []string
 	// fieldsPerPanel is the number of fields indexed for each panel of a dashboard.
 	fieldsPerPanel int
-}{
-	{name: "default"},
-	{name: "with-panels", extraKeys: []string{"spec.panels.@dig:display.name"}, fieldsPerPanel: 1},
 }
 
 func benchProjectName(p int) string {
@@ -432,6 +501,37 @@ func newBenchClient(tb testing.TB, extraKeys []string, authz authorization.Autho
 		tb.Fatalf("%d dashboards indexed, expected %d", count, len(docs))
 	}
 	return c
+}
+
+// retainedHeap builds the index of the given dashboards, with the default indexed keys plus the extra ones, and returns
+// the size of the heap it retains. Only the build is timed. The index is built from copies of the dashboards, as the
+// database returns new documents at each refresh: their memory is retained if the index references it.
+func retainedHeap(b *testing.B, extraKeys []string, docs []json.RawMessage) float64 {
+	b.Helper()
+	b.StopTimer()
+	var before, after runtime.MemStats
+	runtime.GC()
+	runtime.ReadMemStats(&before)
+	copies := make([]json.RawMessage, 0, len(docs))
+	for _, doc := range docs {
+		copies = append(copies, slices.Clone(doc))
+	}
+	c := newBenchClient(b, extraKeys, newDisabledAuthz(b), nil)
+	c.dao = &streamDAO{docs: copies}
+	b.StartTimer()
+	if err := c.Refresh(); err != nil {
+		b.Fatal(err)
+	}
+	b.StopTimer()
+	if count := indexedDashboardCount(c); count != len(docs) {
+		b.Fatalf("%d dashboards indexed, expected %d", count, len(docs))
+	}
+	c.dao = nil
+	runtime.GC()
+	runtime.ReadMemStats(&after)
+	runtime.KeepAlive(c)
+	b.StartTimer()
+	return float64(after.HeapAlloc) - float64(before.HeapAlloc)
 }
 
 func indexedDashboardCount(c *client) int {
