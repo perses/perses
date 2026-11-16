@@ -57,7 +57,7 @@ func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasourc
 			},
 		}
 		entity.GetMetadata().Flatten(a.caseSensitive)
-		_, createErr := a.svc.Create(nil, entity)
+		_, createErr := a.svc.CreateForDiscovery(entity)
 		if createErr == nil {
 			currentNames = append(currentNames, entity.Metadata.Name)
 			continue
@@ -89,7 +89,7 @@ func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasourc
 			logrus.Infof("adopting globaldatasource %q: stamping discovery source %q (%s)", entity.Metadata.Name, a.discoverySource.Name, a.discoverySource.Type)
 		}
 
-		if _, updateError := a.svc.Update(nil, entity, param); updateError != nil {
+		if _, updateError := a.svc.UpdateForDiscovery(entity, param); updateError != nil {
 			errs = append(errs, updateError)
 			continue
 		}

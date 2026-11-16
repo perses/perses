@@ -71,6 +71,20 @@ func (s *service) create(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, err
 	}
 	// The source field is server-managed. Ignore any value sent by the client.
 	entity.Source = nil
+	// Update the time contained in the entity.
+	entity.Metadata.CreateNow()
+	if err := s.dao.Create(entity); err != nil {
+		return nil, err
+	}
+	return entity, nil
+}
+
+func (s *service) CreateForDiscovery(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
+	if err := s.validate(entity); err != nil {
+		return nil, apiInterface.HandleBadRequestError(err.Error())
+	}
+	// Source is set by the discovery caller; preserve it as-is.
+	// Update the time contained in the entity.
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
@@ -106,6 +120,26 @@ func (s *service) update(entity *v1.GlobalDatasource, parameters apiInterface.Pa
 	// The source field is server-managed; preserve it from the stored entity
 	// so that editing via API/UI/DaC does not silently drop the discovery stamp.
 	entity.Source = oldEntity.Source
+	if updateErr := s.dao.Update(entity); updateErr != nil {
+		logrus.WithError(updateErr).Errorf("unable to perform the update of the GlobalDatasource %q, something wrong with the database", entity.Metadata.Name)
+		return nil, updateErr
+	}
+	return entity, nil
+}
+
+func (s *service) UpdateForDiscovery(entity *v1.GlobalDatasource, parameters apiInterface.Parameters) (*v1.GlobalDatasource, error) {
+	if err := s.validate(entity); err != nil {
+		return nil, apiInterface.HandleBadRequestError(err.Error())
+	}
+	if entity.Metadata.Name != parameters.Name {
+		return nil, apiInterface.HandleBadRequestError("metadata.name and the name in the http path request don't match")
+	}
+	oldEntity, err := s.dao.Get(parameters.Name)
+	if err != nil {
+		return nil, err
+	}
+	entity.Metadata.Update(oldEntity.Metadata)
+	// Source is set by the discovery caller; preserve it as-is.
 	if updateErr := s.dao.Update(entity); updateErr != nil {
 		logrus.WithError(updateErr).Errorf("unable to perform the update of the GlobalDatasource %q, something wrong with the database", entity.Metadata.Name)
 		return nil, updateErr

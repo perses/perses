@@ -63,4 +63,11 @@ type DAO interface {
 
 type Service interface {
 	apiInterface.Service[*v1.GlobalDatasource, *v1.GlobalDatasource, *Query]
+	// CreateForDiscovery persists a new GlobalDatasource from a discovery cycle.
+	// Unlike Create, it preserves the Source field set by the caller.
+	CreateForDiscovery(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error)
+	// UpdateForDiscovery updates an existing GlobalDatasource from a discovery cycle.
+	// Unlike Update, it preserves the Source field set by the caller rather than
+	// copying it from the stored entity.
+	UpdateForDiscovery(entity *v1.GlobalDatasource, parameters apiInterface.Parameters) (*v1.GlobalDatasource, error)
 }
