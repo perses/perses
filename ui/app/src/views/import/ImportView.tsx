@@ -12,32 +12,22 @@
 // limitations under the License.
 
 import { Button, Container, Divider, Stack, Typography } from '@mui/material';
-import type { DashboardResource } from '@perses-dev/client';
-import { JSONEditor } from '@perses-dev/components';
+import { YAMLEditor } from '@perses-dev/components';
 import AutoFix from 'mdi-material-ui/AutoFix';
 import Upload from 'mdi-material-ui/Upload';
 import type { ChangeEvent, ReactElement } from 'react';
 import { useState } from 'react';
 
 import { useIsMobileSize } from '../../utils/browser-size';
-import { getDashboardType } from './dashboard-type';
 import GrafanaFlow from './GrafanaFlow';
 import PersesFlow from './PersesFlow';
-
-type Dashboard = GrafanaDashboard | PersesDashboard | undefined;
-
-interface GrafanaDashboard {
-  kind: 'grafana';
-  data: Record<string, unknown>;
-}
-
-interface PersesDashboard {
-  kind: 'perses';
-  data: DashboardResource;
-}
+import { useParsedDashboard } from './use-parsed-dashboard';
 
 function ImportView(): ReactElement {
-  const [dashboard, setDashboard] = useState<Dashboard>();
+  const [definition, setDefinition] = useState('');
+  // Bumped on file upload to remount the editor, as it only uses its value as initial content.
+  const [editorKey, setEditorKey] = useState(0);
+  const dashboard = useParsedDashboard(definition);
   const isMobileSize = useIsMobileSize();
 
   const fileUploadOnChange = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
@@ -47,19 +37,8 @@ function ImportView(): ReactElement {
     }
     const value = await files[0]?.text();
     if (value !== undefined) {
-      completeDashboard(value);
-    }
-  };
-
-  const completeDashboard = (dashboard: string | undefined): void => {
-    try {
-      const json = JSON.parse(dashboard ?? '{}');
-      setDashboard({
-        kind: getDashboardType(json),
-        data: json,
-      });
-    } catch (_) {
-      setDashboard(undefined);
+      setDefinition(value);
+      setEditorKey((key) => key + 1);
     }
   };
 
@@ -74,17 +53,18 @@ function ImportView(): ReactElement {
           1. Provide a dashboard
         </Typography>
         <Button fullWidth startIcon={<Upload />} variant="outlined" component="label">
-          Upload JSON file
-          <input type="file" onChange={fileUploadOnChange} hidden style={{ width: '100%' }} />
+          Upload JSON or YAML file
+          <input type="file" accept=".json,.yaml,.yml" onChange={fileUploadOnChange} hidden style={{ width: '100%' }} />
         </Button>
         <Divider>OR</Divider>
-        <JSONEditor
-          value={dashboard?.data}
-          onChange={(value: string) => completeDashboard(value)}
+        <YAMLEditor
+          key={editorKey}
+          value={definition}
+          onChange={setDefinition}
           minHeight="10rem"
           maxHeight="30rem"
           width="100%"
-          placeholder="Paste your Dashboard JSON here..."
+          placeholder="Paste your Dashboard JSON or YAML here..."
         />
         {dashboard !== undefined && dashboard.kind === 'grafana' && <GrafanaFlow dashboard={dashboard?.data} />}
         {dashboard !== undefined && dashboard.kind === 'perses' && <PersesFlow dashboard={dashboard?.data} />}

@@ -46,7 +46,7 @@ If you are interesting in this, you can track the associated issue: https://gith
 
 - On the home page, click on the `Import Dashboard` in the top right corner.
 
-- Then, you can either paste the JSON of your Grafana dashboard or upload the JSON file.
+- Then, you can either paste the JSON or YAML of your Grafana dashboard or upload the JSON or YAML file.
 !!! tip
     If you want the migrated dashboard to use the default Perses datasource, check the
     `Use default datasource in Perses` checkbox. This will remove any reference to a specific
