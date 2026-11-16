@@ -121,7 +121,7 @@ func (d *discovery) Execute(ctx context.Context, _ context.CancelFunc) error {
 		entities = append(entities, r.datasource)
 	}
 	if err := d.svc.Apply(ctx, entities); err != nil {
-		return fmt.Errorf("kube discovery %q apply failed: %w", d.name, err)
+		return err
 	}
 	return nil
 }

@@ -58,7 +58,7 @@ func (d *discovery) Execute(ctx context.Context, _ context.CancelFunc) error {
 		return fmt.Errorf("failed to execute http discovery %q: %w", d.name, err)
 	}
 	if err := d.svc.Apply(ctx, result); err != nil {
-		return fmt.Errorf("http discovery %q apply failed: %w", d.name, err)
+		return err
 	}
 	return nil
 }
