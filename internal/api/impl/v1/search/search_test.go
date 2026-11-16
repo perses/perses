@@ -19,7 +19,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/index"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/pkg/model/api"
@@ -35,11 +35,11 @@ type fakeIndex struct {
 	results []*index.SearchResult
 }
 
-func (f *fakeIndex) List(_ echo.Context, _ v1.Kind, _ string) ([]*index.SearchResult, error) {
+func (f *fakeIndex) List(_ *echo.Context, _ v1.Kind, _ string) ([]*index.SearchResult, error) {
 	return f.results, nil
 }
 
-func (f *fakeIndex) Search(_ echo.Context, _ v1.Kind, _ string, _ string) ([]*index.SearchResult, error) {
+func (f *fakeIndex) Search(_ *echo.Context, _ v1.Kind, _ string, _ string) ([]*index.SearchResult, error) {
 	return f.results, nil
 }
 
@@ -53,15 +53,21 @@ func (f *fakeIndex) Add(_ api.Entity) error {
 
 func (f *fakeIndex) Delete(_ v1.Kind, _ api.Metadata) {}
 
-func newResult(name, displayName string, score uint64) *index.SearchResult {
+// newListedResult returns a result as the resources are listed, without a match.
+func newListedResult(name, displayName string) *index.SearchResult {
 	return &index.SearchResult{
 		Metadata: &v1.ProjectMetadata{
 			Metadata:               v1.Metadata{Name: name},
 			ProjectMetadataWrapper: v1.ProjectMetadataWrapper{Project: "project"},
 		},
 		DisplayName: displayName,
-		Score:       score,
 	}
+}
+
+func newResult(name, displayName string, score uint64) *index.SearchResult {
+	result := newListedResult(name, displayName)
+	result.FieldMatch = &index.FieldMatch{Score: score}
+	return result
 }
 
 func TestDashboard_sorted(t *testing.T) {
@@ -97,13 +103,13 @@ func TestDashboard_sorted(t *testing.T) {
 			expected: []string{"Node Exporter", "Apache", "Zookeeper"},
 		},
 		{
-			// Without a query, the endpoint lists the dashboards, which all have a score of 0.
+			// Without a query, the endpoint lists the dashboards, which don't have a match.
 			title: "list sorted alphabetically",
 			url:   "/search/dashboards?sorted=desc",
 			results: []*index.SearchResult{
-				newResult("zookeeper", "Zookeeper", 0),
-				newResult("node", "Node Exporter", 0),
-				newResult("apache", "Apache", 0),
+				newListedResult("zookeeper", "Zookeeper"),
+				newListedResult("node", "Node Exporter"),
+				newListedResult("apache", "Apache"),
 			},
 			expected: []string{"Apache", "Node Exporter", "Zookeeper"},
 		},

@@ -27,7 +27,7 @@ func newSortTestResult(project, name, displayName string, score uint64) *SearchR
 			ProjectMetadataWrapper: v1.ProjectMetadataWrapper{Project: project},
 		},
 		DisplayName: displayName,
-		Score:       score,
+		FieldMatch:  &FieldMatch{Score: score},
 	}
 }
 
@@ -100,6 +100,22 @@ func TestSortResults(t *testing.T) {
 		t.Run(tc.title, func(t *testing.T) {
 			SortResults(tc.results, tc.order)
 			assert.Equal(t, tc.expected, displayNames(tc.results))
+		})
+	}
+}
+
+// The listed resources don't have a match, and are sorted alphabetically.
+func TestSortResults_listedResources(t *testing.T) {
+	for _, order := range []SortOrder{SortOrderAsc, SortOrderDesc} {
+		t.Run(string(order), func(t *testing.T) {
+			results := make([]*SearchResult, 0, 3)
+			for _, name := range []string{"Zookeeper", "Node Exporter", "Apache"} {
+				result := newSortTestResult("p", name, name, 0)
+				result.FieldMatch = nil
+				results = append(results, result)
+			}
+			SortResults(results, order)
+			assert.Equal(t, []string{"Apache", "Node Exporter", "Zookeeper"}, displayNames(results))
 		})
 	}
 }

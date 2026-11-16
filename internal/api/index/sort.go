@@ -47,7 +47,9 @@ func (s SortOrder) Validate() error {
 
 // sortKey contains the values used to sort a search result, computed once per result.
 type sortKey struct {
-	result      *SearchResult
+	result *SearchResult
+	// score is 0 for the listed resources, which don't have a match.
+	score       uint64
 	displayName string
 	project     string
 	name        string
@@ -55,7 +57,8 @@ type sortKey struct {
 
 // SortResults sorts the results by score in the given order. When the order is empty, the results are not sorted.
 // The results with the same score are sorted alphabetically by display name (case-insensitive), whatever the order,
-// then by project and name so that the order is always the same.
+// then by project and name so that the order is always the same. The listed resources, which don't have a match, are
+// sorted alphabetically.
 func SortResults(results []*SearchResult, order SortOrder) {
 	if order == SortOrderNone || len(results) < 2 {
 		return
@@ -68,13 +71,16 @@ func SortResults(results []*SearchResult, order SortOrder) {
 			project:     utils.GetMetadataProject(r.Metadata),
 			name:        r.Metadata.GetName(),
 		}
+		if r.FieldMatch != nil {
+			keys[i].score = r.Score
+		}
 	}
 	slices.SortFunc(keys, func(a, b sortKey) int {
 		var c int
 		if order == SortOrderDesc {
-			c = cmp.Compare(b.result.Score, a.result.Score)
+			c = cmp.Compare(b.score, a.score)
 		} else {
-			c = cmp.Compare(a.result.Score, b.result.Score)
+			c = cmp.Compare(a.score, b.score)
 		}
 		if c != 0 {
 			return c
