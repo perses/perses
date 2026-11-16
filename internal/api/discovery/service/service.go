@@ -16,6 +16,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
@@ -66,14 +67,14 @@ func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasourc
 		}
 
 		if !databaseModel.IsKeyConflict(createErr) {
-			errs = append(errs, createErr)
+			errs = append(errs, fmt.Errorf("globaldatasource %q: %w", entity.Metadata.Name, createErr))
 			continue
 		}
 
 		param := apiInterface.Parameters{Name: entity.Metadata.Name}
 		existing, getErr := a.svc.Get(param)
 		if getErr != nil {
-			errs = append(errs, getErr)
+			errs = append(errs, fmt.Errorf("globaldatasource %q: %w", entity.Metadata.Name, getErr))
 			continue
 		}
 
@@ -95,7 +96,7 @@ func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasourc
 		}
 
 		if _, updateError := a.svc.UpdateForDiscovery(entity, param); updateError != nil {
-			errs = append(errs, updateError)
+			errs = append(errs, fmt.Errorf("globaldatasource %q: %w", entity.Metadata.Name, updateError))
 			continue
 		}
 		currentNames = append(currentNames, entity.Metadata.Name)
