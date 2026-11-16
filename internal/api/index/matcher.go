@@ -53,11 +53,14 @@ type SearchResult struct {
 	// When there is a perfect match, then the number is infinite.
 	// It can be equal to 0 if the query is empty.
 	Score uint64 `json:"score,omitempty"`
+	// Variables are the dashboard variable names. Set by a tag search.
+	Variables []string `json:"variables,omitempty"`
 }
 
 type Query struct {
-	Project string `query:"project"`
-	Query   string `query:"query"`
+	Project string   `query:"project"`
+	Query   string   `query:"query"`
+	Tags    []string `query:"tag"`
 }
 
 type matcher struct {

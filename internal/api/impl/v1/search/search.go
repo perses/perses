@@ -47,7 +47,9 @@ func (e *endpoint) Dashboard(ctx *echo.Context) error {
 	}
 	var result []*index.SearchResult
 	var err error
-	if q.Query == "" {
+	if tags := ctx.QueryParams()["tag"]; len(tags) > 0 {
+		result, err = e.index.ListByTags(ctx, v1.KindDashboard, q.Project, tags)
+	} else if q.Query == "" {
 		result, err = e.index.List(ctx, v1.KindDashboard, q.Project)
 	} else {
 		result, err = e.index.Search(ctx, v1.KindDashboard, q.Project, q.Query)
