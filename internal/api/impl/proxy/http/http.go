@@ -444,7 +444,9 @@ func (h *Proxy) getRoundTripper() (http.RoundTripper, error) {
 		return nil, err
 	}
 	if h.EnableTracing {
-		return otelhttp.NewTransport(&redactURLRoundTripper{next: transport}), nil
+		// otelhttp injects the trace headers after filterHeaders: the propagator applies the header policy to them.
+		propagator := policyPropagator{TextMapPropagator: otel.GetTextMapPropagator(), isAllowed: h.isHeaderAllowed}
+		return otelhttp.NewTransport(&redactURLRoundTripper{next: transport}, otelhttp.WithPropagators(propagator)), nil
 	}
 	return transport, nil
 }
