@@ -23,7 +23,7 @@ type PanelGroupConfig = {
   name: string;
 };
 
-type MockQueryRangeQueryConfig = {
+export type MockQueryRangeQueryConfig = {
   query: string;
   response: {
     status?: 200;
@@ -31,7 +31,7 @@ type MockQueryRangeQueryConfig = {
   };
 };
 
-type MockQueryRangeConfig = {
+export type MockQueryRangeConfig = {
   queries: MockQueryRangeQueryConfig[];
 };
 
@@ -381,6 +381,11 @@ export class DashboardPage {
   /**
    * Mock responses from '/api/v1/query_range' by the query parameter in the
    * request. Useful for stabilizing charts when taking screenshots.
+   *
+   * Panels send their queries as soon as the dashboard loads, so calling this
+   * method once the dashboard is open can miss them. To mock the queries of
+   * the dashboard under test, use the `mockQueryRangeRequests` option of the
+   * `dashboardTest` fixture instead.
    */
   async mockQueryRangeRequests({ queries }: MockQueryRangeConfig): Promise<void> {
     // Mock data response, so we can make assertions on consistent response data.
