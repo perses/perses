@@ -18,6 +18,7 @@ import (
 	"slices"
 
 	"cuelang.org/go/cue/build"
+	"github.com/perses/perses/internal/api/plugin/migrate/grafana"
 	"github.com/perses/spec/go/dashboard"
 	"github.com/perses/spec/go/plugin"
 	"github.com/sirupsen/logrus"
@@ -67,7 +68,7 @@ func migrateAnnotationColor(iconColor string) string {
 	return iconColor
 }
 
-func (m *completeMigration) migrateAnnotations(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) []dashboard.AnnotationSpec {
+func (m *completeMigration) migrateAnnotations(grafanaDashboard *grafana.Dashboard, useDefaultDatasource bool) []dashboard.AnnotationSpec {
 	var result []dashboard.AnnotationSpec
 	// The Perses UI identifies an annotation by its name, so only the first annotation with a given name is kept.
 	names := make(map[string]struct{})
@@ -112,7 +113,7 @@ func (m *completeMigration) migrateAnnotations(grafanaDashboard *SimplifiedDashb
 	return result
 }
 
-func migrateAnnotation(annotationInstances map[string]*build.Instance, a GrafanaAnnotation) *plugin.Plugin {
+func migrateAnnotation(annotationInstances map[string]*build.Instance, a grafana.Annotation) *plugin.Plugin {
 	// Like for the variables, nothing in the Grafana annotation indicates which migration script to use.
 	// So we execute all of them, in a stable order, and keep the first one that returns a non-empty plugin.
 	for _, kind := range slices.Sorted(maps.Keys(annotationInstances)) {

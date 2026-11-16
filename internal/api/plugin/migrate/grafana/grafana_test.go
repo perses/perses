@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migrate
+package grafana
 
 import (
 	"encoding/json"
@@ -21,11 +21,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSimplifiedDashboardUnmarshal(t *testing.T) {
+func TestDashboardUnmarshal(t *testing.T) {
 	tests := []struct {
 		title    string
 		data     string
-		expected *SimplifiedDashboard
+		expected *Dashboard
 	}{
 		{
 			title: "Single panel",
@@ -44,7 +44,7 @@ func TestSimplifiedDashboardUnmarshal(t *testing.T) {
       }
     ]
   }`,
-			expected: &SimplifiedDashboard{
+			expected: &Dashboard{
 				Title: "Test Dashboard",
 				Panels: []Panel{
 					{
@@ -71,9 +71,9 @@ func TestSimplifiedDashboardUnmarshal(t *testing.T) {
     "refresh": "1m",
     "timezone": "utc"
   }`,
-			expected: &SimplifiedDashboard{
+			expected: &Dashboard{
 				Title:    "Test Dashboard",
-				Time:     &GrafanaTimeRange{From: "now-6h", To: "now"},
+				Time:     &TimeRange{From: "now-6h", To: "now"},
 				Refresh:  "1m",
 				Timezone: "utc",
 			},
@@ -81,27 +81,27 @@ func TestSimplifiedDashboardUnmarshal(t *testing.T) {
 		{
 			title:    "Auto-refresh off, as written by older Grafana versions",
 			data:     `{"title": "Test Dashboard", "refresh": false}`,
-			expected: &SimplifiedDashboard{Title: "Test Dashboard"},
+			expected: &Dashboard{Title: "Test Dashboard"},
 		},
 		{
 			title:    "Null time settings",
 			data:     `{"title": "Test Dashboard", "time": null, "refresh": null, "timezone": null}`,
-			expected: &SimplifiedDashboard{Title: "Test Dashboard"},
+			expected: &Dashboard{Title: "Test Dashboard"},
 		},
 		{
 			title:    "Time settings with the wrong type are ignored",
 			data:     `{"title": "Test Dashboard", "time": "now-6h", "refresh": 30, "timezone": 0}`,
-			expected: &SimplifiedDashboard{Title: "Test Dashboard", Time: &GrafanaTimeRange{}},
+			expected: &Dashboard{Title: "Test Dashboard", Time: &TimeRange{}},
 		},
 		{
 			title:    "Time range with a number is ignored",
 			data:     `{"title": "Test Dashboard", "time": {"from": 1698228000000, "to": "now"}, "refresh": true, "timezone": false}`,
-			expected: &SimplifiedDashboard{Title: "Test Dashboard", Time: &GrafanaTimeRange{}},
+			expected: &Dashboard{Title: "Test Dashboard", Time: &TimeRange{}},
 		},
 		{
 			title:    "Time settings with the wrong type don't stop the decoding of the next fields",
 			data:     `{"refresh": {"a": 1}, "timezone": [], "time": [], "uid": "after", "title": "After", "tags": ["x"]}`,
-			expected: &SimplifiedDashboard{UID: "after", Title: "After", Tags: []string{"x"}, Time: &GrafanaTimeRange{}},
+			expected: &Dashboard{UID: "after", Title: "After", Tags: []string{"x"}, Time: &TimeRange{}},
 		},
 		{
 			title: "Annotations",
@@ -114,10 +114,10 @@ func TestSimplifiedDashboardUnmarshal(t *testing.T) {
       ]
     }
   }`,
-			expected: &SimplifiedDashboard{
+			expected: &Dashboard{
 				Title: "Test Dashboard",
-				Annotations: GrafanaAnnotations{
-					List: []GrafanaAnnotation{
+				Annotations: Annotations{
+					List: []Annotation{
 						{
 							Name:       "Annotations & Alerts",
 							BuiltIn:    1,
@@ -137,10 +137,10 @@ func TestSimplifiedDashboardUnmarshal(t *testing.T) {
 		{
 			title: "Annotations that are not objects are ignored, and fields with an unexpected type are left empty",
 			data:  `{"title": "Test Dashboard", "annotations": {"list": ["not an annotation", {"name": 1, "enable": "yes", "expr": "up"}]}}`,
-			expected: &SimplifiedDashboard{
+			expected: &Dashboard{
 				Title: "Test Dashboard",
-				Annotations: GrafanaAnnotations{
-					List: []GrafanaAnnotation{
+				Annotations: Annotations{
+					List: []Annotation{
 						{RawMessage: json.RawMessage(`{"enable":"yes","expr":"up","name":1}`)},
 					},
 				},
@@ -149,12 +149,12 @@ func TestSimplifiedDashboardUnmarshal(t *testing.T) {
 		{
 			title:    "Annotations with the wrong type don't stop the decoding of the next fields",
 			data:     `{"annotations": [], "uid": "after", "title": "After"}`,
-			expected: &SimplifiedDashboard{UID: "after", Title: "After"},
+			expected: &Dashboard{UID: "after", Title: "After"},
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.title, func(t *testing.T) {
-			result := &SimplifiedDashboard{}
+			result := &Dashboard{}
 			if err := json.Unmarshal([]byte(test.data), result); err != nil {
 				t.Fatalf("failed to unmarshal JSON: %s", err)
 			}
@@ -163,7 +163,7 @@ func TestSimplifiedDashboardUnmarshal(t *testing.T) {
 	}
 }
 
-func TestSimplifiedDashboardUnmarshalGrafanaResource(t *testing.T) {
+func TestDashboardUnmarshalGrafanaResource(t *testing.T) {
 	tests := []struct {
 		title         string
 		data          string
@@ -204,7 +204,7 @@ func TestSimplifiedDashboardUnmarshalGrafanaResource(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.title, func(t *testing.T) {
-			result := &SimplifiedDashboard{}
+			result := &Dashboard{}
 			require.NoError(t, json.Unmarshal([]byte(test.data), result))
 			assert.Equal(t, test.expectedUID, result.UID)
 			assert.Equal(t, test.expectedTitle, result.Title)
@@ -217,7 +217,7 @@ func TestSimplifiedDashboardUnmarshalGrafanaResource(t *testing.T) {
 	}
 }
 
-func TestSimplifiedDashboardUnmarshalGrafanaResourceErrors(t *testing.T) {
+func TestDashboardUnmarshalGrafanaResourceErrors(t *testing.T) {
 	tests := []struct {
 		title         string
 		data          string
@@ -246,7 +246,7 @@ func TestSimplifiedDashboardUnmarshalGrafanaResourceErrors(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.title, func(t *testing.T) {
-			err := json.Unmarshal([]byte(test.data), &SimplifiedDashboard{})
+			err := json.Unmarshal([]byte(test.data), &Dashboard{})
 			assert.EqualError(t, err, test.expectedError)
 		})
 	}

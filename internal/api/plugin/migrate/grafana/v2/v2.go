@@ -24,7 +24,7 @@ import (
 )
 
 // The strings below are the ones of the classic JSON model used by this package. They are duplicated from the package
-// migrate, which can't be imported without creating an import cycle.
+// grafana, which can't be imported without creating an import cycle.
 const (
 	panelRowType         = "row"
 	panelsField          = "panels"
