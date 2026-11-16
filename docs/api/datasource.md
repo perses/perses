@@ -195,7 +195,7 @@ URL query parameters:
 - default = `<boolean>` : should be used to filter the list of datasource to only have the default one. You should have
   one default datasource per kind
 - name = `<string>` : should be used to filter the list of datasource based on the prefix name.
-- discovery_name = `<string>` : filter to only return datasources managed by the named discovery configuration. Datasources created manually or via DaC have no discovery name and are excluded.
+- discovery_name = `<string>` : filter to only return datasources managed by the named discovery configuration. Datasources created through the API, provisioned, or discovered before the upgrade have no discovery name and are excluded.
 - discovery_type = `<string>` : filter by discovery mechanism type. Accepted values: `kubernetes`, `http`.
 
 Example:
@@ -223,8 +223,8 @@ source:
     type: <string>   # discovery type: "kubernetes" or "http"
 ```
 
-- **`source` is `null`** — the datasource was not created by a discovery process. It may have been created manually via the API, provisioned via DaC, or it was created before datasource discovery was introduced.
-- **`source` is set** — the datasource is managed by the named discovery configuration. The server stamps and preserves this field automatically; any value sent by clients on create or update is ignored.
+- **`source` is absent** — the datasource was not created by a discovery process. It may have been created through the API (UI, percli, DaC), provisioned, or discovered before the version that introduced this field.
+- **`source` is set** — the datasource is managed by the named discovery configuration. The server stamps and preserves this field automatically; it is read-only.
 
 #### Get a single `GlobalDatasource`
 
