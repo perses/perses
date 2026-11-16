@@ -152,7 +152,6 @@ func newHTTPTraceExporter(conf config.OpenTelemetry, tokenSource oauth2.TokenSou
 		if tokenSource != nil {
 			roundTripper = &oauth2.Transport{Source: tokenSource, Base: roundTripper}
 		}
-		// The export timeout is handled by the exporter.
 		opts = append(opts, otlptracehttp.WithHTTPClient(&http.Client{Transport: roundTripper}))
 	}
 	if headers := plainHeaders(conf); len(headers) > 0 {
