@@ -92,7 +92,7 @@ func getServerPortAndExactPluginName(pluginPath string) (int, string, error) {
 // It will wrap the devserver in a taskhelper.Helper and create a signal listener.
 func buildDevServerTasks(servers []*devserver) []taskhelper.Helper {
 	var tasks []taskhelper.Helper
-	signalsListener, _ := taskhelper.New(async.NewSignalListener(syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL))
+	signalsListener, _ := taskhelper.New(async.NewSignalListener(syscall.SIGINT, syscall.SIGTERM))
 	tasks = append(tasks, signalsListener)
 	for _, server := range servers {
 		task, _ := taskhelper.New(server)
