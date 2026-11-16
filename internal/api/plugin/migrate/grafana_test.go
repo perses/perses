@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSimplifiedDashboardUnmarshal(t *testing.T) {
@@ -162,13 +163,91 @@ func TestSimplifiedDashboardUnmarshal(t *testing.T) {
 	}
 }
 
-func TestSimplifiedDashboardUnmarshalGrafanaV2(t *testing.T) {
-	data := `{
-  "apiVersion": "dashboard.grafana.app/v2beta1",
-  "kind": "Dashboard",
-  "metadata": {"name": "test"},
-  "spec": {"title": "Test Dashboard", "elements": {}, "layout": {}}
-}`
-	err := json.Unmarshal([]byte(data), &SimplifiedDashboard{})
-	assert.EqualError(t, err, `the Grafana dashboard schema "dashboard.grafana.app/v2beta1" is not supported, please export the dashboard using the classic JSON model`)
+func TestSimplifiedDashboardUnmarshalGrafanaResource(t *testing.T) {
+	tests := []struct {
+		title         string
+		data          string
+		expectedUID   string
+		expectedTitle string
+		expectedTypes []string
+	}{
+		{
+			title:         "v1beta1 resource holding the classic JSON model",
+			data:          `{"apiVersion": "dashboard.grafana.app/v1beta1", "kind": "Dashboard", "metadata": {"name": "from-metadata"}, "spec": {"title": "Classic", "panels": [{"type": "timeseries", "title": "P"}]}}`,
+			expectedUID:   "from-metadata",
+			expectedTitle: "Classic",
+			expectedTypes: []string{"timeseries"},
+		},
+		{
+			title:         "v0alpha1 resource keeps the UID of the classic JSON model",
+			data:          `{"apiVersion": "dashboard.grafana.app/v0alpha1", "kind": "Dashboard", "metadata": {"name": "from-metadata"}, "spec": {"uid": "from-spec", "title": "Classic"}}`,
+			expectedUID:   "from-spec",
+			expectedTitle: "Classic",
+		},
+		{
+			title: "v2 resource with an expanded row",
+			data: `{"apiVersion": "dashboard.grafana.app/v2", "kind": "Dashboard", "metadata": {"name": "test"}, "spec": {"title": "V2",
+  "elements": {"p1": {"kind": "Panel", "spec": {"title": "p1", "vizConfig": {"group": "timeseries"}}}},
+  "layout": {"kind": "RowsLayout", "spec": {"rows": [{"kind": "RowsLayoutRow", "spec": {"title": "Row", "layout": {"kind": "GridLayout", "spec": {"items": [
+    {"kind": "GridLayoutItem", "spec": {"x": 0, "y": 0, "width": 24, "height": 8, "element": {"kind": "ElementReference", "name": "p1"}}}]}}}}]}}}}`,
+			expectedUID:   "test",
+			expectedTitle: "V2",
+			// The panels of the expanded row are nested in the row, as for a dashboard of the classic JSON model.
+			expectedTypes: []string{"row"},
+		},
+		{
+			title:         "v2beta1 resource without layout",
+			data:          `{"apiVersion": "dashboard.grafana.app/v2beta1", "kind": "Dashboard", "metadata": {"name": "beta"}, "spec": {"title": "Beta", "elements": {}}}`,
+			expectedUID:   "beta",
+			expectedTitle: "Beta",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.title, func(t *testing.T) {
+			result := &SimplifiedDashboard{}
+			require.NoError(t, json.Unmarshal([]byte(test.data), result))
+			assert.Equal(t, test.expectedUID, result.UID)
+			assert.Equal(t, test.expectedTitle, result.Title)
+			var types []string
+			for _, panel := range result.Panels {
+				types = append(types, panel.Type)
+			}
+			assert.Equal(t, test.expectedTypes, types)
+		})
+	}
+}
+
+func TestSimplifiedDashboardUnmarshalGrafanaResourceErrors(t *testing.T) {
+	tests := []struct {
+		title         string
+		data          string
+		expectedError string
+	}{
+		{
+			title:         "unsupported version",
+			data:          `{"apiVersion": "dashboard.grafana.app/v2alpha1", "kind": "Dashboard", "metadata": {"name": "test"}, "spec": {"title": "Test"}}`,
+			expectedError: `the Grafana dashboard schema "dashboard.grafana.app/v2alpha1" is not supported, please export the dashboard using the classic JSON model or the schema v2`,
+		},
+		{
+			title:         "not a dashboard",
+			data:          `{"apiVersion": "dashboard.grafana.app/v2", "kind": "LibraryPanel", "metadata": {"name": "test"}, "spec": {}}`,
+			expectedError: `the Grafana resource of kind "LibraryPanel" is not a dashboard`,
+		},
+		{
+			title:         "no spec",
+			data:          `{"apiVersion": "dashboard.grafana.app/v2", "kind": "Dashboard", "metadata": {"name": "test"}}`,
+			expectedError: `the Grafana dashboard "test" has no spec`,
+		},
+		{
+			title:         "unsupported layout",
+			data:          `{"apiVersion": "dashboard.grafana.app/v2", "kind": "Dashboard", "metadata": {"name": "test"}, "spec": {"title": "Test", "layout": {"kind": "MasonryLayout", "spec": {}}}}`,
+			expectedError: `unable to convert the Grafana schema v2 dashboard "test": unsupported layout kind "MasonryLayout"`,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.title, func(t *testing.T) {
+			err := json.Unmarshal([]byte(test.data), &SimplifiedDashboard{})
+			assert.EqualError(t, err, test.expectedError)
+		})
+	}
 }

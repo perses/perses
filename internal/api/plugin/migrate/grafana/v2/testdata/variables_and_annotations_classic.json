@@ -1,0 +1,156 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations \u0026 Alerts",
+        "type": "dashboard"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prom"
+        },
+        "enable": false,
+        "expr": "ALERTS",
+        "filter": {
+          "exclude": false,
+          "ids": [
+            1
+          ]
+        },
+        "hide": false,
+        "iconColor": "red",
+        "name": "Alerts",
+        "step": "60s",
+        "titleFormat": "{{alertname}}"
+      },
+      {
+        "datasource": {
+          "type": "loki"
+        },
+        "enable": true,
+        "expr": "{app=\"deploy\"}",
+        "hide": false,
+        "iconColor": "blue",
+        "name": "Deploys"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [],
+      "title": "Section",
+      "type": "row"
+    }
+  ],
+  "refresh": "",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": ".*",
+        "allowCustomValue": true,
+        "current": {
+          "text": "api",
+          "value": "api"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prom"
+        },
+        "hide": 1,
+        "includeAll": true,
+        "label": "Job",
+        "multi": true,
+        "name": "job",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(up, job)"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "datasource": {
+          "type": "prometheus"
+        },
+        "hide": 3,
+        "name": "instance",
+        "query": "label_values(instance)",
+        "refresh": 0,
+        "sort": 8,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "default",
+          "value": "default"
+        },
+        "hide": 0,
+        "name": "ds",
+        "pluginId": "prometheus",
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      },
+      {
+        "current": {
+          "text": "true",
+          "value": "true"
+        },
+        "disabledValue": "false",
+        "enabledValue": "true",
+        "hide": 0,
+        "name": "debug",
+        "type": "switch"
+      },
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prom"
+        },
+        "hide": 0,
+        "multi": true,
+        "name": "by",
+        "type": "groupby"
+      },
+      {
+        "name": "fancy",
+        "type": "FancyVariable"
+      },
+      {
+        "hide": 2,
+        "name": "region",
+        "query": "eu",
+        "type": "constant"
+      }
+    ]
+  },
+  "timezone": "",
+  "title": "Variables",
+  "uid": "test"
+}

@@ -27,14 +27,26 @@ plugin. Therefore, the migration is in best-effort basis. However we are working
 We are trying to support as many versions of Grafana as possible. But unfortunately, we can't support all of them. 
 Specially the latest versions of Grafana where the data model has changed a lot.
 
-The migration script is working for Grafana versions 9.0.0 until the version 11.x. Above or below this range, we cannot guarantee the migration will work.
+The migration script is working for Grafana versions 9.0.0 until the version 11.x with the classic JSON model, and for the dashboard resources of Grafana 12 and later described below. Outside of these, we cannot guarantee the migration will work.
 
-Only the classic JSON model of the Grafana dashboards is supported. The dashboard resources of Grafana 12 (identified by an
-`apiVersion` starting with `dashboard.grafana.app/`, like the v2 schema) are rejected. If you are using Grafana 12, export
-your dashboard using the classic JSON model.
+Besides the classic JSON model of the Grafana dashboards, the dashboard resources of Grafana 12 and later (identified by an
+`apiVersion` starting with `dashboard.grafana.app/`) are supported:
 
-We aim to support the latest version of Grafana and we will try to support the Datadog format as well.
-If you are interesting in this, you can track the associated issue: https://github.com/perses/perses/issues/4307
+- The versions `v0alpha1`, `v1beta1` and `v1` hold the classic JSON model in their `spec`, which is migrated as usual.
+- The versions `v2beta1` and `v2` use the schema v2 of Grafana. These dashboards are first converted to the classic JSON
+  model, then migrated as usual. As the classic JSON model doesn't have every concept of the schema v2:
+    - The tabs (`TabsLayout`) become rows, and the panels of an `AutoGridLayout` get the size and the position Grafana
+      gives them.
+    - Rows and tabs can't be nested: the rows and the tabs nested in a row or a tab follow it, except in a repeated row
+      or tab, where their panels are placed in it so they are repeated with it.
+    - A row without header is migrated without panel group when it isn't repeated and its panels stay at the right
+      place. Otherwise, it keeps its position (and its repeat) in a panel group with the title of the row.
+    - The variables and the annotations defined on a row or a tab are added to the dashboard. Such a variable is not
+      kept when the dashboard already has a variable with the same name.
+- The version `v2alpha1` is not supported. Export the dashboard using the classic JSON model or the schema v2 instead.
+
+We will try to support the Datadog format as well. If you are interested in this, you can track the associated
+issue: https://github.com/perses/perses/issues/4307
 
 ## How to migrate
 
@@ -170,7 +182,9 @@ extensible specification.
 
 The migration process is done in two parts:
 
-1. Import the Grafana Dashboard into a Golang structure and then migrate it to the Perses Golang structure.
+1. Import the Grafana Dashboard into a Golang structure and then migrate it to the Perses Golang structure. A dashboard
+   using the schema v2 of Grafana is converted to the classic JSON model beforehand, so the migration scripts always
+   receive the variables, panels, queries and annotations in the classic JSON model.
 2. For each variable, panels and queries in the Grafana dashboard, we are executing a Cuelang script coming
    from the plugin itself, if, of course, the plugin is supported. This script will generate the piece of the Perses
    data model for the corresponding plugin.

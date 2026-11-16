@@ -18,12 +18,14 @@ import (
 	"fmt"
 	"strings"
 
+	v2 "github.com/perses/perses/internal/api/plugin/migrate/grafana/v2"
 	"github.com/perses/spec/go/dashboard/variable"
 )
 
 const (
 	grafanaPanelRowType      = "row"
 	grafanaDashboardAPIGroup = "dashboard.grafana.app/"
+	grafanaDashboardKind     = "Dashboard"
 )
 
 type GridPosition struct {
@@ -310,12 +312,71 @@ type SimplifiedDashboard struct {
 	Timezone LenientString `json:"timezone"`
 }
 
+// grafanaResource is a dashboard resource of the API group dashboard.grafana.app, available since Grafana 12.
+type grafanaResource struct {
+	APIVersion string `json:"apiVersion"`
+	Kind       string `json:"kind"`
+	Metadata   struct {
+		// Name is the UID of the dashboard.
+		Name string `json:"name"`
+	} `json:"metadata"`
+	Spec json.RawMessage `json:"spec"`
+}
+
+// convertGrafanaResource converts a dashboard resource of the API group dashboard.grafana.app into the classic JSON
+// model of the Grafana dashboards. The versions v0alpha1, v1beta1 and v1 of the resources hold the classic JSON model
+// in their spec, while the versions v2beta1 and v2 use the schema v2.
+func convertGrafanaResource(data []byte) ([]byte, error) {
+	resource := grafanaResource{}
+	if err := json.Unmarshal(data, &resource); err != nil {
+		return nil, fmt.Errorf("unable to decode the Grafana dashboard resource: %w", err)
+	}
+	if resource.Kind != grafanaDashboardKind {
+		return nil, fmt.Errorf("the Grafana resource of kind %q is not a dashboard", resource.Kind)
+	}
+	if len(resource.Spec) == 0 || string(resource.Spec) == "null" {
+		return nil, fmt.Errorf("the Grafana dashboard %q has no spec", resource.Metadata.Name)
+	}
+	switch strings.TrimPrefix(resource.APIVersion, grafanaDashboardAPIGroup) {
+	case "v0alpha1", "v1beta1", "v1":
+		return unwrapGrafanaClassicResource(resource)
+	case "v2beta1", "v2":
+		classicDashboard, err := v2.ToClassic(resource.Metadata.Name, resource.Spec)
+		if err != nil {
+			return nil, fmt.Errorf("unable to convert the Grafana schema v2 dashboard %q: %w", resource.Metadata.Name, err)
+		}
+		return classicDashboard, nil
+	default:
+		return nil, fmt.Errorf("the Grafana dashboard schema %q is not supported, please export the dashboard using the classic JSON model or the schema v2", resource.APIVersion)
+	}
+}
+
+// unwrapGrafanaClassicResource returns the classic JSON model held by the spec of the resource.
+func unwrapGrafanaClassicResource(resource grafanaResource) ([]byte, error) {
+	spec := map[string]json.RawMessage{}
+	if err := json.Unmarshal(resource.Spec, &spec); err != nil {
+		return nil, fmt.Errorf("unable to decode the spec of the Grafana dashboard: %w", err)
+	}
+	var uid string
+	if rawUID, ok := spec["uid"]; ok {
+		_ = json.Unmarshal(rawUID, &uid)
+	}
+	if len(uid) == 0 && len(resource.Metadata.Name) > 0 {
+		spec["uid"], _ = json.Marshal(resource.Metadata.Name)
+	}
+	return json.Marshal(spec)
+}
+
 func (d *SimplifiedDashboard) UnmarshalJSON(data []byte) error {
 	var header struct {
 		APIVersion string `json:"apiVersion"`
 	}
 	if err := json.Unmarshal(data, &header); err == nil && strings.HasPrefix(header.APIVersion, grafanaDashboardAPIGroup) {
-		return fmt.Errorf("the Grafana dashboard schema %q is not supported, please export the dashboard using the classic JSON model", header.APIVersion)
+		classicDashboard, convertErr := convertGrafanaResource(data)
+		if convertErr != nil {
+			return convertErr
+		}
+		data = classicDashboard
 	}
 	tmp := &SimplifiedDashboard{}
 	type plain SimplifiedDashboard

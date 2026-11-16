@@ -134,6 +134,24 @@ func TestMig_Migrate(t *testing.T) {
 			inputGrafanaDashboardFile:   "annotations_grafana_dashboard.json",
 			expectedPersesDashboardFile: "annotations_perses_dashboard.json",
 		},
+		{
+			// Same dashboard as the basic one, plus an annotation, but using the schema v2 of Grafana.
+			title:                       "dashboard using the schema v2 of Grafana",
+			inputGrafanaDashboardFile:   "grafana_v2_grafana_dashboard.json",
+			expectedPersesDashboardFile: "grafana_v2_perses_dashboard.json",
+		},
+		{
+			// The rows without header must keep their position, and not be merged into the previous panel group.
+			title:                       "dashboard using the schema v2 of Grafana with rows without header",
+			inputGrafanaDashboardFile:   "grafana_v2_hidden_header_rows_grafana_dashboard.json",
+			expectedPersesDashboardFile: "grafana_v2_hidden_header_rows_perses_dashboard.json",
+		},
+		{
+			// The repeat of a row must be kept, even when the row has no header or only holds rows and tabs.
+			title:                       "dashboard using the schema v2 of Grafana with repeated rows",
+			inputGrafanaDashboardFile:   "grafana_v2_repeated_rows_grafana_dashboard.json",
+			expectedPersesDashboardFile: "grafana_v2_repeated_rows_perses_dashboard.json",
+		},
 	}
 
 	pl := loadDefaultTestPlugins()
