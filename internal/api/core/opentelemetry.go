@@ -90,6 +90,10 @@ func newGRPCTraceExporter(conf config.OpenTelemetry, tokenSource oauth2.TokenSou
 		otlptracegrpc.WithEndpointURL(conf.Endpoint.String()),
 		otlptracegrpc.WithTimeout(time.Duration(conf.Timeout)),
 	}
+	if conf.IsInsecure() {
+		// Otherwise, the TLS credentials of the OTEL_EXPORTER_OTLP_* variables would take precedence over the http scheme.
+		opts = append(opts, otlptracegrpc.WithTLSCredentials(insecure.NewCredentials()))
+	}
 	if conf.TLSConfig != nil {
 		tlsConfig, err := conf.TLSConfig.BuildTLSConfig()
 		if err != nil {
