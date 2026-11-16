@@ -1374,7 +1374,8 @@ sampling_ratio: <float> | default = 0 # Optional
 The TLS settings, headers and compression that aren't set in this configuration can be set with the standard
 `OTEL_EXPORTER_OTLP_*` environment variables (like `OTEL_EXPORTER_OTLP_CERTIFICATE` or `OTEL_EXPORTER_OTLP_HEADERS`).
 A setting present in this configuration takes precedence over the environment variable. The endpoint and the timeout
-always come from this configuration.
+always come from this configuration. The TLS variables are ignored when `tls_config` is set and, with the
+http/protobuf protocol, when an authentication is set (use `tls_config` instead).
 
 With the http/protobuf protocol, the endpoint is used like the signal-specific `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`
 variable: a path in the URL is used as-is. Only a URL without a path is completed with `/v1/traces`.
