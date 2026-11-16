@@ -29,6 +29,7 @@ import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import type { ReactElement } from 'react';
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import type { CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
@@ -97,6 +98,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
   const [isSecretDrawerOpened, setSecretDrawerOpened] = useState(false);
   const [isVariableDrawerOpened, setVariableDrawerOpened] = useState(false);
 
+  const { t } = useTranslation();
   const isReadonly = useIsReadonly();
   const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
 
@@ -224,7 +226,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
               onClick={() => navigate(`${ImportRoute}?project=${encodeURIComponent(projectName)}`)}
               {...props}
             >
-              Import Dashboard
+              {t('import_dashboard')}
             </CRUDButton>
           </Box>
           <CreateDashboardDialog
