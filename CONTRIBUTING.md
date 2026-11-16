@@ -87,6 +87,55 @@ In the PR description:
 - Don't modify the existing benchmarks or their datasets (`fixtures_test.go`) unless it is required, as the comparison
   with the base would no longer be possible. New benchmarks have no base value: mention them.
 
+### Search index changes
+
+The search index keeps the dashboards in memory to answer the requests of `/api/v1/search/dashboards`. It is updated
+each time a dashboard is created, updated or deleted, and rebuilt from the database each time the dashboards change in
+it. A PR that can affect its performance **MUST** include a benchmark comparison proving it does not decrease the
+performance. It concerns changes to:
+
+- `internal/api/index/`,
+- the default search configuration, which defines the indexed fields: `pkg/model/api/config/search.go`,
+- the code that updates or rebuilds the index: the `dashboard` service in `internal/api/impl/v1/`, and the refresh of
+  the search index in `internal/api/core/core.go`.
+
+The benchmarks are in [index_bench_test.go](internal/api/index/index_bench_test.go) and
+[matcher_bench_test.go](internal/api/index/matcher_bench_test.go). Compare the base of your branch with your branch
+using [benchstat](https://pkg.go.dev/golang.org/x/perf/cmd/benchstat), on the same idle machine. The runs of both
+versions are interleaved to limit the noise, and repeated 6 times, the minimum for benchstat to compute a confidence
+interval. Replace `origin/main` with the branch of perses/perses targeted by your PR (in a shallow clone, run
+`git fetch --unshallow` first):
+
+```bash
+BENCH_DIR=$(mktemp -d)
+git worktree add --detach "$BENCH_DIR/base" "$(git merge-base origin/main HEAD)"
+(cd "$BENCH_DIR/base" && go test -c -o "$BENCH_DIR/base.test" ./internal/api/index/)
+git worktree remove "$BENCH_DIR/base"
+go test -c -o "$BENCH_DIR/pr.test" ./internal/api/index/
+for i in 1 2 3 4 5 6; do
+  "$BENCH_DIR/base.test" -test.run '^$' -test.bench . -test.benchmem >> "$BENCH_DIR/base.txt"
+  "$BENCH_DIR/pr.test" -test.run '^$' -test.bench . -test.benchmem >> "$BENCH_DIR/pr.txt"
+done
+go run golang.org/x/perf/cmd/benchstat@latest base="$BENCH_DIR/base.txt" pr="$BENCH_DIR/pr.txt"
+```
+
+It takes about 15 minutes. While iterating, you can restrict the benchmarks with `-test.bench <regexp>`, but the final
+comparison must run all of them, without fewer runs or a shorter `-test.benchtime`, which would make the result
+meaningless.
+
+In the PR description:
+
+- Paste the full `benchstat` output.
+- Explain and justify every regression reported by `benchstat` (in `sec/op`, `B/op` or `allocs/op`). A `~` means there
+  is no significant difference.
+- Explain every change of `results/op`: the search or the listing returns other dashboards, so the measured work
+  changed too.
+- If the change adds work to a code path that no benchmark covers, add a benchmark for it in the same PR. If it changes
+  when the index is updated or rebuilt, explain the impact.
+- Don't modify the existing benchmarks or their datasets (`newBenchDataset` in `index_bench_test.go`) unless it is
+  required, as the comparison with the base would no longer be possible. New benchmarks have no base value: mention
+  them.
+
 ## Documentation
 
 Documentation is written in Markdown. To ensure some quality on our documentation, we are running

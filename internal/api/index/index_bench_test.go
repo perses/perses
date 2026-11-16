@@ -42,9 +42,8 @@ import (
 // Run them with:
 //   go test -run '^$' -bench . -benchmem ./internal/api/index/
 //
-// To measure the impact of a change, compare these benchmarks between the base of the branch and the branch with
-// benchstat, by following the procedure of the "Native authorization changes" section of CONTRIBUTING.md with the
-// package ./internal/api/index/ instead of ./internal/api/authorization/native/.
+// A pull request that can affect the performance of the search index must include a benchstat comparison of these
+// benchmarks between its base and its branch: see the "Search index changes" section of CONTRIBUTING.md.
 // Keep the existing benchmarks and their datasets stable, otherwise the comparison with the base is not possible.
 
 // BenchmarkClientAdd measures the update of a dashboard in the index, done each time a dashboard is created or updated
