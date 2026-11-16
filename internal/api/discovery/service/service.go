@@ -16,7 +16,6 @@ package service
 import (
 	"context"
 	"errors"
-	"strings"
 
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
@@ -96,35 +95,5 @@ func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasourc
 		currentNames = append(currentNames, entity.Metadata.Name)
 	}
 
-	foundDatasources, err := a.svc.List(
-		&globaldatasource.Query{
-			DiscoveryName: a.discoverySource.Name,
-			DiscoveryType: a.discoverySource.Type,
-		})
-	if err != nil {
-		logrus.WithError(err).Error("unable to get discovered globaldatasources")
-		return errors.Join(append(errs, err)...)
-	}
-	for _, ds := range foundDatasources {
-		if err := ctx.Err(); err != nil {
-			return errors.Join(append(errs, err)...)
-		}
-		if !containsDatasource(currentNames, ds.Metadata.Name) {
-			deleteParameters := apiInterface.Parameters{Name: ds.Metadata.Name}
-			if deleteErr := a.svc.Delete(nil, deleteParameters); deleteErr != nil {
-				errs = append(errs, deleteErr)
-			}
-		}
-	}
-
 	return errors.Join(errs...)
-}
-
-func containsDatasource(sources []string, name string) bool {
-	for _, ds := range sources {
-		if strings.EqualFold(ds, name) {
-			return true
-		}
-	}
-	return false
 }
