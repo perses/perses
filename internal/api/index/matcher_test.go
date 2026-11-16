@@ -27,14 +27,14 @@ func TestSearchMatch(t *testing.T) {
 		excludedChars []string
 		query         string
 		txt           string
-		expected      *SearchResult
+		expected      *FieldMatch
 	}{
 		{
 			name:          "perfect match",
 			caseSensitive: true,
 			query:         "abc",
 			txt:           "abc",
-			expected: &SearchResult{
+			expected: &FieldMatch{
 				Original: "abc",
 				Intervals: []MatchingInterval{
 					{From: 0, To: 2},
@@ -47,7 +47,7 @@ func TestSearchMatch(t *testing.T) {
 			caseSensitive: false,
 			query:         "ABC",
 			txt:           "abc",
-			expected: &SearchResult{
+			expected: &FieldMatch{
 				Original: "abc",
 				Intervals: []MatchingInterval{
 					{From: 0, To: 2},
@@ -74,7 +74,7 @@ func TestSearchMatch(t *testing.T) {
 			caseSensitive: true,
 			query:         "bd",
 			txt:           "abcd",
-			expected: &SearchResult{
+			expected: &FieldMatch{
 				Original: "abcd",
 				Intervals: []MatchingInterval{
 					{From: 1, To: 1},
@@ -88,7 +88,7 @@ func TestSearchMatch(t *testing.T) {
 			caseSensitive: true,
 			query:         "bac",
 			txt:           "babac",
-			expected: &SearchResult{
+			expected: &FieldMatch{
 				Original: "babac",
 				Intervals: []MatchingInterval{
 					{From: 2, To: 4},
@@ -101,7 +101,7 @@ func TestSearchMatch(t *testing.T) {
 			caseSensitive: false,
 			query:         "FUZ",
 			txt:           "fzduzf",
-			expected: &SearchResult{
+			expected: &FieldMatch{
 				Original: "fzduzf",
 				Intervals: []MatchingInterval{
 					{From: 0, To: 0},
@@ -116,7 +116,7 @@ func TestSearchMatch(t *testing.T) {
 			excludedChars: []string{"-"},
 			query:         "ab",
 			txt:           "a-b",
-			expected: &SearchResult{
+			expected: &FieldMatch{
 				Original: "a-b",
 				Intervals: []MatchingInterval{
 					{From: 0, To: 0},
@@ -130,7 +130,7 @@ func TestSearchMatch(t *testing.T) {
 			caseSensitive: true,
 			query:         "",
 			txt:           "",
-			expected: &SearchResult{
+			expected: &FieldMatch{
 				Original:  "",
 				Intervals: []MatchingInterval{{From: 0, To: 0}},
 				Score:     math.MaxUint64,
@@ -151,8 +151,13 @@ func TestSearchMatch(t *testing.T) {
 				caseSensitive: tt.caseSensitive,
 				excludedChars: tt.excludedChars,
 			}
-			result := s.match(tt.query, tt.txt)
-			assert.Equal(t, tt.expected, result)
+			match, ok := s.match(tt.query, tt.txt)
+			if tt.expected == nil {
+				assert.False(t, ok)
+				assert.Zero(t, match)
+			} else if assert.True(t, ok) {
+				assert.Equal(t, *tt.expected, match)
+			}
 		})
 	}
 }

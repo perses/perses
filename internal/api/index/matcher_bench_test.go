@@ -74,8 +74,8 @@ func BenchmarkMatcherMatch(b *testing.B) {
 	for _, sc := range scenarios {
 		b.Run(sc.name, func(b *testing.B) {
 			m := &matcher{caseSensitive: false, excludedChars: sc.excludedChars}
-			if result := m.match(sc.query, sc.txt); (result != nil) != sc.expectMatch {
-				b.Fatalf("match(%q, %q) = %+v, expected a match: %t", sc.query, sc.txt, result, sc.expectMatch)
+			if match, ok := m.match(sc.query, sc.txt); ok != sc.expectMatch {
+				b.Fatalf("match(%q, %q) = %+v, expected a match: %t", sc.query, sc.txt, match, sc.expectMatch)
 			}
 			b.ReportAllocs()
 			for b.Loop() {

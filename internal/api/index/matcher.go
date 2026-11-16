@@ -35,31 +35,35 @@ func (m MatchingInterval) Size() uint64 {
 	return m.To - m.From + 1
 }
 
-// SearchResult is the result of a search query. It contains the metadata of the resource that matches the query,
-// the original string that matches the query, and the list of intervals that gives you the position of the characters that match the query in the original string.
+// SearchResult is the result of a search query. It contains the metadata of the resource that matches the query, and
+// the field of the resource that matches the query.
 // Note for developers: this struct is not in the pkg/model/api/v1/search package to avoid generating them with cuelang and facing issues with cuelang when generating the package pkg/model/api.
 type SearchResult struct {
 	// Metadata is the metadata of the resource that matches the query.
 	Metadata api.Metadata `json:"metadata" yaml:"metadata"`
 	// DisplayName is the string that will be used for the search display.
 	DisplayName string `json:"displayName" yaml:"displayName"`
+	// FieldMatch is the field of the resource that matches the query. Its fields are serialized with the ones of the
+	// result. It is nil when the resources are listed, i.e. when the query is empty, which keeps the result small.
+	*FieldMatch
+}
+
+// FieldMatch is a field of a resource that matches a search query: its value, its location in the resource, and the
+// position of the characters of its value that match the query.
+type FieldMatch struct {
 	// The original string that matches the query.
-	// It can be empty if the query is empty.
 	Original string `json:"original,omitempty"`
 	// Key is the index key (as configured in the search config) of the field matching the query.
 	// For example, "metadata.tags" when the query matches one of the tags of the resource.
-	// It can be empty if the query is empty.
 	Key string `json:"key,omitempty"`
 	// Path is the location of the field matching the query in the resource.
 	// For example, ["metadata", "tags", "1"] when the query matches the second tag of the resource.
-	// It can be empty if the query is empty, or if the index key uses a syntax for which the path can't be determined.
+	// It is empty if the index key uses a syntax for which the path can't be determined.
 	Path []string `json:"path,omitempty"`
 	// The list of intervals that match the query.
-	// It can be empty if the query is empty.
 	Intervals []MatchingInterval `json:"intervals,omitempty"`
 	// Score is the score of the match, the higher the score, the better the match.
 	// When there is a perfect match, then the number is infinite.
-	// It can be equal to 0 if the query is empty.
 	Score uint64 `json:"score,omitempty"`
 }
 
@@ -74,8 +78,9 @@ type matcher struct {
 	excludedChars []string
 }
 
-// match returns a result only if the query matches the text.
-func (m *matcher) match(query string, txt string) *SearchResult {
+// match returns the match of the query in the text, and whether the query matches it. The key and the path of the
+// match are not set. The match is returned by value, so that the caller allocates it along with its search result.
+func (m *matcher) match(query string, txt string) (FieldMatch, bool) {
 	localQuery := query
 	localTxt := txt
 	if !m.caseSensitive {
@@ -88,7 +93,7 @@ func (m *matcher) match(query string, txt string) *SearchResult {
 		if len(txt) > 0 {
 			to = len(txt) - 1
 		}
-		return &SearchResult{
+		return FieldMatch{
 			Original: txt,
 			Intervals: []MatchingInterval{
 				{
@@ -101,11 +106,11 @@ func (m *matcher) match(query string, txt string) *SearchResult {
 			},
 			// A perfect match get the maximum score, so it will be the first result in the list of results.
 			Score: math.MaxUint64,
-		}
+		}, true
 	}
 	if len(localQuery) == 0 {
 		// if the query is empty, then we should not return any result.
-		return nil
+		return FieldMatch{}, false
 	}
 	var intervals []MatchingInterval
 	finalScore := uint64(0)
@@ -134,13 +139,13 @@ func (m *matcher) match(query string, txt string) *SearchResult {
 		}
 	}
 	if len(intervals) == 0 {
-		return nil
+		return FieldMatch{}, false
 	}
-	return &SearchResult{
+	return FieldMatch{
 		Original:  txt,
 		Intervals: intervals,
 		Score:     finalScore,
-	}
+	}, true
 }
 
 // generateMatchingIntervals is finding an occurrence of the query in the text starting from the given index.

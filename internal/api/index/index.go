@@ -92,17 +92,27 @@ type index[T api.Metadata] struct {
 	matcher *matcher
 }
 
+// searchHit is a search result along with its field match, to allocate both at once.
+type searchHit struct {
+	result SearchResult
+	match  FieldMatch
+}
+
 func (idx *index[T]) match(text string) *SearchResult {
 	for _, field := range idx.fields {
-		result := idx.matcher.match(text, field.value)
-		if result != nil {
-			result.Metadata = idx.metadata
-			result.DisplayName = idx.displayName
-			result.Key = field.key
-			// The path is copied, so that the result doesn't share the memory of the index.
-			result.Path = slices.Clone(field.path)
-			return result
+		match, ok := idx.matcher.match(text, field.value)
+		if !ok {
+			continue
 		}
+		match.Key = field.key
+		// The path is copied, so that the result doesn't share the memory of the index.
+		match.Path = slices.Clone(field.path)
+		hit := &searchHit{
+			result: SearchResult{Metadata: idx.metadata, DisplayName: idx.displayName},
+			match:  match,
+		}
+		hit.result.FieldMatch = &hit.match
+		return &hit.result
 	}
 	return nil
 }

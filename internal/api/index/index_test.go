@@ -17,6 +17,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
+	"slices"
 	"testing"
 
 	"github.com/labstack/echo/v5"
@@ -415,6 +417,38 @@ func TestClientSearch_returnsKeyAndPathOfMatchingField(t *testing.T) {
 			assert.Equal(t, tc.expectedPath, results[0].Path)
 		})
 	}
+}
+
+// The UI reads the fields of the match at the root of each result, and they are omitted when the resources are listed.
+func TestClientSearchAndList_jsonShapeOfTheResults(t *testing.T) {
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.tags"}}}, newDisabledAuthz(t), nil).(*client)
+	require.NoError(t, c.add(json.RawMessage(`{
+		"kind": "Dashboard",
+		"metadata": {"name": "mydashboard", "project": "myproject", "tags": ["kubernetes", "production"]},
+		"spec": {"display": {"name": "My Dashboard"}}
+	}`)))
+
+	listed, err := c.List(nil, v1.KindDashboard, "")
+	require.NoError(t, err)
+	require.Len(t, listed, 1)
+	assert.Nil(t, listed[0].FieldMatch)
+	data, err := json.Marshal(listed[0])
+	require.NoError(t, err)
+	var listedJSON map[string]any
+	require.NoError(t, json.Unmarshal(data, &listedJSON))
+	assert.ElementsMatch(t, []string{"metadata", "displayName"}, slices.Collect(maps.Keys(listedJSON)))
+
+	found, err := c.Search(nil, v1.KindDashboard, "", "production")
+	require.NoError(t, err)
+	require.Len(t, found, 1)
+	data, err = json.Marshal(found[0])
+	require.NoError(t, err)
+	var foundJSON map[string]any
+	require.NoError(t, json.Unmarshal(data, &foundJSON))
+	assert.ElementsMatch(t, []string{"metadata", "displayName", "original", "key", "path", "intervals", "score"}, slices.Collect(maps.Keys(foundJSON)))
+	assert.Equal(t, "production", foundJSON["original"])
+	assert.Equal(t, "metadata.tags", foundJSON["key"])
+	assert.Equal(t, []any{"metadata", "tags", "1"}, foundJSON["path"])
 }
 
 func TestRefreshDropsDashboardsMissingFromDatabase(t *testing.T) {
