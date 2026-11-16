@@ -126,8 +126,8 @@ meaningless.
 In the PR description:
 
 - Paste the full `benchstat` output.
-- Explain and justify every regression reported by `benchstat` (in `sec/op`, `B/op` or `allocs/op`). A `~` means there
-  is no significant difference.
+- Explain and justify every regression reported by `benchstat` (in `sec/op`, `B/op`, `allocs/op` or
+  `retained-B/dashboard`, the memory kept by the index). A `~` means there is no significant difference.
 - Explain every change of `results/op`: the search or the listing returns other dashboards, so the measured work
   changed too.
 - If the change adds work to a code path that no benchmark covers, add a benchmark for it in the same PR. If it changes
