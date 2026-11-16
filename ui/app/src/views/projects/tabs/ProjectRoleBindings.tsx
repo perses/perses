@@ -102,6 +102,7 @@ export function ProjectRoleBindings(props: ProjectRoleBindingsProps): ReactEleme
         onCreate={handleRoleBindingCreate}
         onUpdate={handleRoleBindingUpdate}
         onDelete={handleRoleBindingDelete}
+        storageKey="RoleBinding"
         initialState={{
           columns: {
             columnVisibilityModel: {
