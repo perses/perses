@@ -33,7 +33,7 @@ import (
 // newDisabledAuthz returns an authorization.Authorization implementation with authorization disabled.
 // When authorization is disabled, the *echo.Context parameter is never used by the implementation,
 // so tests can safely pass nil as the context when calling functions that require it.
-func newDisabledAuthz(t *testing.T) authorization.Authorization {
+func newDisabledAuthz(t testing.TB) authorization.Authorization {
 	t.Helper()
 	authz, err := authorization.New(nil, nil, nil, nil, nil, config.Config{})
 	require.NoError(t, err)
