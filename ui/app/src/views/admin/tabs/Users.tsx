@@ -101,6 +101,7 @@ export function Users(props: UsersProps): ReactElement {
         onCreate={handleUserCreate}
         onUpdate={handleUserUpdate}
         onDelete={handleUserDelete}
+        storageKey="User"
         initialState={{
           columns: {
             columnVisibilityModel: {
