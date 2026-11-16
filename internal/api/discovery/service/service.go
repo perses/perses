@@ -36,6 +36,9 @@ type ApplyService struct {
 	caseSensitive   bool
 	svc             globaldatasource.Service
 	discoverySource v1.DiscoverySource
+	// warnedCollisions tracks datasource names for which a one-time ownership
+	// collision warning has already been logged, to avoid repeating it every cycle.
+	warnedCollisions []string
 }
 
 func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasource) error {
@@ -76,9 +79,12 @@ func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasourc
 
 		existingDiscovery := existing.Source.GetDiscovery()
 		if existingDiscovery != nil {
-			// Another discovery owns this datasource — skip.
+			// Another discovery owns this datasource — skip, and warn once.
 			if existingDiscovery.Name != a.discoverySource.Name || existingDiscovery.Type != a.discoverySource.Type {
-				errs = append(errs, errors.New("skipping update of globaldatasource "+entity.Metadata.Name+": owned by a different discovery"))
+				if !containsName(a.warnedCollisions, entity.Metadata.Name) {
+					logrus.Warnf("globaldatasource %q is owned by discovery %q (%s); skipping", entity.Metadata.Name, existingDiscovery.Name, existingDiscovery.Type)
+					a.warnedCollisions = append(a.warnedCollisions, entity.Metadata.Name)
+				}
 				continue
 			}
 		} else {
@@ -96,4 +102,13 @@ func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasourc
 	}
 
 	return errors.Join(errs...)
+}
+
+func containsName(names []string, name string) bool {
+	for _, n := range names {
+		if n == name {
+			return true
+		}
+	}
+	return false
 }
