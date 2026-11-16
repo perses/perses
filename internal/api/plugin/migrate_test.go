@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/perses/common/set"
-	"github.com/perses/perses/internal/api/plugin/migrate"
+	"github.com/perses/perses/internal/api/plugin/migrate/grafana"
 	testUtils "github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -73,7 +73,7 @@ func TestNoRegMigration(t *testing.T) {
 			pl := loadTestPlugins(test.pluginPath)
 			input := testUtils.ReadFile(test.grafanaDashboardFile)
 			expected := testUtils.ReadFile(test.persesDashboardFile)
-			grafanaDashboard := &migrate.SimplifiedDashboard{}
+			grafanaDashboard := &grafana.Dashboard{}
 
 			if unmarshallErr := json.Unmarshal(input, grafanaDashboard); unmarshallErr != nil {
 				t.Fatal(unmarshallErr)
@@ -160,7 +160,7 @@ func TestMig_Migrate(t *testing.T) {
 		t.Run(test.title, func(t *testing.T) {
 			input := testUtils.ReadFile(filepath.Join("migrate", testDataFolder, "dashboards", test.inputGrafanaDashboardFile))
 			expected := testUtils.ReadFile(filepath.Join("migrate", testDataFolder, "dashboards", test.expectedPersesDashboardFile))
-			grafanaDashboard := &migrate.SimplifiedDashboard{}
+			grafanaDashboard := &grafana.Dashboard{}
 			if unmarshallErr := json.Unmarshal(input, grafanaDashboard); unmarshallErr != nil {
 				t.Fatal(unmarshallErr)
 			}
@@ -176,7 +176,7 @@ func TestMig_Migrate(t *testing.T) {
 
 func TestMig_MigrateTags(t *testing.T) {
 	pl := loadDefaultTestPlugins()
-	grafanaDashboard := &migrate.SimplifiedDashboard{
+	grafanaDashboard := &grafana.Dashboard{
 		UID:   "dashboard-with-tags",
 		Title: "Dashboard with tags",
 		Tags:  []string{"ops", "prod", "ops"},
@@ -230,7 +230,7 @@ func TestMig_MigrateTimeSettings(t *testing.T) {
 
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			grafanaDashboard := &migrate.SimplifiedDashboard{}
+			grafanaDashboard := &grafana.Dashboard{}
 			if unmarshallErr := json.Unmarshal([]byte(test.grafanaDashboard), grafanaDashboard); unmarshallErr != nil {
 				t.Fatal(unmarshallErr)
 			}
@@ -252,7 +252,7 @@ func TestMig_MigrateAnnotationsWithDefaultDatasource(t *testing.T) {
 	input := `{"uid": "annotations", "title": "Annotations", "annotations": {"list": [
 		{"datasource": {"type": "exotic-tsdb", "uid": "exotic-ds"}, "enable": true, "expr": "deployments_total", "name": "Deployments"}
 	]}}`
-	grafanaDashboard := &migrate.SimplifiedDashboard{}
+	grafanaDashboard := &grafana.Dashboard{}
 	if unmarshallErr := json.Unmarshal([]byte(input), grafanaDashboard); unmarshallErr != nil {
 		t.Fatal(unmarshallErr)
 	}
@@ -316,7 +316,7 @@ func TestMig_MigrateVariableAllValue(t *testing.T) {
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			input := `{"uid": "variable-all-value", "title": "Variable all value", "templating": {"list": [` + test.grafanaVariable + `]}}`
-			grafanaDashboard := &migrate.SimplifiedDashboard{}
+			grafanaDashboard := &grafana.Dashboard{}
 			if unmarshallErr := json.Unmarshal([]byte(input), grafanaDashboard); unmarshallErr != nil {
 				t.Fatal(unmarshallErr)
 			}
@@ -342,12 +342,12 @@ func TestMigrateDashboardLinks(t *testing.T) {
 
 	testCases := []struct {
 		name          string
-		grafanaLink   migrate.GrafanaLink
+		grafanaLink   grafana.Link
 		expectedLinks []dashboard.Link
 	}{
 		{
 			name: "Link with URL only",
-			grafanaLink: migrate.GrafanaLink{
+			grafanaLink: grafana.Link{
 				URL:     "http://fakedomain/${samplevar}/$samplevar",
 				Tooltip: "",
 			},
@@ -363,7 +363,7 @@ func TestMigrateDashboardLinks(t *testing.T) {
 		},
 		{
 			name: "Full link with variables and target blank",
-			grafanaLink: migrate.GrafanaLink{
+			grafanaLink: grafana.Link{
 				IncludeVars: true,
 				TargetBlank: true,
 				Title:       "sample link",
@@ -382,7 +382,7 @@ func TestMigrateDashboardLinks(t *testing.T) {
 		},
 		{
 			name: "Link with defaults",
-			grafanaLink: migrate.GrafanaLink{
+			grafanaLink: grafana.Link{
 				Title: "sample link",
 				URL:   "http://fakedomain/${samplevar}/$samplevar",
 			},
@@ -398,17 +398,17 @@ func TestMigrateDashboardLinks(t *testing.T) {
 		},
 		{
 			name:          "Empty or invalid link should be dropped",
-			grafanaLink:   migrate.GrafanaLink{Title: "sample link"},
+			grafanaLink:   grafana.Link{Title: "sample link"},
 			expectedLinks: []dashboard.Link{},
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			grafanaDashboard := &migrate.SimplifiedDashboard{
+			grafanaDashboard := &grafana.Dashboard{
 				UID:   "dashboard-with-links",
 				Title: "Dashboard with links",
-				Links: []migrate.GrafanaLink{tc.grafanaLink},
+				Links: []grafana.Link{tc.grafanaLink},
 			}
 
 			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
@@ -422,7 +422,7 @@ func TestMigrateDashboardLinks(t *testing.T) {
 func TestLinkConversionLogic(t *testing.T) {
 	testSuite := []struct {
 		name                    string
-		grafanaLinks            []migrate.GrafanaLink
+		grafanaLinks            []grafana.Link
 		expectedURLs            []string
 		expectedRenderVariables []bool
 		expectedTargetBlanks    []bool
@@ -430,7 +430,7 @@ func TestLinkConversionLogic(t *testing.T) {
 	}{
 		{
 			name: "mixed links with variables and static URLs",
-			grafanaLinks: []migrate.GrafanaLink{
+			grafanaLinks: []grafana.Link{
 				{
 					Title:       "Dynamic Prometheus",
 					URL:         "https://prometheus.${region}.com/graph?service=${service}",
@@ -449,7 +449,7 @@ func TestLinkConversionLogic(t *testing.T) {
 		},
 		{
 			name:                    "empty links",
-			grafanaLinks:            []migrate.GrafanaLink{},
+			grafanaLinks:            []grafana.Link{},
 			expectedURLs:            []string{},
 			expectedRenderVariables: []bool{},
 			expectedTargetBlanks:    []bool{},
@@ -470,7 +470,7 @@ func TestLinkConversionLogic(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			var panel migrate.Panel
+			var panel grafana.Panel
 			err = json.Unmarshal(jsonData, &panel)
 			if err != nil {
 				t.Fatal(err)

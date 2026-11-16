@@ -18,6 +18,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/perses/perses/internal/api/plugin/migrate/grafana"
 	"github.com/perses/spec/go/common"
 )
 
@@ -43,7 +44,7 @@ var grafanaUnitInDays = map[string]uint64{
 // range starting at "now-<duration>" and ending at "now" or at a past "now-<duration>" is migrated. Any other time
 // range (absolute dates, rounded ranges such as "now-1d/d", chained operations such as "now-1d-2h", a range ending
 // in the future) falls back to the default duration.
-func migrateDuration(timeRange *GrafanaTimeRange) common.DurationString {
+func migrateDuration(timeRange *grafana.TimeRange) common.DurationString {
 	if timeRange == nil {
 		return grafanaDefaultDuration
 	}
