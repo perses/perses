@@ -14,7 +14,6 @@
 package v1
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
@@ -27,17 +26,17 @@ const (
 	DiscoveryTypeHTTP DiscoveryType = "http"
 )
 
-func (d *DiscoveryType) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	switch DiscoveryType(s) {
+// UnmarshalParam implements echo.BindUnmarshaler so the discovery_type query
+// parameter is validated. Stored data is decoded as a plain string and is not
+// subject to this check, so adding a new discovery type is safe during a
+// rolling upgrade or rollback.
+func (d *DiscoveryType) UnmarshalParam(param string) error {
+	switch t := DiscoveryType(param); t {
 	case DiscoveryTypeKubernetes, DiscoveryTypeHTTP:
-		*d = DiscoveryType(s)
+		*d = t
 		return nil
 	default:
-		return fmt.Errorf("unknown discovery type %q", s)
+		return fmt.Errorf("unknown discovery type %q", param)
 	}
 }
 
