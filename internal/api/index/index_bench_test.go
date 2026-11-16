@@ -36,6 +36,7 @@ import (
 // dashboards (see newBenchDataset). They cover:
 //   - the update of a dashboard in the index (Add),
 //   - the search through all the dashboards (Search), with several kinds of queries, and under concurrent requests,
+//   - the sorting of the search results by score (SortResults),
 //   - the listing of the dashboards (List), with and without authorization,
 //   - the rebuild of the whole index from the database (Refresh), also with keys using other syntaxes,
 //   - the memory retained by the index.
@@ -148,6 +149,35 @@ func BenchmarkClientSearchParallel(b *testing.B) {
 					}
 				})
 			})
+		})
+	}
+}
+
+// BenchmarkSortResults measures the sorting of the search results by score, done by the search endpoint when the sorted
+// query parameter is set. It sorts the results of a query matching 25% of the dashboards, in both orders.
+func BenchmarkSortResults(b *testing.B) {
+	for _, size := range benchDatasetSizes {
+		b.Run(size.String(), func(b *testing.B) {
+			c := newBenchClient(b, nil, newDisabledAuthz(b), newBenchDataset(b, size))
+			results, err := c.Search(nil, v1.KindDashboard, "", "kubernetes")
+			if err != nil {
+				b.Fatal(err)
+			}
+			if len(results) == 0 {
+				b.Fatal("no dashboard matches the query")
+			}
+			for _, order := range []SortOrder{SortOrderAsc, SortOrderDesc} {
+				b.Run("order="+string(order), func(b *testing.B) {
+					sorted := make([]*SearchResult, len(results))
+					b.ReportAllocs()
+					for b.Loop() {
+						// The results are sorted in place, so each iteration sorts a copy of the unsorted results.
+						copy(sorted, results)
+						SortResults(sorted, order)
+					}
+					b.ReportMetric(float64(len(results)), "results/op")
+				})
+			}
 		})
 	}
 }
