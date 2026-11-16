@@ -140,6 +140,12 @@ func TestMig_Migrate(t *testing.T) {
 			inputGrafanaDashboardFile:   "grafana_v2_grafana_dashboard.json",
 			expectedPersesDashboardFile: "grafana_v2_perses_dashboard.json",
 		},
+		{
+			// The rows without header must keep their position, and not be merged into the previous panel group.
+			title:                       "dashboard using the schema v2 of Grafana with rows without header",
+			inputGrafanaDashboardFile:   "grafana_v2_hidden_header_rows_grafana_dashboard.json",
+			expectedPersesDashboardFile: "grafana_v2_hidden_header_rows_perses_dashboard.json",
+		},
 	}
 
 	pl := loadDefaultTestPlugins()

@@ -1,0 +1,35 @@
+{
+  "title": "Panels",
+  "description": "Some panels",
+  "tags": ["team-a"],
+  "links": [{"title": "Docs", "type": "link", "icon": "doc", "tooltip": "", "url": "https://example.com", "tags": [], "asDropdown": false, "targetBlank": true, "includeVars": false, "keepTime": false}],
+  "timeSettings": {"timezone": "utc", "from": "now-12h", "to": "now", "autoRefresh": "30s", "autoRefreshIntervals": ["30s"], "hideTimepicker": false, "fiscalYearStartMonth": 0},
+  "elements": {
+    "panel-7": {"kind": "Panel", "spec": {"id": 7, "title": "CPU", "description": "CPU usage", "transparent": true,
+      "links": [{"title": "Runbook", "url": "https://example.com/runbook"}],
+      "data": {"kind": "QueryGroup", "spec": {
+        "queries": [
+          {"kind": "PanelQuery", "spec": {"query": {"kind": "DataQuery", "group": "prometheus", "version": "v0", "datasource": {"name": "prom-a"}, "spec": {"expr": "up", "legendFormat": "{{job}}"}}, "refId": "A", "hidden": false}},
+          {"kind": "PanelQuery", "spec": {"query": {"kind": "DataQuery", "group": "prometheus", "version": "v0", "datasource": {"name": "prom-b"}, "spec": {"expr": "down"}}, "refId": "B", "hidden": true}},
+          {"kind": "PanelQuery", "spec": {"query": {"kind": "DataQuery", "group": "loki", "version": "v0", "spec": {"expr": "{job=\"x\"}"}}, "refId": "C", "hidden": false}}
+        ],
+        "transformations": [
+          {"kind": "Transformation", "group": "organize", "spec": {"options": {"renameByName": {"a": "b"}}}},
+          {"kind": "reduce", "spec": {"id": "reduce", "options": {}}},
+          {"kind": "merge", "spec": {"options": {}}}
+        ],
+        "queryOptions": {"interval": "1m", "maxDataPoints": 500, "timeFrom": "2h"}}},
+      "vizConfig": {"kind": "VizConfig", "group": "timeseries", "version": "12.1.0", "spec": {"options": {"legend": {"showLegend": true}}, "fieldConfig": {"defaults": {"unit": "percent"}, "overrides": []}}}}},
+    "panel-8": {"kind": "Panel", "spec": {"id": 8, "title": "Memory", "links": [],
+      "data": {"kind": "QueryGroup", "spec": {
+        "queries": [{"kind": "PanelQuery", "spec": {"query": {"kind": "DataQuery", "group": "prometheus", "version": "v0", "datasource": {"name": "prom-a"}, "spec": {"expr": "memory"}}, "refId": "A", "hidden": false}}],
+        "transformations": [], "queryOptions": {}}},
+      "vizConfig": {"kind": "VizConfig", "group": "stat", "version": "", "spec": {"options": {}, "fieldConfig": {"defaults": {}, "overrides": []}}}}},
+    "panel-3": {"kind": "LibraryPanel", "spec": {"id": 3, "title": "Shared", "libraryPanel": {"name": "Shared", "uid": "lib-1"}}}
+  },
+  "layout": {"kind": "GridLayout", "spec": {"items": [
+    {"kind": "GridLayoutItem", "spec": {"x": 0, "y": 0, "width": 12, "height": 8, "element": {"kind": "ElementReference", "name": "panel-7"}}},
+    {"kind": "GridLayoutItem", "spec": {"x": 12, "y": 0, "width": 6, "height": 8, "element": {"kind": "ElementReference", "name": "panel-8"}}},
+    {"kind": "GridLayoutItem", "spec": {"x": 18, "y": 0, "width": 6, "height": 8, "element": {"kind": "ElementReference", "name": "panel-3"}}}
+  ]}}
+}
