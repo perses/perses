@@ -1325,9 +1325,9 @@ index_keys:
 Perses can export the traces of its server with the OpenTelemetry protocol (OTLP), to a receiver like an OpenTelemetry
 Collector.
 
-When enabled, Perses creates a span for each HTTP request it receives (except the `/metrics` and `/api/v1/health`
-endpoints, called very often by Prometheus and the probes), and for each request it sends to a datasource through the
-proxy.
+When enabled, Perses creates a span for each HTTP request it receives (except the `/metrics` and
+`<api_prefix>/api/v1/health` endpoints, called very often by Prometheus and the probes), and for each request it sends
+to an HTTP datasource through the proxy.
 
 The trace context is read from and propagated with the W3C `traceparent` and `baggage` headers, so a request coming
 from a traced application (like a portal embedding Perses panels) and its queries to the datasource are part of the same
