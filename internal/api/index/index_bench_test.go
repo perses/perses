@@ -86,7 +86,7 @@ func BenchmarkClientAdd(b *testing.B) {
 }
 
 // BenchmarkClientSearch measures a search through all the dashboards, i.e. without project, by a user who can read all
-// of them. The query is matched against the indexed fields of every dashboard, until one of them matches.
+// of them. The query is matched against the indexed fields of every dashboard, to find the one it matches best.
 func BenchmarkClientSearch(b *testing.B) {
 	queries := []struct {
 		name        string
