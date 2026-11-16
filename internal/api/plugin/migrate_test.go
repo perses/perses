@@ -146,6 +146,12 @@ func TestMig_Migrate(t *testing.T) {
 			inputGrafanaDashboardFile:   "grafana_v2_hidden_header_rows_grafana_dashboard.json",
 			expectedPersesDashboardFile: "grafana_v2_hidden_header_rows_perses_dashboard.json",
 		},
+		{
+			// The repeat of a row must be kept, even when the row has no header or only holds rows and tabs.
+			title:                       "dashboard using the schema v2 of Grafana with repeated rows",
+			inputGrafanaDashboardFile:   "grafana_v2_repeated_rows_grafana_dashboard.json",
+			expectedPersesDashboardFile: "grafana_v2_repeated_rows_perses_dashboard.json",
+		},
 	}
 
 	pl := loadDefaultTestPlugins()

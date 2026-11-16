@@ -44,6 +44,8 @@ func TestToClassic(t *testing.T) {
 		{title: "auto grid with the default settings", name: "auto_grid_defaults"},
 		{title: "auto grid with settings out of range", name: "auto_grid_out_of_range"},
 		{title: "rows without header that can't be placed without row", name: "hidden_header_rows"},
+		{title: "repeated rows, including the ones without header and the ones holding rows or tabs", name: "repeated_rows"},
+		{title: "repeated tab holding rows", name: "repeated_tabs"},
 		{title: "unknown and missing elements", name: "unknown_and_missing_elements"},
 	}
 	for _, test := range tests {

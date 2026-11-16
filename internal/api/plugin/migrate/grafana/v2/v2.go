@@ -158,6 +158,9 @@ type converter struct {
 	// rows is the number of rows emitted so far, and lastRow is the last one.
 	rows    int
 	lastRow rowRef
+	// flatten is true while converting the layout of a repeated row or tab: the classic JSON model only repeats the
+	// panels of a row up to the next row, so the rows and the tabs nested in it are placed without row.
+	flatten bool
 }
 
 // field decodes the field of the spec. It returns false when the field is missing or can't be decoded into a T, so
@@ -306,10 +309,12 @@ func (c *converter) convertSections(sections []section, kind sectionKind, y int,
 		c.addSectionVariablesAndAnnotations(s)
 		spec := s.Spec
 		hidden := kind == rowSection && spec.HideHeader
-		if hidden && c.landsInParentGroup(parent) {
+		repeated := spec.Repeat != nil && len(spec.Repeat.Value) > 0
+		if c.flatten || (hidden && !repeated && c.landsInParentGroup(parent)) {
 			// A row without header has no row in the classic JSON model: its panels are placed directly on the grid.
-			// It's only done when the panels stay in the right panel group once migrated, otherwise they would be
-			// merged into the previous row, or moved to the top of the dashboard.
+			// It's only done when the row isn't repeated, and when the panels stay in the right panel group once
+			// migrated, otherwise they would be merged into the previous row, or moved to the top of the dashboard.
+			// The rows and the tabs nested in a repeated row are placed the same way, to be repeated with it.
 			sectionPanels, end, err := c.convertLayout(spec.Layout, y, parent)
 			if err != nil {
 				return nil, y, err
@@ -318,7 +323,7 @@ func (c *converter) convertSections(sections []section, kind sectionKind, y int,
 			y = end
 			continue
 		}
-		// A row without header that can't be placed directly keeps its position with an expanded row.
+		// A row without header that can't be placed directly keeps its position (and its repeat) with an expanded row.
 		collapsed := spec.Collapse && !hidden && kind == rowSection
 		c.rows++
 		c.lastRow = rowRef{id: c.rows, collapsed: collapsed}
@@ -329,15 +334,17 @@ func (c *converter) convertSections(sections []section, kind sectionKind, y int,
 			"gridPos":   gridPos{X: 0, Y: y, W: gridColumns, H: rowHeight},
 			panelsField: []map[string]any{},
 		}
-		if spec.Repeat != nil && len(spec.Repeat.Value) > 0 {
+		if repeated {
 			row["repeat"] = spec.Repeat.Value
 		}
+		isNested := spec.Layout.Kind == rowsLayout || spec.Layout.Kind == tabsLayout
+		c.flatten = repeated && isNested
 		sectionPanels, end, err := c.convertLayout(spec.Layout, y+rowHeight, c.lastRow.id)
+		c.flatten = false
 		if err != nil {
 			return nil, y, err
 		}
-		isNested := spec.Layout.Kind == rowsLayout || spec.Layout.Kind == tabsLayout
-		if collapsed && !isNested {
+		if collapsed && (!isNested || repeated) {
 			// The panels of a collapsed row are nested in it, and the row takes a single line.
 			if len(sectionPanels) > 0 {
 				row[panelsField] = sectionPanels
@@ -346,7 +353,8 @@ func (c *converter) convertSections(sections []section, kind sectionKind, y int,
 			y += rowHeight
 			continue
 		}
-		// The classic JSON model has no nested rows, so the rows of a nested layout follow the row.
+		// The classic JSON model has no nested rows, so the rows of a nested layout follow the row, except in a
+		// repeated row where they were flattened into it.
 		panels = append(panels, row)
 		panels = append(panels, sectionPanels...)
 		y = end
