@@ -38,6 +38,8 @@ import (
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 	// The version used by otelhttp, which records the attribute replaced by redactURLRoundTripper.
 	semconv "go.opentelemetry.io/otel/semconv/v1.43.0"
 	"go.opentelemetry.io/otel/trace"
@@ -296,22 +298,24 @@ func (h *Proxy) removeCallerCredentials(headers http.Header) {
 
 // filterHeaders applies the policy after configured headers have been set, just before authentication have been added.
 func (h *Proxy) filterHeaders(headers http.Header) {
-	isAllowed := func(name string) bool {
-		matches := func(header string) bool { return strings.EqualFold(header, name) }
-		if len(h.Config.AllowHeaders) > 0 {
-			return slices.ContainsFunc(h.Config.AllowHeaders, matches)
-		}
-		return !slices.ContainsFunc(h.Config.DropHeaders, matches)
-	}
 	for name := range headers {
-		if !isAllowed(name) {
+		if !h.isHeaderAllowed(name) {
 			delete(headers, name)
 		}
 	}
-	if !isAllowed(echo.HeaderXForwardedFor) {
+	if !h.isHeaderAllowed(echo.HeaderXForwardedFor) {
 		// A nil value tells ReverseProxy not to add X-Forwarded-For again.
 		headers[echo.HeaderXForwardedFor] = nil
 	}
+}
+
+// isHeaderAllowed returns whether the header policy of the datasource allows the header to be forwarded.
+func (h *Proxy) isHeaderAllowed(name string) bool {
+	matches := func(header string) bool { return strings.EqualFold(header, name) }
+	if len(h.Config.AllowHeaders) > 0 {
+		return slices.ContainsFunc(h.Config.AllowHeaders, matches)
+	}
+	return !slices.ContainsFunc(h.Config.DropHeaders, matches)
 }
 
 // setupAuthentication sets the credentials used to authenticate against the datasource.
@@ -449,6 +453,27 @@ func (h *Proxy) getRoundTripper() (http.RoundTripper, error) {
 		return otelhttp.NewTransport(&redactURLRoundTripper{next: transport}, otelhttp.WithPropagators(propagator)), nil
 	}
 	return transport, nil
+}
+
+// policyPropagator only injects the headers allowed by the header policy of the datasource.
+type policyPropagator struct {
+	propagation.TextMapPropagator
+	isAllowed func(name string) bool
+}
+
+func (p policyPropagator) Inject(ctx context.Context, carrier propagation.TextMapCarrier) {
+	p.TextMapPropagator.Inject(ctx, policyCarrier{TextMapCarrier: carrier, isAllowed: p.isAllowed})
+}
+
+type policyCarrier struct {
+	propagation.TextMapCarrier
+	isAllowed func(name string) bool
+}
+
+func (c policyCarrier) Set(key, value string) {
+	if c.isAllowed(key) {
+		c.TextMapCarrier.Set(key, value)
+	}
 }
 
 // redactURLRoundTripper replaces the url.full attribute recorded by otelhttp on the client span with a URL whose query values

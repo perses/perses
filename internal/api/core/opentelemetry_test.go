@@ -26,6 +26,7 @@ import (
 	"path/filepath"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
@@ -297,4 +298,98 @@ func assertToken(t *testing.T, tokenSource oauth2.TokenSource, expected string) 
 	token, err := tokenSource.Token()
 	require.NoError(t, err)
 	assert.Equal(t, expected, token.Type()+" "+token.AccessToken)
+}
+
+// blockingTraceService is a gRPC OTLP receiver that never answers.
+type blockingTraceService struct {
+	collectortrace.UnimplementedTraceServiceServer
+}
+
+func (blockingTraceService) Export(ctx context.Context, _ *collectortrace.ExportTraceServiceRequest) (*collectortrace.ExportTraceServiceResponse, error) {
+	<-ctx.Done()
+	return nil, ctx.Err()
+}
+
+// The timeout bounds the whole export, retries included, with both protocols,
+// including with the HTTP client created by Perses (tls_config or authentication).
+func TestTraceExportIsCanceledAfterTheTimeout(t *testing.T) {
+	// Borrow the certificate (valid for 127.0.0.1) of a TLS test server.
+	certServer, ca, _ := newOTLPHTTPReceiver(t)
+	release := make(chan struct{})
+	httpServer := httptest.NewTLSServer(http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
+		select {
+		case <-r.Context().Done():
+		case <-release:
+		}
+	}))
+	t.Cleanup(httpServer.Close)
+	t.Cleanup(func() { close(release) })
+
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	grpcServer := grpc.NewServer(grpc.Creds(credentials.NewTLS(&tls.Config{Certificates: certServer.TLS.Certificates, MinVersion: tls.VersionTLS12})))
+	collectortrace.RegisterTraceServiceServer(grpcServer, blockingTraceService{})
+	go func() { _ = grpcServer.Serve(listener) }()
+	t.Cleanup(grpcServer.Stop)
+
+	testSuite := []struct {
+		title    string
+		endpoint string
+		protocol config.OTLPProtocol
+	}{
+		{title: "http/protobuf", endpoint: httpServer.URL, protocol: config.OTLPProtocolHTTPProtobuf},
+		{title: "grpc", endpoint: "https://" + listener.Addr().String(), protocol: config.OTLPProtocolGRPC},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			conf := config.OpenTelemetry{
+				Enable:        true,
+				Endpoint:      common.MustParseURL(test.endpoint),
+				Protocol:      test.protocol,
+				TLSConfig:     &secret.PublicTLSConfig{CA: secret.Hidden(ca)},
+				Authorization: &secret.PublicAuthorization{Type: "Bearer", Credentials: "my-token"},
+				Timeout:       common.Duration(time.Second),
+				SamplingRatio: 1,
+			}
+			require.NoError(t, conf.Verify())
+			provider, err := newTracerProvider(conf)
+			require.NoError(t, err)
+			_, span := provider.Tracer("test").Start(context.Background(), "test")
+			span.End()
+
+			// Bounds the test if the timeout isn't applied: the exporter would retry for one minute.
+			ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+			defer cancel()
+			start := time.Now()
+			_ = provider.ForceFlush(ctx)
+			assert.Less(t, time.Since(start), 5*time.Second)
+			require.NoError(t, ctx.Err(), "the export was not canceled by the timeout")
+			_ = provider.Shutdown(context.Background())
+		})
+	}
+}
+
+// With an http endpoint, the gRPC connection isn't encrypted, even when the TLS variables of the exporter are set.
+func TestGRPCTraceExporterWithHTTPEndpointIgnoresTLSVariables(t *testing.T) {
+	_, ca, _ := newOTLPHTTPReceiver(t)
+	caFile := filepath.Join(t.TempDir(), "ca.crt")
+	require.NoError(t, os.WriteFile(caFile, []byte(ca), 0o600))
+	t.Setenv("OTEL_EXPORTER_OTLP_CERTIFICATE", caFile)
+
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	receiver := &otlpGRPCReceiver{}
+	server := grpc.NewServer()
+	collectortrace.RegisterTraceServiceServer(server, receiver)
+	go func() { _ = server.Serve(listener) }()
+	t.Cleanup(server.Stop)
+
+	exportOneSpan(t, config.OpenTelemetry{
+		Enable:   true,
+		Endpoint: common.MustParseURL("http://" + listener.Addr().String()),
+		Timeout:  common.Duration(5 * time.Second),
+	})
+	receiver.mutex.Lock()
+	defer receiver.mutex.Unlock()
+	assert.Len(t, receiver.metadata, 1)
 }

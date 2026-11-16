@@ -480,7 +480,7 @@ func TestHTTPProxy_serve_removeCallerCredentials(t *testing.T) {
 	assert.NotContains(t, headers, echo.HeaderAuthorization)
 }
 
-// useTestTracing registers a tracer provider recording the spans and the W3C trace context propagator globally,
+// useTestTracing registers a tracer provider recording the spans and the W3C trace context and baggage propagators globally,
 // as Perses does when OpenTelemetry is enabled, and restores the previous ones at the end of the test.
 func useTestTracing(t *testing.T) (trace.Tracer, *tracetest.SpanRecorder) {
 	t.Helper()
@@ -488,7 +488,7 @@ func useTestTracing(t *testing.T) (trace.Tracer, *tracetest.SpanRecorder) {
 	recorder := tracetest.NewSpanRecorder()
 	provider := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(recorder))
 	otel.SetTracerProvider(provider)
-	otel.SetTextMapPropagator(propagation.TraceContext{})
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 	t.Cleanup(func() {
 		otel.SetTracerProvider(previousProvider)
 		otel.SetTextMapPropagator(previousPropagator)
@@ -550,6 +550,63 @@ func TestHTTPProxy_serve_tracing(t *testing.T) {
 			require.Len(t, clientSpans, 1)
 			assert.Equal(t, serverSpan.SpanContext().SpanID(), clientSpans[0].Parent().SpanID())
 			assert.Equal(t, "00-"+traceID+"-"+clientSpans[0].SpanContext().SpanID().String()+"-01", headers.Get("traceparent"))
+		})
+	}
+}
+
+// The trace headers are injected by otelhttp after the header policy is applied: the policy must apply to them too.
+func TestHTTPProxy_serve_tracingHeaderPolicy(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(r.Header)
+	}))
+	defer server.Close()
+	traceHeaders := []string{"Traceparent", "Tracestate", "Baggage"}
+
+	for _, test := range []struct {
+		name     string
+		allow    []string
+		drop     []string
+		expected []string
+	}{
+		{name: "no policy: the trace headers are sent", expected: traceHeaders},
+		{name: "allowHeaders with traceparent only", allow: []string{"traceparent"}, expected: []string{"Traceparent"}},
+		{name: "allowHeaders without the trace headers", allow: []string{"Accept"}},
+		{name: "dropHeaders with the trace headers", drop: []string{"traceparent", "tracestate", "baggage"}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			tracer, _ := useTestTracing(t)
+			h := &Proxy{
+				Config: &datasourceHTTP.Config{
+					URL:          common.MustParseURL(server.URL),
+					AllowHeaders: test.allow,
+					DropHeaders:  test.drop,
+				},
+				Path:          "/api/v1/query",
+				Guard:         proxytest.NewLoopbackGuard(t),
+				EnableTracing: true,
+			}
+			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/datasource/api/v1/query", nil)
+			req.Header.Set("traceparent", "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01")
+			req.Header.Set("tracestate", "vendor=value")
+			req.Header.Set("baggage", "key=value")
+			// The server span created by the OpenTelemetry middleware for the incoming request.
+			ctx := otel.GetTextMapPropagator().Extract(req.Context(), propagation.HeaderCarrier(req.Header))
+			ctx, serverSpan := tracer.Start(ctx, "server")
+			defer serverSpan.End()
+			rec := httptest.NewRecorder()
+			require.NoError(t, h.Serve(echo.New().NewContext(req.WithContext(ctx), rec)))
+			require.Equal(t, http.StatusOK, rec.Code)
+			var headers http.Header
+			require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &headers))
+
+			var received []string
+			for _, name := range traceHeaders {
+				if len(headers.Get(name)) > 0 {
+					received = append(received, name)
+				}
+			}
+			assert.Equal(t, test.expected, received)
 		})
 	}
 }
