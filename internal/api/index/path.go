@@ -14,8 +14,11 @@
 package index
 
 import (
+	"encoding/binary"
 	"errors"
 	"fmt"
+	"math"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -140,84 +143,169 @@ func fieldPrefix(steps []keyStep) (string, []string) {
 	return strings.Join(raws, "."), names
 }
 
-// extractKeyFields appends to fields the scalar values selected by the key in the raw document, with their path.
-func extractKeyFields(raw []byte, k indexedKey, path []string, fields *[]indexedField) {
-	if len(k.prefixPath) == 0 {
-		// The key starts with # or @dig, so the whole document is walked.
-		extractFields(gjson.ParseBytes(raw), k.steps, k.key, path, fields)
-		return
-	}
-	// Unlike gjson.ParseBytes, gjson.GetBytes copies only the value selected by the prefix, not the whole document.
-	value := gjson.GetBytes(raw, k.prefix)
-	rest := k.steps[len(k.prefixPath):]
-	if len(rest) == 0 && !value.IsArray() && !value.IsObject() {
-		if value.Exists() {
-			// The value is already a copy, and its path is the same in every document, so it is shared.
-			*fields = append(*fields, indexedField{key: k.key, path: k.prefixPath, value: value.String()})
+// stepNames appends to names the names of the field steps that aren't in it yet, including the ones of the @dig steps.
+func stepNames(steps []keyStep, names []string) []string {
+	for _, s := range steps {
+		switch s.kind {
+		case fieldStep:
+			if !slices.Contains(names, s.name) {
+				names = append(names, s.name)
+			}
+		case digStep:
+			names = stepNames(s.dig, names)
 		}
-		return
 	}
-	extractFields(value, rest, k.key, append(path, k.prefixPath...), fields)
+	return names
 }
 
-// extractFields appends to fields the scalar values selected by the steps in the given value, with their path.
-// The path is used as a stack: the recursive calls share its backing array, so it must be copied before being stored.
-func extractFields(value gjson.Result, steps []keyStep, key string, path []string, fields *[]indexedField) {
+// fieldsBuilder collects the fields of a document while it is indexed. Their values and the end of their paths are
+// appended to a single buffer, so that the index stores the fields of a document in two allocations: its data and its
+// fields (see index). It is reused from a document to another, so it must not be shared by concurrent indexations.
+type fieldsBuilder struct {
+	data   []byte
+	fields []indexedField
+	// key is the position, in the indexed keys, of the key whose values are extracted, and names its step names.
+	key   uint32
+	names []string
+	// path is pre-allocated, so the appends done while walking a document don't need to allocate.
+	path []string
+	// tooLarge is set when the data doesn't fit the 32-bit offsets of the fields.
+	tooLarge bool
+}
+
+func (b *fieldsBuilder) reset() {
+	b.data = b.data[:0]
+	b.fields = b.fields[:0]
+	if b.path == nil {
+		b.path = make([]string, 0, 16)
+	}
+	b.tooLarge = false
+}
+
+// offset returns the current size of the data, which is the offset of what is appended next.
+func (b *fieldsBuilder) offset() uint32 {
+	n := len(b.data)
+	// The size is converted so that the comparison compiles on 32-bit platforms, where it is always false.
+	if uint64(n) > math.MaxUint32 {
+		b.tooLarge = true
+		return 0
+	}
+	return uint32(n)
+}
+
+// appendField appends a field made of the value and of the end of its path. Each component of the path is encoded as
+// a uvarint: twice the position of the component in the step names of the key plus one when it is one of them, which
+// is often the case and saves storing it, otherwise twice its length followed by its bytes.
+func (b *fieldsBuilder) appendField(value string, path []string) {
+	start := b.offset()
+	b.data = append(b.data, value...)
+	valueEnd := b.offset()
+	for _, p := range path {
+		if i := slices.Index(b.names, p); i >= 0 {
+			b.data = binary.AppendUvarint(b.data, uint64(i)<<1|1)
+		} else {
+			b.data = binary.AppendUvarint(b.data, uint64(len(p))<<1)
+			b.data = append(b.data, p...)
+		}
+	}
+	b.fields = append(b.fields, indexedField{start: start, valueEnd: valueEnd, end: b.offset(), key: b.key})
+}
+
+// nextPathComponent returns the first component of a path encoded by appendField, and the rest of the path.
+// names are the step names of the key of the field.
+func nextPathComponent(path string, names []string) (string, string) {
+	// The uvarint is decoded in a uint64, like it is encoded, so it can't be truncated on 32-bit platforms.
+	var x, i uint64
+	for shift := 0; ; shift += 7 {
+		c := path[i]
+		i++
+		x |= uint64(c&0x7f) << shift
+		if c < 0x80 {
+			break
+		}
+	}
+	if x&1 == 1 {
+		return names[x>>1], path[i:]
+	}
+	end := i + x>>1
+	return path[i:end], path[end:]
+}
+
+// extractKeyFields appends the scalar values selected by the key in the raw document, with the end of their path:
+// the path after the prefix of the key, which is the same for every document, so it is not stored.
+// key is the position of the key in the indexed keys.
+func (b *fieldsBuilder) extractKeyFields(raw rawDocument, key uint32, k indexedKey) {
+	b.key, b.names = key, k.names
+	switch {
+	case k.steps == nil:
+		b.recursiveDeepExtractFields(raw.getFields(k.key))
+	case len(k.prefixPath) == 0:
+		// The key starts with # or @dig, so the whole document is walked.
+		b.extractFields(gjson.ParseBytes(raw), k.steps, b.path[:0])
+	default:
+		// Unlike gjson.ParseBytes, gjson.GetBytes copies only the value selected by the prefix, not the whole document.
+		b.extractFields(gjson.GetBytes(raw, k.prefix), k.steps[len(k.prefixPath):], b.path[:0])
+	}
+}
+
+// extractFields appends the scalar values selected by the steps in the given value, with their path.
+// The path is used as a stack: the recursive calls share its backing array, which is safe as it is copied in the
+// data when a field is appended.
+func (b *fieldsBuilder) extractFields(value gjson.Result, steps []keyStep, path []string) {
 	if !value.Exists() {
 		return
 	}
 	if len(steps) == 0 {
-		flattenFields(value, key, path, fields)
+		b.flattenFields(value, path)
 		return
 	}
 	step := steps[0]
 	switch step.kind {
 	case fieldStep:
-		extractFields(value.Get(step.raw), steps[1:], key, append(path, step.name), fields)
+		b.extractFields(value.Get(step.raw), steps[1:], append(path, step.name))
 	case arrayItemsStep:
 		if value.IsArray() {
 			forEachChild(value, func(name string, child gjson.Result) {
-				extractFields(child, steps[1:], key, append(path, name), fields)
+				b.extractFields(child, steps[1:], append(path, name))
 			})
 		}
 	case digStep:
 		// Same as the gjson @dig modifier: the key is searched in the value, then in each of its children, recursively.
-		extractFields(value, step.dig, key, path, fields)
+		b.extractFields(value, step.dig, path)
 		forEachChild(value, func(name string, child gjson.Result) {
-			extractFields(child, steps, key, append(path, name), fields)
+			b.extractFields(child, steps, append(path, name))
 		})
 	}
 }
 
-// flattenFields appends to fields every scalar value contained in the given value, with their path.
-func flattenFields(value gjson.Result, key string, path []string, fields *[]indexedField) {
+// flattenFields appends every scalar value contained in the given value, with their path.
+func (b *fieldsBuilder) flattenFields(value gjson.Result, path []string) {
 	if value.IsArray() || value.IsObject() {
 		forEachChild(value, func(name string, child gjson.Result) {
-			flattenFields(child, key, append(path, name), fields)
+			b.flattenFields(child, append(path, name))
 		})
 		return
 	}
-	// The value and the path components are copied in a single string, otherwise they would keep the whole document
-	// in memory.
-	v := value.String()
-	size := len(v)
-	for _, p := range path {
-		size += len(p)
+	b.appendField(value.String(), path)
+}
+
+// recursiveDeepExtractFields appends the scalar values of the given results, without their path.
+// It is used for the keys for which the path of the values can't be determined.
+func (b *fieldsBuilder) recursiveDeepExtractFields(fs []gjson.Result) {
+	for _, f := range fs {
+		if !f.Exists() {
+			continue
+		}
+		if f.IsArray() {
+			b.recursiveDeepExtractFields(f.Array())
+		} else if f.IsObject() {
+			for _, v := range f.Map() {
+				b.recursiveDeepExtractFields([]gjson.Result{v})
+			}
+		} else {
+			b.appendField(f.String(), nil)
+		}
 	}
-	var b strings.Builder
-	b.Grow(size)
-	b.WriteString(v)
-	for _, p := range path {
-		b.WriteString(p)
-	}
-	s := b.String()
-	clonedPath := make([]string, len(path))
-	offset := len(v)
-	for i, p := range path {
-		clonedPath[i] = s[offset : offset+len(p)]
-		offset += len(p)
-	}
-	*fields = append(*fields, indexedField{key: key, path: clonedPath, value: s[:len(v)]})
 }
 
 // forEachChild calls fn with the name (the key or the index) of each child of an object or an array.

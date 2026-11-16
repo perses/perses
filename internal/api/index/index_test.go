@@ -43,12 +43,36 @@ func newDisabledAuthz(t testing.TB) authorization.Authorization {
 	return authz
 }
 
+// decodedIndex is an index with its fields decoded, to compare the indexes in the tests.
+type decodedIndex struct {
+	metadata    *v1.ProjectMetadata
+	displayName string
+	fields      []decodedField
+	matcher     *matcher
+}
+
+func decodeIndexes(c *projectIndexer) map[string]map[string]decodedIndex {
+	decoded := make(map[string]map[string]decodedIndex, len(c.idx))
+	for project, projectIdx := range c.idx {
+		decoded[project] = make(map[string]decodedIndex, len(projectIdx))
+		for name, idx := range projectIdx {
+			decoded[project][name] = decodedIndex{
+				metadata:    idx.metadata,
+				displayName: idx.displayName,
+				fields:      decodeFields(c.indexedKeys, idx.data, idx.fields),
+				matcher:     idx.matcher,
+			}
+		}
+	}
+	return decoded
+}
+
 func TestClientAdd(t *testing.T) {
 	testsCases := []struct {
 		title              string
 		raw                json.RawMessage
 		indexedKeys        []string
-		expectedProjectIdx map[string]map[string]index[*v1.ProjectMetadata]
+		expectedProjectIdx map[string]map[string]decodedIndex
 	}{
 		{
 			title: "add project resource",
@@ -61,7 +85,7 @@ func TestClientAdd(t *testing.T) {
 		"spec": {}
 	}`),
 			indexedKeys: []string{"metadata.name", "metadata.project"},
-			expectedProjectIdx: map[string]map[string]index[*v1.ProjectMetadata]{
+			expectedProjectIdx: map[string]map[string]decodedIndex{
 				"myproject": {
 					"mydashboard": {
 						metadata: &v1.ProjectMetadata{
@@ -73,7 +97,7 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "mydashboard",
-						fields: []indexedField{
+						fields: []decodedField{
 							{key: "metadata.name", path: []string{"metadata", "name"}, value: "mydashboard"},
 							{key: "metadata.project", path: []string{"metadata", "project"}, value: "myproject"},
 						},
@@ -97,7 +121,7 @@ func TestClientAdd(t *testing.T) {
 		}
 	}`),
 			indexedKeys: []string{"metadata.name", "metadata.project", "spec.display.name"},
-			expectedProjectIdx: map[string]map[string]index[*v1.ProjectMetadata]{
+			expectedProjectIdx: map[string]map[string]decodedIndex{
 				"myproject": {
 					"mydashboard": {
 						metadata: &v1.ProjectMetadata{
@@ -109,7 +133,7 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "My Fancy Dashboard",
-						fields: []indexedField{
+						fields: []decodedField{
 							{key: "metadata.name", path: []string{"metadata", "name"}, value: "mydashboard"},
 							{key: "metadata.project", path: []string{"metadata", "project"}, value: "myproject"},
 							{key: "spec.display.name", path: []string{"spec", "display", "name"}, value: "My Fancy Dashboard"},
@@ -130,7 +154,7 @@ func TestClientAdd(t *testing.T) {
 		"spec": {}
 	}`),
 			indexedKeys: []string{"metadata.name", "spec.unknown.field"},
-			expectedProjectIdx: map[string]map[string]index[*v1.ProjectMetadata]{
+			expectedProjectIdx: map[string]map[string]decodedIndex{
 				"myproject": {
 					"mydashboard": {
 						metadata: &v1.ProjectMetadata{
@@ -142,7 +166,7 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "mydashboard",
-						fields: []indexedField{
+						fields: []decodedField{
 							{key: "metadata.name", path: []string{"metadata", "name"}, value: "mydashboard"},
 						},
 						matcher: &matcher{},
@@ -198,7 +222,7 @@ func TestClientAdd(t *testing.T) {
         }
 	}`),
 			indexedKeys: []string{"spec.panels.@dig:display.name"},
-			expectedProjectIdx: map[string]map[string]index[*v1.ProjectMetadata]{
+			expectedProjectIdx: map[string]map[string]decodedIndex{
 				"myproject": {
 					"mydashboard": {
 						metadata: &v1.ProjectMetadata{
@@ -210,7 +234,7 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "mydashboard",
-						fields: []indexedField{
+						fields: []decodedField{
 							{key: "spec.panels.@dig:display.name", path: []string{"spec", "panels", "MyPanel", "spec", "display", "name"}, value: "simple line chart"},
 							{key: "spec.panels.@dig:display.name", path: []string{"spec", "panels", "MyOtherPanel", "spec", "display", "name"}, value: "another line chart"},
 						},
@@ -225,7 +249,7 @@ func TestClientAdd(t *testing.T) {
 			c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: tc.indexedKeys}}, newDisabledAuthz(t), nil).(*client)
 			err := c.add(tc.raw)
 			require.NoError(t, err)
-			assert.Equal(t, tc.expectedProjectIdx, c.dashboards.idx)
+			assert.Equal(t, tc.expectedProjectIdx, decodeIndexes(c.dashboards))
 		})
 	}
 }
@@ -234,11 +258,11 @@ func TestClientAdd_unsupportedKeyOnlyReturnsTheKey(t *testing.T) {
 	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.tags|@reverse"}}}, newDisabledAuthz(t), nil).(*client)
 	require.NoError(t, c.add([]byte(pathTestDocument)))
 
-	fields := c.dashboards.idx["myproject"]["mydashboard"].fields
-	assert.ElementsMatch(t, []indexedField{
+	idx := c.dashboards.idx["myproject"]["mydashboard"]
+	assert.ElementsMatch(t, []decodedField{
 		{key: "metadata.tags|@reverse", value: "kubernetes"},
 		{key: "metadata.tags|@reverse", value: "production"},
-	}, fields)
+	}, decodeFields(c.dashboards.indexedKeys, idx.data, idx.fields))
 }
 
 func Test_client_add_multipleProjectsAreIndexedSeparately(t *testing.T) {

@@ -55,6 +55,30 @@ func gjsonPath(path []string) string {
 	return strings.Join(components, ".")
 }
 
+// decodedField is an indexed field with its key, its value and its path, to compare the fields in the tests.
+type decodedField struct {
+	key   string
+	value string
+	path  []string
+}
+
+// decodeFields returns the fields stored in the data of a document, extracted with the given indexed keys.
+func decodeFields(keys []indexedKey, data string, fields []indexedField) []decodedField {
+	decoded := make([]decodedField, 0, len(fields))
+	for _, f := range fields {
+		decoded = append(decoded, decodedField{key: keys[f.key].key, value: f.value(data), path: f.path(data, keys)})
+	}
+	return decoded
+}
+
+// extractTestFields returns the fields extracted with the key from pathTestDocument.
+func extractTestFields(k indexedKey) []decodedField {
+	var b fieldsBuilder
+	b.reset()
+	b.extractKeyFields([]byte(pathTestDocument), 0, k)
+	return decodeFields([]indexedKey{k}, string(b.data), b.fields)
+}
+
 func TestCompileKey_unsupportedSyntax(t *testing.T) {
 	for _, key := range []string{
 		"",
@@ -132,8 +156,7 @@ func TestExtractFields(t *testing.T) {
 		t.Run(tc.title, func(t *testing.T) {
 			k, err := newIndexedKey(tc.key)
 			require.NoError(t, err)
-			var fields []indexedField
-			extractKeyFields([]byte(pathTestDocument), k, nil, &fields)
+			fields := extractTestFields(k)
 
 			var paths [][]string
 			for _, f := range fields {
@@ -144,6 +167,37 @@ func TestExtractFields(t *testing.T) {
 			assertSameFieldsAsGjson(t, tc.key, fields)
 		})
 	}
+}
+
+func TestIndexedField_path(t *testing.T) {
+	k, err := newIndexedKey("spec.panels.@dig:display.name")
+	require.NoError(t, err)
+	require.Equal(t, []string{"spec", "panels", "display", "name"}, k.names)
+	keys := []indexedKey{{key: "metadata.tags|@reverse"}, k}
+	// The lengths of the components are encoded on 1, 2 and 3 bytes.
+	end := []string{"", "a", strings.Repeat("b", 127), strings.Repeat("c", 128), strings.Repeat("d", 16384), "\x00\x80\xff"}
+	var b fieldsBuilder
+	b.reset()
+	b.key, b.names = 0, keys[0].names
+	b.appendField("unsupported", nil)
+	b.key, b.names = 1, k.names
+	b.appendField("value", end)
+	b.appendField("", nil)
+	b.appendField("CPU usage", []string{"cpu", "spec", "display", "name"})
+	data := string(b.data)
+	fields := decodeFields(keys, data, b.fields)
+	assert.Equal(t, []decodedField{
+		{key: "metadata.tags|@reverse", value: "unsupported"},
+		{key: k.key, value: "value", path: append([]string{"spec", "panels"}, end...)},
+		{key: k.key, value: "", path: []string{"spec", "panels"}},
+		{key: k.key, value: "CPU usage", path: []string{"spec", "panels", "cpu", "spec", "display", "name"}},
+	}, fields)
+	// "cpu" is stored with its length, and the step names of the key are stored as references of a byte each.
+	assert.Equal(t, uint32(1+len("cpu")+3), b.fields[3].end-b.fields[3].valueEnd)
+
+	// Each call returns a new slice, so modifying it doesn't modify the next ones.
+	fields[1].path[0] = "modified"
+	assert.Equal(t, "spec", b.fields[1].path(data, keys)[0])
 }
 
 // FuzzExtractFields checks that, for any supported key, the values extracted are the ones gjson returns for the key,
@@ -166,21 +220,19 @@ func FuzzExtractFields(f *testing.F) {
 		if err != nil {
 			return
 		}
-		var fields []indexedField
-		extractKeyFields([]byte(pathTestDocument), k, nil, &fields)
-		assertSameFieldsAsGjson(t, key, fields)
+		assertSameFieldsAsGjson(t, key, extractTestFields(k))
 	})
 }
 
 // assertSameFieldsAsGjson checks that the values of the fields are the ones gjson returns for the key,
 // and that the path of each field leads to its value.
-func assertSameFieldsAsGjson(t *testing.T, key string, fields []indexedField) {
+func assertSameFieldsAsGjson(t *testing.T, key string, fields []decodedField) {
 	t.Helper()
-	var expectedFields []indexedField
-	recursiveDeepExtractFields([]gjson.Result{gjson.Get(pathTestDocument, key)}, key, &expectedFields)
-	expectedValues := make([]string, 0, len(expectedFields))
-	for _, f := range expectedFields {
-		expectedValues = append(expectedValues, f.value)
+	var expected fieldsBuilder
+	expected.recursiveDeepExtractFields([]gjson.Result{gjson.Get(pathTestDocument, key)})
+	expectedValues := make([]string, 0, len(expected.fields))
+	for _, f := range expected.fields {
+		expectedValues = append(expectedValues, f.value(string(expected.data)))
 	}
 	values := make([]string, 0, len(fields))
 	for _, f := range fields {

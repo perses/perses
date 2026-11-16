@@ -30,6 +30,7 @@ package index
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"slices"
 	"sync"
@@ -70,21 +71,51 @@ func (r rawDocument) getRawMetadata() string {
 	return gjson.GetBytes(r, "metadata").Raw
 }
 
-// indexedField is a value extracted from a document when it is indexed.
+// indexedField is a value extracted from a document when it is indexed. To keep the index small, the value and the end
+// of the path of the field are stored in the data of the document (see fieldsBuilder), and the field only holds their
+// offsets: data[start:valueEnd] is the value, and data[valueEnd:end] the end of the path.
 type indexedField struct {
-	// key is the index key (as configured in the search config) the value has been extracted from.
-	// It shares the memory of the configured key, so storing it doesn't copy the string.
-	key string
-	// path is the location of the value in the document, e.g. ["metadata", "tags", "1"].
-	// It is nil when the key uses a syntax for which the path can't be determined.
-	path  []string
-	value string
+	start, valueEnd, end uint32
+	// key is the position, in the indexed keys, of the key (as configured in the search config) the value has been
+	// extracted from.
+	key uint32
+}
+
+func (f indexedField) value(data string) string {
+	return data[f.start:f.valueEnd]
+}
+
+// path returns the location of the value in the document, e.g. ["metadata", "tags", "1"]: the prefix of its key,
+// followed by the end of the path stored in the data. The components share the memory of the data, which is never
+// modified, but the slice is new, so the caller can modify it.
+// It is nil when the key uses a syntax for which the path can't be determined.
+func (f indexedField) path(data string, keys []indexedKey) []string {
+	prefix := keys[f.key].prefixPath
+	names := keys[f.key].names
+	encoded := data[f.valueEnd:f.end]
+	n := len(prefix)
+	for rest := encoded; len(rest) > 0; n++ {
+		_, rest = nextPathComponent(rest, names)
+	}
+	if n == 0 {
+		return nil
+	}
+	path := make([]string, 0, n)
+	path = append(path, prefix...)
+	for rest := encoded; len(rest) > 0; {
+		var name string
+		name, rest = nextPathComponent(rest, names)
+		path = append(path, name)
+	}
+	return path
 }
 
 type index[T api.Metadata] struct {
 	metadata T
 	// displayName is the string that will be used for the search display.
 	displayName string
+	// data holds the values of the fields, and the end of their path.
+	data string
 	// fields is the list of values that has been collected when the index is created, with the path they come from.
 	// It is used to know which fields are available for search.
 	fields []indexedField
@@ -98,15 +129,15 @@ type searchHit struct {
 	match  FieldMatch
 }
 
-func (idx *index[T]) match(text string) *SearchResult {
+// match returns the result of the first field matching the text. keys are the indexed keys of the fields.
+func (idx *index[T]) match(text string, keys []indexedKey) *SearchResult {
 	for _, field := range idx.fields {
-		match, ok := idx.matcher.match(text, field.value)
+		match, ok := idx.matcher.match(text, field.value(idx.data))
 		if !ok {
 			continue
 		}
-		match.Key = field.key
-		// The path is copied, so that the result doesn't share the memory of the index.
-		match.Path = slices.Clone(field.path)
+		match.Key = keys[field.key].key
+		match.Path = field.path(idx.data, keys)
 		hit := &searchHit{
 			result: SearchResult{Metadata: idx.metadata, DisplayName: idx.displayName},
 			match:  match,
@@ -126,6 +157,9 @@ type indexedKey struct {
 	// The value selected by the prefix is got with gjson.GetBytes, which copies only this value instead of the document.
 	prefix     string
 	prefixPath []string
+	// names are the distinct names of the field steps of the key, which are often the components of the paths of the
+	// values, so the paths refer to them instead of storing them (see fieldsBuilder.appendField).
+	names []string
 }
 
 func newIndexedKey(key string) (indexedKey, error) {
@@ -134,7 +168,7 @@ func newIndexedKey(key string) (indexedKey, error) {
 		return indexedKey{key: key}, err
 	}
 	prefix, prefixPath := fieldPrefix(steps)
-	return indexedKey{key: key, steps: steps, prefix: prefix, prefixPath: prefixPath}, nil
+	return indexedKey{key: key, steps: steps, prefix: prefix, prefixPath: prefixPath, names: stepNames(steps, nil)}, nil
 }
 
 func newProjectIndexer(indexedKeys []string, scope role.Scope, authz authorization.Authorization, matcher *matcher) *projectIndexer {
@@ -176,45 +210,24 @@ type projectIndexer struct {
 	mutex sync.RWMutex
 }
 
-// recursiveDeepExtractFields extracts the scalar values of the given results, with the index key they come from.
-// It is used for the keys for which the path of the values can't be determined.
-func recursiveDeepExtractFields(fs []gjson.Result, key string, fields *[]indexedField) {
-	for _, f := range fs {
-		if !f.Exists() {
-			continue
-		}
-		if f.IsArray() {
-			recursiveDeepExtractFields(f.Array(), key, fields)
-		} else if f.IsObject() {
-			for _, v := range f.Map() {
-				recursiveDeepExtractFields([]gjson.Result{v}, key, fields)
-			}
-		} else {
-			*fields = append(*fields, indexedField{key: key, value: f.String()})
-		}
-	}
-}
-
 func (c *projectIndexer) add(raw json.RawMessage) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
-	return c.addTo(c.idx, raw)
+	return c.addTo(c.idx, raw, &fieldsBuilder{})
 }
 
 // add is adding a new document to the index.
 // The row will be used to find the various field to be indexed depending on the configuration.
 // We are treating the raw JSON instead of the struct because then we can index anything; and we don't need to deal with the Go struct.
-func (c *projectIndexer) addTo(dst map[string]map[string]index[*v1.ProjectMetadata], raw json.RawMessage) error {
+// The builder collects the fields of the document, it can be reused for the next document once the function returns.
+func (c *projectIndexer) addTo(dst map[string]map[string]index[*v1.ProjectMetadata], raw json.RawMessage, b *fieldsBuilder) error {
 	customRaw := rawDocument(raw)
-	// The path is pre-allocated, so the appends done while walking the document don't need to allocate.
-	path := make([]string, 0, 16)
-	var fields []indexedField
-	for _, k := range c.indexedKeys {
-		if k.steps == nil {
-			recursiveDeepExtractFields(customRaw.getFields(k.key), k.key, &fields)
-			continue
-		}
-		extractKeyFields(raw, k, path, &fields)
+	b.reset()
+	for i, k := range c.indexedKeys {
+		b.extractKeyFields(customRaw, uint32(i), k)
+	}
+	if b.tooLarge {
+		return errors.New("the indexed values of the document are too large")
 	}
 
 	displayName := customRaw.getDisplayName()
@@ -225,7 +238,8 @@ func (c *projectIndexer) addTo(dst map[string]map[string]index[*v1.ProjectMetada
 	}
 	idx := index[*v1.ProjectMetadata]{
 		metadata:    m,
-		fields:      fields,
+		data:        string(b.data),
+		fields:      slices.Clone(b.fields),
 		displayName: displayName,
 		matcher:     c.matcher,
 	}
@@ -324,7 +338,7 @@ func (c *projectIndexer) list(ctx *echo.Context, project string) ([]*SearchResul
 
 func (c *projectIndexer) search(ctx *echo.Context, project string, text string) ([]*SearchResult, error) {
 	return c.collect(ctx, project, func(idx index[*v1.ProjectMetadata]) *SearchResult {
-		return idx.match(text)
+		return idx.match(text, c.indexedKeys)
 	})
 }
 
@@ -421,8 +435,9 @@ func (c *client) Refresh() error {
 		errc <- c.dao.StreamRaw(&dashboard.Query{}, ch)
 	}()
 	next := make(map[string]map[string]index[*v1.ProjectMetadata])
+	var b fieldsBuilder
 	for raw := range ch {
-		if addErr := c.addToNext(next, raw); addErr != nil {
+		if addErr := c.addToNext(next, raw, &b); addErr != nil {
 			logrus.WithError(addErr).Error("failed to add document to index")
 		}
 	}
@@ -433,11 +448,11 @@ func (c *client) Refresh() error {
 	return nil
 }
 
-func (c *client) addToNext(dst map[string]map[string]index[*v1.ProjectMetadata], raw json.RawMessage) error {
+func (c *client) addToNext(dst map[string]map[string]index[*v1.ProjectMetadata], raw json.RawMessage, b *fieldsBuilder) error {
 	kind := v1.Kind(gjson.GetBytes(raw, "kind").String())
 	switch kind {
 	case v1.KindDashboard:
-		return c.dashboards.addTo(dst, raw)
+		return c.dashboards.addTo(dst, raw, b)
 	default:
 		logrus.Warnf("kind %s is not supported for indexing", kind)
 		return nil
