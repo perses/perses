@@ -4,6 +4,7 @@
 
 package v1
 
+// DiscoveryType identifies the mechanism used by a datasource discovery configuration.
 #DiscoveryType: _ // #enumDiscoveryType
 
 #enumDiscoveryType:
@@ -24,8 +25,8 @@ package v1
 
 // Source records where a GlobalDatasource came from.
 // A nil Source means the datasource was not created by a discovery process:
-// it may have been created manually via the API, provisioned via DaC, or
-// it was created before datasource discovery was introduced.
+// it may have been created through the API (UI, percli, DaC), provisioned,
+// or discovered before the version that introduced this field.
 #Source: {
 	discovery?: null | #DiscoverySource @go(Discovery,*DiscoverySource)
 }

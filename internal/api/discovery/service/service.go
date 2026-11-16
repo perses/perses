@@ -89,9 +89,9 @@ func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasourc
 				continue
 			}
 		} else {
-			// Nil source: datasource predates discovery (created manually, provisioned, or
-			// created before this feature was introduced). Adopt it: stamp the source on first
-			// update so it is managed going forward.
+			// Nil source: datasource was created through the API, provisioned,
+			// or discovered before the version that introduced this field.
+			// Adopt it: stamp the source on first update so it is managed going forward.
 			logrus.Infof("adopting globaldatasource %q: stamping discovery source %q (%s)", entity.Metadata.Name, a.discoverySource.Name, a.discoverySource.Type)
 		}
 
