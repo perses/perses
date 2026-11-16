@@ -81,7 +81,7 @@ func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasourc
 		existingDiscovery := existing.Source.GetDiscovery()
 		if existingDiscovery != nil {
 			// Another discovery owns this datasource — skip, and warn once.
-			if existingDiscovery.Name != a.discoverySource.Name || existingDiscovery.Type != a.discoverySource.Type {
+			if existingDiscovery.Name != a.discoverySource.Name {
 				if !containsName(a.warnedCollisions, entity.Metadata.Name) {
 					logrus.Warnf("globaldatasource %q is owned by discovery %q (%s); skipping", entity.Metadata.Name, existingDiscovery.Name, existingDiscovery.Type)
 					a.warnedCollisions = append(a.warnedCollisions, entity.Metadata.Name)
