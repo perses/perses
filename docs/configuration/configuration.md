@@ -25,6 +25,10 @@ Perses is configured via command-line flags and a configuration file
     	The path to the cert to use for the HTTPS server. It is reloaded when the file changes.
   -web.tls-cipher-suites string
     	Comma-separated list of TLS cipher suite names
+  -web.tls-client-ca-file string
+    	The path to the CA certificates (PEM) used to verify the client certificates. When set, every client must present a certificate signed by one of them (mTLS), including the health probes. Only these CAs are trusted, not the system ones. It is reloaded when the file changes, but the established connections are not verified again.
+  -web.tls-curve-preferences string
+    	Comma-separated list of TLS curves (key exchange mechanisms), e.g. "X25519MLKEM768,X25519,CurveP256". Replaces Go's default list, including its post-quantum curves; the order is ignored.
   -web.tls-key-file string
     	The path to the key to use for the HTTPS server. It is reloaded when the file changes.
   -web.tls-max-version string

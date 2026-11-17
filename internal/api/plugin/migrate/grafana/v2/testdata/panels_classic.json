@@ -1,0 +1,164 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "Some panels",
+  "links": [
+    {
+      "title": "Docs",
+      "type": "link",
+      "icon": "doc",
+      "tooltip": "",
+      "url": "https://example.com",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": true,
+      "includeVars": false,
+      "keepTime": false
+    }
+  ],
+  "panels": [
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Mixed --"
+      },
+      "description": "CPU usage",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "id": 7,
+      "interval": "1m",
+      "links": [
+        {
+          "title": "Runbook",
+          "url": "https://example.com/runbook"
+        }
+      ],
+      "maxDataPoints": 500,
+      "options": {
+        "legend": {
+          "showLegend": true
+        }
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-a"
+          },
+          "expr": "up",
+          "legendFormat": "{{job}}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-b"
+          },
+          "expr": "down",
+          "hide": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "loki"
+          },
+          "expr": "{job=\"x\"}",
+          "refId": "C"
+        }
+      ],
+      "timeFrom": "2h",
+      "title": "CPU",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "a": "b"
+            }
+          }
+        },
+        {
+          "id": "reduce",
+          "options": {}
+        },
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ],
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prom-a"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 6,
+        "h": 8
+      },
+      "id": 8,
+      "links": [],
+      "options": {},
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prom-a"
+          },
+          "expr": "memory",
+          "refId": "A"
+        }
+      ],
+      "title": "Memory",
+      "type": "stat"
+    },
+    {
+      "gridPos": {
+        "x": 18,
+        "y": 0,
+        "w": 6,
+        "h": 8
+      },
+      "id": 3,
+      "libraryPanel": {
+        "name": "Shared",
+        "uid": "lib-1"
+      },
+      "title": "Shared"
+    }
+  ],
+  "refresh": "30s",
+  "tags": [
+    "team-a"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timezone": "utc",
+  "title": "Panels",
+  "uid": "test"
+}

@@ -108,6 +108,7 @@ export function ProjectVariables(props: ProjectVariablesProps): ReactElement {
         onCreate={handleVariableCreate}
         onUpdate={handleVariableUpdate}
         onDelete={handleVariableDelete}
+        storageKey="Variable"
         initialState={{
           columns: {
             columnVisibilityModel: {

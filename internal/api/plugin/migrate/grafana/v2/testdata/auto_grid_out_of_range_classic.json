@@ -1,0 +1,51 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "panels": [
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 1,
+        "h": 1000
+      },
+      "id": 1,
+      "links": [],
+      "options": {},
+      "targets": [],
+      "title": "p1",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 1,
+        "y": 0,
+        "w": 1,
+        "h": 1000
+      },
+      "id": 2,
+      "links": [],
+      "options": {},
+      "targets": [],
+      "title": "p2",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "timezone": "",
+  "title": "Auto grid",
+  "uid": "test"
+}
