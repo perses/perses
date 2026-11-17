@@ -5,7 +5,7 @@
 package v1
 
 // DiscoveryType identifies the mechanism used by a datasource discovery configuration.
-#DiscoveryType: _ // #enumDiscoveryType
+#DiscoveryType: string // #enumDiscoveryType
 
 #enumDiscoveryType:
 	#DiscoveryTypeKubernetes |
