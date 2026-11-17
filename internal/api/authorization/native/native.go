@@ -281,12 +281,51 @@ func (n *native) GetUserProjects(ctx *echo.Context, requestAction v1Role.Action,
 		return nil, err
 	}
 	c := n.cache.Load()
+	var claimProjects []string
 	if claims, ok := usr.(*crypto.JWTClaims); ok {
-		if claimProjects := projectsWithPermission(n.claimPermissions(c, claims), requestAction, requestScope); len(claimProjects) > 0 {
+		claimProjects = projectsWithPermission(n.claimPermissions(c, claims), requestAction, requestScope)
+		if slices.Contains(claimProjects, v1.WildcardProject) {
 			return claimProjects, nil
 		}
 	}
-	return projectsWithPermission(c.permissions[username], requestAction, requestScope), nil
+	// Like HasPermission, the projects granted by the claims, by name and through the wildcard subject are combined.
+	projects := projectsWithPermission(c.permissions[username], requestAction, requestScope)
+	if slices.Contains(projects, v1.WildcardProject) {
+		// The permission is granted on every project: no need to look at the other projects.
+		return projects, nil
+	}
+	if len(c.allUsersPermissions) > 0 {
+		projects = mergeProjects(projects, projectsWithPermission(c.allUsersPermissions, requestAction, requestScope))
+	}
+	if len(claimProjects) > 0 {
+		projects = mergeProjects(projects, claimProjects)
+	}
+	return projects, nil
+}
+
+// mergeProjects returns the union of two lists of projects returned by projectsWithPermission.
+// The first list can be modified.
+func mergeProjects(projects []string, otherProjects []string) []string {
+	if len(otherProjects) == 0 {
+		return projects
+	}
+	if len(projects) == 0 {
+		return otherProjects
+	}
+	if slices.Contains(projects, v1.WildcardProject) || slices.Contains(otherProjects, v1.WildcardProject) {
+		return []string{v1.WildcardProject}
+	}
+	knownProjects := make(map[string]struct{}, len(projects))
+	for _, project := range projects {
+		knownProjects[project] = struct{}{}
+	}
+	projects = slices.Grow(projects, len(otherProjects))
+	for _, project := range otherProjects {
+		if _, known := knownProjects[project]; !known {
+			projects = append(projects, project)
+		}
+	}
+	return projects
 }
 
 func (n *native) HasPermission(ctx *echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
@@ -365,6 +404,9 @@ func (n *native) getPermissions(ctx userContext) (map[string][]*v1Role.Permissio
 	for project, projectPermissions := range c.permissions[username] {
 		userPermissions[project] = append(userPermissions[project], projectPermissions...)
 	}
+	for project, projectPermissions := range c.allUsersPermissions {
+		userPermissions[project] = append(userPermissions[project], projectPermissions...)
+	}
 	// Merge claim-based permissions
 	if claims, ok := usr.(*crypto.JWTClaims); ok {
 		for project, perms := range n.claimPermissions(c, claims) {
@@ -382,7 +424,7 @@ func (n *native) getPermissions(ctx userContext) (map[string][]*v1Role.Permissio
 // could overwrite the cache built by a more recent refresh that includes this change.
 func (n *native) RefreshPermissionsAndRoles() error {
 	seq := n.refreshSeq.Add(1)
-	permissions, globalRoles, roles, err := n.loadAllPermissionsAndRoles()
+	newCache, err := n.loadCache()
 	if err != nil {
 		return err
 	}
@@ -394,37 +436,33 @@ func (n *native) RefreshPermissionsAndRoles() error {
 	}
 	n.publishedSeq = seq
 	// Publish a brand-new snapshot: the requests in progress keep using the previous one.
-	n.cache.Store(&cache{
-		permissions: permissions,
-		globalRoles: globalRoles,
-		roles:       roles,
-	})
+	n.cache.Store(newCache)
 	return nil
 }
 
-// loadAllPermissionsAndRoles is loading all permissions for all users.
-func (n *native) loadAllPermissionsAndRoles() (usersPermissions, []*v1.GlobalRole, []*v1.Role, error) {
+// loadCache builds a new cache with the permissions of all users, from the database content.
+func (n *native) loadCache() (*cache, error) {
 	users, err := n.userDAO.List(&user.Query{})
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	roles, err := n.roleDAO.List(&role.Query{})
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	globalRoles, err := n.globalRoleDAO.List(&globalrole.Query{})
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	roleBindings, err := n.roleBindingDAO.List(&rolebinding.Query{})
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	globalRoleBindings, err := n.globalRoleBindingDAO.List(&globalrolebinding.Query{})
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
-	return buildUsersPermissions(users, globalRoles, roles, globalRoleBindings, roleBindings), globalRoles, roles, nil
+	return buildCache(users, globalRoles, roles, globalRoleBindings, roleBindings), nil
 }
 
 // claimPermissions resolves the permissions granted by a user's PersistedClaims based on
