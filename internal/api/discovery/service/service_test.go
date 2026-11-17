@@ -79,20 +79,11 @@ func (f *fakeGlobalDatasourceService) List(q *globaldatasource.Query) ([]*v1.Glo
 	if f.listError != nil {
 		return nil, f.listError
 	}
-	var result []*v1.GlobalDatasource
-	for _, ds := range f.store {
-		result = append(result, ds)
-	}
 	var filtered []*v1.GlobalDatasource
-	for _, ds := range result {
-		disc := ds.Source.GetDiscovery()
-		if q.DiscoveryName != "" && (disc == nil || disc.Name != q.DiscoveryName) {
-			continue
+	for _, ds := range f.store {
+		if q.MatchDiscovery(ds) {
+			filtered = append(filtered, ds)
 		}
-		if q.DiscoveryType != "" && (disc == nil || disc.Type != q.DiscoveryType) {
-			continue
-		}
-		filtered = append(filtered, ds)
 	}
 	return filtered, nil
 }

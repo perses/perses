@@ -172,14 +172,9 @@ func filterByDiscovery(list []*v1.GlobalDatasource, q *globaldatasource.Query) [
 	}
 	result := make([]*v1.GlobalDatasource, 0)
 	for _, ds := range list {
-		disc := ds.Source.GetDiscovery()
-		if q.DiscoveryName != "" && (disc == nil || disc.Name != q.DiscoveryName) {
-			continue
+		if q.MatchDiscovery(ds) {
+			result = append(result, ds)
 		}
-		if q.DiscoveryType != "" && (disc == nil || disc.Type != q.DiscoveryType) {
-			continue
-		}
-		result = append(result, ds)
 	}
 	return result
 }

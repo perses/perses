@@ -53,6 +53,22 @@ func (q *Query) GetProjectQueryParam() string {
 func (q *Query) SetProjectQueryParam(_ string) {
 }
 
+// MatchDiscovery reports whether ds matches the discovery filters in q.
+// Returns true when neither DiscoveryName nor DiscoveryType is set.
+func (q *Query) MatchDiscovery(ds *v1.GlobalDatasource) bool {
+	if q.DiscoveryName == "" && q.DiscoveryType == "" {
+		return true
+	}
+	disc := ds.Source.GetDiscovery()
+	if q.DiscoveryName != "" && (disc == nil || disc.Name != q.DiscoveryName) {
+		return false
+	}
+	if q.DiscoveryType != "" && (disc == nil || disc.Type != q.DiscoveryType) {
+		return false
+	}
+	return true
+}
+
 type DAO interface {
 	Create(entity *v1.GlobalDatasource) error
 	Update(entity *v1.GlobalDatasource) error
