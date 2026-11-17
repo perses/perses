@@ -169,9 +169,14 @@ type fieldsBuilder struct {
 	names []string
 	// path is pre-allocated, so the appends done while walking a document don't need to allocate.
 	path []string
-	// tooLarge is set when the data doesn't fit the 32-bit offsets of the fields.
+	// tooLarge is set when a field doesn't fit in maxDataSize: it isn't appended, nor are the fields that follow.
 	tooLarge bool
 }
+
+// maxDataSize is the maximum size of the data of a document, as the fields store 32-bit offsets. It is a uint64, as
+// math.MaxUint32 overflows int on 32-bit platforms.
+// It is a variable, so it can be lowered in tests.
+var maxDataSize uint64 = math.MaxUint32
 
 func (b *fieldsBuilder) reset() {
 	b.data = b.data[:0]
@@ -182,24 +187,16 @@ func (b *fieldsBuilder) reset() {
 	b.tooLarge = false
 }
 
-// offset returns the current size of the data, which is the offset of what is appended next.
-func (b *fieldsBuilder) offset() uint32 {
-	n := len(b.data)
-	// The size is converted so that the comparison compiles on 32-bit platforms, where it is always false.
-	if uint64(n) > math.MaxUint32 {
-		b.tooLarge = true
-		return 0
-	}
-	return uint32(n)
-}
-
 // appendField appends a field made of the value and of the end of its path. Each component of the path is encoded as
 // a uvarint: twice the position of the component in the step names of the key plus one when it is one of them, which
 // is often the case and saves storing it, otherwise twice its length followed by its bytes.
 func (b *fieldsBuilder) appendField(value string, path []string) {
-	start := b.offset()
+	if b.tooLarge {
+		return
+	}
+	start := len(b.data)
 	b.data = append(b.data, value...)
-	valueEnd := b.offset()
+	valueEnd := len(b.data)
 	for _, p := range path {
 		if i := slices.Index(b.names, p); i >= 0 {
 			b.data = binary.AppendUvarint(b.data, uint64(i)<<1|1)
@@ -208,7 +205,13 @@ func (b *fieldsBuilder) appendField(value string, path []string) {
 			b.data = append(b.data, p...)
 		}
 	}
-	b.fields = append(b.fields, indexedField{start: start, valueEnd: valueEnd, end: b.offset(), key: b.key})
+	end := len(b.data)
+	if uint64(end) > maxDataSize {
+		b.data = b.data[:start]
+		b.tooLarge = true
+		return
+	}
+	b.fields = append(b.fields, indexedField{start: uint32(start), valueEnd: uint32(valueEnd), end: uint32(end), key: b.key}) //nolint:gosec // G115: the offsets don't exceed maxDataSize
 }
 
 // nextPathComponent returns the first component of a path encoded by appendField, and the rest of the path.
@@ -252,7 +255,7 @@ func (b *fieldsBuilder) extractKeyFields(raw rawDocument, key uint32, k indexedK
 // The path is used as a stack: the recursive calls share its backing array, which is safe as it is copied in the
 // data when a field is appended.
 func (b *fieldsBuilder) extractFields(value gjson.Result, steps []keyStep, path []string) {
-	if !value.Exists() {
+	if b.tooLarge || !value.Exists() {
 		return
 	}
 	if len(steps) == 0 {

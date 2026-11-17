@@ -265,6 +265,48 @@ func TestClientAdd_unsupportedKeyOnlyReturnsTheKey(t *testing.T) {
 	}, decodeFields(c.dashboards.indexedKeys, idx.data, idx.fields))
 }
 
+// When the indexed values of a dashboard are too large, the ones that fit are indexed, replacing the previous ones.
+func TestClientAdd_tooLargeValuesReplaceThePreviousOnes(t *testing.T) {
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"spec.display.name", "metadata.tags"}}}, newDisabledAuthz(t), nil).(*client)
+	require.NoError(t, c.add(json.RawMessage(`{
+		"kind": "Dashboard",
+		"metadata": {"name": "mydashboard", "project": "myproject", "tags": ["old"]},
+		"spec": {"display": {"name": "Old title"}}
+	}`)))
+	// The display name takes 9 bytes, and each tag 2 bytes more than its value for its index: the third tag doesn't fit.
+	setMaxDataSize(t, 30)
+	require.NoError(t, c.add(json.RawMessage(`{
+		"kind": "Dashboard",
+		"metadata": {"name": "mydashboard", "project": "myproject", "tags": ["first", "second", "third"]},
+		"spec": {"display": {"name": "New title"}}
+	}`)))
+
+	for _, tc := range []struct {
+		text             string
+		expectedOriginal string
+	}{
+		{text: "old"},
+		{text: "third"},
+		{text: "title", expectedOriginal: "New title"},
+		{text: "second", expectedOriginal: "second"},
+	} {
+		t.Run(tc.text, func(t *testing.T) {
+			results, err := c.Search(nil, v1.KindDashboard, "", tc.text)
+			require.NoError(t, err)
+			if tc.expectedOriginal == "" {
+				assert.Empty(t, results)
+				return
+			}
+			require.Len(t, results, 1)
+			assert.Equal(t, tc.expectedOriginal, results[0].Original)
+		})
+	}
+	listed, err := c.List(nil, v1.KindDashboard, "")
+	require.NoError(t, err)
+	require.Len(t, listed, 1)
+	assert.Equal(t, "New title", listed[0].DisplayName)
+}
+
 func Test_client_add_multipleProjectsAreIndexedSeparately(t *testing.T) {
 	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name"}}}, newDisabledAuthz(t), nil).(*client)
 

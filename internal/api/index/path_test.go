@@ -200,6 +200,36 @@ func TestIndexedField_path(t *testing.T) {
 	assert.Equal(t, "spec", b.fields[1].path(data, keys)[0])
 }
 
+// setMaxDataSize lowers the maximum size of the data of a document for the duration of the test.
+func setMaxDataSize(t *testing.T, size uint64) {
+	t.Helper()
+	previous := maxDataSize
+	maxDataSize = size
+	t.Cleanup(func() { maxDataSize = previous })
+}
+
+func TestFieldsBuilder_stopsAtTheFirstFieldNotFitting(t *testing.T) {
+	setMaxDataSize(t, 10)
+	k, err := newIndexedKey("metadata.tags")
+	require.NoError(t, err)
+	var b fieldsBuilder
+	b.reset()
+	b.names = k.names
+	// The field takes 7 bytes: 5 for the value and 2 for its path, the length of the index then the index.
+	b.appendField("first", []string{"0"})
+	// The value fits, but not its path.
+	b.appendField("s", []string{"10"})
+	// The field fits, but it follows a field that doesn't.
+	b.appendField("", nil)
+
+	assert.True(t, b.tooLarge)
+	assert.Len(t, b.data, 7)
+	assert.Equal(t, []decodedField{{key: k.key, value: "first", path: []string{"metadata", "tags", "0"}}}, decodeFields([]indexedKey{k}, string(b.data), b.fields))
+
+	b.reset()
+	assert.False(t, b.tooLarge)
+}
+
 // FuzzExtractFields checks that, for any supported key, the values extracted are the ones gjson returns for the key,
 // and that the path of each value leads to it.
 func FuzzExtractFields(f *testing.F) {

@@ -30,7 +30,6 @@ package index
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"slices"
 	"sync"
@@ -222,20 +221,21 @@ func (c *projectIndexer) add(raw json.RawMessage) error {
 // The builder collects the fields of the document, it can be reused for the next document once the function returns.
 func (c *projectIndexer) addTo(dst map[string]map[string]index[*v1.ProjectMetadata], raw json.RawMessage, b *fieldsBuilder) error {
 	customRaw := rawDocument(raw)
-	b.reset()
-	for i, k := range c.indexedKeys {
-		b.extractKeyFields(customRaw, uint32(i), k)
-	}
-	if b.tooLarge {
-		return errors.New("the indexed values of the document are too large")
-	}
-
-	displayName := customRaw.getDisplayName()
 	rawMetadata := customRaw.getRawMetadata()
 	var m *v1.ProjectMetadata
 	if err := json.Unmarshal([]byte(rawMetadata), &m); err != nil {
 		return err
 	}
+	b.reset()
+	for i, k := range c.indexedKeys {
+		b.extractKeyFields(customRaw, uint32(i), k)
+	}
+	if b.tooLarge {
+		// The document is still indexed, so that the values it had before are replaced and it stays listed.
+		logrus.Warnf("the indexed values of the dashboard %s/%s exceed %d bytes, the values that follow aren't indexed", m.Project, m.Name, maxDataSize)
+	}
+
+	displayName := customRaw.getDisplayName()
 	idx := index[*v1.ProjectMetadata]{
 		metadata:    m,
 		data:        string(b.data),
