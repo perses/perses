@@ -255,14 +255,26 @@ func TestClientAdd(t *testing.T) {
 }
 
 func TestClientAdd_unsupportedKeyOnlyReturnsTheKey(t *testing.T) {
-	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.tags|@reverse"}}}, newDisabledAuthz(t), nil).(*client)
-	require.NoError(t, c.add([]byte(pathTestDocument)))
+	for _, tc := range []struct {
+		key            string
+		expectedValues []string
+	}{
+		{key: "metadata.tags|@reverse", expectedValues: []string{"kubernetes", "production"}},
+		// gjson evaluates .0 on the array of the values found by @dig, so it selects both strings.
+		{key: `@dig:"quoted".0`, expectedValues: []string{"first", "second"}},
+	} {
+		t.Run(tc.key, func(t *testing.T) {
+			c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{tc.key}}}, newDisabledAuthz(t), nil).(*client)
+			require.NoError(t, c.add([]byte(pathTestDocument)))
 
-	idx := c.dashboards.idx["myproject"]["mydashboard"]
-	assert.ElementsMatch(t, []decodedField{
-		{key: "metadata.tags|@reverse", value: "kubernetes"},
-		{key: "metadata.tags|@reverse", value: "production"},
-	}, decodeFields(c.dashboards.indexedKeys, idx.data, idx.fields))
+			idx := c.dashboards.idx["myproject"]["mydashboard"]
+			expected := make([]decodedField, 0, len(tc.expectedValues))
+			for _, value := range tc.expectedValues {
+				expected = append(expected, decodedField{key: tc.key, value: value})
+			}
+			assert.ElementsMatch(t, expected, decodeFields(c.dashboards.indexedKeys, idx.data, idx.fields))
+		})
+	}
 }
 
 // When the indexed values of a dashboard are too large, the ones that fit are indexed, replacing the previous ones.

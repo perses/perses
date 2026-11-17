@@ -61,7 +61,7 @@ const digModifier = "@dig:"
 // once as gjson does: it doesn't look for the next components inside a string, e.g. the key a.0 selects nothing in
 // {"a": "[1]"}.
 // It returns an error when the key uses a gjson syntax for which the path of the values can't be determined:
-// wildcards, queries, multipaths, literals, pipes and modifiers other than @dig.
+// wildcards, queries, multipaths, literals, pipes, modifiers other than @dig and JSON arguments of @dig.
 func compileKey(key string) ([]keyStep, error) {
 	if len(key) == 0 {
 		return nil, errors.New("empty key")
@@ -72,6 +72,11 @@ func compileKey(key string) ([]keyStep, error) {
 			// gjson ends the argument of a modifier at the first pipe, even when it is escaped.
 			if strings.Contains(arg, "|") {
 				return nil, errors.New("pipes are not supported")
+			}
+			// gjson parses an argument starting with {, [ or " as JSON, and evaluates the rest of the key on the array
+			// of the values found: @dig:"a".0 selects the first value found for the key "a", quotes included.
+			if len(arg) > 0 && strings.IndexByte(`{["`, arg[0]) >= 0 {
+				return nil, errors.New("JSON arguments of @dig are not supported")
 			}
 			dig, err := compileKey(arg)
 			if err != nil {

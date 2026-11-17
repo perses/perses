@@ -42,7 +42,8 @@ displayName: <string>
 # It may differ from the dashboard returned by the API when the database has been modified without the API:
 # for example, the API returns the tags sorted, so the position of a tag may differ in a dashboard file edited by hand.
 # It is not set when the index key uses a syntax for which the location can't be determined:
-# wildcards, queries, multipaths, pipes and modifiers other than `@dig`.
+# wildcards, queries, multipaths, pipes, modifiers other than `@dig`, and a `@dig` argument starting with `{`, `[` or
+# `"`.
 # It is not set either when the value has been found inside a string, which gjson does for some keys:
 # for example, `@dig:0` finds `1` in the string `"[1]"`.
 [ path: <list of string> ]

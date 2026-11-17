@@ -25,6 +25,7 @@ import (
 
 const pathTestDocument = `{
 	"kind": "Dashboard",
+	"\"quoted\"": ["first", "second"],
 	"metadata": {"name": "mydashboard", "project": "myproject", "tags": ["kubernetes", "production"]},
 	"spec": {
 		"display": {"name": "My Dashboard"},
@@ -101,6 +102,7 @@ func TestCompileKey_unsupportedSyntax(t *testing.T) {
 		`\`,
 		`spec.panels.@dig:display\|name`,
 		"spec.panels.@dig:",
+		`@dig:"quoted".0`,
 	} {
 		t.Run(key, func(t *testing.T) {
 			_, err := compileKey(key)
@@ -284,6 +286,7 @@ func FuzzExtractFields(f *testing.F) {
 		"spec.variables.0.spec.@dig:0",
 		"spec.variables.1.spec.values.#.1",
 		"spec.datasources.#.name",
+		`@dig:"quoted".0`,
 	} {
 		f.Add(key)
 	}
