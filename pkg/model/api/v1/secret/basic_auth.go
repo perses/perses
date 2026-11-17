@@ -38,6 +38,19 @@ func NewPublicBasicAuth(b *BasicAuth) *PublicBasicAuth {
 	}
 }
 
+// Private returns the BasicAuth described by b, with the password in clear, once verified it is valid.
+// It is used when the public struct is directly part of a plain configuration (that is never encrypted).
+func (b *PublicBasicAuth) Private() (*BasicAuth, error) {
+	if b == nil {
+		return nil, nil
+	}
+	result := &BasicAuth{Username: b.Username, Password: string(b.Password), PasswordFile: b.PasswordFile}
+	if err := result.validate(); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 type BasicAuth struct {
 	Username string `json:"username" yaml:"username"`
 	Password string `json:"password,omitempty" yaml:"password,omitempty"`

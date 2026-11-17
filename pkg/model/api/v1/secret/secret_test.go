@@ -108,3 +108,105 @@ func TestAuthorization_Validate(t *testing.T) {
 		})
 	}
 }
+
+func TestPublicBasicAuth_Private(t *testing.T) {
+	testSuite := []struct {
+		title    string
+		public   *PublicBasicAuth
+		expected *BasicAuth
+		err      string
+	}{
+		{
+			title: "nil basic auth",
+		},
+		{
+			title:    "password is returned in clear",
+			public:   &PublicBasicAuth{Username: "perses", Password: "secret"},
+			expected: &BasicAuth{Username: "perses", Password: "secret"},
+		},
+		{
+			title:  "missing password",
+			public: &PublicBasicAuth{Username: "perses"},
+			err:    "when using basicAuth, username and password/passwordFile cannot be empty",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result, err := test.public.Private()
+			if len(test.err) == 0 {
+				assert.NoError(t, err)
+				assert.Equal(t, test.expected, result)
+			} else {
+				assert.EqualError(t, err, test.err)
+			}
+		})
+	}
+}
+
+func TestPublicAuthorization_Private(t *testing.T) {
+	testSuite := []struct {
+		title    string
+		public   *PublicAuthorization
+		expected *Authorization
+		err      string
+	}{
+		{
+			title: "nil authorization",
+		},
+		{
+			title:    "credentials are returned in clear, with the default type",
+			public:   &PublicAuthorization{Credentials: "token"},
+			expected: &Authorization{Type: "Bearer", Credentials: "token"},
+		},
+		{
+			title:  "credentials and credentialsFile",
+			public: &PublicAuthorization{Credentials: "token", CredentialsFile: "/tmp/token"},
+			err:    "at most one of authorization credentials & credentialsFile must be configured",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result, err := test.public.Private()
+			if len(test.err) == 0 {
+				assert.NoError(t, err)
+				assert.Equal(t, test.expected, result)
+			} else {
+				assert.EqualError(t, err, test.err)
+			}
+		})
+	}
+}
+
+func TestPublicOAuth_Private(t *testing.T) {
+	testSuite := []struct {
+		title    string
+		public   *PublicOAuth
+		expected *OAuth
+		err      string
+	}{
+		{
+			title: "nil oauth",
+		},
+		{
+			title:    "client ID and secret are returned in clear",
+			public:   &PublicOAuth{ClientID: "perses", ClientSecret: "secret", TokenURL: "https://idp/token"}, //nolint:gosec // G101: test value, not a real credential
+			expected: &OAuth{ClientID: "perses", ClientSecret: "secret", TokenURL: "https://idp/token"},       //nolint:gosec // G101: test value, not a real credential
+		},
+		{
+			title:  "missing token URL",
+			public: &PublicOAuth{ClientID: "perses", ClientSecret: "secret"},
+			err:    "when using oauth, clientID, clientSecret/clientSecretFile, and tokenURL cannot be empty",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result, err := test.public.Private()
+			if len(test.err) == 0 {
+				assert.NoError(t, err)
+				assert.Equal(t, test.expected, result)
+			} else {
+				assert.EqualError(t, err, test.err)
+			}
+		})
+	}
+}
