@@ -18,8 +18,11 @@ import (
 )
 
 type PanelGroup struct {
-	Title          string
-	PanelsWidth    int
+	Title       string
+	PanelsWidth int
+	// PanelsPerLine is the number of panels per line set by the PanelsPerLine option.
+	// 0 means as many panels of PanelsWidth as fit in the 24 columns of the grid.
+	PanelsPerLine  int
 	PanelsHeight   int
 	IsCollapsed    *bool
 	RepeatVariable string
