@@ -262,6 +262,7 @@ func TestClientAdd_unsupportedKeyOnlyReturnsTheKey(t *testing.T) {
 		{key: "metadata.tags|@reverse", expectedValues: []string{"kubernetes", "production"}},
 		// gjson evaluates .0 on the array of the values found by @dig, so it selects both strings.
 		{key: `@dig:"quoted".0`, expectedValues: []string{"first", "second"}},
+		{key: "metadata.tags.01", expectedValues: []string{"production"}},
 	} {
 		t.Run(tc.key, func(t *testing.T) {
 			c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{tc.key}}}, newDisabledAuthz(t), nil).(*client)

@@ -61,7 +61,8 @@ const digModifier = "@dig:"
 // once as gjson does: it doesn't look for the next components inside a string, e.g. the key a.0 selects nothing in
 // {"a": "[1]"}.
 // It returns an error when the key uses a gjson syntax for which the path of the values can't be determined:
-// wildcards, queries, multipaths, literals, pipes, modifiers other than @dig and JSON arguments of @dig.
+// wildcards, queries, multipaths, literals, pipes, modifiers other than @dig, JSON arguments of @dig and numbers with
+// leading zeros or out of the range of int.
 func compileKey(key string) ([]keyStep, error) {
 	if len(key) == 0 {
 		return nil, errors.New("empty key")
@@ -142,6 +143,13 @@ func nextComponent(key string) (raw, name, rest string, err error) {
 	// `#` alone at the end of a key returns the length of an array, and `#(...)` is a query.
 	if raw[0] == '#' && (raw != "#" || len(rest) == 0) {
 		return "", "", "", fmt.Errorf("unsupported syntax %q", raw)
+	}
+	// gjson reads a component made of digits as an array index, ignoring its leading zeros and, on 32-bit platforms,
+	// truncating it. The path of the item it selects must contain its index: 1, not 01 or 4294967297.
+	if strings.TrimLeft(raw, "0123456789") == "" {
+		if n, err := strconv.Atoi(raw); err != nil || strconv.Itoa(n) != raw {
+			return "", "", "", fmt.Errorf("unsupported array index %q", raw)
+		}
 	}
 	return raw, unescaped.String(), rest, nil
 }

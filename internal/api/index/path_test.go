@@ -14,9 +14,9 @@
 package index
 
 import (
+	"strconv"
 	"strings"
 	"testing"
-	"unicode"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -45,20 +45,33 @@ const pathTestDocument = `{
 	}
 }`
 
-// gjsonPath converts a path into a gjson path, escaping the special characters of each component.
-func gjsonPath(path []string) string {
-	components := make([]string, len(path))
-	for i, p := range path {
-		var b strings.Builder
-		for _, r := range p {
-			if !unicode.IsLetter(r) && !unicode.IsDigit(r) {
-				b.WriteByte('\\')
+// lookup returns the value at the path in the document, following it as JavaScript does once the document is parsed:
+// unlike gjson, it only finds an item of an array with its index written without leading zeros.
+func lookup(document string, path []string) (gjson.Result, bool) {
+	value := gjson.Parse(document)
+	for _, component := range path {
+		var next gjson.Result
+		switch {
+		case value.IsArray():
+			items := value.Array()
+			if i, err := strconv.Atoi(component); err == nil && strconv.Itoa(i) == component && i >= 0 && i < len(items) {
+				next = items[i]
 			}
-			b.WriteRune(r)
+		case value.IsObject():
+			value.ForEach(func(key, v gjson.Result) bool {
+				if key.String() == component {
+					next = v
+					return false
+				}
+				return true
+			})
 		}
-		components[i] = b.String()
+		if !next.Exists() {
+			return gjson.Result{}, false
+		}
+		value = next
 	}
-	return strings.Join(components, ".")
+	return value, true
 }
 
 // decodedField is an indexed field with its key, its value and its path, to compare the fields in the tests.
@@ -103,6 +116,10 @@ func TestCompileKey_unsupportedSyntax(t *testing.T) {
 		`spec.panels.@dig:display\|name`,
 		"spec.panels.@dig:",
 		`@dig:"quoted".0`,
+		"metadata.tags.01",
+		"spec.variables.#.spec.values.00",
+		"spec.panels.@dig:links.01",
+		"metadata.tags.9223372036854775808",
 	} {
 		t.Run(key, func(t *testing.T) {
 			_, err := compileKey(key)
@@ -287,6 +304,9 @@ func FuzzExtractFields(f *testing.F) {
 		"spec.variables.1.spec.values.#.1",
 		"spec.datasources.#.name",
 		`@dig:"quoted".0`,
+		"metadata.tags.01",
+		"spec.variables.#.spec.values.01",
+		"spec.panels.@dig:links.00",
 	} {
 		f.Add(key)
 	}
@@ -313,7 +333,9 @@ func assertSameFieldsAsGjson(t *testing.T, key string, fields []decodedField) {
 	for _, f := range fields {
 		values = append(values, f.value)
 		if f.path != nil {
-			assert.Equal(t, f.value, gjson.Get(pathTestDocument, gjsonPath(f.path)).String(), "path %q", f.path)
+			value, found := lookup(pathTestDocument, f.path)
+			assert.True(t, found, "path %q", f.path)
+			assert.Equal(t, f.value, value.String(), "path %q", f.path)
 		}
 	}
 	assert.ElementsMatch(t, expectedValues, values, "key %q", key)
