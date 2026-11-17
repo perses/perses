@@ -159,3 +159,86 @@ func TestUpdate_PreservesSource(t *testing.T) {
 	require.NotNil(t, got.Source.GetDiscovery(), "Update must preserve the discovery source stamp")
 	assert.Equal(t, "kube-prod", got.Source.Discovery.Name)
 }
+
+func newFilterDS(name string, discoveryName string, discoveryType v1.DiscoveryType) *v1.GlobalDatasource {
+	ds := &v1.GlobalDatasource{
+		Kind:     v1.KindGlobalDatasource,
+		Metadata: v1.Metadata{Name: name},
+	}
+	if discoveryName != "" || discoveryType != "" {
+		ds.Source = &v1.Source{
+			Discovery: &v1.DiscoverySource{
+				Name: discoveryName,
+				Type: discoveryType,
+			},
+		}
+	}
+	return ds
+}
+
+func TestFilterByDiscovery(t *testing.T) {
+	all := []*v1.GlobalDatasource{
+		newFilterDS("ds-kube-prod-1", "kube-prod", v1.DiscoveryTypeKubernetes),
+		newFilterDS("ds-kube-prod-2", "kube-prod", v1.DiscoveryTypeKubernetes),
+		newFilterDS("ds-kube-staging", "kube-staging", v1.DiscoveryTypeKubernetes),
+		newFilterDS("ds-http-prod", "http-prod", v1.DiscoveryTypeHTTP),
+		newFilterDS("ds-manual", "", ""),
+	}
+
+	tests := []struct {
+		name          string
+		query         globaldatasourceIface.Query
+		expectedNames []string
+	}{
+		{
+			name:          "no filter returns all",
+			query:         globaldatasourceIface.Query{},
+			expectedNames: []string{"ds-kube-prod-1", "ds-kube-prod-2", "ds-kube-staging", "ds-http-prod", "ds-manual"},
+		},
+		{
+			name:          "discovery_name=kube-prod",
+			query:         globaldatasourceIface.Query{DiscoveryName: "kube-prod"},
+			expectedNames: []string{"ds-kube-prod-1", "ds-kube-prod-2"},
+		},
+		{
+			name:          "discovery_name=kube-staging",
+			query:         globaldatasourceIface.Query{DiscoveryName: "kube-staging"},
+			expectedNames: []string{"ds-kube-staging"},
+		},
+		{
+			name:          "discovery_type=kubernetes only",
+			query:         globaldatasourceIface.Query{DiscoveryType: v1.DiscoveryTypeKubernetes},
+			expectedNames: []string{"ds-kube-prod-1", "ds-kube-prod-2", "ds-kube-staging"},
+		},
+		{
+			name:          "discovery_type=http only",
+			query:         globaldatasourceIface.Query{DiscoveryType: v1.DiscoveryTypeHTTP},
+			expectedNames: []string{"ds-http-prod"},
+		},
+		{
+			name:          "discovery_name=kube-prod AND discovery_type=kubernetes",
+			query:         globaldatasourceIface.Query{DiscoveryName: "kube-prod", DiscoveryType: v1.DiscoveryTypeKubernetes},
+			expectedNames: []string{"ds-kube-prod-1", "ds-kube-prod-2"},
+		},
+		{
+			name:          "discovery_name=kube-prod AND discovery_type=http returns nothing",
+			query:         globaldatasourceIface.Query{DiscoveryName: "kube-prod", DiscoveryType: v1.DiscoveryTypeHTTP},
+			expectedNames: []string{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var names []string
+			for _, ds := range all {
+				if tt.query.MatchDiscovery(ds) {
+					names = append(names, ds.Metadata.Name)
+				}
+			}
+			if names == nil {
+				names = []string{}
+			}
+			assert.ElementsMatch(t, tt.expectedNames, names)
+		})
+	}
+}
