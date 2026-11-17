@@ -188,6 +188,29 @@ func getTemplatePath(pluginType pluginSpec.Kind) (string, error) {
 	return "", fmt.Errorf("unknown plugin type %q", pluginType)
 }
 
+// groupPluginsByKind splits the plugins by the kind of the plugin, so the templates can list them separately.
+func groupPluginsByKind(plugins []GeneratedPlugin) (panels, datasources, queries, variables, annotations, explores []GeneratedPlugin) {
+	for _, p := range plugins {
+		if p.Kind.IsQuery() {
+			queries = append(queries, p)
+			continue
+		}
+		switch p.Kind {
+		case pluginSpec.KindDatasource:
+			datasources = append(datasources, p)
+		case pluginSpec.KindVariable:
+			variables = append(variables, p)
+		case pluginSpec.KindAnnotation:
+			annotations = append(annotations, p)
+		case pluginSpec.KindExplore:
+			explores = append(explores, p)
+		case pluginSpec.KindPanel:
+			panels = append(panels, p)
+		}
+	}
+	return panels, datasources, queries, variables, annotations, explores
+}
+
 func (o *generateOptions) Execute() error {
 	var err error
 
@@ -197,12 +220,6 @@ func (o *generateOptions) Execute() error {
 	isModuleGeneration := false
 
 	var persesPlugins []GeneratedPlugin
-	var persesPanelPlugins []GeneratedPlugin
-	var persesDatasourcePlugins []GeneratedPlugin
-	var persesQueryPlugins []GeneratedPlugin
-	var persesVariablePlugins []GeneratedPlugin
-	var persesAnnotationsPlugins []GeneratedPlugin
-	var persesExplorePlugins []GeneratedPlugin
 	var exposedModules []ExposedModule
 
 	currentModule, err := plugin.ReadPackage(o.outputDir)
@@ -267,24 +284,7 @@ func (o *generateOptions) Execute() error {
 		Path: pluginPath,
 	})
 
-	for _, p := range persesPlugins {
-		if p.Kind.IsQuery() {
-			persesQueryPlugins = append(persesQueryPlugins, p)
-		} else {
-			switch p.Kind {
-			case pluginSpec.KindDatasource:
-				persesDatasourcePlugins = append(persesDatasourcePlugins, p)
-			case pluginSpec.KindVariable:
-				persesVariablePlugins = append(persesVariablePlugins, p)
-			case pluginSpec.KindAnnotation:
-				persesAnnotationsPlugins = append(persesAnnotationsPlugins, p)
-			case pluginSpec.KindExplore:
-				persesExplorePlugins = append(persesExplorePlugins, p)
-			case pluginSpec.KindPanel:
-				persesPanelPlugins = append(persesPanelPlugins, p)
-			}
-		}
-	}
+	persesPanelPlugins, persesDatasourcePlugins, persesQueryPlugins, persesVariablePlugins, persesAnnotationsPlugins, persesExplorePlugins := groupPluginsByKind(persesPlugins)
 
 	data := map[string]any{
 		"ModuleName":               GetKebabCase(o.pluginModuleName),
