@@ -37,8 +37,10 @@ displayName: <string>
 # For example: `spec.panels.@dig:display.name`.
 [ key: <string> ]
 
-# The location of the matching value in the dashboard, as a list of object keys and array indexes.
+# The location of the matching value in the dashboard as stored in the database, as a list of object keys and array indexes.
 # For example: `["spec", "panels", "MyPanel", "spec", "display", "name"]`.
+# It may differ from the dashboard returned by the API when the database has been modified without the API:
+# for example, the API returns the tags sorted, so the position of a tag may differ in a dashboard file edited by hand.
 # It is not set when the index key uses a syntax for which the location can't be determined:
 # wildcards, queries, multipaths, pipes and modifiers other than `@dig`.
 # It is not set either when the value has been found inside a string, which gjson does for some keys:
