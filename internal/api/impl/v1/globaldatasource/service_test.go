@@ -14,8 +14,12 @@
 package globaldatasource_test
 
 import (
+	"errors"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	databaseFile "github.com/perses/perses/internal/api/database/file"
 	apiInterface "github.com/perses/perses/internal/api/interface"
@@ -241,4 +245,28 @@ func TestFilterByDiscovery(t *testing.T) {
 			assert.ElementsMatch(t, tt.expectedNames, names)
 		})
 	}
+}
+
+// TestList_UnknownDiscoveryType verifies that a request with an unrecognised
+// discovery_type query parameter is rejected with HTTP 400.
+func TestList_UnknownDiscoveryType(t *testing.T) {
+	svc := newRealService(t)
+	authz, err := authorization.New(nil, nil, nil, nil, nil, config.Config{})
+	require.NoError(t, err)
+	ep := globaldatasourceImpl.NewEndpoint(config.DatasourceConfig{}, svc, authz, false, false)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/globaldatasources?discovery_type=foo", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+
+	listHandler := ep.(interface {
+		List(*echo.Context) error
+	})
+	herr := listHandler.List(ctx)
+	require.Error(t, herr)
+	assert.True(t, errors.Is(herr, apiInterface.BadRequestError), "expected BadRequestError, got %T: %v", herr, herr)
+	var httpErr *echo.HTTPError
+	require.True(t, errors.As(apiInterface.HandleError(herr), &httpErr))
+	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
 }
