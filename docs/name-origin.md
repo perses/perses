@@ -1,6 +1,8 @@
 # Origin of the name
 
-Perses takes its name from a Titan of Greek mythology.
+The name Perses was chosen in reference to [Prometheus](https://prometheus.io), the first datasource supported by
+Perses. As Prometheus is named after a [Titan of Greek mythology](https://en.wikipedia.org/wiki/Prometheus), we picked
+another Titan from the same family: Perses, a cousin of Prometheus. Their fathers, Crius and Iapetus, are brothers.
 
 ## Perses, the Titan
 
@@ -15,11 +17,5 @@ Zeus, Asteria turned into a quail, *ortyx* in Greek, and leapt into the sea, whe
 
 Their daughter is [Hecate](https://en.wikipedia.org/wiki/Hecate), the torch-bearing goddess of crossroads and magic,
 whom Zeus honoured above all others.
-
-## A cousin of Prometheus
-
-Perses' father, Crius, is the brother of Iapetus, the father of [Prometheus](https://en.wikipedia.org/wiki/Prometheus).
-Perses and Prometheus are therefore cousins, a fitting family tie for a dashboard tool that grew up in the Prometheus
-ecosystem.
 
 If the name rings a different bell to Finnish or Estonian speakers, rest assured: the resemblance is a pure coincidence.
