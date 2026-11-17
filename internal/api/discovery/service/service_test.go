@@ -164,7 +164,6 @@ func TestApply_StampsSourceAndDiscoveryName(t *testing.T) {
 	}
 }
 
-
 func TestApply_NoDeleteWhenListErrors(t *testing.T) {
 	fake := newFakeService(
 		storeEntity("ds-a1", "kube-prod"),
