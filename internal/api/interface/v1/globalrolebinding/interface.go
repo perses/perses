@@ -28,6 +28,9 @@ type Query struct {
 	// NamePrefix can be empty in case you want to return the full list of GlobalRoleBinding available.
 	NamePrefix   string `query:"name"`
 	MetadataOnly bool   `query:"metadata_only"`
+	// SourceFolder filters the list to only resources whose source.provisioning.folder matches this value.
+	// It is not exposed as a query parameter and is only used internally by the provisioning subsystem.
+	SourceFolder string `query:"-"`
 }
 
 func (q *Query) GetMetadataOnlyQueryParam() bool {

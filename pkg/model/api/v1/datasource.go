@@ -45,6 +45,7 @@ type GlobalDatasource struct {
 	Kind     Kind            `json:"kind" yaml:"kind"`
 	Metadata Metadata        `json:"metadata" yaml:"metadata"`
 	Spec     datasource.Spec `json:"spec" yaml:"spec"`
+	Source   *Source         `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 func (d *GlobalDatasource) UnmarshalJSON(data []byte) error {
@@ -99,6 +100,14 @@ func (d *GlobalDatasource) GetSpec() any {
 	return d.Spec
 }
 
+func (d *GlobalDatasource) GetSource() *Source {
+	return d.Source
+}
+
+func (d *GlobalDatasource) SetSource(s *Source) {
+	d.Source = s
+}
+
 // Datasource will be the datasource you can define in your project/namespace
 // This is a resource that won't be shared across projects.
 // A Dashboard can use it only if it is in the same project.
@@ -106,6 +115,7 @@ type Datasource struct {
 	Kind     Kind            `json:"kind" yaml:"kind"`
 	Metadata ProjectMetadata `json:"metadata" yaml:"metadata"`
 	Spec     datasource.Spec `json:"spec" yaml:"spec"`
+	Source   *Source         `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 func (d *Datasource) UnmarshalJSON(data []byte) error {
@@ -158,4 +168,12 @@ func (d *Datasource) GetDatasourceSpec() datasource.Spec {
 
 func (d *Datasource) GetSpec() any {
 	return d.Spec
+}
+
+func (d *Datasource) GetSource() *Source {
+	return d.Source
+}
+
+func (d *Datasource) SetSource(s *Source) {
+	d.Source = s
 }

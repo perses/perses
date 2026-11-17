@@ -89,7 +89,7 @@ func TestBuildQuery(t *testing.T) {
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			d := &DAO{Folder: ""}
-			result, prefix, _, err := d.buildQuery(test.query)
+			result, prefix, _, _, err := d.buildQuery(test.query)
 			assert.NoError(t, err)
 			assert.Equal(t, test.expectedPath, result)
 			assert.Equal(t, test.expectedNamePrefix, prefix)

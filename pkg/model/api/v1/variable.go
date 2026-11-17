@@ -77,6 +77,7 @@ type GlobalVariable struct {
 	Kind     Kind         `json:"kind" yaml:"kind"`
 	Metadata Metadata     `json:"metadata" yaml:"metadata"`
 	Spec     VariableSpec `json:"spec" yaml:"spec"`
+	Source   *Source      `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 func (v *GlobalVariable) GetMetadata() modelAPI.Metadata {
@@ -95,12 +96,21 @@ func (v *GlobalVariable) GetSpec() any {
 	return v.Spec
 }
 
+func (v *GlobalVariable) GetSource() *Source {
+	return v.Source
+}
+
+func (v *GlobalVariable) SetSource(s *Source) {
+	v.Source = s
+}
+
 // Variable relates to variables defined at project level.
 // If you are looking for variable defined at dashboard level, see dashboard.Variable
 type Variable struct {
 	Kind     Kind            `json:"kind" yaml:"kind"`
 	Metadata ProjectMetadata `json:"metadata" yaml:"metadata"`
 	Spec     VariableSpec    `json:"spec" yaml:"spec"`
+	Source   *Source         `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 func (v *Variable) GetMetadata() modelAPI.Metadata {
@@ -117,6 +127,14 @@ func (v *Variable) GetVarSpec() VariableSpec {
 
 func (v *Variable) GetSpec() any {
 	return v.Spec
+}
+
+func (v *Variable) GetSource() *Source {
+	return v.Source
+}
+
+func (v *Variable) SetSource(s *Source) {
+	v.Source = s
 }
 
 // IsBuiltinVariable check if variable name is a builtin variable
