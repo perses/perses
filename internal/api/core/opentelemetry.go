@@ -147,6 +147,10 @@ func newHTTPTraceExporter(conf config.OpenTelemetry, tokenSource oauth2.TokenSou
 		otlptracehttp.WithEndpointURL(endpoint.String()),
 		otlptracehttp.WithTimeout(time.Duration(conf.Timeout)),
 	}
+	if conf.IsInsecure() {
+		// Removes the TLS config of the OTEL_EXPORTER_OTLP_* variables: the exporter would refuse to start with it.
+		opts = append(opts, otlptracehttp.WithTLSClientConfig(nil))
+	}
 	// A client of our own only when needed: it replaces the TLS settings of the OTEL_EXPORTER_OTLP_* variables.
 	if conf.TLSConfig != nil || tokenSource != nil {
 		transport, err := newTransport(conf)

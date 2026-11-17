@@ -1333,9 +1333,10 @@ When enabled, Perses creates a span for each HTTP request it receives (except th
 `<api_prefix>/api/v1/health` endpoints, called very often by Prometheus and the probes), and for each request it sends
 to an HTTP datasource through the proxy.
 
-The trace context is read from and propagated with the W3C `traceparent` and `baggage` headers, so a request coming
-from a traced application (like a portal embedding Perses panels) and its queries to the datasource are part of the same
-trace.
+The trace context is read from and propagated with the W3C `traceparent`, `tracestate` and `baggage` headers, so a
+request coming from a traced application (like a portal embedding Perses panels) and its queries to the datasource are
+part of the same trace. The header policy of an HTTP datasource (`allowHeaders` / `dropHeaders`) applies to these
+headers too: with `allowHeaders`, list them to propagate the trace context to the datasource.
 
 ```yaml
 # Enable the export of the traces.
@@ -1378,8 +1379,8 @@ sampling_ratio: <float> | default = 0 # Optional
 The TLS settings, headers and compression that aren't set in this configuration can be set with the standard
 `OTEL_EXPORTER_OTLP_*` environment variables (like `OTEL_EXPORTER_OTLP_CERTIFICATE` or `OTEL_EXPORTER_OTLP_HEADERS`).
 A setting present in this configuration takes precedence over the environment variable. The endpoint and the timeout
-always come from this configuration. The TLS variables are ignored when `tls_config` is set and, with the
-http/protobuf protocol, when an authentication is set (use `tls_config` instead).
+always come from this configuration. The TLS variables are ignored with an http endpoint, when `tls_config` is set
+and, with the http/protobuf protocol, when an authentication is set (use `tls_config` instead).
 
 With the http/protobuf protocol, the endpoint is used like the signal-specific `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`
 variable: a path in the URL is used as-is. Only a URL without a path is completed with `/v1/traces`.

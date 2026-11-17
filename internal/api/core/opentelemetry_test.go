@@ -173,8 +173,14 @@ func TestGRPCTraceExporterUsesTLSConfigAndAuthorization(t *testing.T) {
 	assert.Equal(t, []string{"perses"}, receiver.metadata[0].Get("x-scope-orgid"))
 }
 
-// With an http endpoint, the export is sent in clear text, to /v1/traces when the endpoint has no path.
+// With an http endpoint, the export is sent in clear text, to /v1/traces when the endpoint has no path,
+// even when the TLS variables of the exporter are set (the exporter would refuse to start with them).
 func TestHTTPTraceExporterWithHTTPEndpoint(t *testing.T) {
+	_, ca, _ := newOTLPHTTPReceiver(t)
+	caFile := filepath.Join(t.TempDir(), "ca.crt")
+	require.NoError(t, os.WriteFile(caFile, []byte(ca), 0o600))
+	t.Setenv("OTEL_EXPORTER_OTLP_CERTIFICATE", caFile)
+
 	var mutex sync.Mutex
 	var paths []string
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -362,7 +368,10 @@ func TestTraceExportIsCanceledAfterTheTimeout(t *testing.T) {
 			defer cancel()
 			start := time.Now()
 			_ = provider.ForceFlush(ctx)
-			assert.Less(t, time.Since(start), 5*time.Second)
+			elapsed := time.Since(start)
+			// Returning before the timeout would mean that the export failed for another reason (like a TLS error).
+			assert.GreaterOrEqual(t, elapsed, time.Second)
+			assert.Less(t, elapsed, 5*time.Second)
 			require.NoError(t, ctx.Err(), "the export was not canceled by the timeout")
 			_ = provider.Shutdown(context.Background())
 		})
