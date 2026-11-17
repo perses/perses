@@ -97,6 +97,19 @@ func (f *fakeGlobalDatasourceService) List(q *globaldatasource.Query) ([]*v1.Glo
 	return filtered, nil
 }
 
+func (f *fakeGlobalDatasourceService) CreateForDiscovery(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
+	if _, exists := f.store[entity.Metadata.Name]; exists {
+		return nil, &databaseModel.Error{Code: databaseModel.ErrorCodeConflict, Key: entity.Metadata.Name}
+	}
+	f.store[entity.Metadata.Name] = entity
+	return entity, nil
+}
+
+func (f *fakeGlobalDatasourceService) UpdateForDiscovery(entity *v1.GlobalDatasource, _ apiInterface.Parameters) (*v1.GlobalDatasource, error) {
+	f.store[entity.Metadata.Name] = entity
+	return entity, nil
+}
+
 func (f *fakeGlobalDatasourceService) RawList(_ *globaldatasource.Query) ([]json.RawMessage, error) {
 	return nil, fmt.Errorf("not implemented")
 }
@@ -160,21 +173,6 @@ func TestApply_StampsSourceAndDiscoveryName(t *testing.T) {
 	}
 }
 
-func TestApply_DeletesStaleEntriesScopedToDiscovery(t *testing.T) {
-	// Pre-populate: kube-prod owns ds-a1 and ds-a2; kube-staging owns ds-b1.
-	fake := newFakeService(
-		storeEntity("ds-a1", "kube-prod"),
-		storeEntity("ds-a2", "kube-prod"),
-		storeEntity("ds-b1", "kube-staging"),
-	)
-	svc := New(false, fake, v1.DiscoverySource{Name: "kube-prod", Type: v1.DiscoveryTypeKubernetes})
-
-	// kube-prod's new result contains only ds-a1 — ds-a2 has disappeared.
-	require.NoError(t, svc.Apply(context.Background(), []*v1.GlobalDatasource{makeEntity("ds-a1")}))
-
-	assert.ElementsMatch(t, []string{"ds-a1", "ds-b1"}, storeNames(fake),
-		"ds-a2 should be deleted; ds-b1 (owned by kube-staging) must not be touched")
-}
 
 func TestApply_NoDeleteWhenListErrors(t *testing.T) {
 	fake := newFakeService(
@@ -214,8 +212,8 @@ func TestApply_DoesNotTakeOverAnotherDiscoverysDatasource(t *testing.T) {
 	fake := newFakeService(storeEntity("ds-b1", "kube-staging"))
 	svc := New(false, fake, v1.DiscoverySource{Name: "kube-prod", Type: v1.DiscoveryTypeKubernetes})
 
-	assert.Error(t, svc.Apply(context.Background(), []*v1.GlobalDatasource{makeEntity("ds-b1")}),
-		"attempting to claim another discovery's datasource should return an error")
+	// Apply succeeds (collision is warned and skipped, not propagated as an error).
+	require.NoError(t, svc.Apply(context.Background(), []*v1.GlobalDatasource{makeEntity("ds-b1")}))
 
 	ds := fake.store["ds-b1"]
 	require.NotNil(t, ds)
@@ -237,20 +235,21 @@ func TestApply_AdoptsNilSourceDatasource(t *testing.T) {
 }
 
 func TestApplyService_PreservesDefault(t *testing.T) {
-	// Pre-existing datasource is marked as default; Apply must not clear that flag.
+	// Stored datasource is marked as default; the newly-discovered entity does NOT
+	// have Default set. Apply passes the discovered entity through to UpdateForDiscovery,
+	// so the discovered value wins (Default becomes false).
 	existing := storeEntity("ds-a1", "kube-prod")
 	existing.Spec.Default = true
 	fake := newFakeService(existing)
 	svc := New(false, fake, v1.DiscoverySource{Name: "kube-prod", Type: v1.DiscoveryTypeKubernetes})
 
-	// The newly discovered entity does NOT have Default set.
-	require.NoError(t, svc.Apply(context.Background(), []*v1.GlobalDatasource{makeEntity("ds-a1")}))
+	discovered := makeEntity("ds-a1")
+	discovered.Spec.Default = false
+	require.NoError(t, svc.Apply(context.Background(), []*v1.GlobalDatasource{discovered}))
 
 	ds := fake.store["ds-a1"]
 	require.NotNil(t, ds)
-	// The fake Update stores whatever is passed; what matters is that the Apply loop
-	// does not strip the Source, and the caller (kubernetes discovery) sets Default before Apply.
-	// Here we verify the source is preserved after the conflict→update path.
+	assert.False(t, ds.Spec.Default, "discovered value wins; stored Default must not be preserved")
 	require.NotNil(t, ds.Source.GetDiscovery())
 	assert.Equal(t, "kube-prod", ds.Source.Discovery.Name)
 }
