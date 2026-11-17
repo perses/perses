@@ -58,7 +58,8 @@ type FieldMatch struct {
 	Key string `json:"key,omitempty"`
 	// Path is the location of the field matching the query in the resource.
 	// For example, ["metadata", "tags", "1"] when the query matches the second tag of the resource.
-	// It is empty if the index key uses a syntax for which the path can't be determined.
+	// It is empty if the index key uses a syntax for which the path can't be determined, or if the value has been found
+	// inside a string, e.g. gjson selects 1 in the string "[1]" with the key "@dig:0".
 	Path []string `json:"path,omitempty"`
 	// The list of intervals that match the query.
 	Intervals []MatchingInterval `json:"intervals,omitempty"`

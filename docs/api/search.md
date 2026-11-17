@@ -41,6 +41,8 @@ displayName: <string>
 # For example: `["spec", "panels", "MyPanel", "spec", "display", "name"]`.
 # It is not set when the index key uses a syntax for which the location can't be determined:
 # wildcards, queries, multipaths, pipes and modifiers other than `@dig`.
+# It is not set either when the value has been found inside a string, which gjson does for some keys:
+# for example, `@dig:0` finds `1` in the string `"[1]"`.
 [ path: <list of string> ]
 
 # The position of the characters matching the query in the matching value.

@@ -76,8 +76,16 @@ func (r rawDocument) getRawMetadata() string {
 type indexedField struct {
 	start, valueEnd, end uint32
 	// key is the position, in the indexed keys, of the key (as configured in the search config) the value has been
-	// extracted from.
+	// extracted from, combined with pathlessField when the path of the value can't be determined.
 	key uint32
+}
+
+// pathlessField is the bit of indexedField.key set when the path of the value can't be determined.
+const pathlessField = 1 << 31
+
+// keyIndex returns the position of the key of the field in the indexed keys.
+func (f indexedField) keyIndex() uint32 {
+	return f.key &^ pathlessField
 }
 
 func (f indexedField) value(data string) string {
@@ -87,8 +95,12 @@ func (f indexedField) value(data string) string {
 // path returns the location of the value in the document, e.g. ["metadata", "tags", "1"]: the prefix of its key,
 // followed by the end of the path stored in the data. The components share the memory of the data, which is never
 // modified, but the slice is new, so the caller can modify it.
-// It is nil when the key uses a syntax for which the path can't be determined.
+// It is nil when the path can't be determined: when the key uses an unsupported syntax, or when the value has been
+// found by gjson inside a string (see fieldsBuilder.extractFields).
 func (f indexedField) path(data string, keys []indexedKey) []string {
+	if f.key&pathlessField != 0 {
+		return nil
+	}
 	prefix := keys[f.key].prefixPath
 	names := keys[f.key].names
 	encoded := data[f.valueEnd:f.end]
@@ -135,7 +147,7 @@ func (idx *index[T]) match(text string, keys []indexedKey) *SearchResult {
 		if !ok {
 			continue
 		}
-		match.Key = keys[field.key].key
+		match.Key = keys[field.keyIndex()].key
 		match.Path = field.path(idx.data, keys)
 		hit := &searchHit{
 			result: SearchResult{Metadata: idx.metadata, DisplayName: idx.displayName},
@@ -152,9 +164,7 @@ type indexedKey struct {
 	key string
 	// steps is nil when the key uses a syntax for which the path of the values can't be determined.
 	steps []keyStep
-	// prefix is the beginning of the key made of field steps only, and prefixPath the names of these steps.
-	// The value selected by the prefix is got with gjson.GetBytes, which copies only this value instead of the document.
-	prefix     string
+	// prefixPath is the beginning of the path of every value: the names of the first step when it is a field step.
 	prefixPath []string
 	// names are the distinct names of the field steps of the key, which are often the components of the paths of the
 	// values, so the paths refer to them instead of storing them (see fieldsBuilder.appendField).
@@ -166,8 +176,11 @@ func newIndexedKey(key string) (indexedKey, error) {
 	if err != nil {
 		return indexedKey{key: key}, err
 	}
-	prefix, prefixPath := fieldPrefix(steps)
-	return indexedKey{key: key, steps: steps, prefix: prefix, prefixPath: prefixPath, names: stepNames(steps, nil)}, nil
+	k := indexedKey{key: key, steps: steps, names: stepNames(steps, nil)}
+	if steps[0].kind == fieldStep {
+		k.prefixPath = steps[0].names
+	}
+	return k, nil
 }
 
 func newProjectIndexer(indexedKeys []string, scope role.Scope, authz authorization.Authorization, matcher *matcher) *projectIndexer {

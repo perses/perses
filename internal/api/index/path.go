@@ -33,9 +33,10 @@ import (
 type keyStepKind int
 
 const (
-	// fieldStep selects the value of an object key, or of an array item when the component is a number.
+	// fieldStep selects a value with consecutive components, each selecting the value of an object key, or of an array
+	// item when the component is a number.
 	fieldStep keyStepKind = iota
-	// arrayItemsStep (#) selects every item of an array.
+	// arrayItemsStep (#) selects every item of an array, or the value of the "#" key of an object.
 	arrayItemsStep
 	// digStep (@dig:<key>) selects the values matching the key at any depth.
 	digStep
@@ -43,17 +44,22 @@ const (
 
 type keyStep struct {
 	kind keyStepKind
-	// raw is the component as written in the key, used to get the value with gjson.
+	// key is the rest of the key from this step, as written, used to get the values with gjson when their path can't be
+	// determined (see fieldsBuilder.extractFields).
+	key string
+	// raw is the components of a fieldStep as written in the key, used to get the value with gjson.
 	raw string
-	// name is the unescaped component, used in the path of the values.
-	name string
+	// names are the unescaped components of a fieldStep, used in the path of the values.
+	names []string
 	// dig is the key to find at any depth, for a digStep.
 	dig []keyStep
 }
 
 const digModifier = "@dig:"
 
-// compileKey splits an index key into steps.
+// compileKey splits an index key into steps. Consecutive field components are grouped in a single step, evaluated at
+// once as gjson does: it doesn't look for the next components inside a string, e.g. the key a.0 selects nothing in
+// {"a": "[1]"}.
 // It returns an error when the key uses a gjson syntax for which the path of the values can't be determined:
 // wildcards, queries, multipaths, literals, pipes and modifiers other than @dig.
 func compileKey(key string) ([]keyStep, error) {
@@ -61,8 +67,8 @@ func compileKey(key string) ([]keyStep, error) {
 		return nil, errors.New("empty key")
 	}
 	var steps []keyStep
-	for len(key) > 0 {
-		if arg, isDig := strings.CutPrefix(key, digModifier); isDig {
+	for rest := key; len(rest) > 0; {
+		if arg, isDig := strings.CutPrefix(rest, digModifier); isDig {
 			// gjson ends the argument of a modifier at the first pipe, even when it is escaped.
 			if strings.Contains(arg, "|") {
 				return nil, errors.New("pipes are not supported")
@@ -71,76 +77,68 @@ func compileKey(key string) ([]keyStep, error) {
 			if err != nil {
 				return nil, fmt.Errorf("invalid argument of %s: %w", digModifier, err)
 			}
-			return append(steps, keyStep{kind: digStep, dig: dig}), nil
+			return append(steps, keyStep{kind: digStep, key: rest, dig: dig}), nil
 		}
-		step, rest, err := nextStep(key)
+		raw, name, next, err := nextComponent(rest)
 		if err != nil {
 			return nil, err
 		}
-		steps = append(steps, step)
-		key = rest
+		last := len(steps) - 1
+		if raw == "#" {
+			steps = append(steps, keyStep{kind: arrayItemsStep, key: rest})
+		} else if last >= 0 && steps[last].kind == fieldStep {
+			// The components are separated by a single dot.
+			steps[last].raw = steps[last].key[:len(steps[last].raw)+1+len(raw)]
+			steps[last].names = append(steps[last].names, name)
+		} else {
+			steps = append(steps, keyStep{kind: fieldStep, key: rest, raw: raw, names: []string{name}})
+		}
+		rest = next
 	}
 	return steps, nil
 }
 
-// nextStep returns the step of the first component of the key, and the rest of the key.
-func nextStep(key string) (keyStep, string, error) {
+// nextComponent returns the first component of the key, as written and unescaped, and the rest of the key.
+func nextComponent(key string) (raw, name, rest string, err error) {
 	switch key[0] {
 	case '@', '{', '[', '!':
-		return keyStep{}, "", fmt.Errorf("unsupported syntax %q", key)
+		return "", "", "", fmt.Errorf("unsupported syntax %q", key)
 	}
-	var name strings.Builder
+	var unescaped strings.Builder
 	i := 0
 	for ; i < len(key) && key[i] != '.'; i++ {
 		switch key[i] {
 		case '\\':
 			if i+1 == len(key) {
-				return keyStep{}, "", errors.New("the key ends with an escape character")
+				return "", "", "", errors.New("the key ends with an escape character")
 			}
 			i++
-			name.WriteByte(key[i])
+			unescaped.WriteByte(key[i])
 			continue
 		case '|':
-			return keyStep{}, "", errors.New("pipes are not supported")
+			return "", "", "", errors.New("pipes are not supported")
 		case '*', '?':
 			// gjson selects the first key matching a wildcard for which the rest of the path exists,
 			// which can't be determined step by step.
-			return keyStep{}, "", errors.New("wildcards are not supported")
+			return "", "", "", errors.New("wildcards are not supported")
 		}
-		name.WriteByte(key[i])
+		unescaped.WriteByte(key[i])
 	}
-	raw := key[:i]
+	raw = key[:i]
 	if len(raw) == 0 {
-		return keyStep{}, "", errors.New("empty component")
+		return "", "", "", errors.New("empty component")
 	}
-	rest := ""
 	if i < len(key) {
 		rest = key[i+1:]
 		if len(rest) == 0 {
-			return keyStep{}, "", errors.New("the key ends with a dot")
+			return "", "", "", errors.New("the key ends with a dot")
 		}
 	}
-	if raw[0] == '#' {
-		// `#` alone at the end of a key returns the length of the array, and `#(...)` is a query.
-		if raw != "#" || len(rest) == 0 {
-			return keyStep{}, "", fmt.Errorf("unsupported syntax %q", raw)
-		}
-		return keyStep{kind: arrayItemsStep}, rest, nil
+	// `#` alone at the end of a key returns the length of an array, and `#(...)` is a query.
+	if raw[0] == '#' && (raw != "#" || len(rest) == 0) {
+		return "", "", "", fmt.Errorf("unsupported syntax %q", raw)
 	}
-	return keyStep{kind: fieldStep, raw: raw, name: name.String()}, rest, nil
-}
-
-// fieldPrefix returns the beginning of the steps made of field steps only: the key selecting them, and their names.
-func fieldPrefix(steps []keyStep) (string, []string) {
-	var raws, names []string
-	for _, s := range steps {
-		if s.kind != fieldStep {
-			break
-		}
-		raws = append(raws, s.raw)
-		names = append(names, s.name)
-	}
-	return strings.Join(raws, "."), names
+	return raw, unescaped.String(), rest, nil
 }
 
 // stepNames appends to names the names of the field steps that aren't in it yet, including the ones of the @dig steps.
@@ -148,8 +146,10 @@ func stepNames(steps []keyStep, names []string) []string {
 	for _, s := range steps {
 		switch s.kind {
 		case fieldStep:
-			if !slices.Contains(names, s.name) {
-				names = append(names, s.name)
+			for _, name := range s.names {
+				if !slices.Contains(names, name) {
+					names = append(names, name)
+				}
 			}
 		case digStep:
 			names = stepNames(s.dig, names)
@@ -191,6 +191,15 @@ func (b *fieldsBuilder) reset() {
 // a uvarint: twice the position of the component in the step names of the key plus one when it is one of them, which
 // is often the case and saves storing it, otherwise twice its length followed by its bytes.
 func (b *fieldsBuilder) appendField(value string, path []string) {
+	b.appendKeyField(value, path, b.key)
+}
+
+// appendPathlessField appends a field whose path can't be determined.
+func (b *fieldsBuilder) appendPathlessField(value string) {
+	b.appendKeyField(value, nil, b.key|pathlessField)
+}
+
+func (b *fieldsBuilder) appendKeyField(value string, path []string, key uint32) {
 	if b.tooLarge {
 		return
 	}
@@ -211,7 +220,7 @@ func (b *fieldsBuilder) appendField(value string, path []string) {
 		b.tooLarge = true
 		return
 	}
-	b.fields = append(b.fields, indexedField{start: uint32(start), valueEnd: uint32(valueEnd), end: uint32(end), key: b.key}) //nolint:gosec // G115: the offsets don't exceed maxDataSize
+	b.fields = append(b.fields, indexedField{start: uint32(start), valueEnd: uint32(valueEnd), end: uint32(end), key: key}) //nolint:gosec // G115: the offsets don't exceed maxDataSize
 }
 
 // nextPathComponent returns the first component of a path encoded by appendField, and the rest of the path.
@@ -242,19 +251,25 @@ func (b *fieldsBuilder) extractKeyFields(raw rawDocument, key uint32, k indexedK
 	switch {
 	case k.steps == nil:
 		b.recursiveDeepExtractFields(raw.getFields(k.key))
-	case len(k.prefixPath) == 0:
-		// The key starts with # or @dig, so the whole document is walked.
-		b.extractFields(gjson.ParseBytes(raw), k.steps, b.path[:0])
+	case k.steps[0].kind == fieldStep:
+		// The components of the first step are the prefix of the key. Unlike gjson.ParseBytes, gjson.GetBytes copies
+		// only the value they select, not the whole document.
+		b.extractFields(gjson.GetBytes(raw, k.steps[0].raw), k.steps[1:], b.path[:0], false)
 	default:
-		// Unlike gjson.ParseBytes, gjson.GetBytes copies only the value selected by the prefix, not the whole document.
-		b.extractFields(gjson.GetBytes(raw, k.prefix), k.steps[len(k.prefixPath):], b.path[:0])
+		// The key starts with # or @dig, so the whole document is walked.
+		b.extractFields(gjson.ParseBytes(raw), k.steps, b.path[:0], true)
 	}
 }
 
 // extractFields appends the scalar values selected by the steps in the given value, with their path.
+// isRoot is set when gjson evaluates the steps on the value as on a new document, which it does for the document, for
+// each item of an array selected by #, and for each value @dig searches its key in. Then, when the value is a scalar,
+// gjson evaluates the steps on the first array or object it finds in it, even inside a string, e.g. the key 0 selects
+// 1 in "[1]": as the location of such a value can't be represented, it is appended without its path. Otherwise, gjson
+// doesn't select anything in a scalar.
 // The path is used as a stack: the recursive calls share its backing array, which is safe as it is copied in the
 // data when a field is appended.
-func (b *fieldsBuilder) extractFields(value gjson.Result, steps []keyStep, path []string) {
+func (b *fieldsBuilder) extractFields(value gjson.Result, steps []keyStep, path []string, isRoot bool) {
 	if b.tooLarge || !value.Exists() {
 		return
 	}
@@ -263,21 +278,32 @@ func (b *fieldsBuilder) extractFields(value gjson.Result, steps []keyStep, path 
 		return
 	}
 	step := steps[0]
-	switch step.kind {
-	case fieldStep:
-		b.extractFields(value.Get(step.raw), steps[1:], append(path, step.name))
-	case arrayItemsStep:
-		if value.IsArray() {
-			forEachChild(value, func(name string, child gjson.Result) {
-				b.extractFields(child, steps[1:], append(path, name))
-			})
-		}
-	case digStep:
-		// Same as the gjson @dig modifier: the key is searched in the value, then in each of its children, recursively.
-		b.extractFields(value, step.dig, path)
+	if step.kind == digStep {
+		// Same as the gjson @dig modifier: the key is searched in the value, then in each of its children, recursively,
+		// each of them being a new document.
+		b.extractFields(value, step.dig, path, true)
 		forEachChild(value, func(name string, child gjson.Result) {
-			b.extractFields(child, steps, append(path, name))
+			b.extractFields(child, steps, append(path, name), true)
 		})
+		return
+	}
+	isArray := value.IsArray()
+	if !isArray && !value.IsObject() {
+		if isRoot {
+			b.recursiveDeepExtractFields([]gjson.Result{value.Get(step.key)})
+		}
+		return
+	}
+	switch {
+	case step.kind == fieldStep:
+		b.extractFields(value.Get(step.raw), steps[1:], append(path, step.names...), false)
+	case isArray:
+		forEachChild(value, func(name string, child gjson.Result) {
+			b.extractFields(child, steps[1:], append(path, name), true)
+		})
+	default:
+		// On an object, gjson selects the value of the "#" key.
+		b.extractFields(value.Get("#"), steps[1:], append(path, "#"), false)
 	}
 }
 
@@ -293,7 +319,7 @@ func (b *fieldsBuilder) flattenFields(value gjson.Result, path []string) {
 }
 
 // recursiveDeepExtractFields appends the scalar values of the given results, without their path.
-// It is used for the keys for which the path of the values can't be determined.
+// It is used for the values whose path can't be determined.
 func (b *fieldsBuilder) recursiveDeepExtractFields(fs []gjson.Result) {
 	for _, f := range fs {
 		if !f.Exists() {
@@ -306,7 +332,7 @@ func (b *fieldsBuilder) recursiveDeepExtractFields(fs []gjson.Result) {
 				b.recursiveDeepExtractFields([]gjson.Result{v})
 			}
 		} else {
-			b.appendField(f.String(), nil)
+			b.appendPathlessField(f.String())
 		}
 	}
 }

@@ -35,7 +35,12 @@ const pathTestDocument = `{
 		"layouts": [
 			{"kind": "Grid", "spec": {"display": {"title": "Resources"}}},
 			{"kind": "Grid", "spec": {"display": {"title": "Network"}}}
-		]
+		],
+		"variables": [
+			{"kind": "TextVariable", "spec": {"name": "[42]"}},
+			{"kind": "ListVariable", "spec": {"name": "env", "query": "sum(rate(up[5m]))", "values": ["[1, [2]]", "{\"name\": \"in a string\"}"]}}
+		],
+		"datasources": {"#": {"name": "hash"}}
 	}
 }`
 
@@ -66,7 +71,7 @@ type decodedField struct {
 func decodeFields(keys []indexedKey, data string, fields []indexedField) []decodedField {
 	decoded := make([]decodedField, 0, len(fields))
 	for _, f := range fields {
-		decoded = append(decoded, decodedField{key: keys[f.key].key, value: f.value(data), path: f.path(data, keys)})
+		decoded = append(decoded, decodedField{key: keys[f.keyIndex()].key, value: f.value(data), path: f.path(data, keys)})
 	}
 	return decoded
 }
@@ -151,6 +156,36 @@ func TestExtractFields(t *testing.T) {
 			key:           "spec.unknown.field",
 			expectedPaths: nil,
 		},
+		{
+			// gjson evaluates the fields together, so it doesn't search the rest of the key in the string "[42]".
+			title:         "fields continuing in a string",
+			key:           "spec.variables.#.spec.name.0",
+			expectedPaths: nil,
+		},
+		{
+			title:         "fields continuing in a string, searched by dig",
+			key:           "spec.variables.@dig:query.0",
+			expectedPaths: nil,
+		},
+		{
+			// gjson searches the key in each value found by @dig, as in a new document, so it finds 42 in the string
+			// "[42]", whose path can't be represented.
+			title:         "dig finding a value in a string",
+			key:           "spec.variables.0.spec.@dig:0",
+			expectedPaths: [][]string{nil},
+		},
+		{
+			// gjson evaluates the rest of the key on each item, as on a new document, so it finds [2] in the string
+			// "[1, [2]]".
+			title:         "array item finding a value in a string",
+			key:           "spec.variables.1.spec.values.#.1",
+			expectedPaths: [][]string{nil},
+		},
+		{
+			title:         "# key of an object",
+			key:           "spec.datasources.#.name",
+			expectedPaths: [][]string{{"spec", "datasources", "#", "name"}},
+		},
 	}
 	for _, tc := range testsCases {
 		t.Run(tc.title, func(t *testing.T) {
@@ -179,11 +214,12 @@ func TestIndexedField_path(t *testing.T) {
 	var b fieldsBuilder
 	b.reset()
 	b.key, b.names = 0, keys[0].names
-	b.appendField("unsupported", nil)
+	b.appendPathlessField("unsupported")
 	b.key, b.names = 1, k.names
 	b.appendField("value", end)
 	b.appendField("", nil)
 	b.appendField("CPU usage", []string{"cpu", "spec", "display", "name"})
+	b.appendPathlessField("in a string")
 	data := string(b.data)
 	fields := decodeFields(keys, data, b.fields)
 	assert.Equal(t, []decodedField{
@@ -191,6 +227,7 @@ func TestIndexedField_path(t *testing.T) {
 		{key: k.key, value: "value", path: append([]string{"spec", "panels"}, end...)},
 		{key: k.key, value: "", path: []string{"spec", "panels"}},
 		{key: k.key, value: "CPU usage", path: []string{"spec", "panels", "cpu", "spec", "display", "name"}},
+		{key: k.key, value: "in a string"},
 	}, fields)
 	// "cpu" is stored with its length, and the step names of the key are stored as references of a byte each.
 	assert.Equal(t, uint32(1+len("cpu")+3), b.fields[3].end-b.fields[3].valueEnd)
@@ -242,6 +279,11 @@ func FuzzExtractFields(f *testing.F) {
 		`spec.panels.my\.memory.spec.links`,
 		"spec.panels.*.kind",
 		`metadata.name\`,
+		"spec.variables.#.spec.name.0",
+		"spec.variables.@dig:query.0",
+		"spec.variables.0.spec.@dig:0",
+		"spec.variables.1.spec.values.#.1",
+		"spec.datasources.#.name",
 	} {
 		f.Add(key)
 	}
@@ -255,7 +297,7 @@ func FuzzExtractFields(f *testing.F) {
 }
 
 // assertSameFieldsAsGjson checks that the values of the fields are the ones gjson returns for the key,
-// and that the path of each field leads to its value.
+// and that the path of each field, when it can be determined, leads to its value.
 func assertSameFieldsAsGjson(t *testing.T, key string, fields []decodedField) {
 	t.Helper()
 	var expected fieldsBuilder
@@ -267,7 +309,9 @@ func assertSameFieldsAsGjson(t *testing.T, key string, fields []decodedField) {
 	values := make([]string, 0, len(fields))
 	for _, f := range fields {
 		values = append(values, f.value)
-		assert.Equal(t, f.value, gjson.Get(pathTestDocument, gjsonPath(f.path)).String(), "path %q", f.path)
+		if f.path != nil {
+			assert.Equal(t, f.value, gjson.Get(pathTestDocument, gjsonPath(f.path)).String(), "path %q", f.path)
+		}
 	}
 	assert.ElementsMatch(t, expectedValues, values, "key %q", key)
 }
