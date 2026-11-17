@@ -47,7 +47,6 @@ func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasourc
 		return nil
 	}
 
-	var currentNames []string
 	var errs []error
 	for _, entity := range entities {
 		if err := ctx.Err(); err != nil {
@@ -62,7 +61,6 @@ func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasourc
 		entity.GetMetadata().Flatten(a.caseSensitive)
 		_, createErr := a.svc.CreateForDiscovery(entity)
 		if createErr == nil {
-			currentNames = append(currentNames, entity.Metadata.Name)
 			continue
 		}
 
@@ -99,7 +97,6 @@ func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasourc
 			errs = append(errs, fmt.Errorf("globaldatasource %q: %w", entity.Metadata.Name, updateError))
 			continue
 		}
-		currentNames = append(currentNames, entity.Metadata.Name)
 	}
 
 	return errors.Join(errs...)
