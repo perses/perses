@@ -120,6 +120,10 @@ func TestCompileKey_unsupportedSyntax(t *testing.T) {
 		"spec.variables.#.spec.values.00",
 		"spec.panels.@dig:links.01",
 		"metadata.tags.9223372036854775808",
+		`metadata.tags.x\|!0`,
+		`metadata.tags.x\.[!0]`,
+		`metadata.tags.x\.{"a":!0}`,
+		`metadata.tags.x\.@this`,
 	} {
 		t.Run(key, func(t *testing.T) {
 			_, err := compileKey(key)
@@ -307,6 +311,8 @@ func FuzzExtractFields(f *testing.F) {
 		"metadata.tags.01",
 		"spec.variables.#.spec.values.01",
 		"spec.panels.@dig:links.00",
+		`@dig:\.[!0)`,
+		`spec.variables.#.spec.values.x\|!0`,
 	} {
 		f.Add(key)
 	}

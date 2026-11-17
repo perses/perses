@@ -61,8 +61,8 @@ const digModifier = "@dig:"
 // once as gjson does: it doesn't look for the next components inside a string, e.g. the key a.0 selects nothing in
 // {"a": "[1]"}.
 // It returns an error when the key uses a gjson syntax for which the path of the values can't be determined:
-// wildcards, queries, multipaths, literals, pipes, modifiers other than @dig, JSON arguments of @dig and numbers with
-// leading zeros or out of the range of int.
+// wildcards, queries, multipaths, literals, pipes, including escaped ones, modifiers other than @dig, JSON arguments of
+// @dig, numbers with leading zeros or out of the range of int, and escaped dots followed by [, { or @.
 func compileKey(key string) ([]keyStep, error) {
 	if len(key) == 0 {
 		return nil, errors.New("empty key")
@@ -119,6 +119,14 @@ func nextComponent(key string) (raw, name, rest string, err error) {
 				return "", "", "", errors.New("the key ends with an escape character")
 			}
 			i++
+			// gjson ignores the escape characters of a component evaluated on an array: an escaped pipe, or an escaped
+			// dot followed by [, { or a modifier, is a pipe there, which can select values that aren't in the document.
+			switch {
+			case key[i] == '|':
+				return "", "", "", errors.New("escaped pipes are not supported")
+			case key[i] == '.' && i+1 < len(key) && strings.IndexByte("[{@", key[i+1]) >= 0:
+				return "", "", "", fmt.Errorf("escaped dots followed by %q are not supported", key[i+1])
+			}
 			unescaped.WriteByte(key[i])
 			continue
 		case '|':
