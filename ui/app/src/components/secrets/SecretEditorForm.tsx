@@ -35,10 +35,11 @@ import {
 import type { Secret, SecretsEditorSchemaType } from '@perses-dev/client';
 import { secretsEditorSchema } from '@perses-dev/client';
 import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import PlusIcon from 'mdi-material-ui/Plus';
 import TrashIcon from 'mdi-material-ui/TrashCan';
-import type { ReactElement, SyntheticEvent } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import type { ForwardedRef, ReactElement, SyntheticEvent } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import type { z } from 'zod';
@@ -67,16 +68,10 @@ type SecretEditorFormProps = FormEditorProps<Secret>;
 
 type EndpointParams = Record<string, string[]> | undefined;
 
-export function SecretEditorForm({
-  initialValue,
-  action,
-  isDraft,
-  isReadonly,
-  onActionChange,
-  onSave,
-  onClose,
-  onDelete,
-}: SecretEditorFormProps): ReactElement {
+export const SecretEditorForm = forwardRef(function SecretEditorForm(
+  { initialValue, action, isDraft, isReadonly, onActionChange, onSave, onClose, onDelete }: SecretEditorFormProps,
+  ref: ForwardedRef<FormEditorHandle>,
+): ReactElement {
   // Reset all attributes that are "hidden" by the API and are returning <secret> as value
   const initialSecretClean: Secret = useMemo(() => {
     const result = structuredClone(initialValue);
@@ -118,6 +113,8 @@ export function SecretEditorForm({
       onClose();
     }
   }
+
+  useImperativeHandle(ref, () => ({ requestClose: handleCancel }));
 
   // Form errors are removed only from latest input touched
   // This will remove errors for others inputs
@@ -930,7 +927,7 @@ export function SecretEditorForm({
       />
     </FormProvider>
   );
-}
+});
 
 interface TabPanelProps extends BoxProps {
   index: string;
