@@ -1,8 +1,8 @@
-import type { DatasourceSelector } from '@perses-dev/spec';
+import type { DatasourceSelectValue } from '@perses-dev/plugin-system';
 
 export interface {{ .PluginPascalName }}Spec {
   query: string;
-  datasource?: DatasourceSelector;
+  datasource?: DatasourceSelectValue;
 }
 
 // TODO: import this type from your datasource or an existing datasource plugin

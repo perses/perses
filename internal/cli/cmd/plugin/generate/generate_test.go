@@ -19,6 +19,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/perses/perses/internal/api/plugin"
 	cmdTest "github.com/perses/perses/internal/cli/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -308,6 +309,11 @@ func TestPluginGenerateEveryPluginType(t *testing.T) {
 			pluginPath, err := getPluginPath(pluginName, pluginType)
 			require.NoError(t, err)
 			assert.DirExists(t, filepath.Join(dir, filepath.FromSlash(pluginPath)))
+
+			npmPackage, err := plugin.ReadPackage(dir)
+			require.NoError(t, err)
+			require.Len(t, npmPackage.Perses.Plugins, 1)
+			assert.Equal(t, pluginType, npmPackage.Perses.Plugins[0].Kind)
 		})
 	}
 }

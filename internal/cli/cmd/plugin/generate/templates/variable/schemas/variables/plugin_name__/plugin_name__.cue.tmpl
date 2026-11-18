@@ -2,12 +2,15 @@ package model
 
 import (
 	"strings"
+
+	"github.com/perses/shared/cue/common"
 )
 
 kind: "{{ .PluginPascalName }}"
 spec: close({
-	datasource?: {
-		kind: "YourDatasourceKind"
+	datasource?: =~common.#variableSyntaxRegex | {
+		kind:  "YourDatasourceKind"
+		name?: string
 	}
 	query: strings.MinRunes(1)
 })

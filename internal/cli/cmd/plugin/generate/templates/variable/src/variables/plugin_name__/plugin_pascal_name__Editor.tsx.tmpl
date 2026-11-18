@@ -15,12 +15,7 @@ export function {{ .PluginPascalName }}Editor(props: {{ .PluginPascalName }}Edit
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
     (newDatasourceSelection) => {
-      // Dashboard variables are not supported as datasource selection by this plugin, ignore them.
-      if (isVariableDatasource(newDatasourceSelection)) {
-        return;
-      }
-
-      if (newDatasourceSelection.kind === DATASOURCE_KIND) {
+      if (isVariableDatasource(newDatasourceSelection) || newDatasourceSelection.kind === DATASOURCE_KIND) {
         onChange({ ...value, datasource: newDatasourceSelection });
       }
     },
