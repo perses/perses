@@ -49,6 +49,8 @@ func TestConfigCMD(t *testing.T) {
     enable_auth: true
     cors:
         enable: false
+    content_security_policy:
+        disable: false
 
 `,
 		},

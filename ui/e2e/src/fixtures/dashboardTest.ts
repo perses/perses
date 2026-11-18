@@ -13,10 +13,10 @@
 
 import type { DashboardResource } from '@perses-dev/client';
 import type { ConsoleMessage } from '@playwright/test';
-import { test as testBase, expect } from '@playwright/test';
 
 import type { MockQueryRangeConfig } from '../pages';
 import { AppHomePage, DashboardPage } from '../pages';
+import { expect, test as testBase } from './persesTest';
 
 type DashboardTestOptions = {
   projectName: string;
@@ -212,4 +212,4 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
   },
 });
 
-export { expect } from '@playwright/test';
+export { expect } from './persesTest';

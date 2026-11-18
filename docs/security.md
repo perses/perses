@@ -56,10 +56,14 @@ properties of this design deserve attention:
   to the Perses origin are also removed: `Set-Cookie`, `Clear-Site-Data`,
   `Refresh`, `Strict-Transport-Security`, `Alt-Svc`, `Service-Worker-Allowed`,
   the CORS headers (`Access-Control-*`, defined by `security.cors` instead),
-  and the `Location` / `Content-Location` headers that are not relative. The
-  Perses UI queries the proxy with `fetch`, so this has no impact on it, but
-  the UI of a datasource (for example the Prometheus UI) can no longer be
-  browsed through the proxy.
+  and the `Location` / `Content-Location` headers that are not relative. As the
+  [Content Security Policy](#content-security-policy) of the UI allows the
+  scripts of the Perses origin, the proxy also refuses the requests made to
+  load a script or a worker (`Sec-Fetch-Dest`), and serves the JavaScript
+  responses as `text/plain`, which the browsers refuse to run. The Perses UI
+  queries the proxy with `fetch`, so this has no impact on it, but the UI of a
+  datasource (for example the Prometheus UI) can no longer be browsed through
+  the proxy.
 
 ## Dashboard content
 
@@ -112,3 +116,32 @@ When using the SQL backend:
 - With `database.sql.case_sensitive: true`, ensure the database uses a
   case-sensitive collation; otherwise case variants of names alias each other
   even though the setting is enabled.
+
+## Content Security Policy
+
+The pages of the UI are sent with a `Content-Security-Policy` header, which
+restricts what the browser can run in the Perses origin. It's a second layer of
+protection against a script injected in the content of a dashboard (for example
+through a link URL): even if such a script reached a page, the browser wouldn't
+run it.
+
+The default policy is
+`script-src 'self' 'unsafe-eval'; object-src 'none'; base-uri 'self'`:
+
+- `script-src 'self' 'unsafe-eval'`: only the scripts served by Perses, the UI
+  and the plugins, can run (the datasource proxy refuses to serve the responses
+  of the datasources as scripts). The inline scripts, the inline event handlers
+  and the `javascript:` URLs are blocked. `eval()` is allowed, as the module
+  federation runtime, which loads the plugins, relies on it.
+- `object-src 'none'`: the `<object>` and `<embed>` elements can't load
+  anything.
+- `base-uri 'self'`: a `<base>` element can only use a URL of the Perses
+  origin, so it can't make the relative URLs point to another website.
+
+The policy can be changed, or disabled, with
+`security.content_security_policy` (see the
+[configuration](./configuration/configuration.md#content-security-policy-config)).
+For example, if a reverse proxy injects a script in the pages (analytics,
+monitoring, ...), allow its origin in `script-src`, and check the console of
+the browser for the reports of the blocked resources. A plugin must not rely on
+inline scripts or `javascript:` URLs.

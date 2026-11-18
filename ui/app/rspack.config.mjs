@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { defineConfig } from '@rspack/cli';
@@ -20,6 +22,18 @@ import TerserPlugin from 'terser-webpack-plugin';
 
 const isDev = process.env.NODE_ENV === 'development';
 const isSharedDev = isDev && process.env.SHARED_DEV === 'true';
+
+// loader-theme.js is loaded by index.html as is, before the app (see the file for the details). Its name embeds a hash
+// of its content, so the browsers cache it like the bundles of the app instead of revalidating it on each page load.
+const loaderThemeHash = createHash('sha256')
+  .update(readFileSync(resolve(import.meta.dirname, 'loader-theme.js')))
+  .digest('hex')
+  .slice(0, 16);
+const loaderThemeFile = `loader-theme.${loaderThemeHash}.js`;
+
+// The default Content-Security-Policy of the Perses server (DefaultContentSecurityPolicy in
+// pkg/model/api/config/security.go). The dev server sends it too, so the violations show up during the development.
+const defaultContentSecurityPolicy = "script-src 'self' 'unsafe-eval'; object-src 'none'; base-uri 'self'";
 
 // When SHARED_DEV=true, resolve shared packages from an adjacent perses/shared checkout (see that repo for linking instructions).
 const sharedPackagesPath = process.env.SHARED_PACKAGES_PATH ?? resolve(import.meta.dirname, '../../../shared');
@@ -147,6 +161,7 @@ export default defineConfig({
         liveReload: false,
         port: parseInt(process.env.PORT ?? '3000'),
         allowedHosts: 'all',
+        headers: { 'Content-Security-Policy': defaultContentSecurityPolicy },
         proxy: [
           {
             context: ['/api', '/proxy', '/plugins'],
@@ -172,6 +187,7 @@ export default defineConfig({
       template: './index.html',
       favicon: './favicon.ico',
       publicPath: isDev ? '/' : 'PREFIX_PATH_PLACEHOLDER/',
+      templateParameters: { loaderThemeFile },
     }),
     new rspack.CopyRspackPlugin({
       patterns: [
@@ -179,6 +195,11 @@ export default defineConfig({
           from: 'src/locales',
           to: 'locales',
           noErrorOnMissing: true,
+        },
+        // Loaded by index.html, see loaderThemeFile.
+        {
+          from: 'loader-theme.js',
+          to: loaderThemeFile,
         },
       ],
     }),
