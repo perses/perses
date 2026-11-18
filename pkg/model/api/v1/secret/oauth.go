@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type PublicOAuth struct {
@@ -117,7 +118,7 @@ func (o *OAuth) GetClientSecret() (string, error) {
 		if err != nil {
 			return "", fmt.Errorf("failed to read clientSecretFile: %w", err)
 		}
-		return string(clientSecret), nil
+		return strings.TrimSpace(string(clientSecret)), nil
 	}
 
 	return o.ClientSecret, nil

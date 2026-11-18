@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 )
 
 // PublicBasicAuth is the public struct of BasicAuth.
@@ -90,7 +91,7 @@ func (b *BasicAuth) GetPassword() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		return string(data), nil
+		return strings.TrimSpace(string(data)), nil
 	}
 	return b.Password, nil
 }
