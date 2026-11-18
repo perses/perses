@@ -52,6 +52,7 @@ import {
 import DelegatedAuthnErrorView from './views/auth/DelegatedAuthnErrorView';
 import SignInView from './views/auth/SignInView';
 import SignUpView from './views/auth/SignUpView';
+import type FolderView from './views/folder/FolderView';
 import HomeView from './views/home/HomeView';
 
 // Other routes are lazy-loaded for code-splitting
@@ -174,6 +175,13 @@ const router = createBrowserRouter(
                       } satisfies PageTitleHandle,
                       element: <RequireEphemeralDashboardEnabled />,
                       children: [{ index: true, Component: EphemeralDashboardView }],
+                    },
+                    {
+                      path: 'folders/:rootFolder/*',
+                      lazy: async (): Promise<{ Component: typeof FolderView }> => ({
+                        Component: (await import('./views/folder/FolderView')).default,
+                      }),
+                      handle: { title: 'Folder' } satisfies PageTitleHandle,
                     },
                     { path: ':tab', Component: ProjectView },
                   ],
