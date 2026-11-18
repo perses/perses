@@ -14,15 +14,18 @@
 package generate
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"go/token"
 	"io"
 	"log"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
+	"runtime/debug"
 	"slices"
 	"strings"
 	"text/template"
@@ -36,6 +39,9 @@ import (
 	pluginSpec "github.com/perses/spec/go/plugin"
 	"github.com/prometheus/common/version"
 	"github.com/spf13/cobra"
+	"golang.org/x/mod/modfile"
+	gomodule "golang.org/x/mod/module"
+	"golang.org/x/mod/semver"
 )
 
 // persesModulePath is the Go module that provides the Dashboard-as-Code builders used by the generated Go SDK.
@@ -62,10 +68,12 @@ type generateOptions struct {
 	outputDir         string
 	// goModuleMissing is true when the output directory has no go.mod yet, so one has to be created.
 	goModuleMissing bool
-	runGo           goRunner
-	ctx             context.Context
-	writer          io.Writer
-	errWriter       io.Writer
+	// persesVersion is the version of the perses module the Go SDK is generated for.
+	persesVersion string
+	runGo         goRunner
+	ctx           context.Context
+	writer        io.Writer
+	errWriter     io.Writer
 }
 
 type ExposedModule struct {
@@ -139,6 +147,17 @@ func (o *generateOptions) Validate() error {
 		o.pluginDisplayName = o.pluginPascalName
 	}
 
+	if slices.Contains(pluginTypesWithGoSDK, o.pluginType) {
+		if err := validateGoSDKName(o.pluginType, o.pluginName, o.pluginPascalName); err != nil {
+			return err
+		}
+		persesVersion, err := persesModuleVersion(version.Version, buildInfoVersion())
+		if err != nil {
+			return err
+		}
+		o.persesVersion = persesVersion
+	}
+
 	return nil
 }
 
@@ -188,27 +207,37 @@ func getTemplatePath(pluginType pluginSpec.Kind) (string, error) {
 	return "", fmt.Errorf("unknown plugin type %q", pluginType)
 }
 
-// groupPluginsByKind splits the plugins by the kind of the plugin, so the templates can list them separately.
-func groupPluginsByKind(plugins []GeneratedPlugin) (panels, datasources, queries, variables, annotations, explores []GeneratedPlugin) {
+// pluginsByKind holds the plugins of a module split by kind, so the templates can list them separately.
+type pluginsByKind struct {
+	panels      []GeneratedPlugin
+	datasources []GeneratedPlugin
+	queries     []GeneratedPlugin
+	variables   []GeneratedPlugin
+	annotations []GeneratedPlugin
+	explores    []GeneratedPlugin
+}
+
+func groupPluginsByKind(plugins []GeneratedPlugin) pluginsByKind {
+	var groups pluginsByKind
 	for _, p := range plugins {
 		if p.Kind.IsQuery() {
-			queries = append(queries, p)
+			groups.queries = append(groups.queries, p)
 			continue
 		}
 		switch p.Kind {
 		case pluginSpec.KindDatasource:
-			datasources = append(datasources, p)
+			groups.datasources = append(groups.datasources, p)
 		case pluginSpec.KindVariable:
-			variables = append(variables, p)
+			groups.variables = append(groups.variables, p)
 		case pluginSpec.KindAnnotation:
-			annotations = append(annotations, p)
+			groups.annotations = append(groups.annotations, p)
 		case pluginSpec.KindExplore:
-			explores = append(explores, p)
+			groups.explores = append(groups.explores, p)
 		case pluginSpec.KindPanel:
-			panels = append(panels, p)
+			groups.panels = append(groups.panels, p)
 		}
 	}
-	return panels, datasources, queries, variables, annotations, explores
+	return groups
 }
 
 func (o *generateOptions) Execute() error {
@@ -284,7 +313,7 @@ func (o *generateOptions) Execute() error {
 		Path: pluginPath,
 	})
 
-	persesPanelPlugins, persesDatasourcePlugins, persesQueryPlugins, persesVariablePlugins, persesAnnotationsPlugins, persesExplorePlugins := groupPluginsByKind(persesPlugins)
+	groups := groupPluginsByKind(persesPlugins)
 
 	data := map[string]any{
 		"ModuleName":               GetKebabCase(o.pluginModuleName),
@@ -295,12 +324,12 @@ func (o *generateOptions) Execute() error {
 		"PluginGoPackage":          GetGoPackageName(o.pluginName),
 		"ExposedModules":           exposedModules,
 		"PersesPlugins":            persesPlugins,
-		"PersesPanelPlugins":       persesPanelPlugins,
-		"PersesDatasourcePlugins":  persesDatasourcePlugins,
-		"PersesQueryPlugins":       persesQueryPlugins,
-		"PersesVariablePlugins":    persesVariablePlugins,
-		"PersesAnnotationsPlugins": persesAnnotationsPlugins,
-		"PersesExplorePlugins":     persesExplorePlugins,
+		"PersesPanelPlugins":       groups.panels,
+		"PersesDatasourcePlugins":  groups.datasources,
+		"PersesQueryPlugins":       groups.queries,
+		"PersesVariablePlugins":    groups.variables,
+		"PersesAnnotationsPlugins": groups.annotations,
+		"PersesExplorePlugins":     groups.explores,
 	}
 
 	var moduleTemplateFiles []string
@@ -375,7 +404,7 @@ func (o *generateOptions) Execute() error {
 	return output.HandleString(o.writer, o.successMessage(isModuleGeneration, createdPaths))
 }
 
-// successMessage lists the files created by the generation.
+// successMessage lists the files created or changed by the generation.
 func (o *generateOptions) successMessage(isModuleGeneration bool, createdPaths []string) string {
 	msg := fmt.Sprintf("plugin %s generated successfully", o.pluginPascalName)
 	if isModuleGeneration {
@@ -395,6 +424,39 @@ var pluginTypesWithGoSDK = []pluginSpec.Kind{
 	pluginSpec.KindTimeSeriesQuery,
 	pluginSpec.KindAnnotation,
 	pluginSpec.KindPanel,
+}
+
+// goSDKDeclarations are the exported identifiers that the Go SDK template of each plugin type declares next to the
+// constructor named after the plugin, so a plugin can't be named after one of them.
+var goSDKDeclarations = map[pluginSpec.Kind][]string{
+	pluginSpec.KindDatasource: {"PluginKind", "Option", "Builder", "Selector", "DirectURL", "HTTPProxy"},
+	pluginSpec.KindTimeSeriesQuery: {"PluginKind", "DatasourceKind", "PluginSpec", "Option", "Builder", "Expr",
+		"Datasource"},
+	pluginSpec.KindAnnotation: {"PluginKind", "PluginSpec", "Option", "Builder", "Expr", "Datasource", "Title", "Legend",
+		"Tags"},
+	pluginSpec.KindPanel: {"PluginKind", "LegendPosition", "BottomPosition", "RightPosition", "LegendMode", "ListMode",
+		"TableMode", "LegendSize", "SmallSize", "MediumSize", "Legend", "ColorMode", "FixedColorMode",
+		"FixedSingleColorMode", "QuerySettings", "PluginSpec", "Option", "Builder", "WithLegend", "WithThresholds",
+		"WithQuerySettings"},
+}
+
+// validateGoSDKName checks that the Go SDK generated for the plugin compiles: the package name derived from the
+// plugin name must be a valid one, and the constructor named after the plugin must not collide with the other
+// declarations of the template.
+func validateGoSDKName(pluginType pluginSpec.Kind, pluginName, pluginPascalName string) error {
+	pkg := GetGoPackageName(pluginName)
+	if !token.IsIdentifier(pkg) || pkg == "main" {
+		return fmt.Errorf("plugin.name %q can't be used for the Go SDK, as %q isn't a valid Go package name: "+
+			"use a name that starts with a letter and isn't a Go keyword", pluginName, pkg)
+	}
+	if !token.IsIdentifier(pluginPascalName) {
+		return fmt.Errorf("plugin.name %q can't be used for the Go SDK, as %q isn't a valid Go identifier", pluginName, pluginPascalName)
+	}
+	if slices.Contains(goSDKDeclarations[pluginType], pluginPascalName) {
+		return fmt.Errorf("plugin.name %q can't be used for a %s plugin, as its Go SDK already declares %s: use another name",
+			pluginName, pluginType, pluginPascalName)
+	}
+	return nil
 }
 
 // checkGoModuleRequirements records whether the output directory needs a go.mod and, if it does or the plugin type
@@ -436,20 +498,70 @@ func (o *generateOptions) goModulePath() (string, error) {
 	return fmt.Sprintf("github.com/%s/%s", org, name), nil
 }
 
-// persesModuleVersion returns the version of the perses module that matches the Go SDK templates of this percli
-// build, or "latest" for a development build that has no version.
-func persesModuleVersion() string {
-	if version.Version == "" {
-		return "latest"
+// buildInfoVersion returns the version of the main module of this binary, which `go install` sets to the installed
+// version.
+func buildInfoVersion() string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return ""
 	}
-	return "v" + strings.TrimPrefix(version.Version, "v")
+	return info.Main.Version
+}
+
+// persesModuleVersion returns the version of the perses module that matches the Go SDK templates of this percli
+// build. buildVersion is the version set with -ldflags, and moduleVersion the version from the build info, used for
+// a binary installed with `go install`. A development build, a pseudo-version or a modified checkout gets "latest".
+func persesModuleVersion(buildVersion, moduleVersion string) (string, error) {
+	if buildVersion != "" {
+		v := "v" + strings.TrimPrefix(buildVersion, "v")
+		if !semver.IsValid(v) {
+			return "", fmt.Errorf("the percli version %q isn't a valid semantic version, so the Go SDK can't be pinned to it", buildVersion)
+		}
+		return v, nil
+	}
+	if semver.IsValid(moduleVersion) && !gomodule.IsPseudoVersion(moduleVersion) && semver.Build(moduleVersion) == "" {
+		return moduleVersion, nil
+	}
+	return "latest", nil
+}
+
+// requiredPersesVersion returns the version of the perses module required by the go.mod at goModPath, or an empty
+// string when it doesn't exist or doesn't require perses.
+func requiredPersesVersion(goModPath string) (string, error) {
+	data, err := readOptionalFile(goModPath)
+	if err != nil {
+		return "", fmt.Errorf("could not read %q: %w", goModPath, err)
+	}
+	if data == nil {
+		return "", nil
+	}
+	goMod, err := modfile.Parse(goModPath, data, nil)
+	if err != nil {
+		return "", fmt.Errorf("could not parse %q: %w", goModPath, err)
+	}
+	for _, r := range goMod.Require {
+		if r.Mod.Path == persesModulePath {
+			return r.Mod.Version, nil
+		}
+	}
+	return "", nil
+}
+
+// readOptionalFile returns the content of the file, or nil when it doesn't exist.
+func readOptionalFile(filePath string) ([]byte, error) {
+	data, err := os.ReadFile(filePath) //nolint:gosec // a file of the output directory
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, nil
+	}
+	return data, err
 }
 
 // ensureGoModule initializes the Go module with `go mod init` when the output directory doesn't have a go.mod yet.
 // When Go sources were generated, it requires the perses module at the version of this percli build, since a plain
-// `go mod tidy` would resolve the latest version, which may not match the templates, and then runs `go mod tidy`
-// for the new imports. Otherwise, a new go.mod is tidied and an existing one is left untouched. It returns the
-// relative paths of the created files.
+// `go mod tidy` would resolve the latest version, which may not match the templates. A module that already requires
+// a newer perses keeps it, as `go get` would downgrade it along with the modules that depend on it. Then it runs
+// `go mod tidy` for the new imports. Otherwise, a new go.mod is tidied and an existing one is left untouched. It
+// returns the relative paths of go.mod and go.sum when they were created or changed.
 func (o *generateOptions) ensureGoModule(modulePath string, generatedGoSources bool) ([]string, error) {
 	if !o.goModuleMissing && !generatedGoSources {
 		return nil, nil
@@ -464,9 +576,15 @@ func (o *generateOptions) ensureGoModule(modulePath string, generatedGoSources b
 		run = runGo
 	}
 
-	goSumExisted, err := file.Exists(filepath.Join(o.outputDir, "go.sum"))
+	goModPath := filepath.Join(o.outputDir, "go.mod")
+	goSumPath := filepath.Join(o.outputDir, "go.sum")
+	goModBefore, err := readOptionalFile(goModPath)
 	if err != nil {
-		return nil, fmt.Errorf("could not check for the go.sum under %q: %w", o.outputDir, err)
+		return nil, fmt.Errorf("could not read the go.mod under %q: %w", o.outputDir, err)
+	}
+	goSumBefore, err := readOptionalFile(goSumPath)
+	if err != nil {
+		return nil, fmt.Errorf("could not read the go.sum under %q: %w", o.outputDir, err)
 	}
 
 	var commands [][]string
@@ -474,28 +592,65 @@ func (o *generateOptions) ensureGoModule(modulePath string, generatedGoSources b
 		commands = append(commands, []string{"mod", "init", modulePath})
 	}
 	if generatedGoSources {
-		commands = append(commands, []string{"get", persesModulePath + "@" + persesModuleVersion()})
+		getArgs, err := o.persesGetCommand(goModPath)
+		if err != nil {
+			return nil, err
+		}
+		if getArgs != nil {
+			commands = append(commands, getArgs)
+		}
 	}
 	commands = append(commands, []string{"mod", "tidy"})
 
-	for _, args := range commands {
+	for i, args := range commands {
 		if out, err := run(ctx, o.outputDir, args...); err != nil {
-			return nil, fmt.Errorf("`go %s` failed under %q: %w\n%s", strings.Join(args, " "), o.outputDir, err, out)
+			remaining := make([]string, 0, len(commands)-i)
+			for _, c := range commands[i:] {
+				remaining = append(remaining, "go "+strings.Join(c, " "))
+			}
+			return nil, fmt.Errorf("`go %s` failed under %q: %w\n%s\n"+
+				"The plugin files were generated, but the Go module isn't complete. Once the cause is fixed, run the "+
+				"command again or run `%s` in %q", strings.Join(args, " "), o.outputDir, err, out,
+				strings.Join(remaining, " && "), o.outputDir)
 		}
 	}
 
-	var created []string
-	if o.goModuleMissing {
-		created = append(created, "go.mod")
+	var changed []string
+	for _, f := range []struct {
+		name   string
+		path   string
+		before []byte
+	}{{"go.mod", goModPath, goModBefore}, {"go.sum", goSumPath, goSumBefore}} {
+		after, err := readOptionalFile(f.path)
+		if err != nil {
+			return nil, fmt.Errorf("could not read the %s under %q: %w", f.name, o.outputDir, err)
+		}
+		if after != nil && !bytes.Equal(after, f.before) {
+			changed = append(changed, f.name)
+		}
 	}
-	goSumExists, err := file.Exists(filepath.Join(o.outputDir, "go.sum"))
+	return changed, nil
+}
+
+// persesGetCommand returns the `go get` arguments that require the perses module at the version of this percli
+// build, or nil when the module already requires that version or a newer one.
+func (o *generateOptions) persesGetCommand(goModPath string) ([]string, error) {
+	target := o.persesVersion
+	if target == "" {
+		target = "latest"
+	}
+	current, err := requiredPersesVersion(goModPath)
 	if err != nil {
-		return nil, fmt.Errorf("could not check for the go.sum under %q: %w", o.outputDir, err)
+		return nil, err
 	}
-	if goSumExists && !goSumExisted {
-		created = append(created, "go.sum")
+	if current == "" || (target != "latest" && semver.Compare(current, target) < 0) {
+		return []string{"get", persesModulePath + "@" + target}, nil
 	}
-	return created, nil
+	if target != "latest" && current != target && o.errWriter != nil {
+		_, _ = fmt.Fprintf(o.errWriter, "warning: the module requires %s %s, which is newer than %s the Go SDK was "+
+			"generated for, so it is kept\n", persesModulePath, current, target)
+	}
+	return nil, nil
 }
 
 func (o *generateOptions) SetWriter(writer io.Writer) {
@@ -519,6 +674,11 @@ func newCMD(run goRunner) *cobra.Command {
 Creates a new plugin module if does not exist and generates a plugin inside it. 
 This command can be used several times to add more plugins to the same module. 
 A single plugin can be generated at a time.
+
+For Datasource, TimeSeriesQuery, Annotation and Panel plugins, it also generates a Go SDK for Dashboard-as-Code
+under sdk/go/. It then requires github.com/perses/perses at the version of percli, unless the module already
+requires a newer one, and runs go mod tidy. This needs the go binary in the PATH and network access, and it
+updates the go.mod and go.sum files of an existing module.
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			o.ctx = cmd.Context()

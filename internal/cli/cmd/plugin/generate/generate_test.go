@@ -15,14 +15,23 @@ package generate
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
+	"text/template"
 
 	cmdTest "github.com/perses/perses/internal/cli/test"
+	pluginSpec "github.com/perses/spec/go/plugin"
+	"github.com/prometheus/common/version"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -58,17 +67,33 @@ func getFileList(filePaths []string) string {
 }
 
 // fakeGo records the go commands instead of running them, so the tests don't download modules. `go mod init` writes
-// a go.mod, since the generator checks for it.
+// a go.mod, since the generator checks for it. failures makes a subcommand ("get", "mod tidy"...) fail.
 type fakeGo struct {
-	calls [][]string
+	calls    [][]string
+	failures map[string]error
 }
 
 func (f *fakeGo) run(_ context.Context, dir string, args ...string) ([]byte, error) {
 	f.calls = append(f.calls, args)
+	subcommand := args[0]
+	if subcommand == "mod" && len(args) > 1 {
+		subcommand += " " + args[1]
+	}
+	if err, ok := f.failures[subcommand]; ok {
+		return []byte("go: something went wrong"), err
+	}
 	if len(args) == 3 && args[0] == "mod" && args[1] == "init" {
 		return nil, os.WriteFile(filepath.Join(dir, "go.mod"), []byte("module "+args[2]+"\n"), 0o600)
 	}
 	return nil, nil
+}
+
+// setPercliVersion sets the version of this percli build for the duration of the test.
+func setPercliVersion(t *testing.T, v string) {
+	t.Helper()
+	previous := version.Version
+	version.Version = v
+	t.Cleanup(func() { version.Version = previous })
 }
 
 func (f *fakeGo) newCMD() *cobra.Command {
@@ -78,6 +103,7 @@ func (f *fakeGo) newCMD() *cobra.Command {
 func TestPluginGenerateCMD(t *testing.T) {
 	removeTestFiles()
 	defer removeTestFiles()
+	setPercliVersion(t, "0.55.0")
 
 	goCmd := &fakeGo{}
 
@@ -176,10 +202,10 @@ func TestPluginGenerateCMD(t *testing.T) {
 
 	assert.Equal(t, [][]string{
 		{"mod", "init", "github.com/my-plugin-org/my-plugin-module"},
-		{"get", "github.com/perses/perses@" + persesModuleVersion()},
+		{"get", "github.com/perses/perses@v0.55.0"},
 		{"mod", "tidy"},
 		// The panel added to the existing module brings new imports, so the dependencies are resolved again.
-		{"get", "github.com/perses/perses@" + persesModuleVersion()},
+		{"get", "github.com/perses/perses@v0.55.0"},
 		{"mod", "tidy"},
 	}, goCmd.calls)
 }
@@ -203,13 +229,17 @@ func generateModule(t *testing.T, dir string) {
 	})
 }
 
-func TestPluginGenerateKeepsExistingGoMod(t *testing.T) {
+// writeGoMod replaces the go.mod of the module under dir.
+func writeGoMod(t *testing.T, dir, content string) {
+	t.Helper()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "go.mod"), []byte(content), 0o600))
+}
+
+func TestPluginGenerateDoesNotReinitializeExistingGoMod(t *testing.T) {
+	setPercliVersion(t, "0.55.0")
 	dir := t.TempDir()
 	generateModule(t, dir)
-
-	goModPath := filepath.Join(dir, "go.mod")
-	customGoMod := "module example.com/custom\n\ngo 1.21\n"
-	require.NoError(t, os.WriteFile(goModPath, []byte(customGoMod), 0o600))
+	writeGoMod(t, dir, "module example.com/custom\n\ngo 1.21\n")
 
 	goCmd := &fakeGo{}
 	cmdTest.ExecuteSuiteTest(t, goCmd.newCMD, []cmdTest.Suite{
@@ -224,15 +254,231 @@ func TestPluginGenerateKeepsExistingGoMod(t *testing.T) {
 		},
 	})
 
-	content, err := os.ReadFile(goModPath) //nolint:gosec // goModPath is inside t.TempDir
-	require.NoError(t, err)
-	assert.Equal(t, customGoMod, string(content))
-
 	// The existing module is not initialized again, only its dependencies are resolved for the new Go SDK.
 	assert.Equal(t, [][]string{
-		{"get", "github.com/perses/perses@" + persesModuleVersion()},
+		{"get", "github.com/perses/perses@v0.55.0"},
 		{"mod", "tidy"},
 	}, goCmd.calls)
+}
+
+func TestPluginGeneratePersesRequirement(t *testing.T) {
+	setPercliVersion(t, "0.55.0")
+
+	for _, tc := range []struct {
+		name          string
+		required      string
+		expectedCalls [][]string
+		expectedMsg   string
+	}{
+		{
+			name:          "older perses is upgraded",
+			required:      "v0.54.0",
+			expectedCalls: [][]string{{"get", "github.com/perses/perses@v0.55.0"}, {"mod", "tidy"}},
+		},
+		{
+			name:          "same perses is left as is",
+			required:      "v0.55.0",
+			expectedCalls: [][]string{{"mod", "tidy"}},
+		},
+		{
+			name:          "newer perses is kept",
+			required:      "v0.55.1",
+			expectedCalls: [][]string{{"mod", "tidy"}},
+			expectedMsg:   `warning: the module requires github.com/perses/perses v0.55.1, which is newer than v0.55.0`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			generateModule(t, dir)
+			writeGoMod(t, dir, "module example.com/custom\n\ngo 1.21\n\nrequire github.com/perses/perses "+tc.required+"\n")
+
+			expectedMsg := tc.expectedMsg
+			if expectedMsg == "" {
+				expectedMsg = `plugin MyTestPanel generated successfully`
+			}
+			goCmd := &fakeGo{}
+			cmdTest.ExecuteSuiteTest(t, goCmd.newCMD, []cmdTest.Suite{
+				{
+					Title:                "Build a panel",
+					Args:                 []string{"--plugin.name", "MyTestPanel", "--plugin.type", "Panel", dir},
+					ExpectedRegexMessage: expectedMsg,
+				},
+			})
+			assert.Equal(t, tc.expectedCalls, goCmd.calls)
+		})
+	}
+}
+
+func TestPluginGenerateWithoutGoSDKLeavesExistingGoMod(t *testing.T) {
+	dir := t.TempDir()
+	generateModule(t, dir)
+
+	goCmd := &fakeGo{}
+	cmdTest.ExecuteSuiteTest(t, goCmd.newCMD, []cmdTest.Suite{
+		{
+			Title:                "Build an explore plugin in a module that already has a go.mod",
+			Args:                 []string{"--plugin.name", "MyTestExplore", "--plugin.type", "Explore", dir},
+			ExpectedRegexMessage: `plugin MyTestExplore generated successfully`,
+		},
+	})
+	assert.Empty(t, goCmd.calls, "no go command must run for a plugin without a Go SDK")
+}
+
+func TestPluginGenerateGoFailure(t *testing.T) {
+	setPercliVersion(t, "0.55.0")
+	dir := t.TempDir()
+
+	goCmd := &fakeGo{failures: map[string]error{"get": errors.New("exit status 1")}}
+	cmdTest.ExecuteSuiteTest(t, goCmd.newCMD, []cmdTest.Suite{
+		{
+			Title: "Build a module when go get fails",
+			Args: []string{
+				"--module.name", "MyPluginModule",
+				"--module.org", "MyPluginOrg",
+				"--plugin.name", "MyTestPanel",
+				"--plugin.type", "Panel",
+				dir,
+			},
+			IsErrorExpected: true,
+			ExpectedRegexMessage: "(?s)`go get github.com/perses/perses@v0.55.0` failed under .*go: something went wrong.*" +
+				"run the command again or run `go get github.com/perses/perses@v0.55.0 && go mod tidy`",
+		},
+	})
+
+	// The generation stops at the failing command.
+	assert.Equal(t, [][]string{
+		{"mod", "init", "github.com/my-plugin-org/my-plugin-module"},
+		{"get", "github.com/perses/perses@v0.55.0"},
+	}, goCmd.calls)
+}
+
+func TestPluginGenerateRejectsGoSDKNames(t *testing.T) {
+	for _, tc := range []struct {
+		pluginType pluginSpec.Kind
+		name       string
+		expected   string
+	}{
+		{pluginSpec.KindPanel, "Map", `"map" isn't a valid Go package name`},
+		{pluginSpec.KindPanel, "Switch", `"switch" isn't a valid Go package name`},
+		{pluginSpec.KindPanel, "Main", `"main" isn't a valid Go package name`},
+		{pluginSpec.KindPanel, "---", `"" isn't a valid Go package name`},
+		{pluginSpec.KindDatasource, "3D Source", `"3dsource" isn't a valid Go package name`},
+		{pluginSpec.KindPanel, "Legend", `its Go SDK already declares Legend`},
+		{pluginSpec.KindTimeSeriesQuery, "Datasource", `its Go SDK already declares Datasource`},
+		{pluginSpec.KindDatasource, "Builder", `its Go SDK already declares Builder`},
+		{pluginSpec.KindAnnotation, "Tags", `its Go SDK already declares Tags`},
+	} {
+		t.Run(fmt.Sprintf("%s %s", tc.pluginType, tc.name), func(t *testing.T) {
+			dir := t.TempDir()
+			cmdTest.ExecuteSuiteTest(t, (&fakeGo{}).newCMD, []cmdTest.Suite{
+				{
+					Title: "Build a plugin with a name the Go SDK can't use",
+					Args: []string{
+						"--module.name", "MyPluginModule",
+						"--module.org", "MyPluginOrg",
+						"--plugin.name", tc.name,
+						"--plugin.type", string(tc.pluginType),
+						dir,
+					},
+					IsErrorExpected:      true,
+					ExpectedRegexMessage: regexp.QuoteMeta(tc.expected),
+				},
+			})
+			entries, err := os.ReadDir(dir)
+			require.NoError(t, err)
+			assert.Empty(t, entries, "nothing must be generated for a rejected name")
+		})
+	}
+}
+
+// TestGoSDKDeclarations checks that goSDKDeclarations lists every exported identifier the Go SDK templates declare,
+// besides the constructor named after the plugin.
+func TestGoSDKDeclarations(t *testing.T) {
+	const placeholder = "PlaceholderName"
+	for _, pluginType := range pluginTypesWithGoSDK {
+		t.Run(string(pluginType), func(t *testing.T) {
+			srcDir, err := getTemplatePath(pluginType)
+			require.NoError(t, err)
+
+			var declared []string
+			err = fs.WalkDir(embeddedTemplates, srcDir, func(p string, d fs.DirEntry, err error) error {
+				if err != nil || d.IsDir() || !strings.Contains(p, "/sdk/go/") || !strings.HasSuffix(p, ".go"+tmplExt) {
+					return err
+				}
+				content, err := fs.ReadFile(embeddedTemplates, p)
+				require.NoError(t, err)
+				var rendered strings.Builder
+				require.NoError(t, template.Must(template.New(p).Parse(string(content))).Execute(&rendered, map[string]any{
+					"PluginName":       "placeholder-name",
+					"PluginPascalName": placeholder,
+					"PluginGoPackage":  "placeholdername",
+				}))
+				file, err := parser.ParseFile(token.NewFileSet(), p, rendered.String(), 0)
+				require.NoError(t, err)
+				for _, decl := range file.Decls {
+					switch decl := decl.(type) {
+					case *ast.FuncDecl:
+						if decl.Recv == nil {
+							declared = append(declared, decl.Name.Name)
+						}
+					case *ast.GenDecl:
+						for _, spec := range decl.Specs {
+							switch spec := spec.(type) {
+							case *ast.TypeSpec:
+								declared = append(declared, spec.Name.Name)
+							case *ast.ValueSpec:
+								for _, n := range spec.Names {
+									declared = append(declared, n.Name)
+								}
+							}
+						}
+					}
+				}
+				return nil
+			})
+			require.NoError(t, err)
+
+			var exported []string
+			for _, name := range declared {
+				if name != placeholder && ast.IsExported(name) {
+					exported = append(exported, name)
+				}
+			}
+			require.NotEmpty(t, exported)
+			assert.ElementsMatch(t, goSDKDeclarations[pluginType], exported)
+		})
+	}
+}
+
+func TestPersesModuleVersion(t *testing.T) {
+	for _, tc := range []struct {
+		name          string
+		buildVersion  string
+		moduleVersion string
+		expected      string
+		expectedErr   bool
+	}{
+		{name: "development build", expected: "latest"},
+		{name: "development build with devel module", moduleVersion: "(devel)", expected: "latest"},
+		{name: "build version", buildVersion: "0.55.0", expected: "v0.55.0"},
+		{name: "build version with v", buildVersion: "v0.55.0", expected: "v0.55.0"},
+		{name: "pre-release build version", buildVersion: "0.56.0-beta.1", expected: "v0.56.0-beta.1"},
+		{name: "build version wins over the module version", buildVersion: "0.55.0", moduleVersion: "v0.54.0", expected: "v0.55.0"},
+		{name: "invalid build version", buildVersion: "main", expectedErr: true},
+		{name: "go install", moduleVersion: "v0.55.1", expected: "v0.55.1"},
+		{name: "pseudo-version", moduleVersion: "v0.55.2-0.20261118101010-0123456789ab", expected: "latest"},
+		{name: "modified checkout", moduleVersion: "v0.55.1+dirty", expected: "latest"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			v, err := persesModuleVersion(tc.buildVersion, tc.moduleVersion)
+			if tc.expectedErr {
+				assert.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, tc.expected, v)
+		})
+	}
 }
 
 func TestPluginGenerateFailsBeforeWritingWithoutGo(t *testing.T) {
@@ -298,7 +544,9 @@ func TestGetGoPackageName(t *testing.T) {
 		"ISO-8601 Time":     "iso8601time",
 		"already lowercase": "alreadylowercase",
 	} {
-		assert.Equal(t, expected, GetGoPackageName(name), name)
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, expected, GetGoPackageName(name))
+		})
 	}
 }
 
@@ -311,6 +559,8 @@ func TestGeneratedGoSDKCompiles(t *testing.T) {
 	persesRoot, err := filepath.Abs(filepath.Join("..", "..", "..", "..", ".."))
 	require.NoError(t, err)
 	require.FileExists(t, filepath.Join(persesRoot, "go.mod"))
+	// The temporary module is outside of any go.work the environment may point to.
+	t.Setenv("GOWORK", "off")
 
 	run := func(ctx context.Context, dir string, args ...string) ([]byte, error) {
 		if args[0] == "get" {
@@ -342,5 +592,7 @@ func TestGeneratedGoSDKCompiles(t *testing.T) {
 	assert.Contains(t, string(goMod), "github.com/perses/perses ")
 
 	out, err := runGo(context.Background(), dir, "build", "./...")
+	require.NoError(t, err, string(out))
+	out, err = runGo(context.Background(), dir, "vet", "./...")
 	require.NoError(t, err, string(out))
 }

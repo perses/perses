@@ -63,14 +63,11 @@ func Expr(expr string) Option {
 	}
 }
 
-// Datasource selects the datasource of the given kind to run the annotation query against.
+// Datasource selects the datasource of the given kind and name to run the annotation query against. The schema only
+// accepts a static selector, so a name starting with "$" is kept as a plain name, not turned into a variable.
 func Datasource(kind, name string) Option {
 	return func(builder *Builder) error {
-		selector, err := datasource.NewSelector(kind, name)
-		if err != nil {
-			return err
-		}
-		builder.Datasource = selector
+		builder.Datasource = datasource.NewStaticSelector(kind, name)
 		return nil
 	}
 }

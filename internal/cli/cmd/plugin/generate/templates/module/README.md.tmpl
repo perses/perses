@@ -58,3 +58,16 @@ npm test
 ```
 
 Tests use Vitest and jsdom. Add tests alongside your source as `*.test.ts` or `*.test.tsx`.
+{{- if or .PersesDatasourcePlugins .PersesQueryPlugins .PersesAnnotationsPlugins .PersesPanelPlugins }}
+
+### Go SDK
+
+The Datasource, TimeSeriesQuery, Annotation and Panel plugins come with a Go SDK for Dashboard-as-Code under `sdk/go/`,
+built on the `github.com/perses/perses/go-sdk` builders. Keep it in sync with the CUE schemas under `schemas/` when you
+change the spec of a plugin, and check that it still builds:
+
+```bash
+go build ./...
+go vet ./...
+```
+{{- end }}
