@@ -93,6 +93,28 @@ func TestBuildVariableDependencies(t *testing.T) {
 			result: map[string][]string{},
 		},
 		{
+			title: "query variable with null values in the plugin spec",
+			variables: []dashboard.Variable{
+				{
+					Kind: variable.KindList,
+					Spec: &dashboard.ListVariableSpec{
+						ListSpec: variable.ListSpec{
+							Plugin: plugin.Plugin{
+								Kind: "PrometheusLabelValuesVariable",
+								Spec: map[string]any{
+									"labelName":  "job",
+									"matchers":   []any{nil},
+									"datasource": nil,
+								},
+							},
+						},
+						Name: "myVariable",
+					},
+				},
+			},
+			result: map[string][]string{},
+		},
+		{
 			title: "query variable with variable used",
 			variables: []dashboard.Variable{
 				{
