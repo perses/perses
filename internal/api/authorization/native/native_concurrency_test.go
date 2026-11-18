@@ -18,7 +18,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
@@ -26,10 +26,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// pausingContext wraps an echo.Context and blocks the first call to Get until resume is closed.
+// pausingContext wraps an *echo.Context and blocks the first call to Get until resume is closed.
 // It is used to deterministically pause a request in the middle of the authorization code.
+// As *echo.Context is a struct, its Get method cannot be overridden for the exported methods of native:
+// the tests call their unexported counterpart, which reads the user through the userContext interface.
 type pausingContext struct {
-	echo.Context
+	*echo.Context
 	once   sync.Once
 	paused chan struct{}
 	resume chan struct{}
@@ -122,7 +124,7 @@ func TestGetPermissionsWithConcurrentRefreshDoesNotDeadlock(t *testing.T) {
 	// 1. Start the request and wait for it to be paused inside GetPermissions.
 	getPermissionsDone := make(chan error, 1)
 	go func() {
-		_, err := n.GetPermissions(ctx)
+		_, err := n.getPermissions(ctx)
 		getPermissionsDone <- err
 	}()
 	<-ctx.paused
@@ -256,7 +258,7 @@ func TestConcurrentAccessWithRefresh(t *testing.T) {
 
 	// Each request is expected to be granted, whatever the cache snapshot used.
 	requests := []struct {
-		ctx     echo.Context
+		ctx     *echo.Context
 		project string
 	}{
 		{ctx: newTestContext(testUserName(0), nil), project: testProjectName(0)},                                                     // global admin

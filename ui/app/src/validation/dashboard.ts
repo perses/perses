@@ -60,9 +60,9 @@ export interface DashboardValidationSchema {
 
 // Validate dashboard name and check if it doesn't already exist
 export function useDashboardValidationSchema(projectName?: string): DashboardValidationSchema {
-  const { data: dashboards, isLoading: isDashboardsLoading, isError } = useSearchDashboards(projectName);
+  const { data: dashboards, isPending: isDashboardsPending, isError } = useSearchDashboards(projectName);
   return useMemo((): DashboardValidationSchema => {
-    if (isDashboardsLoading)
+    if (isDashboardsPending)
       return {
         schema: undefined,
         isSchemaLoading: true,
@@ -102,5 +102,5 @@ export function useDashboardValidationSchema(projectName?: string): DashboardVal
     });
 
     return { schema: refinedSchema, isSchemaLoading: false, hasSchemaError: false };
-  }, [dashboards, isDashboardsLoading, isError]);
+  }, [dashboards, isDashboardsPending, isError]);
 }

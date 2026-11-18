@@ -25,7 +25,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/impl/proxy/proxytest"
 	"github.com/perses/perses/internal/api/netguard"
 	"github.com/perses/perses/pkg/model/api/config"

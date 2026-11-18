@@ -16,7 +16,7 @@ import type { DashboardResource } from '@perses-dev/client';
 import { useSnackbar } from '@perses-dev/components';
 import Import from 'mdi-material-ui/Import';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useIsReadonly } from '../../context/Config';
@@ -25,21 +25,29 @@ import { useProjectList } from '../../model/project-client';
 
 interface PersesFlowProps {
   dashboard: DashboardResource;
+  // Project selected by default to import the dashboard into, if the user has access to it.
+  defaultProject?: string;
 }
 
-function PersesFlow({ dashboard }: PersesFlowProps): ReactElement {
+function PersesFlow({ dashboard, defaultProject }: PersesFlowProps): ReactElement {
   const navigate = useNavigate();
   const isReadonly = useIsReadonly();
   const { exceptionSnackbar } = useSnackbar();
-  const [projectName, setProjectName] = useState<string>('');
+  const [projectName, setProjectName] = useState<string | null>(defaultProject ?? null);
   const { data, error } = useProjectList();
+  const projectNames = useMemo(() => (data ?? []).map((project) => project.metadata.name), [data]);
+  // A project that isn't one of the user's projects, like an unknown default project, is ignored.
+  const selectedProject = projectName !== null && projectNames.includes(projectName) ? projectName : null;
   const dashboardMutation = useCreateDashboardMutation((data) => {
     navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
   });
 
   const importOnClick = (): void => {
+    if (selectedProject === null) {
+      return;
+    }
     const dashboardToCreate = structuredClone(dashboard);
-    dashboardToCreate.metadata.project = projectName;
+    dashboardToCreate.metadata.project = selectedProject;
     dashboardMutation.mutate(dashboardToCreate);
   };
 
@@ -57,15 +65,16 @@ function PersesFlow({ dashboard }: PersesFlowProps): ReactElement {
           <Stack width="100%" gap={1}>
             <Autocomplete
               disablePortal
-              options={data.map((project) => project.metadata.name)}
-              onInputChange={(event, value) => {
+              options={projectNames}
+              value={selectedProject}
+              onChange={(event, value) => {
                 setProjectName(value);
               }}
               renderInput={(params) => <TextField {...params} required label="Project name" />}
             />
             <Button
               variant="contained"
-              disabled={dashboardMutation.isPending || projectName.length === 0 || isReadonly}
+              disabled={dashboardMutation.isPending || selectedProject === null || isReadonly}
               startIcon={<Import />}
               onClick={importOnClick}
             >

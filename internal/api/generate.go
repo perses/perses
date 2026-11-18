@@ -51,7 +51,7 @@ package {{ $package }}
 import (
     "fmt"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/interface/v1/{{ $package }}"
 	"github.com/perses/perses/internal/api/toolbox"
 	"github.com/perses/perses/internal/api/rbac"
@@ -97,25 +97,25 @@ func (e *Endpoint) CollectRoutes(g *route.Group) {
 {{- end }}
 }
 
-func (e *Endpoint) Create(ctx echo.Context) error {
+func (e *Endpoint) Create(ctx *echo.Context) error {
 	entity := &v1.{{ $kind }}{}
 	return e.toolbox.Create(ctx, entity)
 }
 
-func (e *Endpoint) Update(ctx echo.Context) error {
+func (e *Endpoint) Update(ctx *echo.Context) error {
 	entity := &v1.{{ $kind }}{}
 	return e.toolbox.Update(ctx, entity)
 }
 
-func (e *Endpoint) Delete(ctx echo.Context) error {
+func (e *Endpoint) Delete(ctx *echo.Context) error {
 	return e.toolbox.Delete(ctx)
 }
 
-func (e *Endpoint) Get(ctx echo.Context) error {
+func (e *Endpoint) Get(ctx *echo.Context) error {
 	return e.toolbox.Get(ctx)
 }
 
-func (e *Endpoint) List(ctx echo.Context) error {
+func (e *Endpoint) List(ctx *echo.Context) error {
 	q := &{{ $package }}.Query{}
 	return e.toolbox.List(ctx, q)
 }

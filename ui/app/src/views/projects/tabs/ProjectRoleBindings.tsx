@@ -33,7 +33,7 @@ interface ProjectRoleBindingsProps {
 export function ProjectRoleBindings(props: ProjectRoleBindingsProps): ReactElement {
   const { projectName, id } = props;
 
-  const { data, isLoading } = useRoleBindingList(projectName);
+  const { data, isPending } = useRoleBindingList(projectName);
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const createRoleBindingMutation = useCreateRoleBindingMutation(projectName);
@@ -98,10 +98,11 @@ export function ProjectRoleBindings(props: ProjectRoleBindingsProps): ReactEleme
     <Card id={id}>
       <RoleBindingList
         data={data ?? []}
-        isLoading={isLoading}
+        isLoading={isPending}
         onCreate={handleRoleBindingCreate}
         onUpdate={handleRoleBindingUpdate}
         onDelete={handleRoleBindingDelete}
+        storageKey="RoleBinding"
         initialState={{
           columns: {
             columnVisibilityModel: {

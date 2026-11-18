@@ -11,19 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migrate
+// Package grafana holds the classic JSON model of the Grafana dashboards, and decodes into it both the dashboards
+// exported with the classic JSON model and the dashboard resources of the API group dashboard.grafana.app, available
+// since Grafana 12. The resources using the schema v2 are converted into the classic JSON model by the package v2.
+// The migration of the decoded dashboards into Perses dashboards is done by the package migrate.
+package grafana
 
 import (
 	"encoding/json"
 	"fmt"
 	"strings"
 
+	v2 "github.com/perses/perses/internal/api/plugin/migrate/grafana/v2"
 	"github.com/perses/spec/go/dashboard/variable"
 )
 
 const (
-	grafanaPanelRowType      = "row"
-	grafanaDashboardAPIGroup = "dashboard.grafana.app/"
+	// PanelRowType is the type of the panels that are rows.
+	PanelRowType      = "row"
+	dashboardAPIGroup = "dashboard.grafana.app/"
+	dashboardKind     = "Dashboard"
 )
 
 type GridPosition struct {
@@ -33,7 +40,7 @@ type GridPosition struct {
 	Y      float64 `json:"y"`
 }
 
-type GrafanaLink struct {
+type Link struct {
 	Title       string `json:"title"`
 	URL         string `json:"url"`
 	TargetBlank bool   `json:"targetBlank"`
@@ -52,7 +59,7 @@ type Panel struct {
 	Panels          []Panel           `json:"panels"`
 	GridPosition    GridPosition      `json:"gridPos"`
 	Targets         []json.RawMessage `json:"targets"`
-	Links           []GrafanaLink     `json:"links"`
+	Links           []Link            `json:"links"`
 	json.RawMessage
 }
 
@@ -186,7 +193,78 @@ func (v *TemplateVar) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (v *TemplateVar) getDefaultValue() *variable.DefaultValue {
+// Annotation is an entry of the list of annotations of a Grafana dashboard.
+type Annotation struct {
+	Name string `json:"name"`
+	// BuiltIn is 1 for the annotation that Grafana adds to every dashboard ("Annotations & Alerts"),
+	// that queries the annotations stored by Grafana itself.
+	BuiltIn int `json:"builtIn"`
+	// Enable is false when the annotation is not shown by default on the dashboard. Grafana considers it true when it's not set.
+	Enable    *bool  `json:"enable"`
+	IconColor string `json:"iconColor"`
+	json.RawMessage
+}
+
+// Custom unmarshal to both store fields and keep raw data (used by the CUE-based migration logic).
+// A field with an unexpected type is ignored instead of making the whole migration fail.
+func (a *Annotation) UnmarshalJSON(data []byte) error {
+	var tmp map[string]json.RawMessage
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+	annotation := Annotation{}
+	if name, ok := tmp["name"]; ok {
+		_ = json.Unmarshal(name, &annotation.Name)
+	}
+	if builtIn, ok := tmp["builtIn"]; ok {
+		_ = json.Unmarshal(builtIn, &annotation.BuiltIn)
+	}
+	if enable, ok := tmp["enable"]; ok {
+		// Decoded apart, so a value that is not a boolean leaves the field unset instead of setting it to false.
+		var value *bool
+		if json.Unmarshal(enable, &value) == nil {
+			annotation.Enable = value
+		}
+	}
+	if iconColor, ok := tmp["iconColor"]; ok {
+		_ = json.Unmarshal(iconColor, &annotation.IconColor)
+	}
+	var err error
+	annotation.RawMessage, err = json.Marshal(tmp)
+	if err != nil {
+		return err
+	}
+	*a = annotation
+	return nil
+}
+
+// Annotations is the annotations section of a Grafana dashboard, e.g. {"list": [...]}.
+type Annotations struct {
+	List []Annotation `json:"list"`
+}
+
+// UnmarshalJSON decodes the annotations best-effort: an annotation that can't be decoded is ignored, and an
+// annotations section that is not an object leaves the list empty, instead of making the whole migration fail.
+func (a *Annotations) UnmarshalJSON(data []byte) error {
+	var tmp struct {
+		List []json.RawMessage `json:"list"`
+	}
+	if json.Unmarshal(data, &tmp) != nil {
+		return nil
+	}
+	var list []Annotation
+	for _, rawAnnotation := range tmp.List {
+		var annotation Annotation
+		if json.Unmarshal(rawAnnotation, &annotation) == nil {
+			list = append(list, annotation)
+		}
+	}
+	a.List = list
+	return nil
+}
+
+// DefaultValue returns the current value of the variable, or nil when it has none.
+func (v *TemplateVar) DefaultValue() *variable.DefaultValue {
 	if v.Current == nil {
 		return nil
 	}
@@ -205,53 +283,114 @@ func (s *LenientString) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// GrafanaTimeRange is the default time range of a Grafana dashboard, e.g. {"from": "now-6h", "to": "now"}.
-type GrafanaTimeRange struct {
+// TimeRange is the default time range of a Grafana dashboard, e.g. {"from": "now-6h", "to": "now"}.
+type TimeRange struct {
 	From string `json:"from"`
 	To   string `json:"to"`
 }
 
 // UnmarshalJSON decodes the time range best-effort: a value that is not an object of strings leaves the time range
 // empty (the migration then uses the default duration of Perses), instead of making the whole migration fail.
-func (t *GrafanaTimeRange) UnmarshalJSON(data []byte) error {
-	type plain GrafanaTimeRange
+func (t *TimeRange) UnmarshalJSON(data []byte) error {
+	type plain TimeRange
 	var tmp plain
 	if json.Unmarshal(data, &tmp) == nil {
-		*t = GrafanaTimeRange(tmp)
+		*t = TimeRange(tmp)
 	}
 	return nil
 }
 
-type SimplifiedDashboard struct {
-	UID        string        `json:"uid,omitempty"`
-	Title      string        `json:"title"`
-	Tags       []string      `json:"tags"`
-	Panels     []Panel       `json:"panels"`
-	Links      []GrafanaLink `json:"links"`
+// Dashboard is the classic JSON model of a Grafana dashboard, restricted to the fields used by the migration.
+type Dashboard struct {
+	UID        string   `json:"uid,omitempty"`
+	Title      string   `json:"title"`
+	Tags       []string `json:"tags"`
+	Panels     []Panel  `json:"panels"`
+	Links      []Link   `json:"links"`
 	Templating struct {
 		List []TemplateVar `json:"list"`
 	} `json:"templating"`
+	Annotations Annotations `json:"annotations"`
 	// Time is the default time range of the dashboard. It is nil when the dashboard has none.
-	Time *GrafanaTimeRange `json:"time"`
+	Time *TimeRange `json:"time"`
 	// Refresh is the default auto-refresh interval of the dashboard, e.g. "1m". It is empty when auto-refresh is off.
 	Refresh LenientString `json:"refresh"`
 	// Timezone is the timezone of the dashboard: "browser", "utc", an IANA timezone name, or empty.
 	Timezone LenientString `json:"timezone"`
 }
 
-func (d *SimplifiedDashboard) UnmarshalJSON(data []byte) error {
+// dashboardResource is a dashboard resource of the API group dashboard.grafana.app, available since Grafana 12.
+type dashboardResource struct {
+	APIVersion string `json:"apiVersion"`
+	Kind       string `json:"kind"`
+	Metadata   struct {
+		// Name is the UID of the dashboard.
+		Name string `json:"name"`
+	} `json:"metadata"`
+	Spec json.RawMessage `json:"spec"`
+}
+
+// convertResource converts a dashboard resource of the API group dashboard.grafana.app into the classic JSON
+// model of the Grafana dashboards. The versions v0alpha1, v1beta1 and v1 of the resources hold the classic JSON model
+// in their spec, while the versions v2beta1 and v2 use the schema v2.
+func convertResource(data []byte) ([]byte, error) {
+	resource := dashboardResource{}
+	if err := json.Unmarshal(data, &resource); err != nil {
+		return nil, fmt.Errorf("unable to decode the Grafana dashboard resource: %w", err)
+	}
+	if resource.Kind != dashboardKind {
+		return nil, fmt.Errorf("the Grafana resource of kind %q is not a dashboard", resource.Kind)
+	}
+	if len(resource.Spec) == 0 || string(resource.Spec) == "null" {
+		return nil, fmt.Errorf("the Grafana dashboard %q has no spec", resource.Metadata.Name)
+	}
+	switch strings.TrimPrefix(resource.APIVersion, dashboardAPIGroup) {
+	case "v0alpha1", "v1beta1", "v1":
+		return unwrapClassicResource(resource)
+	case "v2beta1", "v2":
+		classicDashboard, err := v2.ToClassic(resource.Metadata.Name, resource.Spec)
+		if err != nil {
+			return nil, fmt.Errorf("unable to convert the Grafana schema v2 dashboard %q: %w", resource.Metadata.Name, err)
+		}
+		return classicDashboard, nil
+	default:
+		return nil, fmt.Errorf("the Grafana dashboard schema %q is not supported, please export the dashboard using the classic JSON model or the schema v2", resource.APIVersion)
+	}
+}
+
+// unwrapClassicResource returns the classic JSON model held by the spec of the resource.
+func unwrapClassicResource(resource dashboardResource) ([]byte, error) {
+	spec := map[string]json.RawMessage{}
+	if err := json.Unmarshal(resource.Spec, &spec); err != nil {
+		return nil, fmt.Errorf("unable to decode the spec of the Grafana dashboard: %w", err)
+	}
+	var uid string
+	if rawUID, ok := spec["uid"]; ok {
+		_ = json.Unmarshal(rawUID, &uid)
+	}
+	if len(uid) == 0 && len(resource.Metadata.Name) > 0 {
+		spec["uid"], _ = json.Marshal(resource.Metadata.Name)
+	}
+	return json.Marshal(spec)
+}
+
+func (d *Dashboard) UnmarshalJSON(data []byte) error {
 	var header struct {
 		APIVersion string `json:"apiVersion"`
 	}
-	if err := json.Unmarshal(data, &header); err == nil && strings.HasPrefix(header.APIVersion, grafanaDashboardAPIGroup) {
-		return fmt.Errorf("the Grafana dashboard schema %q is not supported, please export the dashboard using the classic JSON model", header.APIVersion)
+	if err := json.Unmarshal(data, &header); err == nil && strings.HasPrefix(header.APIVersion, dashboardAPIGroup) {
+		classicDashboard, convertErr := convertResource(data)
+		if convertErr != nil {
+			return convertErr
+		}
+		data = classicDashboard
 	}
-	tmp := &SimplifiedDashboard{}
-	type plain SimplifiedDashboard
+	tmp := &Dashboard{}
+	type plain Dashboard
 	if err := json.Unmarshal(data, (*plain)(tmp)); err != nil {
 		return err
 	}
-	tmp.rearrangeGrafanaPanelsWithinExpandedRows()
+	tmp.rearrangePanelsWithinExpandedRows()
 	*d = *tmp
 	return nil
 }
@@ -280,11 +419,11 @@ func (d *SimplifiedDashboard) UnmarshalJSON(data []byte) error {
 //
 // row2,
 // ...
-func (d *SimplifiedDashboard) rearrangeGrafanaPanelsWithinExpandedRows() {
+func (d *Dashboard) rearrangePanelsWithinExpandedRows() {
 	var newPanelList []Panel
 	var parentRow *Panel
 	for _, panel := range d.Panels {
-		if panel.Type == grafanaPanelRowType {
+		if panel.Type == PanelRowType {
 			if parentRow != nil {
 				// situation corresponding to this case:
 				// row1,   <- current parentRow

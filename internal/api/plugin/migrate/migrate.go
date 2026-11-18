@@ -21,7 +21,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 	"sync"
 
@@ -30,6 +29,7 @@ import (
 	"cuelang.org/go/cue/cuecontext"
 	"github.com/perses/common/set"
 	apiinterface "github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/internal/api/plugin/migrate/grafana"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/spec/go/common"
@@ -42,26 +42,13 @@ const (
 	grafanaType     = "#grafanaType"
 	migrationFolder = "migrate"
 	varDefID        = "#grafanaVar"
+	annotationDefID = "#grafanaAnnotation"
 )
 
 var kindRegexp = regexp.MustCompile(`(?m)kind\s*:\s*"(\w+)"`)
 
 func LoadMigrateSchema(schemaPath string) (*build.Instance, error) {
 	return schema.LoadSchemaInstance(schemaPath, "migrate")
-}
-
-func ReplaceInputValue(input map[string]string, grafanaDashboard string) string {
-	result := grafanaDashboard
-	for key, value := range input {
-		// Escape special characters that may be present in the value
-		escapedValue := strconv.Quote(value)
-		// Remove the extra surrounding quotes added by strconv.Quote
-		escapedValue = escapedValue[1 : len(escapedValue)-1]
-		// Do the replacement (2 syntaxes to support)
-		result = strings.ReplaceAll(result, fmt.Sprintf("$%s", key), escapedValue)
-		result = strings.ReplaceAll(result, fmt.Sprintf("${%s}", key), escapedValue)
-	}
-	return result
 }
 
 func Load(pluginPath string, moduleSpec v1.ModuleSpec) ([]schema.LoadSchema, error) {
@@ -129,6 +116,9 @@ func GetPluginKind(migrateFile string) (plugin.Kind, error) {
 	}
 	if strings.Contains(string(data), varDefID) {
 		return plugin.KindVariable, nil
+	}
+	if strings.Contains(string(data), annotationDefID) {
+		return plugin.KindAnnotation, nil
 	}
 	return plugin.KindQuery, nil
 }
@@ -234,20 +224,22 @@ type Migration interface {
 	Load(pluginPath string, module v1.PluginModule) error
 	LoadDevPlugin(pluginPath string, module v1.PluginModule) error
 	UnLoadDevPlugin(module v1.PluginModule)
-	Migrate(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) (*v1.Dashboard, error)
+	Migrate(grafanaDashboard *grafana.Dashboard, useDefaultDatasource bool) (*v1.Dashboard, error)
 }
 
 func New() Migration {
 	return &completeMigration{
 		mig: &mig{
-			panels:    make(map[string]*panelInstance),
-			variables: make(map[string]*build.Instance),
-			queries:   make(map[string]*queryInstance),
+			panels:      make(map[string]*panelInstance),
+			variables:   make(map[string]*build.Instance),
+			queries:     make(map[string]*queryInstance),
+			annotations: make(map[string]*build.Instance),
 		},
 		devMig: &mig{
-			panels:    make(map[string]*panelInstance),
-			variables: make(map[string]*build.Instance),
-			queries:   make(map[string]*queryInstance),
+			panels:      make(map[string]*panelInstance),
+			variables:   make(map[string]*build.Instance),
+			queries:     make(map[string]*queryInstance),
+			annotations: make(map[string]*build.Instance),
 		},
 	}
 }
@@ -279,7 +271,7 @@ func (m *completeMigration) UnLoadDevPlugin(module v1.PluginModule) {
 	}
 }
 
-func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) (*v1.Dashboard, error) {
+func (m *completeMigration) Migrate(grafanaDashboard *grafana.Dashboard, useDefaultDatasource bool) (*v1.Dashboard, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 	result := &v1.Dashboard{
@@ -308,10 +300,11 @@ func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard, useDe
 	result.Spec.Variables = m.migrateVariables(grafanaDashboard)
 	result.Spec.Layouts = m.migrateGrid(grafanaDashboard)
 	result.Spec.Links = m.migrateDashboardLinks(grafanaDashboard)
+	result.Spec.Annotations = m.migrateAnnotations(grafanaDashboard, useDefaultDatasource)
 	return result, nil
 }
 
-func (m *completeMigration) migrateDashboardLinks(grafanaDashboard *SimplifiedDashboard) []dashboard.Link {
+func (m *completeMigration) migrateDashboardLinks(grafanaDashboard *grafana.Dashboard) []dashboard.Link {
 	links := []dashboard.Link{}
 	for _, l := range grafanaDashboard.Links {
 		if len(l.URL) == 0 {
@@ -340,7 +333,7 @@ func buildRepeatVariable(value string, direction string, maxPerRow *int) *dashbo
 	return rv
 }
 
-func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) []dashboard.Layout {
+func (m *completeMigration) migrateGrid(grafanaDashboard *grafana.Dashboard) []dashboard.Layout {
 	var result []dashboard.Layout
 	// This is not allowed in Perses to have "orphan" panels (a.k.a panels that don't belong to a group).
 	// Thus we have to create a first grid to gather the eventual orphans found at the beginning of the
@@ -358,7 +351,7 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 	result = append(result, orphansGrid)
 
 	for i, panel := range grafanaDashboard.Panels {
-		if panel.Type != grafanaPanelRowType {
+		if panel.Type != grafana.PanelRowType {
 			item := dashboard.GridItem{
 				Width:  panel.GridPosition.Width,
 				Height: panel.GridPosition.Height,
@@ -437,6 +430,9 @@ type mig struct {
 	// queries is a map that implies we won't allow having two migration scripts for the same query type.
 	// The key is the query instance kind (e.g., PrometheusTimeSeriesQuery).
 	queries map[string]*queryInstance
+	// annotations is a map that implies we won't allow having two migration scripts for the same annotation type.
+	// The key is the annotation instance kind (e.g., PrometheusPromQLAnnotation).
+	annotations map[string]*build.Instance
 }
 
 func (m *mig) load(pluginPath string, module v1.PluginModule) error {
@@ -452,6 +448,8 @@ func (m *mig) load(pluginPath string, module v1.PluginModule) error {
 			m.loadVariable(sch.Name, sch.Instance, module)
 		case plugin.KindPanel:
 			m.loadPanel(sch.Name, sch.Instance, module)
+		case plugin.KindAnnotation:
+			m.loadAnnotation(sch.Name, sch.Instance, module)
 		}
 	}
 	return nil
@@ -537,6 +535,29 @@ func (m *mig) loadVariable(schemaPath string, instance *build.Instance, module v
 	logrus.Infof("unable to recognize the variable kind from the migrate script %q", schemaPath)
 }
 
+func (m *mig) loadAnnotation(schemaPath string, instance *build.Instance, module v1.PluginModule) {
+	// Like for the variables, the annotation instance name is only used to ensure we have a single migration script per annotation kind,
+	// so the migration script of a plugin loaded from the dev environment can override the existing one.
+	data, err := os.ReadFile(filepath.Join(schemaPath, "migrate.cue")) //nolint: gosec
+	if err != nil {
+		logrus.WithError(err).Warnf("unable to read migrate script from %q", schemaPath)
+		return
+	}
+	for _, group := range kindRegexp.FindAllStringSubmatch(string(data), -1) {
+		if len(group) < 2 {
+			continue
+		}
+		kind := group[1]
+		for _, plg := range module.Spec.Plugins {
+			if plg.Kind == plugin.KindAnnotation && plg.Spec.Name == kind {
+				m.annotations[kind] = instance
+				return
+			}
+		}
+	}
+	logrus.Infof("unable to recognize the annotation kind from the migrate script %q", schemaPath)
+}
+
 func (m *mig) loadQuery(schemaPath string, instance *build.Instance, module v1.PluginModule) {
 	// The idea here is to know the query instance name we are dealing with.
 	// Then based on that, we will loop over the plugins listed in the module to get the high level query kind.
@@ -580,7 +601,8 @@ func (m *mig) remove(kind plugin.Kind, name string) {
 			delete(m.panels, name)
 		case plugin.KindVariable:
 			delete(m.variables, name)
-		// TODO: annotations
+		case plugin.KindAnnotation:
+			delete(m.annotations, name)
 		case plugin.KindDatasource, plugin.KindExplore:
 		// No migration script for datasource or explorer, so nothing to remove
 		default:

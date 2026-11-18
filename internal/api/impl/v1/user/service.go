@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	"github.com/brunoga/deep"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/crypto"
 	apiInterface "github.com/perses/perses/internal/api/interface"
@@ -41,7 +41,7 @@ func NewService(dao user.DAO, authz authorization.Authorization) user.Service {
 	}
 }
 
-func (s *service) Create(_ echo.Context, entity *v1.User) (*v1.PublicUser, error) {
+func (s *service) Create(_ *echo.Context, entity *v1.User) (*v1.PublicUser, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -70,7 +70,7 @@ func (s *service) create(entity *v1.User) (*v1.PublicUser, error) {
 	return v1.NewPublicUser(entity), nil
 }
 
-func (s *service) Update(_ echo.Context, entity *v1.User, parameters apiInterface.Parameters) (*v1.PublicUser, error) {
+func (s *service) Update(_ *echo.Context, entity *v1.User, parameters apiInterface.Parameters) (*v1.PublicUser, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -118,7 +118,7 @@ func (s *service) update(entity *v1.User, parameters apiInterface.Parameters) (*
 	return v1.NewPublicUser(entity), nil
 }
 
-func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
+func (s *service) Delete(_ *echo.Context, parameters apiInterface.Parameters) error {
 	err := s.dao.Delete(parameters.Name)
 	if err != nil {
 		return err

@@ -14,6 +14,8 @@
 package schema
 
 import (
+	"os"
+	"path/filepath"
 	"slices"
 	"testing"
 
@@ -196,4 +198,76 @@ func TestGenerateSchemaDisjunctionWithDefinitions(t *testing.T) {
 
 	invalid := ctx.CompileString(`{kind: "PaletteChart", spec: {visual: palette: {mode: "categorical", name: "unknown"}}}`)
 	assert.Error(t, result.Unify(invalid).Validate(cue.Concrete(true)))
+}
+
+func TestGenerateSchemaDefinitionsInlinesImportedTypes(t *testing.T) {
+	root := t.TempDir()
+
+	write := func(name, content string) {
+		path := filepath.Join(root, name)
+		require.NoError(t, os.MkdirAll(filepath.Dir(path), 0o750))
+		require.NoError(t, os.WriteFile(path, []byte(content), 0o600))
+	}
+
+	write("cue.mod/module.cue", `
+module: "example.com/regression@v0"
+language: version: "v0.11.0"
+`)
+
+	write("shared/defs.cue", `
+package shared
+
+#Calculation: "first" | "last"
+`)
+
+	write("panels/model.cue", `
+package model
+
+import "example.com/regression/shared"
+
+kind: "ImportedChart"
+spec: close({
+    calculation: shared.#Calculation
+})
+`)
+
+	schema := loadSchemaFromTestdata(
+		t, filepath.Join(root, "panels"),
+	)
+
+	result, err := GenerateSchemaDefinitions(
+		cuecontext.New(), []LoadSchema{schema},
+	)
+	require.NoError(t, err)
+
+	output, err := apiCue.Marshal(result)
+	require.NoError(t, err)
+
+	require.NotContains(t, string(output),
+		"example.com/regression/shared")
+	require.NotContains(t, string(output),
+		"shared.#Calculation")
+
+	consumerCtx := cuecontext.New()
+	standalone := consumerCtx.CompileBytes(output)
+	require.NoError(t, standalone.Err(), string(output))
+
+	definition := standalone.LookupPath(
+		cue.MakePath(cue.Def("#ImportedChart")),
+	)
+	require.True(t, definition.Exists())
+
+	valid := consumerCtx.CompileString(`
+kind: "ImportedChart"
+spec: {calculation: "first"}
+`)
+	require.NoError(t,
+		definition.Unify(valid).Validate(cue.Concrete(true)))
+
+	invalid := consumerCtx.CompileString(`
+kind: "ImportedChart"
+spec: {calculation: "invalid"}
+`)
+	require.Error(t,
+		definition.Unify(invalid).Validate(cue.Concrete(true)))
 }

@@ -39,6 +39,31 @@ test.describe('ProjectView', () => {
     await projectPage.clickDashboardItemInList(['my_folder', 'Demo'], 'main-dashboard-list');
   });
 
+  test('can import a dashboard into the project', async ({ page }) => {
+    const projectPage = new AppProjectPage(page);
+    await projectPage.goto('testing');
+
+    const importNavigationPromise = page.waitForURL(new RegExp('/import\\?project=testing$'));
+    await projectPage.importDashboardButton.click();
+    await importNavigationPromise;
+
+    // Unique name, so that the test can be retried.
+    const dashboardName = `imported_dashboard_${Date.now()}`;
+    const dashboard = {
+      kind: 'Dashboard',
+      metadata: { name: dashboardName },
+      spec: { duration: '1h', panels: {}, layouts: [] },
+    };
+    await page.getByRole('textbox').fill(JSON.stringify(dashboard));
+
+    // The project of the page the import was started from is selected
+    await expect(page.getByRole('combobox', { name: 'Project name' })).toHaveValue('testing');
+
+    const dashboardNavigationPromise = page.waitForURL(`/projects/testing/dashboards/${dashboardName}`);
+    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    await dashboardNavigationPromise;
+  });
+
   test('can change current tab', async ({ page }) => {
     const projectPage = new AppProjectPage(page);
     await projectPage.goto(project);
@@ -72,6 +97,30 @@ test.describe('ProjectView', () => {
     await variableEditor.saveButton.click();
 
     await expect(projectPage.variableList).toContainText('$list_var');
+  });
+
+  test('keeps the settings of the variable list', async ({ page }) => {
+    const projectPage = new AppProjectPage(page);
+    await projectPage.goto(project);
+
+    await projectPage.gotoVariablesTab();
+
+    const displayNameHeader = projectPage.variableList.getByRole('columnheader', { name: 'Display Name' });
+    const versionHeader = projectPage.variableList.getByRole('columnheader', { name: 'Version' });
+    await expect(displayNameHeader).toHaveAttribute('aria-sort', 'ascending');
+    await expect(versionHeader).toBeHidden();
+
+    await displayNameHeader.click();
+    await expect(displayNameHeader).toHaveAttribute('aria-sort', 'descending');
+    await projectPage.variableList.getByRole('button', { name: 'Columns' }).click();
+    await page.getByRole('checkbox', { name: 'Version' }).check();
+    await page.keyboard.press('Escape');
+    await expect(versionHeader).toBeVisible();
+
+    await page.reload();
+
+    await expect(displayNameHeader).toHaveAttribute('aria-sort', 'descending');
+    await expect(versionHeader).toBeVisible();
   });
 
   test('can create a secret', async ({ page }) => {

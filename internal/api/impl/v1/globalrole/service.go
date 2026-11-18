@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	"github.com/brunoga/deep"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
@@ -43,7 +43,7 @@ func NewService(dao globalrole.DAO, authz authorization.Authorization, sch schem
 	}
 }
 
-func (s *service) Create(_ echo.Context, entity *v1.GlobalRole) (*v1.GlobalRole, error) {
+func (s *service) Create(_ *echo.Context, entity *v1.GlobalRole) (*v1.GlobalRole, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -64,7 +64,7 @@ func (s *service) create(entity *v1.GlobalRole) (*v1.GlobalRole, error) {
 	return entity, nil
 }
 
-func (s *service) Update(_ echo.Context, entity *v1.GlobalRole, parameters apiInterface.Parameters) (*v1.GlobalRole, error) {
+func (s *service) Update(_ *echo.Context, entity *v1.GlobalRole, parameters apiInterface.Parameters) (*v1.GlobalRole, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -95,7 +95,7 @@ func (s *service) update(entity *v1.GlobalRole, parameters apiInterface.Paramete
 	return entity, nil
 }
 
-func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
+func (s *service) Delete(_ *echo.Context, parameters apiInterface.Parameters) error {
 	if err := s.dao.Delete(parameters.Name); err != nil {
 		return err
 	}

@@ -1,0 +1,68 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "createdAt": "0001-01-01T00:00:00Z",
+    "name": "annotations",
+    "project": "",
+    "updatedAt": "0001-01-01T00:00:00Z",
+    "version": 0
+  },
+  "spec": {
+    "display": {
+      "name": "Dashboard with annotations"
+    },
+    "duration": "6h",
+    "layouts": [],
+    "panels": {},
+    "annotations": [
+      {
+        "display": {
+          "name": "Deployments",
+          "color": "#c4162a"
+        },
+        "plugin": {
+          "kind": "SomeAnnotation",
+          "spec": {
+            "datasource": {
+              "kind": "ExoticTSDB",
+              "name": "exotic-ds"
+            },
+            "expr": "deployments_total"
+          }
+        }
+      },
+      {
+        "display": {
+          "name": "Restarts",
+          "hidden": true,
+          "color": "rgba(255, 96, 96, 1)"
+        },
+        "plugin": {
+          "kind": "SomeAnnotation",
+          "spec": {
+            "datasource": {
+              "kind": "ExoticTSDB",
+              "name": "exotic-ds"
+            },
+            "expr": "restarts_total"
+          }
+        }
+      },
+      {
+        "display": {
+          "name": "Incidents"
+        },
+        "plugin": {
+          "kind": "SomeAnnotation",
+          "spec": {
+            "datasource": {
+              "kind": "ExoticTSDB",
+              "name": "exotic-ds"
+            },
+            "expr": "incidents_total"
+          }
+        }
+      }
+    ]
+  }
+}

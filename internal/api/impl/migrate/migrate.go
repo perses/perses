@@ -17,9 +17,10 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin/migrate"
+	"github.com/perses/perses/internal/api/plugin/migrate/grafana"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/pkg/model/api"
 )
@@ -44,14 +45,14 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 }
 
 // Migrate is the endpoint that provides the Perses dashboard corresponding to the provided grafana dashboard.
-func (e *endpoint) Migrate(ctx echo.Context) error {
+func (e *endpoint) Migrate(ctx *echo.Context) error {
 	body := &api.Migrate{}
 	if err := ctx.Bind(body); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
 
-	rawGrafanaDashboard := []byte(migrate.ReplaceInputValue(body.Input, string(body.GrafanaDashboard)))
-	grafanaDashboard := &migrate.SimplifiedDashboard{}
+	rawGrafanaDashboard := []byte(grafana.ReplaceInputValue(body.Input, string(body.GrafanaDashboard)))
+	grafanaDashboard := &grafana.Dashboard{}
 	if err := json.Unmarshal(rawGrafanaDashboard, grafanaDashboard); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}

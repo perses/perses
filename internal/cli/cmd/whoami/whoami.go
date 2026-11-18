@@ -48,7 +48,8 @@ func (o *option) Complete(_ []string) error {
 }
 
 func (o *option) Validate() error {
-	if o.authorization == nil {
+	// A Kubernetes login doesn't store any token in the config: the credentials are read from the kubeconfig file.
+	if o.authorization == nil && config.Global.RestClientConfig.K8sAuth == nil {
 		return fmt.Errorf("you are not connected to any Perses server")
 	}
 	return nil

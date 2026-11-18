@@ -14,27 +14,52 @@
 package middleware
 
 import (
-	"github.com/labstack/echo/v4"
-	echoMiddleware "github.com/labstack/echo/v4/middleware"
+	"compress/gzip"
+	"errors"
+	"io"
+	"strings"
+
+	"github.com/labstack/echo/v5"
+	echoMiddleware "github.com/labstack/echo/v5/middleware"
 )
 
+// contextKeyDecompressNextCalled is set in the echo context when the echo Decompress middleware calls the next handler.
+const contextKeyDecompressNextCalled = "decompressNextCalled"
+
 // Decompress decompresses the gzip request bodies like the echo Decompress middleware does.
-// The echo middleware only replaces the body: the headers Content-Encoding and Content-Length still describe the
-// compressed body. A request forwarded as is (e.g. by the datasource proxy) would then be inconsistent and rejected.
-// Once the body is decompressed, these headers are removed, and the length of the body becomes unknown.
+// The echo middleware only replaces the body (and sets the length of the request as unknown): the headers
+// Content-Encoding and Content-Length still describe the compressed body. A request forwarded as is (e.g. by the
+// datasource proxy) would then be inconsistent and rejected. Once the body is decompressed, these headers are removed.
+// A body that is not a valid gzip stream is rejected with the status 400.
 func Decompress() echo.MiddlewareFunc {
 	decompress := echoMiddleware.Decompress()
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return decompress(func(c echo.Context) error {
+		handler := decompress(func(c *echo.Context) error {
+			c.Set(contextKeyDecompressNextCalled, true)
 			req := c.Request()
 			// The echo middleware calls the next handler with this header only when it decompressed the body
-			// (or when the body is empty).
-			if req.Header.Get(echo.HeaderContentEncoding) == echoMiddleware.GZIPEncoding {
+			// (or when the body is empty). Like the echo middleware, the value is compared without considering the case.
+			if strings.EqualFold(req.Header.Get(echo.HeaderContentEncoding), echoMiddleware.GZIPEncoding) {
 				req.Header.Del(echo.HeaderContentEncoding)
 				req.Header.Del(echo.HeaderContentLength)
-				req.ContentLength = -1
 			}
 			return next(c)
 		})
+		return func(c *echo.Context) error {
+			err := handler(c)
+			if err == nil {
+				return nil
+			}
+			// When the body is not a valid gzip stream, the echo middleware returns the error of the gzip reader as is,
+			// without calling the next handler: gzip.ErrHeader, or io.ErrUnexpectedEOF when the header is truncated.
+			// This error is caused by the client, but without an HTTP status, it would be answered with 500 and logged
+			// as an unexpected error. Once the next handler is called, the errors come from the rest of the chain
+			// (e.g. a recovered panic) and are returned untouched.
+			if nextCalled, _ := c.Get(contextKeyDecompressNextCalled).(bool); !nextCalled && echo.StatusCode(err) == 0 &&
+				(errors.Is(err, gzip.ErrHeader) || errors.Is(err, io.ErrUnexpectedEOF)) {
+				return echo.ErrBadRequest.Wrap(err)
+			}
+			return err
+		}
 	}
 }

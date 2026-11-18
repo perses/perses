@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/go-jose/go-jose/v4"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

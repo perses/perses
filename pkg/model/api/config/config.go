@@ -14,6 +14,7 @@
 package config
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -31,11 +32,17 @@ type EphemeralDashboard struct {
 	Enable bool `json:"enable" yaml:"enable"`
 	// The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
 	CleanupInterval common.Duration `json:"cleanup_interval" yaml:"cleanup_interval"`
+	// MaxTTL is the maximum time to live that a user can set on an ephemeral dashboard.
+	// It is not set by default, meaning there is no limit.
+	MaxTTL common.Duration `json:"max_ttl,omitempty" yaml:"max_ttl,omitempty"`
 }
 
 func (e *EphemeralDashboard) Verify() error {
 	if e.Enable && e.CleanupInterval <= 0 {
 		e.CleanupInterval = common.Duration(defaultEphemeralDashboardsCleanupInterval)
+	}
+	if e.MaxTTL < 0 {
+		return fmt.Errorf("max_ttl cannot be negative")
 	}
 	return nil
 }
@@ -67,6 +74,8 @@ type Config struct {
 	Plugin Plugin `json:"plugin,omitempty" yaml:"plugin,omitempty"`
 	// Search contains the config for the search engine and the index in memory.
 	Search Search `json:"search,omitempty" yaml:"search,omitempty"`
+	// OpenTelemetry contains the config to export the traces of the Perses server with OTLP.
+	OpenTelemetry OpenTelemetry `json:"opentelemetry,omitempty" yaml:"opentelemetry,omitempty"`
 }
 
 func (c *Config) Verify() error {

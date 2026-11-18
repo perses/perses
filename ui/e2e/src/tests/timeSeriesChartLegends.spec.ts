@@ -13,68 +13,65 @@
 
 import { mockTimeSeriesResponseWithStableValue } from '@perses-dev/internal-utils';
 
-import { test } from '../fixtures/dashboardTest';
+import { test, expect } from '../fixtures/dashboardTest';
 import { waitForStableCanvas } from '../utils';
+
+const MOCK_NOW = 1673805600000;
 
 test.use({
   dashboardName: 'TimeSeriesChartLegends',
-  mockNow: 1673805600000,
+  mockNow: MOCK_NOW,
+  // Mock data response, so we can make assertions on consistent response data.
+  mockQueryRangeRequests: {
+    queries: [
+      {
+        query: 'prometheus_http_requests_total',
+        response: {
+          status: 200,
+          body: JSON.stringify(
+            mockTimeSeriesResponseWithStableValue({
+              metrics: [
+                {
+                  metric: {
+                    __name__: 'prometheus_http_requests_total',
+                    instance: 'demo.do.prometheus.io:9090',
+                    job: 'prometheus',
+                    handler: '/-/healthy',
+                  },
+                  value: '1',
+                },
+                {
+                  metric: {
+                    __name__: 'prometheus_http_requests_total',
+                    instance: 'demo.do.prometheus.io:9090',
+                    job: 'prometheus',
+                    handler: '/api/v1/alerts',
+                  },
+                  value: '10',
+                },
+                {
+                  metric: {
+                    __name__: 'prometheus_http_requests_total',
+                    instance: 'demo.do.prometheus.io:9090',
+                    job: 'prometheus',
+                    handler: '/api/v1/labels',
+                  },
+                  value: '100',
+                },
+              ],
+              startTimeMs: MOCK_NOW - 6 * 60 * 60 * 1000,
+              endTimeMs: MOCK_NOW,
+            }),
+          ),
+        },
+      },
+    ],
+  },
 });
 
 test.describe('Dashboard: Time Series Chart Legends', () => {
   ['bottom table', 'right table', 'bottom list', 'right list'].forEach((panelName) => {
-    test(`on mouse over ${panelName} legend item highlights the associated line`, async ({
-      dashboardPage,
-      mockNow,
-    }) => {
-      // Mock data response, so we can make assertions on consistent response data.
-
-      await dashboardPage.mockQueryRangeRequests({
-        queries: [
-          {
-            query: 'prometheus_http_requests_total',
-            response: {
-              status: 200,
-              body: JSON.stringify(
-                mockTimeSeriesResponseWithStableValue({
-                  metrics: [
-                    {
-                      metric: {
-                        __name__: 'prometheus_http_requests_total',
-                        instance: 'demo.do.prometheus.io:9090',
-                        job: 'prometheus',
-                        handler: '/-/healthy',
-                      },
-                      value: '1',
-                    },
-                    {
-                      metric: {
-                        __name__: 'prometheus_http_requests_total',
-                        instance: 'demo.do.prometheus.io:9090',
-                        job: 'prometheus',
-                        handler: '/api/v1/alerts',
-                      },
-                      value: '10',
-                    },
-                    {
-                      metric: {
-                        __name__: 'prometheus_http_requests_total',
-                        instance: 'demo.do.prometheus.io:9090',
-                        job: 'prometheus',
-                        handler: '/api/v1/labels',
-                      },
-                      value: '100',
-                    },
-                  ],
-                  startTimeMs: mockNow - 6 * 60 * 60 * 1000,
-                  endTimeMs: mockNow,
-                }),
-              ),
-            },
-          },
-        ],
-      });
-
+    test(`on mouse over ${panelName} legend item highlights the associated line`, async ({ dashboardPage }) => {
       await dashboardPage.forEachTheme(async () => {
         const timeSeriesPanel = dashboardPage.getPanelByName(panelName);
         await timeSeriesPanel.isLoaded();
@@ -82,8 +79,10 @@ test.describe('Dashboard: Time Series Chart Legends', () => {
 
         const legendItemRole = panelName.includes('table') ? 'row' : 'listitem';
 
-        const legendItems = timeSeriesPanel.container.getByRole(legendItemRole);
-        await legendItems.first().hover();
+        // Target a series rather than the first item, which is the header row of table legends.
+        const legendItem = timeSeriesPanel.container.getByRole(legendItemRole).filter({ hasText: '/-/healthy' });
+        await expect(legendItem).toBeVisible();
+        await legendItem.hover();
       });
     });
   });

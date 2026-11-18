@@ -60,7 +60,7 @@ To start the server you just built:
 \___/                 \_|  \___|_|  |___/\___||___/  [PERSES_VERSION]
 __________________________________________________________
 
-⇨ http server started on [::]:8080
+INFO[2025-01-04T11:40:04Z] http server started on [::]:8080
 ```
 
 If you are interested in exploring how to configure your Perses server, please see the

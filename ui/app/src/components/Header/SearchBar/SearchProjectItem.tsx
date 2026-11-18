@@ -14,7 +14,6 @@
 import { Stack } from '@mui/material';
 import type { SxProps, Theme } from '@mui/material';
 import type { ProjectResource } from '@perses-dev/client';
-import ArchiveIcon from 'mdi-material-ui/Archive';
 import DatabaseIcon from 'mdi-material-ui/Database';
 import DashboardIcon from 'mdi-material-ui/ViewDashboard';
 import type { ReactElement } from 'react';
@@ -86,7 +85,6 @@ export const SearchProjectItem = (props: SearchProjectItemProps): ReactElement =
         sx={STATIC_SX.left}
         direction="row"
       >
-        <ArchiveIcon fontSize="small" />
         <HighlightedMatch
           value={value}
           intervals={intervals}

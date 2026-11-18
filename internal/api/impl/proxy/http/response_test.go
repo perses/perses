@@ -20,7 +20,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/impl/proxy/proxytest"
 	"github.com/perses/spec/go/common"
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"

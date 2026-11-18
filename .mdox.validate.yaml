@@ -11,9 +11,6 @@ validators:
   # datatracker is now returning a 403 error, while when you visit the page it works.
   - regex: 'datatracker\.ietf\.org'
     type: 'ignore'
-  # context timeout
-  - regex: 'mui\.com'
-    type: 'ignore'
   # code 500
   - regex: 'slack\.com'
     type: 'ignore'
@@ -21,22 +18,7 @@ validators:
   - regex: 'storybook\.js\.com'
     type: 'ignore'
   # timeout
-  - regex: 'tanstack\.com'
-    type: 'ignore'
-  # timeout
-  - regex: 'github\.com'
-    type: 'ignore'
-  # timeout
-  - regex: 'slack\.cncf\.io'
-    type: 'ignore'
-  # timeout
-  - regex: 'nodejs\.org'
-    type: 'ignore'
-  # timeout
   - regex: 'youtube\.com'
-    type: 'ignore'
-  # timeout
-  - regex: 'lodash\.com'
     type: 'ignore'
   # code 999
   - regex: 'linkedin\.com'

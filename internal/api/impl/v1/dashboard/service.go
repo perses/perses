@@ -19,7 +19,7 @@ import (
 	"net/http"
 
 	"github.com/brunoga/deep"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/index"
 	apiInterface "github.com/perses/perses/internal/api/interface"
@@ -69,7 +69,7 @@ func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariabl
 	}
 }
 
-func (s *service) Create(ctx echo.Context, entity *v1.Dashboard) (*v1.Dashboard, error) {
+func (s *service) Create(ctx *echo.Context, entity *v1.Dashboard) (*v1.Dashboard, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -98,7 +98,7 @@ func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 	return entity, nil
 }
 
-func (s *service) Update(ctx echo.Context, entity *v1.Dashboard, parameters apiInterface.Parameters) (*v1.Dashboard, error) {
+func (s *service) Update(ctx *echo.Context, entity *v1.Dashboard, parameters apiInterface.Parameters) (*v1.Dashboard, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -143,7 +143,7 @@ func (s *service) update(entity *v1.Dashboard, parameters apiInterface.Parameter
 	return entity, nil
 }
 
-func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
+func (s *service) Delete(_ *echo.Context, parameters apiInterface.Parameters) error {
 	if err := s.dao.Delete(parameters.Project, parameters.Name); err != nil {
 		return err
 	}
@@ -230,7 +230,7 @@ func (s *service) collectGlobalVariables() ([]*v1.GlobalVariable, error) {
 
 // checkSecretPermission ensures that the user that creates/updates a datasource with a secret actually has the secret
 // reader permission.
-func (s *service) checkSecretPermission(ctx echo.Context, dashboard *v1.Dashboard) error {
+func (s *service) checkSecretPermission(ctx *echo.Context, dashboard *v1.Dashboard) error {
 	if !s.authz.IsEnabled() {
 		return nil
 	}
