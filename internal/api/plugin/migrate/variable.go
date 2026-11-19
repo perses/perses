@@ -43,6 +43,15 @@ var defaultVariablePlugin = plugin.Plugin{
 	},
 }
 
+// grafanaHideVariable is the value of the field `hide` of a Grafana variable that hides it. The other values show it:
+// with its label (0), without its label (1), or in the controls menu of the dashboard (3).
+const grafanaHideVariable = 2
+
+// isVariableHidden tells whether the Grafana variable is hidden in the dashboard.
+func isVariableHidden(v grafana.TemplateVar) bool {
+	return v.Hide == grafanaHideVariable
+}
+
 func buildDefaultVariable(v grafana.TemplateVar) dashboard.Variable {
 	return dashboard.Variable{
 		Kind: variable.KindList,
@@ -52,7 +61,7 @@ func buildDefaultVariable(v grafana.TemplateVar) dashboard.Variable {
 				Display: &variable.Display{
 					Name:        v.Label,
 					Description: v.Description,
-					Hidden:      v.Hide > 0,
+					Hidden:      isVariableHidden(v),
 				},
 				AllowAllValue:  v.IncludeAll,
 				AllowMultiple:  v.Multi,
@@ -102,7 +111,7 @@ func (m *completeMigration) migrateListVariable(v grafana.TemplateVar) dashboard
 			Display: &variable.Display{
 				Name:        v.Label,
 				Description: v.Description,
-				Hidden:      v.Hide > 0,
+				Hidden:      isVariableHidden(v),
 			},
 			AllowAllValue: v.IncludeAll,
 			AllowMultiple: v.Multi,
@@ -167,7 +176,7 @@ func migrateTextVariable(v grafana.TemplateVar) *dashboard.Variable {
 				Display: &variable.Display{
 					Name:        v.Label,
 					Description: v.Description,
-					Hidden:      v.Hide > 0,
+					Hidden:      isVariableHidden(v),
 				},
 				Constant: v.Type == "constant",
 				Value:    value,
