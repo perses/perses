@@ -113,7 +113,7 @@ func (n *Node) doesKindExistWithSpecIndex() (bool, int, int) {
 	kindIndex := -1
 	specIndex := -1
 	for i, node := range n.Nodes {
-		if node.FieldName == datasource.ProxyKindField && strings.ToLower(node.ConcreteValue) == http.ProxyKindName {
+		if node.FieldName == datasource.ProxyKindField && strings.EqualFold(node.ConcreteValue, http.ProxyKindName) {
 			kindExist = true
 			kindIndex = i
 		} else if node.FieldName == datasource.ProxySpec {
