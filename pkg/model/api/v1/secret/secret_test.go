@@ -16,6 +16,7 @@ package secret
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/nexucis/lamenv"
@@ -209,4 +210,21 @@ func TestPublicOAuth_Private(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSecretFiles_TrimSpace(t *testing.T) {
+	file := filepath.Join(t.TempDir(), "secret")
+	assert.NoError(t, os.WriteFile(file, []byte("s3cr3t\n"), 0600))
+
+	password, err := (&BasicAuth{Username: "user", PasswordFile: file}).GetPassword()
+	assert.NoError(t, err)
+	assert.Equal(t, "s3cr3t", password)
+
+	credentials, err := (&Authorization{CredentialsFile: file}).GetCredentials()
+	assert.NoError(t, err)
+	assert.Equal(t, "s3cr3t", credentials)
+
+	clientSecret, err := (&OAuth{ClientSecretFile: file}).GetClientSecret()
+	assert.NoError(t, err)
+	assert.Equal(t, "s3cr3t", clientSecret)
 }
