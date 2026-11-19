@@ -1,0 +1,67 @@
+// Package {{ .PluginGoPackage }} provides the Dashboard-as-Code builder for the {{ .PluginPascalName }} datasource plugin.
+package {{ .PluginGoPackage }}
+
+import (
+	"github.com/perses/perses/go-sdk/datasource"
+	"github.com/perses/perses/go-sdk/http"
+	datasourceSpec "github.com/perses/spec/go/datasource"
+)
+
+const PluginKind = "{{ .PluginPascalName }}"
+
+type Option func(plugin *Builder) error
+
+// Builder follows the spec in schemas/datasources/{{ .PluginName }}/{{ .PluginName }}.cue.
+type Builder struct {
+	datasourceSpec.HTTPDatasourceSpec `json:",inline" yaml:",inline"`
+}
+
+func create(options ...Option) (Builder, error) {
+	builder := &Builder{
+		HTTPDatasourceSpec: datasourceSpec.HTTPDatasourceSpec{},
+	}
+
+	for _, opt := range options {
+		if err := opt(builder); err != nil {
+			return *builder, err
+		}
+	}
+
+	return *builder, nil
+}
+
+// {{ .PluginPascalName }} sets the {{ .PluginPascalName }} plugin on a datasource.
+func {{ .PluginPascalName }}(options ...Option) datasource.Option {
+	return func(builder *datasource.Builder) error {
+		plugin, err := create(options...)
+		if err != nil {
+			return err
+		}
+		builder.Spec.Plugin.Kind = PluginKind
+		builder.Spec.Plugin.Spec = plugin.HTTPDatasourceSpec
+		return nil
+	}
+}
+
+// Selector selects a {{ .PluginPascalName }} datasource by name, e.g. for the queries that use it.
+func Selector(name string) (*datasource.Selector, error) {
+	return datasource.NewSelector(PluginKind, name)
+}
+
+func DirectURL(url string) Option {
+	return func(builder *Builder) error {
+		builder.DirectURL = url
+		return nil
+	}
+}
+
+func HTTPProxy(url string, options ...http.Option) Option {
+	return func(builder *Builder) error {
+		p, err := http.New(url, options...)
+		if err != nil {
+			return err
+		}
+		builder.Proxy = &p.Proxy
+		return nil
+	}
+}
