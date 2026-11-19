@@ -25,6 +25,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 	"runtime/debug"
 	"slices"
 	"strings"
@@ -46,6 +47,9 @@ import (
 
 // persesModulePath is the Go module that provides the Dashboard-as-Code builders used by the generated Go SDK.
 const persesModulePath = "github.com/perses/perses"
+
+// latestVersion is the module query that resolves to the latest release, used when percli has no release version.
+const latestVersion = "latest"
 
 // goRunner runs the go command with the given arguments in dir and returns its combined output.
 type goRunner func(ctx context.Context, dir string, args ...string) ([]byte, error)
@@ -428,6 +432,8 @@ var pluginTypesWithGoSDK = []pluginSpec.Kind{
 
 // goSDKDeclarations are the exported identifiers that the Go SDK template of each plugin type declares next to the
 // constructor named after the plugin, so a plugin can't be named after one of them.
+//
+//nolint:goconst // the identifiers each template declares, listed as they appear in it
 var goSDKDeclarations = map[pluginSpec.Kind][]string{
 	pluginSpec.KindDatasource: {"PluginKind", "Option", "Builder", "Selector", "DirectURL", "HTTPProxy"},
 	pluginSpec.KindTimeSeriesQuery: {"PluginKind", "DatasourceKind", "PluginSpec", "Option", "Builder", "Expr",
@@ -440,6 +446,11 @@ var goSDKDeclarations = map[pluginSpec.Kind][]string{
 		"WithQuerySettings"},
 }
 
+// goSDKNamePattern matches the kebab-cased plugin names the Go SDK can use, since they name the directory and the
+// file of its package: ASCII only, as in an import path, and no underscore, as go ignores a name starting with one
+// and a suffix like _test, _linux or _amd64 makes a test or a platform-specific file.
+var goSDKNamePattern = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
+
 // validateGoSDKName checks that the Go SDK generated for the plugin compiles: the package name derived from the
 // plugin name must be a valid one, and the constructor named after the plugin must not collide with the other
 // declarations of the template.
@@ -447,13 +458,17 @@ func validateGoSDKName(pluginType pluginSpec.Kind, pluginName, pluginPascalName 
 	pkg := GetGoPackageName(pluginName)
 	if !token.IsIdentifier(pkg) || pkg == "main" {
 		return fmt.Errorf("plugin.name %q can't be used for the Go SDK, as %q isn't a valid Go package name: "+
-			"use a name that starts with a letter and isn't a Go keyword", pluginName, pkg)
+			"use a name that starts with a letter and isn't a Go keyword or main", pluginName, pkg)
 	}
 	if !token.IsIdentifier(pluginPascalName) {
 		return fmt.Errorf("plugin.name %q can't be used for the Go SDK, as %q isn't a valid Go identifier", pluginName, pluginPascalName)
 	}
+	if !goSDKNamePattern.MatchString(pluginName) {
+		return fmt.Errorf("plugin.name %q can't be used for the Go SDK, as it names the directory and the file of its "+
+			"package: use ASCII letters, digits, spaces or dashes", pluginName)
+	}
 	if slices.Contains(goSDKDeclarations[pluginType], pluginPascalName) {
-		return fmt.Errorf("plugin.name %q can't be used for a %s plugin, as its Go SDK already declares %s: use another name",
+		return fmt.Errorf("plugin.name %q can't be used for the %s plugin type, as its Go SDK already declares %s: use another name",
 			pluginName, pluginType, pluginPascalName)
 	}
 	return nil
@@ -522,7 +537,7 @@ func persesModuleVersion(buildVersion, moduleVersion string) (string, error) {
 	if semver.IsValid(moduleVersion) && !gomodule.IsPseudoVersion(moduleVersion) && semver.Build(moduleVersion) == "" {
 		return moduleVersion, nil
 	}
-	return "latest", nil
+	return latestVersion, nil
 }
 
 // requiredPersesVersion returns the version of the perses module required by the go.mod at goModPath, or an empty
@@ -535,7 +550,7 @@ func requiredPersesVersion(goModPath string) (string, error) {
 	if data == nil {
 		return "", nil
 	}
-	goMod, err := modfile.Parse(goModPath, data, nil)
+	goMod, err := modfile.ParseLax(goModPath, data, nil)
 	if err != nil {
 		return "", fmt.Errorf("could not parse %q: %w", goModPath, err)
 	}
@@ -637,16 +652,16 @@ func (o *generateOptions) ensureGoModule(modulePath string, generatedGoSources b
 func (o *generateOptions) persesGetCommand(goModPath string) ([]string, error) {
 	target := o.persesVersion
 	if target == "" {
-		target = "latest"
+		target = latestVersion
 	}
 	current, err := requiredPersesVersion(goModPath)
 	if err != nil {
 		return nil, err
 	}
-	if current == "" || (target != "latest" && semver.Compare(current, target) < 0) {
+	if current == "" || (target != latestVersion && semver.Compare(current, target) < 0) {
 		return []string{"get", persesModulePath + "@" + target}, nil
 	}
-	if target != "latest" && current != target && o.errWriter != nil {
+	if target != latestVersion && current != target && o.errWriter != nil {
 		_, _ = fmt.Fprintf(o.errWriter, "warning: the module requires %s %s, which is newer than %s the Go SDK was "+
 			"generated for, so it is kept\n", persesModulePath, current, target)
 	}

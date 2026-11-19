@@ -86,6 +86,16 @@ func (f *fakeGo) run(_ context.Context, dir string, args ...string) ([]byte, err
 	if len(args) == 3 && args[0] == "mod" && args[1] == "init" {
 		return nil, os.WriteFile(filepath.Join(dir, "go.mod"), []byte("module "+args[2]+"\n"), 0o600)
 	}
+	// Like go, `go get` adds the requirement to go.mod, so a later generation sees it.
+	if len(args) == 2 && args[0] == "get" {
+		modPath, modVersion, _ := strings.Cut(args[1], "@")
+		goMod, err := os.OpenFile(filepath.Clean(filepath.Join(dir, "go.mod")), os.O_APPEND|os.O_WRONLY, 0)
+		if err != nil {
+			return nil, err
+		}
+		_, err = fmt.Fprintf(goMod, "\nrequire %s %s\n", modPath, modVersion)
+		return nil, errors.Join(err, goMod.Close())
+	}
 	return nil, nil
 }
 
@@ -243,8 +253,7 @@ func TestPluginGenerateCMD(t *testing.T) {
 		{"mod", "init", "github.com/my-plugin-org/my-plugin-module"},
 		{"get", "github.com/perses/perses@v0.55.0"},
 		{"mod", "tidy"},
-		// The panel added to the existing module brings new imports, so the dependencies are resolved again.
-		{"get", "github.com/perses/perses@v0.55.0"},
+		// The module already requires perses, so the panel added to it only resolves its new imports.
 		{"mod", "tidy"},
 	}, goCmd.calls)
 }
@@ -301,39 +310,47 @@ func TestPluginGenerateDoesNotReinitializeExistingGoMod(t *testing.T) {
 }
 
 func TestPluginGeneratePersesRequirement(t *testing.T) {
-	setPercliVersion(t, "0.55.0")
-
 	for _, tc := range []struct {
 		name          string
+		percliVersion string
 		required      string
 		expectedCalls [][]string
 		expectedMsg   string
 	}{
 		{
 			name:          "older perses is upgraded",
+			percliVersion: "0.55.0",
 			required:      "v0.54.0",
 			expectedCalls: [][]string{{"get", "github.com/perses/perses@v0.55.0"}, {"mod", "tidy"}},
 		},
 		{
 			name:          "same perses is left as is",
+			percliVersion: "0.55.0",
 			required:      "v0.55.0",
 			expectedCalls: [][]string{{"mod", "tidy"}},
 		},
 		{
 			name:          "newer perses is kept",
+			percliVersion: "0.55.0",
 			required:      "v0.55.1",
 			expectedCalls: [][]string{{"mod", "tidy"}},
 			expectedMsg:   `warning: the module requires github.com/perses/perses v0.55.1, which is newer than v0.55.0`,
 		},
+		{
+			name:          "development build keeps the existing perses",
+			required:      "v0.54.0",
+			expectedCalls: [][]string{{"mod", "tidy"}},
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
+			setPercliVersion(t, tc.percliVersion)
 			dir := t.TempDir()
 			generateModule(t, dir)
 			writeGoMod(t, dir, "module example.com/custom\n\ngo 1.21\n\nrequire github.com/perses/perses "+tc.required+"\n")
 
 			expectedMsg := tc.expectedMsg
 			if expectedMsg == "" {
-				expectedMsg = `plugin MyTestPanel generated successfully`
+				expectedMsg = `^plugin MyTestPanel generated successfully`
 			}
 			goCmd := &fakeGo{}
 			cmdTest.ExecuteSuiteTest(t, goCmd.newCMD, []cmdTest.Suite{
@@ -406,6 +423,10 @@ func TestPluginGenerateRejectsGoSDKNames(t *testing.T) {
 		{pluginSpec.KindTimeSeriesQuery, "Datasource", `its Go SDK already declares Datasource`},
 		{pluginSpec.KindDatasource, "Builder", `its Go SDK already declares Builder`},
 		{pluginSpec.KindAnnotation, "Tags", `its Go SDK already declares Tags`},
+		{pluginSpec.KindPanel, "Météo", `plugin.name "météo" can't be used for the Go SDK, as it names the directory`},
+		{pluginSpec.KindDatasource, "smoke_test", `plugin.name "smoke_test" can't be used for the Go SDK, as it names the directory`},
+		{pluginSpec.KindPanel, "status_linux", `plugin.name "status_linux" can't be used for the Go SDK, as it names the directory`},
+		{pluginSpec.KindPanel, "_Hidden", `plugin.name "_hidden" can't be used for the Go SDK, as it names the directory`},
 	} {
 		t.Run(fmt.Sprintf("%s %s", tc.pluginType, tc.name), func(t *testing.T) {
 			dir := t.TempDir()
