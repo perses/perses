@@ -11,6 +11,10 @@
 
 <!-- If there are UI changes -->
 
+# Benchmarks
+
+<!-- If there are native authorization or search index changes, paste the benchstat output comparing the base and this branch -->
+
 # Checklist
 
 - [ ] Pull request has a descriptive title and context useful to a reviewer.
@@ -27,3 +31,15 @@
   - Is the data inconsistent? You need to mock API requests.
   - Does the time change? You need to use consistent time values or mock time utilities.
   - Does it have loading states? You need to wait for loading to complete.
+
+## Native Authorization Changes
+
+- [ ] Changes that can affect the native authorization performance include the `benchstat` comparison between the base
+  and this branch, and every regression is justified.
+  See [Native authorization changes](https://github.com/perses/perses/blob/main/CONTRIBUTING.md#native-authorization-changes).
+
+## Search Index Changes
+
+- [ ] Changes that can affect the search index performance include the `benchstat` comparison between the base and
+  this branch, and every regression is justified.
+  See [Search index changes](https://github.com/perses/perses/blob/main/CONTRIBUTING.md#search-index-changes).

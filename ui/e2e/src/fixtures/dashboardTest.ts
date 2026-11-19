@@ -13,9 +13,10 @@
 
 import type { DashboardResource } from '@perses-dev/client';
 import type { ConsoleMessage } from '@playwright/test';
-import { test as testBase, expect } from '@playwright/test';
 
+import type { MockQueryRangeConfig } from '../pages';
 import { AppHomePage, DashboardPage } from '../pages';
+import { expect, test as testBase } from './persesTest';
 
 type DashboardTestOptions = {
   projectName: string;
@@ -40,6 +41,14 @@ type DashboardTestFixtures = {
    * page. Useful for stabilizing tests that depend on the current time.
    */
   mockNow: number;
+
+  /**
+   * Responses to return for the '/api/v1/query_range' requests, matched by
+   * query. The mocks are registered before the dashboard is opened, so the
+   * requests sent while the panels load are mocked too. Requests for other
+   * queries are sent to the backend.
+   */
+  mockQueryRangeRequests: MockQueryRangeConfig;
 
   dashboardPage: DashboardPage;
 };
@@ -144,9 +153,10 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
   dashboardName: '',
   modifiesDashboard: false,
   mockNow: 0,
+  mockQueryRangeRequests: { queries: [] },
   ignoresConsoleErrors: [],
   dashboardPage: async (
-    { page, projectName, dashboardName, modifiesDashboard, mockNow, ignoresConsoleErrors },
+    { page, projectName, dashboardName, modifiesDashboard, mockNow, mockQueryRangeRequests, ignoresConsoleErrors },
     use,
     testInfo,
   ) => {
@@ -163,6 +173,13 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
     }
 
     const persesApp = new AppHomePage(page);
+    const dashboardPage = new DashboardPage(page);
+
+    if (mockQueryRangeRequests.queries.length > 0) {
+      // Panels send their queries as soon as the dashboard loads, so the mocks
+      // must be in place before navigating to it.
+      await dashboardPage.mockQueryRangeRequests(mockQueryRangeRequests);
+    }
 
     const consoleErrors: string[] = [];
     page.on('console', (msg) => {
@@ -174,8 +191,6 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
     });
 
     await persesApp.navigateToDashboard(projectName, testDashboardName);
-
-    const dashboardPage = new DashboardPage(page);
 
     // Use the fixture value in the test.
     // oxlint-disable-next-line react/rules-of-hooks -- Playwright's fixture callback is not a React component.
@@ -197,4 +212,4 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
   },
 });
 
-export { expect } from '@playwright/test';
+export { expect } from './persesTest';

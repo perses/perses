@@ -15,7 +15,6 @@ import { Chip, Stack } from '@mui/material';
 import type { SxProps, Theme } from '@mui/material';
 import { isProjectMetadata } from '@perses-dev/client';
 import type { DatasourceResource } from '@perses-dev/client';
-import DatabaseIcon from 'mdi-material-ui/Database';
 import type { ReactElement } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
@@ -99,7 +98,6 @@ export const SearchDatasourceItem = (props: SearchDatasourceItemProps): ReactEle
         sx={STATIC_SX.left}
         direction="row"
       >
-        <DatabaseIcon fontSize="small" />
         <HighlightedMatch
           sx={STATIC_SX.name}
           value={value}

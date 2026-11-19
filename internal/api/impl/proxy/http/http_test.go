@@ -19,9 +19,10 @@ import (
 	"encoding/pem"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/internal/api/impl/proxy/proxytest"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -30,6 +31,12 @@ import (
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/propagation"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func TestNew(t *testing.T) {
@@ -67,7 +74,8 @@ func TestHTTPProxy_prepareRequest_headerPolicies(t *testing.T) {
 		"X-Configured":      {"configured-value"},
 		"X-Forwarded-For":   {"192.0.2.2"},
 		"X-Forwarded-Proto": {"http"},
-		"X-Real-Ip":         {"192.0.2.2"},
+		// The address of the peer (192.0.2.1 with httptest): the X-Forwarded-For header sent by the client is not trusted.
+		"X-Real-Ip": {"192.0.2.1"},
 	}
 	droppedHeaders := defaultHeaders.Clone()
 	droppedHeaders.Del("Origin")
@@ -242,7 +250,7 @@ func TestHTTPProxy_getToken_honorsTLSConfig(t *testing.T) {
 
 func TestHTTPProxy_prepareRequest_OAuthPassThrough(t *testing.T) {
 	refresher := func(token string) crypto.TokenRefresher {
-		return func(_ echo.Context) string { return token }
+		return func(_ *echo.Context) string { return token }
 	}
 	testSuite := []struct {
 		name              string
@@ -470,4 +478,178 @@ func TestHTTPProxy_serve_removeCallerCredentials(t *testing.T) {
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &headers))
 	assert.NotContains(t, headers, echo.HeaderCookie)
 	assert.NotContains(t, headers, echo.HeaderAuthorization)
+}
+
+// useTestTracing registers a tracer provider recording the spans and the W3C trace context and baggage propagators globally,
+// as Perses does when OpenTelemetry is enabled, and restores the previous ones at the end of the test.
+func useTestTracing(t *testing.T) (trace.Tracer, *tracetest.SpanRecorder) {
+	t.Helper()
+	previousProvider, previousPropagator := otel.GetTracerProvider(), otel.GetTextMapPropagator()
+	recorder := tracetest.NewSpanRecorder()
+	provider := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(recorder))
+	otel.SetTracerProvider(provider)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
+	t.Cleanup(func() {
+		otel.SetTracerProvider(previousProvider)
+		otel.SetTextMapPropagator(previousPropagator)
+		_ = provider.Shutdown(context.Background())
+	})
+	return provider.Tracer("test"), recorder
+}
+
+func TestHTTPProxy_serve_tracing(t *testing.T) {
+	const (
+		traceID          = "0af7651916cd43dd8448eb211c80319c"
+		incomingSpanID   = "b7ad6b7169203331"
+		incomingTraceCtx = "00-" + traceID + "-" + incomingSpanID + "-01"
+	)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(r.Header)
+	}))
+	defer server.Close()
+
+	for _, test := range []struct {
+		name          string
+		enableTracing bool
+	}{
+		{name: "tracing enabled: the datasource receives the trace context of the client span", enableTracing: true},
+		{name: "tracing disabled: the trace context received by Perses is forwarded unchanged", enableTracing: false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			tracer, recorder := useTestTracing(t)
+			h := &Proxy{
+				Config:        &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
+				Path:          "/api/v1/query",
+				Guard:         proxytest.NewLoopbackGuard(t),
+				EnableTracing: test.enableTracing,
+			}
+			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/datasource/api/v1/query", nil)
+			req.Header.Set("traceparent", incomingTraceCtx)
+			// The server span created by the OpenTelemetry middleware for the incoming request.
+			ctx := otel.GetTextMapPropagator().Extract(req.Context(), propagation.HeaderCarrier(req.Header))
+			ctx, serverSpan := tracer.Start(ctx, "server")
+			rec := httptest.NewRecorder()
+			require.NoError(t, h.Serve(echo.New().NewContext(req.WithContext(ctx), rec)))
+			serverSpan.End()
+			require.Equal(t, http.StatusOK, rec.Code)
+			var headers http.Header
+			require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &headers))
+
+			if !test.enableTracing {
+				assert.Equal(t, incomingTraceCtx, headers.Get("traceparent"))
+				require.Len(t, recorder.Ended(), 1) // only the server span
+				return
+			}
+			var clientSpans []sdktrace.ReadOnlySpan
+			for _, span := range recorder.Ended() {
+				if span.SpanKind() == trace.SpanKindClient {
+					clientSpans = append(clientSpans, span)
+				}
+			}
+			require.Len(t, clientSpans, 1)
+			assert.Equal(t, serverSpan.SpanContext().SpanID(), clientSpans[0].Parent().SpanID())
+			assert.Equal(t, "00-"+traceID+"-"+clientSpans[0].SpanContext().SpanID().String()+"-01", headers.Get("traceparent"))
+		})
+	}
+}
+
+// The trace headers are injected by otelhttp after the header policy is applied: the policy must apply to them too.
+func TestHTTPProxy_serve_tracingHeaderPolicy(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(r.Header)
+	}))
+	defer server.Close()
+	traceHeaders := []string{"Traceparent", "Tracestate", "Baggage"}
+
+	for _, test := range []struct {
+		name     string
+		allow    []string
+		drop     []string
+		expected []string
+	}{
+		{name: "no policy: the trace headers are sent", expected: traceHeaders},
+		{name: "allowHeaders with traceparent only", allow: []string{"traceparent"}, expected: []string{"Traceparent"}},
+		{name: "allowHeaders without the trace headers", allow: []string{"Accept"}},
+		{name: "dropHeaders with the trace headers", drop: []string{"traceparent", "tracestate", "baggage"}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			tracer, _ := useTestTracing(t)
+			h := &Proxy{
+				Config: &datasourceHTTP.Config{
+					URL:          common.MustParseURL(server.URL),
+					AllowHeaders: test.allow,
+					DropHeaders:  test.drop,
+				},
+				Path:          "/api/v1/query",
+				Guard:         proxytest.NewLoopbackGuard(t),
+				EnableTracing: true,
+			}
+			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/datasource/api/v1/query", nil)
+			req.Header.Set("traceparent", "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01")
+			req.Header.Set("tracestate", "vendor=value")
+			req.Header.Set("baggage", "key=value")
+			// The server span created by the OpenTelemetry middleware for the incoming request.
+			ctx := otel.GetTextMapPropagator().Extract(req.Context(), propagation.HeaderCarrier(req.Header))
+			ctx, serverSpan := tracer.Start(ctx, "server")
+			defer serverSpan.End()
+			rec := httptest.NewRecorder()
+			require.NoError(t, h.Serve(echo.New().NewContext(req.WithContext(ctx), rec)))
+			require.Equal(t, http.StatusOK, rec.Code)
+			var headers http.Header
+			require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &headers))
+
+			var received []string
+			for _, name := range traceHeaders {
+				if len(headers.Get(name)) > 0 {
+					received = append(received, name)
+				}
+			}
+			assert.Equal(t, test.expected, received)
+		})
+	}
+}
+
+func TestHTTPProxy_serve_tracingRedactsTheQuery(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+	_, recorder := useTestTracing(t)
+
+	h := &Proxy{
+		Config:        &datasourceHTTP.Config{URL: common.MustParseURL(server.URL + "?api_key=datasource-secret")},
+		Path:          "/api/v1/query",
+		Guard:         proxytest.NewLoopbackGuard(t),
+		EnableTracing: true,
+	}
+	req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/datasource/api/v1/query?query=up&token=query-secret", nil)
+	rec := httptest.NewRecorder()
+	require.NoError(t, h.Serve(echo.New().NewContext(req, rec)))
+	require.Equal(t, http.StatusOK, rec.Code)
+
+	spans := recorder.Ended()
+	require.Len(t, spans, 1)
+	assert.Contains(t, spans[0].Attributes(), attribute.String("url.full", server.URL+"/api/v1/query?api_key=REDACTED&query=REDACTED&token=REDACTED"))
+}
+
+func TestRedactURL(t *testing.T) {
+	testSuite := []struct {
+		title  string
+		url    string
+		result string
+	}{
+		{title: "without query", url: "https://prometheus.example.com/api/v1/query", result: "https://prometheus.example.com/api/v1/query"},
+		{title: "query values are redacted", url: "https://prometheus.example.com/api/v1/query?query=up&api_key=secret", result: "https://prometheus.example.com/api/v1/query?api_key=REDACTED&query=REDACTED"},
+		{title: "every value of a parameter is redacted", url: "https://prometheus.example.com/api/v1/series?match[]=up&match[]=down", result: "https://prometheus.example.com/api/v1/series?match%5B%5D=REDACTED&match%5B%5D=REDACTED"},
+		{title: "user info is removed", url: "https://user:password@prometheus.example.com/api/v1/query", result: "https://prometheus.example.com/api/v1/query"}, //nolint:gosec // G101: test value, not a real credential
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			u, err := url.Parse(test.url)
+			require.NoError(t, err)
+			assert.Equal(t, test.result, redactURL(u))
+		})
+	}
 }

@@ -20,7 +20,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -58,7 +58,7 @@ func TestCheckParameterUserPermissionsUsername(t *testing.T) {
 	// HandleError maps the *PersesError returned on rejection to its HTTP status, as the real server does.
 	e.Use(HandleError())
 	e.Use(CheckParameter(stubProjectService{}, ""))
-	handler := func(c echo.Context) error { return c.NoContent(http.StatusOK) }
+	handler := func(c *echo.Context) error { return c.NoContent(http.StatusOK) }
 	e.GET("/api/v1/users/:name/permissions", handler)
 	e.GET("/api/v1/users/:name", handler)
 	e.GET("/api/v1/globalvariables/:name", handler)

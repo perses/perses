@@ -29,6 +29,7 @@ import (
 	"testing"
 	"text/template"
 
+	"github.com/perses/perses/internal/api/plugin"
 	cmdTest "github.com/perses/perses/internal/cli/test"
 	pluginSpec "github.com/perses/spec/go/plugin"
 	"github.com/prometheus/common/version"
@@ -196,6 +197,44 @@ func TestPluginGenerateCMD(t *testing.T) {
 				"src/panels/my-test-panel/MyTestPanel.tsx",
 				"src/panels/my-test-panel/MyTestPanelComponent.tsx",
 				"src/panels/my-test-panel/MyTestPanelSettingsEditor.tsx"}),
+		},
+		{
+			Title: "Build a variable plugin in an existing module",
+			Args: []string{
+				"--plugin.name", "MyTestVariable",
+				"--plugin.type", "Variable",
+				testFolder,
+			},
+			IsErrorExpected: false,
+			ExpectedMessage: `plugin MyTestVariable generated successfully
+` + getFileList([]string{
+				".gitignore",
+				".oxfmtrc.json",
+				".oxlintrc.json",
+				".swcrc",
+				"LICENSE",
+				"README.md",
+				"cue.mod/module.cue",
+				"package.json",
+				"rsbuild.config.ts",
+				"src/bootstrap.tsx",
+				"src/env.d.ts",
+				"src/getPluginModule.ts",
+				"src/index-federation.ts",
+				"src/index.ts",
+				"src/setup-tests.ts",
+				"tsconfig.build.json",
+				"tsconfig.json",
+				"vitest.config.ts",
+				"schemas/variables/my-test-variable/my-test-variable.cue",
+				"schemas/variables/my-test-variable/my-test-variable.json",
+				"src/variables/index.ts",
+				"src/variables/my-test-variable/constants.ts",
+				"src/variables/my-test-variable/get-variable-options.ts",
+				"src/variables/my-test-variable/index.ts",
+				"src/variables/my-test-variable/my-test-variable-types.ts",
+				"src/variables/my-test-variable/MyTestVariable.tsx",
+				"src/variables/my-test-variable/MyTestVariableEditor.tsx"}),
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, goCmd.newCMD, testSuite)
@@ -595,4 +634,36 @@ func TestGeneratedGoSDKCompiles(t *testing.T) {
 	require.NoError(t, err, string(out))
 	out, err = runGo(context.Background(), dir, "vet", "./...")
 	require.NoError(t, err, string(out))
+}
+
+func TestPluginGenerateEveryPluginType(t *testing.T) {
+	for _, pluginType := range availablePluginTypes {
+		t.Run(string(pluginType), func(t *testing.T) {
+			dir := t.TempDir()
+			pluginName := "MyTest" + string(pluginType)
+
+			cmdTest.ExecuteSuiteTest(t, new(fakeGo).newCMD, []cmdTest.Suite{
+				{
+					Title: "Build module with a " + string(pluginType) + " plugin",
+					Args: []string{
+						"--module.name", "MyPluginModule",
+						"--module.org", "MyPluginOrg",
+						"--plugin.name", pluginName,
+						"--plugin.type", string(pluginType),
+						dir,
+					},
+					ExpectedRegexMessage: `plugin ` + pluginName + ` generated successfully`,
+				},
+			})
+
+			pluginPath, err := getPluginPath(pluginName, pluginType)
+			require.NoError(t, err)
+			assert.DirExists(t, filepath.Join(dir, filepath.FromSlash(pluginPath)))
+
+			npmPackage, err := plugin.ReadPackage(dir)
+			require.NoError(t, err)
+			require.Len(t, npmPackage.Perses.Plugins, 1)
+			assert.Equal(t, pluginType, npmPackage.Perses.Plugins[0].Kind)
+		})
+	}
 }

@@ -1,0 +1,21 @@
+import type { VariablePlugin } from '@perses-dev/plugin-system';
+import { isVariableDatasource, parseVariables } from '@perses-dev/plugin-system';
+
+import { getVariableOptions } from './get-variable-options';
+import type { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
+import { {{ .PluginPascalName }}Editor } from './{{ .PluginPascalName }}Editor';
+
+export const {{ .PluginPascalName }}: VariablePlugin<{{ .PluginPascalName }}Spec> = {
+  getVariableOptions,
+  OptionsEditorComponent: {{ .PluginPascalName }}Editor,
+  createInitialOptions: () => ({ query: '' }),
+  dependsOn: (spec) => {
+    const queryVariables = parseVariables(spec.query);
+    const datasourceVariables =
+      spec.datasource && isVariableDatasource(spec.datasource) ? parseVariables(spec.datasource) : [];
+    const allVariables = [...new Set([...queryVariables, ...datasourceVariables])];
+    return {
+      variables: allVariables,
+    };
+  },
+};

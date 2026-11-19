@@ -16,7 +16,7 @@ package apiinterface
 import (
 	"encoding/json"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/pkg/model/api"
 )
@@ -27,9 +27,9 @@ type Parameters struct {
 }
 
 type Service[T api.Entity, K api.Entity, V databaseModel.Query] interface {
-	Create(ctx echo.Context, entity T) (K, error)
-	Update(ctx echo.Context, entity T, parameters Parameters) (K, error)
-	Delete(ctx echo.Context, parameters Parameters) error
+	Create(ctx *echo.Context, entity T) (K, error)
+	Update(ctx *echo.Context, entity T, parameters Parameters) (K, error)
+	Delete(ctx *echo.Context, parameters Parameters) error
 	Get(parameters Parameters) (K, error)
 	List(query V) ([]K, error)
 	RawList(query V) ([]json.RawMessage, error)

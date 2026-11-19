@@ -16,7 +16,7 @@ package proxy
 import (
 	"fmt"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/utils"
@@ -28,7 +28,7 @@ import (
 
 // proxyProjectDatasource forwards the request to the datasource.
 // transportKey must be empty for an unsaved datasource, so its transport is not cached.
-func (e *endpoint) proxyProjectDatasource(ctx echo.Context, projectName, dtsName, transportKey string, spec datasource.Spec, retrieveSecret func(name string) (*v1.SecretSpec, error)) error {
+func (e *endpoint) proxyProjectDatasource(ctx *echo.Context, projectName, dtsName, transportKey string, spec datasource.Spec, retrieveSecret func(name string) (*v1.SecretSpec, error)) error {
 	path := ctx.Param("*")
 	pr, err := e.newProxy(dtsName, projectName, transportKey, spec, path, retrieveSecret)
 	if err != nil {
@@ -37,11 +37,11 @@ func (e *endpoint) proxyProjectDatasource(ctx echo.Context, projectName, dtsName
 	return pr.Serve(ctx)
 }
 
-func (e *endpoint) proxyUnsavedProjectDatasource(ctx echo.Context) error {
+func (e *endpoint) proxyUnsavedProjectDatasource(ctx *echo.Context) error {
 	projectName := ctx.Param(utils.ParamProject)
 	body := &unsavedProxyBody{}
 	if err := ctx.Bind(body); err != nil {
-		return err
+		return handleBindError(err)
 	}
 
 	if err := e.checkPermission(ctx, projectName, role.DatasourceScope, role.CreateAction); err != nil {
@@ -63,7 +63,7 @@ func (e *endpoint) proxyUnsavedProjectDatasource(ctx echo.Context) error {
 	})
 }
 
-func (e *endpoint) proxySavedProjectDatasource(ctx echo.Context) error {
+func (e *endpoint) proxySavedProjectDatasource(ctx *echo.Context) error {
 	projectName := ctx.Param(utils.ParamProject)
 	if err := e.checkPermission(ctx, projectName, role.DatasourceScope, role.ReadAction); err != nil {
 		return err

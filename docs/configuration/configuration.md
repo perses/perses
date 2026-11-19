@@ -16,17 +16,21 @@ Perses is configured via command-line flags and a configuration file
   -pprof
     	Enable pprof
   -web.hide-port
-    	If true, it will not be print on stdout the port listened to receive the HTTP request
+    	If true, the address listened to receive the HTTP requests is not logged when the server starts
   -web.listen-address string
     	The address to listen on for HTTP requests, web interface and telemetry. (default ":8080")
   -web.telemetry-path string
     	Path under which to expose metrics. (default "/metrics")
   -web.tls-cert-file string
-    	The path to the cert to use for the HTTPS server
+    	The path to the cert to use for the HTTPS server. It is reloaded when the file changes.
   -web.tls-cipher-suites string
     	Comma-separated list of TLS cipher suite names
+  -web.tls-client-ca-file string
+    	The path to the CA certificates (PEM) used to verify the client certificates. When set, every client must present a certificate signed by one of them (mTLS), including the health probes. Only these CAs are trusted, not the system ones. It is reloaded when the file changes, but the established connections are not verified again.
+  -web.tls-curve-preferences string
+    	Comma-separated list of TLS curves (key exchange mechanisms), e.g. "X25519MLKEM768,X25519,CurveP256". Replaces Go's default list, including its post-quantum curves; the order is ignored.
   -web.tls-key-file string
-    	The path to the key to use for the HTTPS server
+    	The path to the key to use for the HTTPS server. It is reloaded when the file changes.
   -web.tls-max-version string
     	Maximum TLS version (e.g., "1.2", "1.3")
   -web.tls-min-version string
@@ -127,6 +131,9 @@ plugin: <Plugin config> # Optional
 
 # The configuration of the search feature. You can customize the search engine used and the indexation of the resources.
 search: <Search config> # Optional
+
+# The configuration to export the traces of the Perses server with the OpenTelemetry protocol (OTLP).
+opentelemetry: <OpenTelemetry config> # Optional
 ```
 
 ### Security config
@@ -165,6 +172,9 @@ encryption_key_file: <filename> # Optional
 
 # Configuration for CORS (cross-origin resource sharing).
 cors: <CORS config> # Optional
+
+# Configuration of the Content-Security-Policy header sent with the pages of the UI.
+content_security_policy: <Content Security Policy config> # Optional
 
 # List of absolute directories from which Secrets and GlobalSecrets are allowed to read files
 # (basicAuth.passwordFile, authorization.credentialsFile, oauth.clientSecretFile, tlsConfig.caFile/certFile/keyFile).
@@ -484,7 +494,13 @@ authenticator_ttl: <duration> | default = 2m  # Optional
 enable: <boolean> | default = false # Optional
 
 # Configure the value of the Access-Control-Allow-Origin response header.
-# The wildcard characters '*' (0+ chars) and '?' (1 char) are supported.
+# Each value is an exact origin (`scheme://host[:port]`, e.g. `https://perses.dev`), or `*` to allow every origin.
+# DEPRECATED: the wildcard patterns, where '*' matches 0 or more characters and '?' matches 1 character
+# (e.g. `https://*.example.com`), are deprecated and will be removed in v0.58.0. List the exact origins instead.
+# The patterns can allow more origins than expected: `https://*example.com` also allows `https://evilexample.com`,
+# and a `*` label matches one or more labels while the labels on its left are ignored, so `https://*.example.com`
+# also allows `https://a.b.example.com` and `https://admin.*.example.com` also allows `https://victim.example.com`.
+# See https://github.com/perses/perses/issues/4721.
 # See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin
 allow_origins: <string[]> | default = ["*"] # Optional
 
@@ -499,6 +515,13 @@ allow_methods: <string[]> | default = [] # Optional
 allow_headers: <string[]> | default = [] # Optional
 
 # Configure the value of the Access-Control-Allow-Credentials response header.
+# The browsers reject the requests with credentials answered with the response header `Access-Control-Allow-Origin: *`.
+# The entries of `allow_origins` are checked in order, and the origins matched by `*` receive this header. Hence, when
+# `enable` and `allow_credentials` are true, Perses refuses to start if `allow_origins` is not set (its default value is
+# `["*"]`) or if its first entry is `*`, as every origin would receive `Access-Control-Allow-Origin: *`.
+# DEPRECATED: `*` placed after other entries of `allow_origins` (e.g. `["https://app.example.com", "*"]`) while
+# `allow_credentials` is true is deprecated and will be rejected in v0.58.0. Only the origins matched by an entry
+# before `*` can send requests with credentials. See https://github.com/perses/perses/issues/4721.
 # See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials
 allow_credentials: <boolean> | default = false # Optional
 
@@ -508,6 +531,20 @@ expose_headers: <string[]> | default = [] # Optional
 
 # Configure how long (in seconds) the results of a preflight request can be cached.
 max_age: <integer> | default = 0 # Optional
+```
+
+#### Content Security Policy config
+
+```yaml
+# Stop sending the Content-Security-Policy header with the pages of the UI.
+# See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP
+disable: <boolean> | default = false # Optional
+
+# The value of the Content-Security-Policy header. It can be written on several lines.
+# The default policy only allows the scripts served by Perses (the UI and the plugins) to run: the inline scripts,
+# the inline event handlers and the javascript: URLs are blocked.
+# See the security considerations (https://perses.dev/perses/docs/security/) for the details of the default policy.
+policy: <string> | default = "script-src 'self' 'unsafe-eval'; object-src 'none'; base-uri 'self'" # Optional
 ```
 
 ### Database config
@@ -1079,6 +1116,10 @@ enable: <bool> | default = false # Optional
 
 # The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
 cleanup_interval: <duration> | default = 1d # Optional
+
+# The maximum time to live a user can set on an ephemeral dashboard. A request with a greater TTL is rejected.
+# When not set, there is no limit.
+max_ttl: <duration> # Optional
 ```
 
 ### Frontend config
@@ -1107,6 +1148,9 @@ important_dashboards:
 # The markdown content to be displayed on the UI home page
 information: <string> # Optional
 
+# The images to display in place of the Perses logo
+logo: <Logo config> # Optional
+
 # TimeRange configuration
 time_range: <TimeRange config> # Optional
 
@@ -1127,6 +1171,30 @@ default_user_preferences:
 severity: <enum | possibleValue = 'info' | 'warning' | 'error'> | default = info # Optional
 # The content of the information to be displayed in the banner. It can be html content.
 message: <string>
+```
+
+#### Logo config
+
+Each image replaces the Perses logo at one place of the UI. When a URL is not set, the Perses logo is kept at this place.
+A URL can be an `http` or `https` URL, a path starting with `/` (e.g. `/static/logo.svg`, served by a reverse proxy in
+front of Perses), or a `data` URL that embeds the image in the configuration (e.g. `data:image/svg+xml;base64,...`).
+The browsers of the users load the image directly from this URL. A path is used as is, it is not prefixed with
+`api_prefix`: if Perses is served under `/perses` and the reverse proxy serves the image under this prefix, the path
+must include it (e.g. `/perses/static/logo.svg`).
+
+A `data` URL is part of the response of `/api/config`, which the UI loads before displaying anything. Prefer a small
+image for a `data` URL (e.g. an optimized SVG), and use an `http` or `https` URL for a bigger one.
+
+If an image can't be loaded, the Perses logo is displayed instead.
+
+```yaml
+# URL of the image displayed in the navigation bar, at the top left of every page.
+# The image is scaled to fit in 130x32 pixels (64x32 pixels on small screens) and is displayed on the dark blue background of the bar.
+navbar_url: <string> # Optional
+
+# URL of the image displayed on the sign-in, sign-up and authentication error pages.
+# The image is scaled to fit in 394x116 pixels.
+sign_in_url: <string> # Optional
 ```
 
 #### Explorer config
@@ -1271,4 +1339,95 @@ excluded_chars: <list of strings> # Optional
 # Syntax is available here: https://github.com/tidwall/gjson/blob/master/SYNTAX.md
 index_keys:
   dashboard: <list of strings | default = ["metadata.name", "spec.display.name"]> # Optional
+```
+
+### OpenTelemetry config
+
+Perses can export the traces of its server with the OpenTelemetry protocol (OTLP), to a receiver like an OpenTelemetry
+Collector.
+
+When enabled, Perses creates a span for each HTTP request it receives (except the `/metrics` and
+`<api_prefix>/api/v1/health` endpoints, called very often by Prometheus and the probes), and for each request it sends
+to an HTTP datasource through the proxy.
+
+The trace context is read from and propagated with the W3C `traceparent`, `tracestate` and `baggage` headers, so a
+request coming from a traced application (like a portal embedding Perses panels) and its queries to the datasource are
+part of the same trace. The header policy of an HTTP datasource (`allowHeaders` / `dropHeaders`) applies to these
+headers too: with `allowHeaders`, list them to propagate the trace context to the datasource.
+
+```yaml
+# Enable the export of the traces.
+enable: <boolean> | default = false # Optional
+
+# The URL of the OTLP receiver. Required when enabled.
+# With the http scheme, the connection is not encrypted. Use https to connect with TLS.
+# With the http/protobuf protocol, the traces are sent to the path of the URL, or to /v1/traces when the URL has no path.
+endpoint: <url> # Optional
+
+# The transport used to send the telemetry.
+protocol: <enum = "grpc" | "http/protobuf"> | default = "grpc" # Optional
+
+# Config used to connect to an https endpoint.
+tls_config: <TLS config> # Optional
+
+# The credentials sent with each export request. They require an https endpoint.
+# basic_auth, authorization and oauth are mutually exclusive. Use one of them.
+basic_auth: <Basic Auth specification> # Optional
+authorization: <Authorization specification> # Optional
+oauth: <Oauth specification> # Optional
+
+# Headers sent with each export request. Their values are hidden when the configuration is returned by the API,
+# but prefer basic_auth, authorization or oauth for the credentials.
+headers:
+  <string>: <string> # Optional
+
+# Compress the export requests with gzip.
+compression: <boolean> | default = false # Optional
+
+# The maximum duration of an export request, retries included.
+timeout: <duration> | default = 10s # Optional
+
+# The fraction (between 0 and 1) of the traces started by Perses that are sampled.
+# A request received as part of a sampled trace is always traced, whatever this ratio.
+# With the default value, Perses only traces the requests that are part of a sampled trace.
+sampling_ratio: <float> | default = 0 # Optional
+```
+
+The TLS settings, headers and compression that aren't set in this configuration can be set with the standard
+`OTEL_EXPORTER_OTLP_*` environment variables (like `OTEL_EXPORTER_OTLP_CERTIFICATE` or `OTEL_EXPORTER_OTLP_HEADERS`).
+A setting present in this configuration takes precedence over the environment variable. The endpoint and the timeout
+always come from this configuration. The TLS variables are ignored with an http endpoint, when `tls_config` is set
+and, with the http/protobuf protocol, when an authentication is set (use `tls_config` instead).
+
+With the http/protobuf protocol, the endpoint is used like the signal-specific `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`
+variable: a path in the URL is used as-is. Only a URL without a path is completed with `/v1/traces`.
+
+The standard environment variables `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` can be used to change the name
+of the service (`perses` by default) or to add attributes to the resource, like the namespace of the service.
+
+The files of the credentials (`credentialsFile`, `passwordFile` and `clientSecretFile`) are read each time a token is
+needed, so a rotated file (like a Kubernetes projected service account token) is taken into account without restarting
+Perses.
+
+The sampling decision of a request received with a `traceparent` header comes from the client. Any client able to reach
+Perses, including with anonymous requests, can force its requests to be traced by sending a sampled `traceparent`
+header, and so increase the volume of traces sent to the receiver. When Perses is exposed publicly, you can limit it in
+your collector, or remove the `traceparent` header in the reverse proxy in front of Perses.
+
+The span of a request sent to a datasource records its URL (`url.full`) with the values of the query parameters
+replaced by `REDACTED`, as they can carry credentials (of the datasource URL or of the query). The path of the URL is
+kept as-is.
+
+Example, with TLS and a bearer token read from a file:
+
+```yaml
+opentelemetry:
+  enable: true
+  endpoint: https://otel-collector.observability:4317
+  tls_config:
+    caFile: /etc/perses/otel/ca.crt
+  authorization:
+    type: Bearer
+    credentialsFile: /etc/perses/otel/token
+  sampling_ratio: 0.1
 ```

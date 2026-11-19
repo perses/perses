@@ -18,8 +18,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
-	echoMiddleware "github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/common/app"
 	"github.com/perses/perses/internal/api/core/middleware"
 	"github.com/perses/perses/internal/api/dashboard"
@@ -33,7 +32,33 @@ import (
 	"github.com/perses/perses/ui"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 )
+
+// setupOpenTelemetry registers the provider exporting the traces and the middleware tracing the HTTP requests.
+// It does nothing when OpenTelemetry is disabled.
+func setupOpenTelemetry(runner *app.Runner, conf config.OpenTelemetry, apiPrefix string) error {
+	if !conf.Enable {
+		return nil
+	}
+	provider, err := newTracerProvider(conf)
+	if err != nil {
+		return err
+	}
+	// The runner registers the provider globally and shuts it down (flushing the remaining spans) when Perses stops.
+	runner.OTeLProviderBuilder().SetProvider(provider)
+	propagator := propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{})
+	otel.SetTextMapPropagator(propagator)
+	// The provider is registered globally only when the runner starts, so it is given to the middleware directly.
+	runner.HTTPServerBuilder().Middleware(middleware.OpenTelemetryWithConfig(middleware.OpenTelemetryConfig{
+		// The metrics are scraped and the health is checked by the probes very often: tracing them would only be noise.
+		IgnoredRoutes:  []string{"/metrics", apiPrefix + utils.APIV1Prefix + "/health"},
+		TracerProvider: provider,
+		Propagators:    propagator,
+	}))
+	return nil
+}
 
 func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, banner string) (*app.Runner, dependency.Manager, error) {
 	dependencyManager, err := dependency.NewManager(conf)
@@ -47,6 +72,9 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	persesAPI := NewPersesAPI(dependencyManager, conf)
 	persesFrontend := ui.NewPersesFrontend(conf, dependencyManager.Service().GetPlugin())
 	runner := app.NewRunner().WithDefaultHTTPServerAndPrometheusRegisterer(utils.MetricNamespace, registry, registry).SetBanner(banner)
+	if otelErr := setupOpenTelemetry(runner, conf.OpenTelemetry, conf.APIPrefix); otelErr != nil {
+		return nil, nil, otelErr
+	}
 
 	// enable cleanup of the ephemeral dashboards once their ttl is reached
 	if conf.EphemeralDashboard.Enable {
@@ -77,7 +105,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 
 	// Enable the refresh of the RBAC permissions if the native provider is enabled.
 	if conf.Security.Authorization.Provider.Native.Enable {
-		rbacTask := refresh.New(persesDAO,
+		rbacTask := refresh.New("RBAC permissions", persesDAO,
 			dependencyManager.Service().GetAuthorization().RefreshPermissionsAndRoles,
 			[]modelV1.Kind{modelV1.KindRole, modelV1.KindRoleBinding, modelV1.KindGlobalRole, modelV1.KindGlobalRoleBinding},
 		)
@@ -85,7 +113,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	}
 
 	// Enable the refresh of the search index.
-	runner.WithTimerTasks(time.Duration(conf.Search.CheckLatestUpdateInterval), refresh.New(persesDAO, dependencyManager.Service().GetIndex().Refresh, []modelV1.Kind{modelV1.KindDashboard}))
+	runner.WithTimerTasks(time.Duration(conf.Search.CheckLatestUpdateInterval), refresh.New("search index", persesDAO, dependencyManager.Service().GetIndex().Refresh, []modelV1.Kind{modelV1.KindDashboard}))
 
 	// Extract the plugin archives and load the plugins.
 	// Loading plugin is not mandatory, so we don't return an error if the plugin can't be loaded.
@@ -104,7 +132,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		HTTPServerBuilder().
 		ActivatePprof(enablePprof).
 		APIRegistration(persesAPI).
-		GzipSkipper(func(c echo.Context) bool {
+		GzipSkipper(func(c *echo.Context) bool {
 			// let's skip the gzip compression when using the proxy and rely on the datasource behind.
 			return strings.HasPrefix(c.Request().URL.Path, fmt.Sprintf("%s/proxy", conf.APIPrefix)) ||
 				// When serving the plugins from a dev server, we don't want to compress the response since it's already compressed by rsbuild.
@@ -120,14 +148,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		runner.HTTPServerBuilder().PreMiddleware(middleware.HandleAPIPrefix(conf.APIPrefix))
 	}
 	if conf.Security.CORS.Enable {
-		runner.HTTPServerBuilder().Middleware(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
-			AllowOrigins:     conf.Security.CORS.AllowOrigins,
-			AllowMethods:     conf.Security.CORS.AllowMethods,
-			AllowHeaders:     conf.Security.CORS.AllowHeaders,
-			AllowCredentials: conf.Security.CORS.AllowCredentials,
-			ExposeHeaders:    conf.Security.CORS.ExposeHeaders,
-			MaxAge:           conf.Security.CORS.MaxAge,
-		}))
+		runner.HTTPServerBuilder().Middleware(middleware.CORS(conf.Security.CORS))
 	}
 	return runner, dependencyManager, nil
 }

@@ -21,6 +21,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
 
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/sirupsen/logrus"
@@ -28,6 +30,16 @@ import (
 
 const (
 	defaultEncryptionKey = "e=dz;`M'5Pjvy^Sq3FVBkTC@N9?H/gua"
+	// DefaultContentSecurityPolicy is the Content-Security-Policy sent with the pages of the UI when no policy is
+	// configured:
+	//   - script-src 'self' 'unsafe-eval': only the scripts served by Perses (the UI and the plugins) can run.
+	//     It blocks the inline scripts, the inline event handlers and the javascript: URLs, which is how a script
+	//     injected in the content of a dashboard would run. 'unsafe-eval' is allowed as the module federation runtime,
+	//     which loads the plugins, relies on it.
+	//   - object-src 'none': no <object> or <embed> element can load content.
+	//   - base-uri 'self': a <base> element can only use a URL of the Perses origin, so it can't make the relative URLs
+	//     point to another website.
+	DefaultContentSecurityPolicy = "script-src 'self' 'unsafe-eval'; object-src 'none'; base-uri 'self'"
 )
 
 type SameSite http.SameSite
@@ -140,6 +152,70 @@ type CORSConfig struct {
 	MaxAge           int      `json:"max_age,omitempty" yaml:"max_age,omitempty"`
 }
 
+func (c *CORSConfig) Verify() error {
+	if !c.Enable {
+		return nil
+	}
+	if len(c.AllowOrigins) == 0 {
+		// Every origin is allowed by default.
+		c.AllowOrigins = []string{"*"}
+	}
+	if c.AllowCredentials {
+		// The entries are checked in order, so every origin receives 'Access-Control-Allow-Origin: *' when '*' comes first.
+		if c.AllowOrigins[0] == "*" {
+			return errors.New("security.cors.allow_credentials cannot be true when the first entry of security.cors.allow_origins is '*' (its default value is [\"*\"]): " +
+				"every origin then receives the response header 'Access-Control-Allow-Origin: *', which the browsers reject for the requests with credentials. " +
+				"Set security.cors.allow_origins to the list of the allowed origins instead")
+		}
+		if slices.Contains(c.AllowOrigins, "*") {
+			// TODO: return an error instead in v0.58.0, like echo v5 does natively, see https://github.com/perses/perses/issues/4721
+			logrus.Warn("security.cors.allow_origins contains '*' while security.cors.allow_credentials is true: the origins not matched by an entry before '*' " +
+				"receive the response header 'Access-Control-Allow-Origin: *', which the browsers reject for the requests with credentials. " +
+				"This configuration is deprecated and will be rejected in v0.58.0. Remove '*' from security.cors.allow_origins, or set security.cors.allow_credentials to false. " +
+				"See https://github.com/perses/perses/issues/4721")
+		}
+	}
+	for _, origin := range c.AllowOrigins {
+		if IsCORSOriginPattern(origin) {
+			// TODO: return an error instead in v0.58.0, see https://github.com/perses/perses/issues/4721
+			logrus.Warnf("the entry %q of security.cors.allow_origins is a wildcard pattern. The wildcard patterns are deprecated and will be removed in v0.58.0. "+
+				"List the exact origins instead. See https://github.com/perses/perses/issues/4721", origin)
+		}
+	}
+	return nil
+}
+
+// IsCORSOriginPattern tells if the given allowed origin is a wildcard pattern,
+// where '*' matches 0 or more characters and '?' matches exactly 1 character.
+// The value '*' alone is not a pattern: it allows every origin.
+func IsCORSOriginPattern(origin string) bool {
+	return origin != "*" && strings.ContainsAny(origin, "*?")
+}
+
+// ContentSecurityPolicy is the configuration of the Content-Security-Policy header sent with the pages of the UI.
+// The header restricts what the browser is allowed to run in the Perses origin, as a second layer of protection
+// against a script injected in the content of a dashboard.
+type ContentSecurityPolicy struct {
+	// Disable stops sending the Content-Security-Policy header with the pages of the UI.
+	Disable bool `json:"disable" yaml:"disable"`
+	// Policy is the value of the Content-Security-Policy header. When empty, DefaultContentSecurityPolicy is used.
+	// The policy can be written on several lines: consecutive whitespaces, including newlines, are replaced by a single
+	// space.
+	Policy string `json:"policy,omitempty" yaml:"policy,omitempty"`
+}
+
+func (c *ContentSecurityPolicy) Verify() error {
+	if c.Disable {
+		return nil
+	}
+	// A header value can't contain a newline, and the whitespaces are not significant in a policy.
+	c.Policy = strings.Join(strings.Fields(c.Policy), " ")
+	if len(c.Policy) == 0 {
+		c.Policy = DefaultContentSecurityPolicy
+	}
+	return nil
+}
+
 type Security struct {
 	// Readonly will deactivate any HTTP POST, PUT, DELETE endpoint
 	Readonly bool `json:"readonly" yaml:"readonly"`
@@ -162,6 +238,8 @@ type Security struct {
 	Authentication AuthenticationConfig `json:"authentication,omitempty" yaml:"authentication,omitempty"`
 	// Configuration for the CORS middleware.
 	CORS CORSConfig `json:"cors,omitempty" yaml:"cors"`
+	// ContentSecurityPolicy is the configuration of the Content-Security-Policy header sent with the pages of the UI.
+	ContentSecurityPolicy ContentSecurityPolicy `json:"content_security_policy" yaml:"content_security_policy"`
 	// SecretFileAllowedDirectories is the list of absolute directories from which the Secrets and GlobalSecrets
 	// are allowed to read files (basicAuth.passwordFile, authorization.credentialsFile, oauth.clientSecretFile,
 	// tlsConfig.caFile/certFile/keyFile).

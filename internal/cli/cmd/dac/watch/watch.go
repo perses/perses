@@ -124,7 +124,7 @@ func (o *option) Execute() error {
 	var tasks []taskhelper.Helper
 
 	// Setup signal listener
-	signalListener, _ := taskhelper.New(async.NewSignalListener(syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL))
+	signalListener, _ := taskhelper.New(async.NewSignalListener(syscall.SIGINT, syscall.SIGTERM))
 	tasks = append(tasks, signalListener)
 
 	// Add watcher task

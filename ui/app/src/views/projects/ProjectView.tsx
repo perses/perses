@@ -34,7 +34,7 @@ function ProjectView(): ReactElement {
     throw new Error('Unable to get the project name');
   }
 
-  const { data: project, isLoading } = useProject(projectName);
+  const { data: project, isPending } = useProject(projectName);
   const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
@@ -78,7 +78,7 @@ function ProjectView(): ReactElement {
     );
   }
 
-  if (isLoading || project === undefined) {
+  if (isPending || project === undefined) {
     return (
       <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress />

@@ -19,7 +19,7 @@ import (
 	"net/http"
 
 	"github.com/brunoga/deep"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
@@ -54,7 +54,7 @@ func NewService(cfg config.DatasourceConfig, dao globaldatasource.DAO, sch schem
 	}
 }
 
-func (s *service) Create(ctx echo.Context, entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
+func (s *service) Create(ctx *echo.Context, entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -77,7 +77,7 @@ func (s *service) create(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, err
 	return entity, nil
 }
 
-func (s *service) Update(ctx echo.Context, entity *v1.GlobalDatasource, parameters apiInterface.Parameters) (*v1.GlobalDatasource, error) {
+func (s *service) Update(ctx *echo.Context, entity *v1.GlobalDatasource, parameters apiInterface.Parameters) (*v1.GlobalDatasource, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -109,7 +109,7 @@ func (s *service) update(entity *v1.GlobalDatasource, parameters apiInterface.Pa
 	return entity, nil
 }
 
-func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
+func (s *service) Delete(_ *echo.Context, parameters apiInterface.Parameters) error {
 	return s.dao.Delete(parameters.Name)
 }
 
@@ -127,7 +127,7 @@ func (s *service) List(q *globaldatasource.Query) ([]*v1.GlobalDatasource, error
 
 // checkSecretPermission ensures that the user that creates/updates a datasource with a secret actually has the secret
 // reader permission.
-func (s *service) checkSecretPermission(ctx echo.Context, datasource *v1.GlobalDatasource) error {
+func (s *service) checkSecretPermission(ctx *echo.Context, datasource *v1.GlobalDatasource) error {
 	if !s.authz.IsEnabled() {
 		return nil
 	}

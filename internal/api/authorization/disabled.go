@@ -14,8 +14,8 @@
 package authorization
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/perses/perses/internal/api/crypto"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 )
@@ -31,39 +31,39 @@ func (r *disabledImpl) IsNativeAuthz() bool {
 	return true
 }
 
-func (r *disabledImpl) GetUser(_ echo.Context) (any, error) {
+func (r *disabledImpl) GetUser(_ *echo.Context) (any, error) {
 	return nil, nil
 }
 
-func (r *disabledImpl) GetUsername(_ echo.Context) (string, error) {
+func (r *disabledImpl) GetUsername(_ *echo.Context) (string, error) {
 	return "", nil
 }
 
-func (r *disabledImpl) GetProviderInfo(_ echo.Context) (crypto.ProviderInfo, error) {
+func (r *disabledImpl) GetProviderInfo(_ *echo.Context) (crypto.ProviderInfo, error) {
 	return crypto.ProviderInfo{}, nil
 }
 
 func (r *disabledImpl) Middleware(_ middleware.Skipper) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(ctx echo.Context) error {
+		return func(ctx *echo.Context) error {
 			return next(ctx)
 		}
 	}
 }
 
-func (r *disabledImpl) GetUserProjects(_ echo.Context, _ v1Role.Action, _ v1Role.Scope) ([]string, error) {
+func (r *disabledImpl) GetUserProjects(_ *echo.Context, _ v1Role.Action, _ v1Role.Scope) ([]string, error) {
 	return []string{}, nil
 }
 
-func (r *disabledImpl) HasPermission(_ echo.Context, _ v1Role.Action, _ string, _ v1Role.Scope) bool {
+func (r *disabledImpl) HasPermission(_ *echo.Context, _ v1Role.Action, _ string, _ v1Role.Scope) bool {
 	return true
 }
 
-func (r *disabledImpl) HasProjectCreatePermission(_ echo.Context, _ string) bool {
+func (r *disabledImpl) HasProjectCreatePermission(_ *echo.Context, _ string) bool {
 	return true
 }
 
-func (r *disabledImpl) GetPermissions(_ echo.Context) (map[string][]*v1Role.Permission, error) {
+func (r *disabledImpl) GetPermissions(_ *echo.Context) (map[string][]*v1Role.Permission, error) {
 	return nil, nil
 }
 

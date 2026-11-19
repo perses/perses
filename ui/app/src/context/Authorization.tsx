@@ -63,11 +63,11 @@ export function useAuthorizationContext(): AuthorizationContext {
   return ctx;
 }
 
-export function useDashboardCreateAllowedProjects(): { data: ProjectResource[]; isLoading: boolean } {
+export function useDashboardCreateAllowedProjects(): { data: ProjectResource[]; isPending: boolean } {
   const { enabled, userPermissions } = useAuthorizationContext();
-  const { data, isLoading } = useProjectList();
+  const { data, isPending } = useProjectList();
   if (!enabled) {
-    return { data: data ?? [], isLoading };
+    return { data: data ?? [], isPending };
   }
 
   return {
@@ -76,7 +76,7 @@ export function useDashboardCreateAllowedProjects(): { data: ProjectResource[]; 
         permissionListHasPermission(userPermissions[GlobalProject] ?? [], 'create', 'Dashboard') ||
         permissionListHasPermission(userPermissions[project.metadata.name] ?? [], 'create', 'Dashboard'),
     ),
-    isLoading,
+    isPending,
   };
 }
 

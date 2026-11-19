@@ -33,7 +33,7 @@ interface ProjectVariablesProps {
 export function ProjectVariables(props: ProjectVariablesProps): ReactElement {
   const { projectName, id } = props;
 
-  const { data, isLoading } = useVariableList(projectName);
+  const { data, isPending } = useVariableList(projectName);
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const createVariableMutation = useCreateVariableMutation(projectName);
@@ -104,10 +104,11 @@ export function ProjectVariables(props: ProjectVariablesProps): ReactElement {
     <Card id={id}>
       <VariableList
         data={data ?? []}
-        isLoading={isLoading}
+        isLoading={isPending}
         onCreate={handleVariableCreate}
         onUpdate={handleVariableUpdate}
         onDelete={handleVariableDelete}
+        storageKey="Variable"
         initialState={{
           columns: {
             columnVisibilityModel: {

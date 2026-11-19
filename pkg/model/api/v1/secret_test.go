@@ -80,3 +80,68 @@ func TestUnmarshalJSONSecretSpecMutuallyExclusiveAuth(t *testing.T) {
 		})
 	}
 }
+
+func TestUnmarshalJSONSecretSpecAuthorizationCredentials(t *testing.T) {
+	emptyCredentialsErr := fmt.Errorf("when using authorization, credentials/credentialsFile cannot be empty")
+
+	testSuite := []struct {
+		title string
+		jason string
+		err   error
+	}{
+		{
+			title: "authorization omitted",
+			jason: `{` + basicAuthJSON + `}`,
+		},
+		{
+			title: "empty authorization",
+			jason: `{"authorization": {}}`,
+			err:   emptyCredentialsErr,
+		},
+		{
+			title: "type-only authorization",
+			jason: `{"authorization": {"type": "Bearer"}}`,
+			err:   emptyCredentialsErr,
+		},
+		{
+			title: "credentials only",
+			jason: `{"authorization": {"credentials": "token"}}`,
+		},
+		{
+			title: "credentialsFile only",
+			jason: `{"authorization": {"credentialsFile": "/tmp/token"}}`,
+		},
+		{
+			title: "credentials and credentialsFile",
+			jason: `{"authorization": {"credentials": "token", "credentialsFile": "/tmp/token"}}`,
+			err:   fmt.Errorf("at most one of authorization credentials & credentialsFile must be configured"),
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result := &SecretSpec{}
+			err := json.Unmarshal([]byte(test.jason), result)
+			if test.err == nil {
+				assert.NoError(t, err)
+			} else {
+				assert.EqualError(t, err, test.err.Error())
+			}
+		})
+	}
+}
+
+func TestUnmarshalJSONSecretAuthorizationWithoutCredentials(t *testing.T) {
+	expectedErr := "when using authorization, credentials/credentialsFile cannot be empty"
+
+	t.Run("Secret", func(t *testing.T) {
+		result := &Secret{}
+		err := json.Unmarshal([]byte(`{"kind": "Secret", "metadata": {"name": "test", "project": "perses"}, "spec": {"authorization": {"type": "Bearer"}}}`), result)
+		assert.EqualError(t, err, expectedErr)
+	})
+
+	t.Run("GlobalSecret", func(t *testing.T) {
+		result := &GlobalSecret{}
+		err := json.Unmarshal([]byte(`{"kind": "GlobalSecret", "metadata": {"name": "test"}, "spec": {"authorization": {"type": "Bearer"}}}`), result)
+		assert.EqualError(t, err, expectedErr)
+	})
+}

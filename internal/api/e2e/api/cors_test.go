@@ -29,9 +29,11 @@ import (
 	apiConfig "github.com/perses/perses/pkg/model/api/config"
 )
 
+// sendPreflightRequest sends a CORS preflight request, which carries the method of the actual request like the browsers do.
 func sendPreflightRequest(expect *httpexpect.Expect, origin string) *httpexpect.Response {
 	return expect.OPTIONS(fmt.Sprintf("%s/projects", utils.APIV1Prefix)).
 		WithHeader("Origin", origin).
+		WithHeader("Access-Control-Request-Method", http.MethodGet).
 		Expect()
 }
 

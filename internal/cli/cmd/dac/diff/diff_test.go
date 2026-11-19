@@ -22,6 +22,7 @@ import (
 )
 
 func TestDiffCMD(t *testing.T) {
+	outputFolder := t.TempDir()
 	testSuite := []cmdTest.Suite{
 		{
 			Title:           "empty args",
@@ -36,6 +37,22 @@ func TestDiffCMD(t *testing.T) {
 			Config:          config.Config{Dac: config.Dac{OutputFolder: "./emptybuild"}},
 			IsErrorExpected: true,
 			ExpectedMessage: "no dashboard found to create the diff",
+		},
+		{
+			Title:                "diff a dashboard without project in the project of the config",
+			Args:                 []string{"-f", "../../../test/sample_resources/dashboard_without_project.json"},
+			APIClient:            fakeapi.New(),
+			Config:               config.Config{Project: "perses", Dac: config.Dac{OutputFolder: outputFolder}},
+			IsErrorExpected:      false,
+			ExpectedRegexMessage: `^- project: perses\n  dashboard: node_exporter\n  status: UPDATED\n  diff: \S*perses-node_exporter\.diff`,
+		},
+		{
+			Title:                "diff a dashboard without project in the project of the flag",
+			Args:                 []string{"-f", "../../../test/sample_resources/dashboard_without_project.json", "--project", "testing"},
+			APIClient:            fakeapi.New(),
+			Config:               config.Config{Project: "perses", Dac: config.Dac{OutputFolder: outputFolder}},
+			IsErrorExpected:      false,
+			ExpectedRegexMessage: `^- project: testing\n  dashboard: node_exporter\n  status: UPDATED\n  diff: \S*testing-node_exporter\.diff`,
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)

@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/crypto"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiinterface "github.com/perses/perses/internal/api/interface"
@@ -47,7 +47,7 @@ func (e *nativeEndpoint) GetSlugID() string {
 	return "" // no slug ID needed for native auth
 }
 
-func (e *nativeEndpoint) RefreshOIDCToken(_ echo.Context) string {
+func (e *nativeEndpoint) RefreshOIDCToken(_ *echo.Context) string {
 	// No OIDC token to refresh for native auth
 	return ""
 }
@@ -64,7 +64,7 @@ func (e *nativeEndpoint) CollectRoutes(g *route.Group) {
 	g.POST(fmt.Sprintf("/%s/%s", utils.AuthnKindNative, utils.PathLogin), e.auth, true)
 }
 
-func (e *nativeEndpoint) auth(ctx echo.Context) error {
+func (e *nativeEndpoint) auth(ctx *echo.Context) error {
 	body := &api.Auth{}
 	if err := ctx.Bind(body); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())

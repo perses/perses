@@ -57,6 +57,9 @@ func TestJSONMarshalConfig(t *testing.T) {
     },
     "cors": {
       "enable": false
+    },
+    "content_security_policy": {
+      "disable": false
     }
   },
   "database": {},
@@ -99,7 +102,8 @@ func TestJSONMarshalConfig(t *testing.T) {
   },
   "search": {
     "index_keys": {}
-  }
+  },
+  "opentelemetry": {}
 }`,
 		},
 		{
@@ -125,6 +129,10 @@ func TestJSONMarshalConfig(t *testing.T) {
     },
     "cors": {
       "enable": false
+    },
+    "content_security_policy": {
+      "disable": false,
+      "policy": "script-src 'self' 'unsafe-eval'; object-src 'none'; base-uri 'self'"
     }
   },
   "database": {
@@ -200,7 +208,8 @@ func TestJSONMarshalConfig(t *testing.T) {
         "spec.display.name"
       ]
     }
-  }
+  },
+  "opentelemetry": {}
 }`,
 		},
 	}
@@ -552,6 +561,7 @@ plugin:
 						ExposeHeaders:    []string{"Content-Encoding"},
 						MaxAge:           60,
 					},
+					ContentSecurityPolicy: ContentSecurityPolicy{Policy: DefaultContentSecurityPolicy},
 				},
 				Database: Database{
 					File: &File{
@@ -909,6 +919,72 @@ frontend:
 	}
 }
 
+func TestResolveLogo(t *testing.T) {
+	testSuite := []struct {
+		name       string
+		configData string
+		env        map[string]string
+		expected   *Logo
+		errMessage string
+	}{
+		{
+			name:     "no logo by default",
+			expected: nil,
+		},
+		{
+			name: "resolves the logo from the config file",
+			configData: `
+frontend:
+  logo:
+    navbar_url: https://example.com/navbar-logo.svg
+    sign_in_url: /static/sign-in-logo.png
+`,
+			expected: &Logo{
+				NavbarURL: "https://example.com/navbar-logo.svg",
+				SignInURL: "/static/sign-in-logo.png",
+			},
+		},
+		{
+			name: "resolves the logo from the environment variables",
+			env: map[string]string{
+				"PERSES_FRONTEND_LOGO_NAVBAR_URL": "https://example.com/navbar-logo.svg",
+			},
+			expected: &Logo{
+				NavbarURL: "https://example.com/navbar-logo.svg",
+			},
+		},
+		{
+			name: "rejects an unsupported scheme",
+			configData: `
+frontend:
+  logo:
+    navbar_url: javascript:alert(1)
+`,
+			errMessage: "invalid frontend.logo.navbar_url",
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.name, func(t *testing.T) {
+			for key, value := range test.env {
+				t.Setenv(key, value)
+			}
+			resolvedConfig := Config{}
+			err := config.NewResolver[Config]().
+				SetConfigData([]byte(test.configData)).
+				SetEnvPrefix("PERSES").
+				Resolve(&resolvedConfig).
+				Verify()
+			if len(test.errMessage) > 0 {
+				assert.ErrorContains(t, err, test.errMessage)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, test.expected, resolvedConfig.Frontend.Logo)
+		})
+	}
+}
+
 func TestResolveDatasourceHTTPProxy(t *testing.T) {
 	testSuite := []struct {
 		name       string
@@ -1088,6 +1164,38 @@ datasource:
 			}
 			assert.NoError(t, err)
 			assert.Equal(t, test.expected, resolvedConfig.Datasource.Proxy.HTTP)
+		})
+	}
+}
+
+func TestEphemeralDashboardVerify(t *testing.T) {
+	testSuite := []struct {
+		title           string
+		ephemeralConfig EphemeralDashboard
+		expectedErrMsg  string
+	}{
+		{
+			title:           "no max ttl",
+			ephemeralConfig: EphemeralDashboard{Enable: true},
+		},
+		{
+			title:           "positive max ttl",
+			ephemeralConfig: EphemeralDashboard{Enable: true, MaxTTL: common.Duration(24 * time.Hour)},
+		},
+		{
+			title:           "negative max ttl",
+			ephemeralConfig: EphemeralDashboard{Enable: true, MaxTTL: common.Duration(-time.Hour)},
+			expectedErrMsg:  "max_ttl cannot be negative",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			err := test.ephemeralConfig.Verify()
+			if len(test.expectedErrMsg) > 0 {
+				assert.EqualError(t, err, test.expectedErrMsg)
+				return
+			}
+			assert.NoError(t, err)
 		})
 	}
 }

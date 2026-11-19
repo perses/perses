@@ -23,7 +23,7 @@ import type * as Authorization from '../../../context/Authorization';
 import { ConfigContextProvider } from '../../../context/Config';
 import { useConfig } from '../../../model/config-client';
 import type * as ConfigClient from '../../../model/config-client';
-import { useDashboardList, useImportantDashboardList } from '../../../model/dashboard-client';
+import { resolveImportantDashboardList, useDashboardList } from '../../../model/dashboard-client';
 import type * as DashboardClient from '../../../model/dashboard-client';
 import type * as DatasourceClient from '../../../model/datasource-client';
 import { useDatasourceList } from '../../../model/datasource-client';
@@ -58,7 +58,11 @@ vi.mock('../../../model/config-client', async (importOriginal) => {
 
 vi.mock('../../../model/dashboard-client', async (importOriginal) => {
   const actual = await importOriginal<typeof DashboardClient>();
-  return { ...actual, useDashboardList: vi.fn(), useImportantDashboardList: vi.fn() };
+  return {
+    ...actual,
+    useDashboardList: vi.fn(),
+    resolveImportantDashboardList: vi.fn(actual.resolveImportantDashboardList),
+  };
 });
 
 vi.mock('../../../model/datasource-client', async (importOriginal) => {
@@ -95,45 +99,43 @@ const SearchBar = (): ReactElement => {
   );
 };
 
+// The hooks are always called: a list is only fetched when its hook is called with `enabled: true`.
+const expectNeverFetched = (hook: unknown): void => {
+  expect(hook).not.toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
+};
+
 describe('SearchBar', () => {
   let rerenderSearchBar: () => void;
 
   beforeEach(() => {
     vi.mocked(useHasPermission).mockReturnValue(true);
 
-    vi.mocked(useConfig).mockReturnValue({ data: MOCK_CLIENT_CONFIG, isLoading: false } as ReturnType<
+    vi.mocked(useConfig).mockReturnValue({ data: MOCK_CLIENT_CONFIG, isPending: false } as ReturnType<
       typeof useConfig
     >);
 
     vi.mocked(useDashboardList).mockReturnValue({
       data: DASHBOARDS_RESOURCES,
-      isLoading: false,
+      isPending: false,
       isSuccess: true,
     } as ReturnType<typeof useDashboardList>);
 
-    vi.mocked(useImportantDashboardList).mockReturnValue({
-      data: IMPORTANT_DASHBOARDS_RESOURCES,
-      isLoading: false,
-      isSuccess: true,
-      error: null,
-    } as ReturnType<typeof useImportantDashboardList>);
-
     vi.mocked(useDatasourceList).mockReturnValue({
       data: DATASOURCE_RESOURCE,
-      isLoading: false,
+      isPending: false,
       isSuccess: true,
     } as ReturnType<typeof useDatasourceList>);
 
     vi.mocked(useGlobalDatasourceList).mockReturnValue({
       data: GLOBAL_DATASOURCE_RESOURCE,
-      isLoading: false,
+      isPending: false,
       isSuccess: true,
       error: null,
     } as ReturnType<typeof useGlobalDatasourceList>);
 
     vi.mocked(useProjectList).mockReturnValue({
       data: PROJECT_RESOURCE,
-      isLoading: false,
+      isPending: false,
       isSuccess: true,
     } as ReturnType<typeof useProjectList>);
 
@@ -304,13 +306,77 @@ describe('SearchBar', () => {
       const noRecords = screen.getByTestId(TEST_IDS.noRecordContainer);
       expect(noRecords).toBeInTheDocument();
     });
+
+    it('should not show no records found while a list is loading', () => {
+      vi.mocked(useProjectList).mockReturnValue({
+        data: undefined,
+        isPending: true,
+        isFetching: true,
+      } as ReturnType<typeof useProjectList>);
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'XYZ' } });
+
+      expect(screen.queryByTestId(TEST_IDS.noRecordContainer)).not.toBeInTheDocument();
+    });
+
+    it('should not show no records found while the initial fetch of a list is paused', () => {
+      // e.g. when the browser is offline, the fetch is paused: the list has no data yet but is not fetching.
+      vi.mocked(useProjectList).mockReturnValue({
+        data: undefined,
+        isPending: true,
+        isFetching: false,
+      } as ReturnType<typeof useProjectList>);
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'XYZ' } });
+
+      expect(screen.queryByTestId(TEST_IDS.noRecordContainer)).not.toBeInTheDocument();
+    });
+
+    it('should not show no records found while a list is refetched', () => {
+      // e.g. after a dashboard has been created, the cached list is refetched when the search is opened.
+      vi.mocked(useDashboardList).mockReturnValue({
+        data: DASHBOARDS_RESOURCES,
+        isPending: false,
+        isFetching: true,
+      } as ReturnType<typeof useDashboardList>);
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'XYZ' } });
+
+      expect(screen.queryByTestId(TEST_IDS.noRecordContainer)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('closed search', () => {
+    it('should not process the dashboards loaded by other pages while the search is closed', () => {
+      vi.mocked(resolveImportantDashboardList).mockClear();
+      rerenderSearchBar();
+      expect(resolveImportantDashboardList).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'DASH' } });
+      expect(resolveImportantDashboardList).toHaveBeenCalled();
+    });
+  });
+
+  describe('section title', () => {
+    it('should title each section with its resource type and number of results', () => {
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'GDS' } });
+
+      expect(
+        screen.getByRole('heading', { name: `Global Datasources (${GLOBAL_DATASOURCE_RESOURCE.length})` }),
+      ).toBeInTheDocument();
+    });
   });
 
   describe('project counts', () => {
     it('should display the number of dashboards and datasources of a project', () => {
       vi.mocked(useProjectList).mockReturnValue({
         data: [{ kind: 'Project', metadata: { name: 'P1' } }],
-        isLoading: false,
+        isPending: false,
         isSuccess: true,
       } as ReturnType<typeof useProjectList>);
 
@@ -332,8 +398,25 @@ describe('SearchBar', () => {
       fireEvent.change(screen.getByRole('textbox'), { target: { value: 'GDS' } });
 
       expect(screen.getByTestId(`${GLOBAL_DATASOURCE_RESOURCE_TEST_IDS.dsName}-GDS1`)).toBeInTheDocument();
-      expect(useDashboardList).not.toHaveBeenCalled();
-      expect(useDatasourceList).not.toHaveBeenCalled();
+      expectNeverFetched(useDashboardList);
+      expectNeverFetched(useDatasourceList);
+    });
+  });
+
+  describe('fetching', () => {
+    it('should not fetch anything until a query is typed', () => {
+      for (const hook of [useDashboardList, useProjectList, useGlobalDatasourceList, useDatasourceList]) {
+        vi.mocked(hook).mockClear();
+      }
+      rerenderSearchBar();
+      fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
+
+      for (const hook of [useDashboardList, useProjectList, useGlobalDatasourceList, useDatasourceList]) {
+        expectNeverFetched(hook);
+      }
+
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'DASH' } });
+      expect(useDashboardList).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
     });
   });
 
@@ -341,7 +424,7 @@ describe('SearchBar', () => {
     it('should display the error instead of "no records found" when a list fails to load', () => {
       vi.mocked(useProjectList).mockReturnValue({
         data: undefined,
-        isLoading: false,
+        isPending: false,
         isError: true,
         error: new UserFriendlyError('internal server error', 500),
       } as ReturnType<typeof useProjectList>);
@@ -358,11 +441,10 @@ describe('SearchBar', () => {
       const error = new UserFriendlyError('database unavailable', 500);
       vi.mocked(useDashboardList).mockReturnValue({
         data: undefined,
-        isLoading: false,
+        isPending: false,
         isError: true,
         error,
       } as ReturnType<typeof useDashboardList>);
-      vi.mocked(useImportantDashboardList).mockReturnValue({ data: [], isLoading: false, error });
 
       fireEvent.click(screen.getByTestId(TEST_IDS.searchButton));
       fireEvent.change(screen.getByRole('textbox'), { target: { value: 'DASH' } });
@@ -384,7 +466,7 @@ describe('SearchBar', () => {
       const chip = screen.getByRole('button', { name: 'Global Datasources' });
       expect(chip).toHaveAttribute('aria-disabled', 'true');
       expect(chip).toHaveAccessibleDescription("You don't have permission to read global datasources");
-      expect(useGlobalDatasourceList).not.toHaveBeenCalled();
+      expectNeverFetched(useGlobalDatasourceList);
     });
 
     it('should let keyboard users focus an unavailable filter to display its explanation', () => {
@@ -432,7 +514,7 @@ describe('SearchBar', () => {
           ...MOCK_CLIENT_CONFIG,
           datasource: { ...MOCK_CLIENT_CONFIG.datasource, global: { disable: true }, project: { disable: true } },
         },
-        isLoading: false,
+        isPending: false,
       } as ReturnType<typeof useConfig>);
       vi.mocked(useGlobalDatasourceList).mockClear();
       vi.mocked(useDatasourceList).mockClear();
@@ -451,8 +533,8 @@ describe('SearchBar', () => {
       expect(datasourcesChip).toHaveAccessibleDescription(
         'Project datasources are disabled in the server configuration',
       );
-      expect(useGlobalDatasourceList).not.toHaveBeenCalled();
-      expect(vi.mocked(useDatasourceList).mock.calls.every(([options]) => options?.enabled === false)).toBe(true);
+      expectNeverFetched(useGlobalDatasourceList);
+      expectNeverFetched(useDatasourceList);
     });
   });
 });

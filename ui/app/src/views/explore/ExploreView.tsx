@@ -133,7 +133,7 @@ function HelperExploreView(): ReactElement {
   const { data: projects } = useProjectList({ enabled: isProjectDatasourceEnabled });
 
   // Collect global variables
-  const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
+  const { data: globalVars, isPending: isGlobalVarsPending } = useGlobalVariableList();
   const externalVariableDefinitions: ExternalVariableDefinition[] | undefined = useMemo(
     () => [buildGlobalVariableDefinition(globalVars ?? [])],
     [globalVars],
@@ -166,7 +166,7 @@ function HelperExploreView(): ReactElement {
     return breadcrumbContent;
   }, [isMobileSize, isProjectDatasourceEnabled, projectName, projects, setProjectParam]);
 
-  if (isLoadingGlobalVars) {
+  if (isGlobalVarsPending) {
     return (
       <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress />

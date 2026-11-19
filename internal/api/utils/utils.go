@@ -14,7 +14,7 @@
 package utils
 
 import (
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
@@ -69,15 +69,15 @@ var ProjectResourcePathList = []string{
 	PathDashboard, PathEphemeralDashboard, PathDatasource, PathFolder, PathRole, PathRoleBinding, PathSecret, PathVariable,
 }
 
-func GetNameParameter(ctx echo.Context) string {
+func GetNameParameter(ctx *echo.Context) string {
 	return ctx.Param(ParamName)
 }
 
-func GetProjectParameter(ctx echo.Context) string {
+func GetProjectParameter(ctx *echo.Context) string {
 	return ctx.Param(ParamProject)
 }
 
-func IsAnonymous(ctx echo.Context) bool {
+func IsAnonymous(ctx interface{ Get(key string) any }) bool {
 	// When there is an anonymous endpoint, the user is not set in the context.
 	// During the authorization process, this is something that must be considered.
 	value := ctx.Get(ContextKeyAnonymous)

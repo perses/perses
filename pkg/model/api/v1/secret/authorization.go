@@ -39,6 +39,19 @@ func NewPublicAuthorization(a *Authorization) *PublicAuthorization {
 	}
 }
 
+// Private returns the Authorization described by a, with the credentials in clear, once verified it is valid.
+// It is used when the public struct is directly part of a plain configuration (that is never encrypted).
+func (a *PublicAuthorization) Private() (*Authorization, error) {
+	if a == nil {
+		return nil, nil
+	}
+	result := &Authorization{Type: a.Type, Credentials: string(a.Credentials), CredentialsFile: a.CredentialsFile}
+	if err := result.validate(); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 func NewBearerToken(token string) *Authorization {
 	return &Authorization{
 		Type:        "Bearer",
@@ -85,12 +98,15 @@ func (a *Authorization) GetCredentials() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		return string(data), nil
+		return strings.TrimSpace(string(data)), nil
 	}
 	return a.Credentials, nil
 }
 
 func (a *Authorization) validate() error {
+	if len(a.Credentials) == 0 && len(a.CredentialsFile) == 0 {
+		return fmt.Errorf("when using authorization, credentials/credentialsFile cannot be empty")
+	}
 	if len(a.Credentials) > 0 && len(a.CredentialsFile) > 0 {
 		return fmt.Errorf("at most one of authorization credentials & credentialsFile must be configured")
 	}

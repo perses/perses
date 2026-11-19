@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"cuelang.org/go/cue/build"
+	"github.com/perses/perses/internal/api/plugin/migrate/grafana"
 	"github.com/perses/spec/go/dashboard"
 	"github.com/perses/spec/go/plugin"
 	"github.com/sirupsen/logrus"
@@ -50,7 +51,7 @@ func hasGrafanaVariables(url string) bool {
 	return grafanaVariablePattern.MatchString(url)
 }
 
-func convertGrafanaLinksToPerses(grafanaLinks []GrafanaLink) []dashboard.Link {
+func convertGrafanaLinksToPerses(grafanaLinks []grafana.Link) []dashboard.Link {
 	if len(grafanaLinks) == 0 {
 		return nil
 	}
@@ -67,10 +68,10 @@ func convertGrafanaLinksToPerses(grafanaLinks []GrafanaLink) []dashboard.Link {
 	return persesLinks
 }
 
-func (m *completeMigration) migratePanels(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) (map[string]*dashboard.Panel, error) {
+func (m *completeMigration) migratePanels(grafanaDashboard *grafana.Dashboard, useDefaultDatasource bool) (map[string]*dashboard.Panel, error) {
 	panels := make(map[string]*dashboard.Panel)
 	for i, p := range grafanaDashboard.Panels {
-		if p.Type == grafanaPanelRowType {
+		if p.Type == grafana.PanelRowType {
 			for j, innerPanel := range p.Panels {
 				panel, err := m.migratePanel(innerPanel, useDefaultDatasource)
 				if err != nil {
@@ -89,7 +90,7 @@ func (m *completeMigration) migratePanels(grafanaDashboard *SimplifiedDashboard,
 	return panels, nil
 }
 
-func (m *completeMigration) migratePanel(grafanaPanel Panel, useDefaultDatasource bool) (*dashboard.Panel, error) {
+func (m *completeMigration) migratePanel(grafanaPanel grafana.Panel, useDefaultDatasource bool) (*dashboard.Panel, error) {
 	result := &dashboard.Panel{
 		Kind: string(plugin.KindPanel),
 		Spec: dashboard.PanelSpec{
@@ -127,13 +128,8 @@ func (m *completeMigration) migratePanel(grafanaPanel Panel, useDefaultDatasourc
 	// Apply datasource cleaning if the flag is set
 	if useDefaultDatasource {
 		// Clean datasource references on all queries in this panel
-		for _, query := range result.Spec.Queries {
-			if pluginSpec, ok := query.Spec.Plugin.Spec.(map[string]any); ok {
-				if datasourceRef, ok := pluginSpec["datasource"].(map[string]any); ok {
-					// Remove explicit datasource references to use default datasource
-					delete(datasourceRef, "name")
-				}
-			}
+		for i := range result.Spec.Queries {
+			removeDatasourceName(&result.Spec.Queries[i].Spec.Plugin)
 		}
 	}
 

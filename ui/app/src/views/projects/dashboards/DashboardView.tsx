@@ -35,7 +35,7 @@ function DashboardView(): ReactElement | null {
 
   const navigate = useNavigate();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const { data, isLoading, error: dashboardNotFoundError } = useDashboard(projectName, dashboardName);
+  const { data, isPending, error: dashboardNotFoundError } = useDashboard(projectName, dashboardName);
   const isReadonly = useIsReadonly();
   const updateDashboardMutation = useUpdateDashboardMutation();
 
@@ -66,7 +66,7 @@ function DashboardView(): ReactElement | null {
     [exceptionSnackbar, successSnackbar, updateDashboardMutation],
   );
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress />

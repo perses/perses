@@ -21,6 +21,7 @@ import (
 
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/migrate"
+	"github.com/perses/perses/internal/api/plugin/migrate/grafana"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/file"
@@ -181,8 +182,8 @@ func (o *option) onlineExecution(grafanaDashboard json.RawMessage) (*modelV1.Das
 }
 
 func (o *option) offlineExecution(grafanaDashboard json.RawMessage) (*modelV1.Dashboard, error) {
-	rawGrafanaDashboard := []byte(migrate.ReplaceInputValue(o.input, string(grafanaDashboard)))
-	dash := &migrate.SimplifiedDashboard{}
+	rawGrafanaDashboard := []byte(grafana.ReplaceInputValue(o.input, string(grafanaDashboard)))
+	dash := &grafana.Dashboard{}
 	if err := json.Unmarshal(rawGrafanaDashboard, dash); err != nil {
 		return nil, err
 	}

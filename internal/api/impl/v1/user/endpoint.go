@@ -20,7 +20,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
@@ -70,30 +70,30 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 	currentUserGroup.GET(fmt.Sprintf("/%s", utils.PathWhoAmI), e.WhoAmI, false)
 }
 
-func (e *endpoint) Create(ctx echo.Context) error {
+func (e *endpoint) Create(ctx *echo.Context) error {
 	entity := &v1.User{}
 	return e.toolbox.Create(ctx, entity)
 }
 
-func (e *endpoint) Update(ctx echo.Context) error {
+func (e *endpoint) Update(ctx *echo.Context) error {
 	entity := &v1.User{}
 	return e.toolbox.Update(ctx, entity)
 }
 
-func (e *endpoint) Delete(ctx echo.Context) error {
+func (e *endpoint) Delete(ctx *echo.Context) error {
 	return e.toolbox.Delete(ctx)
 }
 
-func (e *endpoint) Get(ctx echo.Context) error {
+func (e *endpoint) Get(ctx *echo.Context) error {
 	return e.toolbox.Get(ctx)
 }
 
-func (e *endpoint) List(ctx echo.Context) error {
+func (e *endpoint) List(ctx *echo.Context) error {
 	q := &user.Query{}
 	return e.toolbox.List(ctx, q)
 }
 
-func (e *endpoint) WhoAmI(ctx echo.Context) error {
+func (e *endpoint) WhoAmI(ctx *echo.Context) error {
 	if !e.authz.IsEnabled() {
 		return apiinterface.HandleUnauthorizedError("authentication is required to retrieve user permissions")
 	}
@@ -104,7 +104,7 @@ func (e *endpoint) WhoAmI(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, publicUser)
 }
 
-func (e *endpoint) GetPermissions(ctx echo.Context) error {
+func (e *endpoint) GetPermissions(ctx *echo.Context) error {
 	parameters := toolbox.ExtractParameters(ctx, e.caseSensitive)
 	// Since delegated authentication usernames (k8s) can contain colons and other characters with conflict
 	// with url standards, the urls containing usernames with them will be % encoded, so

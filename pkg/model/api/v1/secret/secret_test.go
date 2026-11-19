@@ -16,6 +16,7 @@ package secret
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/nexucis/lamenv"
@@ -57,4 +58,173 @@ func TestSecret_ENV(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, os.Getenv("PREFIX_SECRET"), `<secret>`)
 	_ = os.Unsetenv("PREFIX_SECRET")
+}
+
+func TestAuthorization_Validate(t *testing.T) {
+	missingErr := "when using authorization, credentials/credentialsFile cannot be empty"
+	exclusiveErr := "at most one of authorization credentials & credentialsFile must be configured"
+
+	testSuite := []struct {
+		title    string
+		jason    string
+		expected *Authorization
+		err      string
+	}{
+		{
+			title: "empty authorization",
+			jason: `{}`,
+			err:   missingErr,
+		},
+		{
+			title: "type-only authorization",
+			jason: `{"type": "Bearer"}`,
+			err:   missingErr,
+		},
+		{
+			title:    "credentials only",
+			jason:    `{"credentials": "token"}`,
+			expected: &Authorization{Type: "Bearer", Credentials: "token"},
+		},
+		{
+			title:    "credentialsFile only",
+			jason:    `{"type": "Basic", "credentialsFile": "/tmp/token"}`,
+			expected: &Authorization{Type: "Basic", CredentialsFile: "/tmp/token"},
+		},
+		{
+			title: "credentials and credentialsFile",
+			jason: `{"credentials": "token", "credentialsFile": "/tmp/token"}`,
+			err:   exclusiveErr,
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result := &Authorization{}
+			err := json.Unmarshal([]byte(test.jason), result)
+			if len(test.err) == 0 {
+				assert.NoError(t, err)
+				assert.Equal(t, test.expected, result)
+			} else {
+				assert.EqualError(t, err, test.err)
+			}
+		})
+	}
+}
+
+func TestPublicBasicAuth_Private(t *testing.T) {
+	testSuite := []struct {
+		title    string
+		public   *PublicBasicAuth
+		expected *BasicAuth
+		err      string
+	}{
+		{
+			title: "nil basic auth",
+		},
+		{
+			title:    "password is returned in clear",
+			public:   &PublicBasicAuth{Username: "perses", Password: "secret"},
+			expected: &BasicAuth{Username: "perses", Password: "secret"},
+		},
+		{
+			title:  "missing password",
+			public: &PublicBasicAuth{Username: "perses"},
+			err:    "when using basicAuth, username and password/passwordFile cannot be empty",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result, err := test.public.Private()
+			if len(test.err) == 0 {
+				assert.NoError(t, err)
+				assert.Equal(t, test.expected, result)
+			} else {
+				assert.EqualError(t, err, test.err)
+			}
+		})
+	}
+}
+
+func TestPublicAuthorization_Private(t *testing.T) {
+	testSuite := []struct {
+		title    string
+		public   *PublicAuthorization
+		expected *Authorization
+		err      string
+	}{
+		{
+			title: "nil authorization",
+		},
+		{
+			title:    "credentials are returned in clear, with the default type",
+			public:   &PublicAuthorization{Credentials: "token"},
+			expected: &Authorization{Type: "Bearer", Credentials: "token"},
+		},
+		{
+			title:  "credentials and credentialsFile",
+			public: &PublicAuthorization{Credentials: "token", CredentialsFile: "/tmp/token"},
+			err:    "at most one of authorization credentials & credentialsFile must be configured",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result, err := test.public.Private()
+			if len(test.err) == 0 {
+				assert.NoError(t, err)
+				assert.Equal(t, test.expected, result)
+			} else {
+				assert.EqualError(t, err, test.err)
+			}
+		})
+	}
+}
+
+func TestPublicOAuth_Private(t *testing.T) {
+	testSuite := []struct {
+		title    string
+		public   *PublicOAuth
+		expected *OAuth
+		err      string
+	}{
+		{
+			title: "nil oauth",
+		},
+		{
+			title:    "client ID and secret are returned in clear",
+			public:   &PublicOAuth{ClientID: "perses", ClientSecret: "secret", TokenURL: "https://idp/token"}, //nolint:gosec // G101: test value, not a real credential
+			expected: &OAuth{ClientID: "perses", ClientSecret: "secret", TokenURL: "https://idp/token"},       //nolint:gosec // G101: test value, not a real credential
+		},
+		{
+			title:  "missing token URL",
+			public: &PublicOAuth{ClientID: "perses", ClientSecret: "secret"},
+			err:    "when using oauth, clientID, clientSecret/clientSecretFile, and tokenURL cannot be empty",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result, err := test.public.Private()
+			if len(test.err) == 0 {
+				assert.NoError(t, err)
+				assert.Equal(t, test.expected, result)
+			} else {
+				assert.EqualError(t, err, test.err)
+			}
+		})
+	}
+}
+
+func TestSecretFiles_TrimSpace(t *testing.T) {
+	file := filepath.Join(t.TempDir(), "secret")
+	assert.NoError(t, os.WriteFile(file, []byte("s3cr3t\n"), 0600))
+
+	password, err := (&BasicAuth{Username: "user", PasswordFile: file}).GetPassword()
+	assert.NoError(t, err)
+	assert.Equal(t, "s3cr3t", password)
+
+	credentials, err := (&Authorization{CredentialsFile: file}).GetCredentials()
+	assert.NoError(t, err)
+	assert.Equal(t, "s3cr3t", credentials)
+
+	clientSecret, err := (&OAuth{ClientSecretFile: file}).GetClientSecret()
+	assert.NoError(t, err)
+	assert.Equal(t, "s3cr3t", clientSecret)
 }

@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/crypto"
 	apiinterface "github.com/perses/perses/internal/api/interface"
@@ -101,7 +101,7 @@ type authEndpoint interface {
 	// RefreshOIDCToken refreshes the upstream OIDC/OAuth token using the refresh token stored in the cookies,
 	// and updates the cookies accordingly.
 	// It returns the new access token, or an empty string if the token has not been refreshed.
-	RefreshOIDCToken(ctx echo.Context) string
+	RefreshOIDCToken(ctx *echo.Context) string
 }
 
 type endpoint struct {
@@ -164,7 +164,7 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 	}
 }
 
-func (e *endpoint) refresh(ctx echo.Context) error {
+func (e *endpoint) refresh(ctx *echo.Context) error {
 	// First, let's try to get the refresh token from the Cookie
 	var refreshToken string
 	refreshTokenCookie, err := ctx.Cookie(crypto.CookieKeyRefreshToken)
@@ -206,7 +206,7 @@ func (e *endpoint) refresh(ctx echo.Context) error {
 	})
 }
 
-func (e *endpoint) logout(ctx echo.Context) error {
+func (e *endpoint) logout(ctx *echo.Context) error {
 	jwtHeaderPayloadCookie, signatureCookie := e.jwt.DeleteAccessTokenCookie()
 	ctx.SetCookie(e.jwt.DeleteRefreshTokenCookie())
 	ctx.SetCookie(e.jwt.DeleteOIDCTokenCookie())
@@ -238,7 +238,7 @@ func (e *endpoint) logout(ctx echo.Context) error {
 // getTokenRefresher returns a TokenRefresher that can be used by the proxy endpoint
 // to refresh the upstream OIDC/OAuth token when it expires before the Perses session token.
 func (e *endpoint) getTokenRefresher() crypto.TokenRefresher {
-	return func(ctx echo.Context) string {
+	return func(ctx *echo.Context) string {
 		refreshTokenCookie, err := ctx.Cookie(crypto.CookieKeyRefreshToken)
 		if err != nil || refreshTokenCookie.Value == "" {
 			return ""
@@ -262,7 +262,7 @@ func (e *endpoint) getTokenRefresher() crypto.TokenRefresher {
 // https://www.rfc-editor.org/rfc/rfc8628#section-3.5
 // Otherwise, and only if the error is not an explicit Perses or HTTP error, we send back an opaque InternalError.
 func withOAuthErrorMdw(handler echo.HandlerFunc) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
+	return func(ctx *echo.Context) error {
 		err := handler(ctx)
 		if err == nil {
 			return nil

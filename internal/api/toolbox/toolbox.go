@@ -18,7 +18,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/authorization"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
@@ -29,7 +29,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func ExtractParameters(ctx echo.Context, caseSensitive bool) apiInterface.Parameters {
+func ExtractParameters(ctx *echo.Context, caseSensitive bool) apiInterface.Parameters {
 	project := utils.GetProjectParameter(ctx)
 	name := utils.GetNameParameter(ctx)
 	if !caseSensitive {
@@ -42,7 +42,7 @@ func ExtractParameters(ctx echo.Context, caseSensitive bool) apiInterface.Parame
 	}
 }
 
-func isJSONContentType(ctx echo.Context) bool {
+func isJSONContentType(ctx *echo.Context) bool {
 	contentType := ctx.Request().Header.Get(echo.HeaderContentType)
 	if len(contentType) == 0 {
 		return false
@@ -53,11 +53,11 @@ func isJSONContentType(ctx echo.Context) bool {
 // Toolbox is an interface that defines the different methods that can be used in the different endpoint of the API.
 // This is a way to align the code of the different endpoints.
 type Toolbox[T api.Entity, K databaseModel.Query] interface {
-	Create(ctx echo.Context, entity T) error
-	Update(ctx echo.Context, entity T) error
-	Delete(ctx echo.Context) error
-	Get(ctx echo.Context) error
-	List(ctx echo.Context, q K) error
+	Create(ctx *echo.Context, entity T) error
+	Update(ctx *echo.Context, entity T) error
+	Delete(ctx *echo.Context) error
+	Get(ctx *echo.Context) error
+	List(ctx *echo.Context, q K) error
 }
 
 func New[T api.Entity, K api.Entity, V databaseModel.Query](service apiInterface.Service[T, K, V], authz authorization.Authorization, kind v1.Kind, caseSensitive bool) Toolbox[T, V] {
@@ -79,7 +79,7 @@ type toolbox[T api.Entity, K api.Entity, V databaseModel.Query] struct {
 
 // checkPermissionList will verify only the permission for the List method. As you can see, scope is hardcoded.
 // Use the generic checkPermission for any other purpose
-func (t *toolbox[T, K, V]) checkPermissionList(ctx echo.Context, parameters apiInterface.Parameters, scope *role.Scope) error {
+func (t *toolbox[T, K, V]) checkPermissionList(ctx *echo.Context, parameters apiInterface.Parameters, scope *role.Scope) error {
 	if !t.authz.IsEnabled() {
 		return nil
 	}
@@ -103,7 +103,7 @@ func (t *toolbox[T, K, V]) checkPermissionList(ctx echo.Context, parameters apiI
 	return nil
 }
 
-func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, parameters apiInterface.Parameters, action role.Action) error {
+func (t *toolbox[T, K, V]) checkPermission(ctx *echo.Context, entity api.Entity, parameters apiInterface.Parameters, action role.Action) error {
 	if !t.authz.IsEnabled() {
 		return nil
 	}
@@ -144,7 +144,7 @@ func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, 
 	return nil
 }
 
-func (t *toolbox[T, K, V]) Create(ctx echo.Context, entity T) error {
+func (t *toolbox[T, K, V]) Create(ctx *echo.Context, entity T) error {
 	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
@@ -159,7 +159,7 @@ func (t *toolbox[T, K, V]) Create(ctx echo.Context, entity T) error {
 	return ctx.JSON(http.StatusOK, newEntity)
 }
 
-func (t *toolbox[T, K, V]) Update(ctx echo.Context, entity T) error {
+func (t *toolbox[T, K, V]) Update(ctx *echo.Context, entity T) error {
 	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
@@ -174,7 +174,7 @@ func (t *toolbox[T, K, V]) Update(ctx echo.Context, entity T) error {
 	return ctx.JSON(http.StatusOK, newEntity)
 }
 
-func (t *toolbox[T, K, V]) Delete(ctx echo.Context) error {
+func (t *toolbox[T, K, V]) Delete(ctx *echo.Context) error {
 	parameters := ExtractParameters(ctx, t.caseSensitive)
 	if err := t.checkPermission(ctx, nil, parameters, role.DeleteAction); err != nil {
 		return err
@@ -185,7 +185,7 @@ func (t *toolbox[T, K, V]) Delete(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-func (t *toolbox[T, K, V]) Get(ctx echo.Context) error {
+func (t *toolbox[T, K, V]) Get(ctx *echo.Context) error {
 	parameters := ExtractParameters(ctx, t.caseSensitive)
 	if err := t.checkPermission(ctx, nil, parameters, role.ReadAction); err != nil {
 		return err
@@ -197,7 +197,7 @@ func (t *toolbox[T, K, V]) Get(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, entity)
 }
 
-func (t *toolbox[T, K, V]) List(ctx echo.Context, query V) error {
+func (t *toolbox[T, K, V]) List(ctx *echo.Context, query V) error {
 	if err := ctx.Bind(query); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
@@ -211,7 +211,7 @@ func (t *toolbox[T, K, V]) List(ctx echo.Context, query V) error {
 	return ctx.JSON(http.StatusOK, list)
 }
 
-func (t *toolbox[T, K, V]) bind(ctx echo.Context, entity api.Entity) error {
+func (t *toolbox[T, K, V]) bind(ctx *echo.Context, entity api.Entity) error {
 	if !isJSONContentType(ctx) {
 		return apiInterface.UnsupportedMediaType
 	}
@@ -225,7 +225,7 @@ func (t *toolbox[T, K, V]) bind(ctx echo.Context, entity api.Entity) error {
 	return nil
 }
 
-func (t *toolbox[T, K, V]) validateMetadata(ctx echo.Context, metadata api.Metadata) error {
+func (t *toolbox[T, K, V]) validateMetadata(ctx *echo.Context, metadata api.Metadata) error {
 	switch met := metadata.(type) {
 	case *v1.Metadata:
 		return t.validateMetadataVersusParameter(ctx, utils.ParamName, &met.Name)
@@ -245,7 +245,7 @@ func (t *toolbox[T, K, V]) validateMetadata(ctx echo.Context, metadata api.Metad
 //   - Else
 //   - If the values are not matching return an error => KO
 //   - Else => OK
-func (t *toolbox[T, K, V]) validateMetadataVersusParameter(ctx echo.Context, paramName string, metadataValue *string) error {
+func (t *toolbox[T, K, V]) validateMetadataVersusParameter(ctx *echo.Context, paramName string, metadataValue *string) error {
 	paramValue := ctx.Param(paramName)
 	if !t.caseSensitive {
 		paramValue = strings.ToLower(paramValue)
