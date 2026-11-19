@@ -427,6 +427,11 @@ func TestPluginGenerateRejectsGoSDKNames(t *testing.T) {
 		{pluginSpec.KindDatasource, "smoke_test", `plugin.name "smoke_test" can't be used for the Go SDK, as it names the directory`},
 		{pluginSpec.KindPanel, "status_linux", `plugin.name "status_linux" can't be used for the Go SDK, as it names the directory`},
 		{pluginSpec.KindPanel, "_Hidden", `plugin.name "_hidden" can't be used for the Go SDK, as it names the directory`},
+		{pluginSpec.KindPanel, "Init", `"init" isn't a valid Go package name`},
+		{pluginSpec.KindAnnotation, "Docu Mentation", `"documentation" isn't a valid Go package name`},
+		{pluginSpec.KindPanel, "Internal", `plugin.name "internal" can't be used for the Go SDK, as go treats a directory`},
+		{pluginSpec.KindDatasource, "Testdata", `plugin.name "testdata" can't be used for the Go SDK, as go treats a directory`},
+		{pluginSpec.KindPanel, "Aux", `plugin.name "aux" can't be used for the Go SDK, as go treats a directory`},
 	} {
 		t.Run(fmt.Sprintf("%s %s", tc.pluginType, tc.name), func(t *testing.T) {
 			dir := t.TempDir()

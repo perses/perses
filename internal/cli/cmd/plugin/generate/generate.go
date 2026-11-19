@@ -451,14 +451,19 @@ var goSDKDeclarations = map[pluginSpec.Kind][]string{
 // and a suffix like _test, _linux or _amd64 makes a test or a platform-specific file.
 var goSDKNamePattern = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
 
+// goSDKReservedNames are kebab-cased plugin names that match goSDKNamePattern, but that go treats specially as the
+// directory of a package: it ignores a testdata directory, and only the parent directory can import an internal one.
+var goSDKReservedNames = []string{"internal", "testdata"}
+
 // validateGoSDKName checks that the Go SDK generated for the plugin compiles: the package name derived from the
 // plugin name must be a valid one, and the constructor named after the plugin must not collide with the other
 // declarations of the template.
 func validateGoSDKName(pluginType pluginSpec.Kind, pluginName, pluginPascalName string) error {
 	pkg := GetGoPackageName(pluginName)
-	if !token.IsIdentifier(pkg) || pkg == "main" {
+	// go can't import a main package, can't import an init one without an alias, and ignores a documentation one.
+	if !token.IsIdentifier(pkg) || pkg == "main" || pkg == "init" || pkg == "documentation" {
 		return fmt.Errorf("plugin.name %q can't be used for the Go SDK, as %q isn't a valid Go package name: "+
-			"use a name that starts with a letter and isn't a Go keyword or main", pluginName, pkg)
+			"use a name that starts with a letter and isn't a Go keyword, main, init or documentation", pluginName, pkg)
 	}
 	if !token.IsIdentifier(pluginPascalName) {
 		return fmt.Errorf("plugin.name %q can't be used for the Go SDK, as %q isn't a valid Go identifier", pluginName, pluginPascalName)
@@ -466,6 +471,11 @@ func validateGoSDKName(pluginType pluginSpec.Kind, pluginName, pluginPascalName 
 	if !goSDKNamePattern.MatchString(pluginName) {
 		return fmt.Errorf("plugin.name %q can't be used for the Go SDK, as it names the directory and the file of its "+
 			"package: use ASCII letters, digits, spaces or dashes", pluginName)
+	}
+	// CheckImportPath also rejects the names reserved on Windows (aux, con, nul...), as go does in an import path.
+	if slices.Contains(goSDKReservedNames, pluginName) || gomodule.CheckImportPath(pluginName) != nil {
+		return fmt.Errorf("plugin.name %q can't be used for the Go SDK, as go treats a directory with this name "+
+			"specially: use another name", pluginName)
 	}
 	if slices.Contains(goSDKDeclarations[pluginType], pluginPascalName) {
 		return fmt.Errorf("plugin.name %q can't be used for the %s plugin type, as its Go SDK already declares %s: use another name",
