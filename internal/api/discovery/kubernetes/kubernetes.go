@@ -120,10 +120,7 @@ func (d *discovery) Execute(ctx context.Context, _ context.CancelFunc) error {
 	for _, r := range resources {
 		entities = append(entities, r.datasource)
 	}
-	if err := d.svc.Apply(ctx, entities); err != nil {
-		return err
-	}
-	return nil
+	return d.svc.Apply(ctx, entities)
 }
 
 // setDefaultDatasource marks the first discovered datasource whose labels and
