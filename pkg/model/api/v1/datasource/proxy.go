@@ -126,11 +126,12 @@ func (c *configFinder) findInMap(v reflect.Value) {
 }
 
 func (c *configFinder) unmarshalConfig(spec reflect.Value) {
-	if !spec.IsValid() {
+	// A missing or null spec leaves no config to return, while the callers expect one when the proxy kind is found.
+	spec = getNextElem(spec)
+	if !spec.IsValid() || (spec.Kind() == reflect.Pointer && spec.IsNil()) {
+		c.err = fmt.Errorf("the spec of the proxy %q is missing", c.foundKind)
 		return
 	}
-
-	spec = getNextElem(spec)
 	var data []byte
 	data, c.err = json.Marshal(spec.Interface())
 	if c.err != nil {

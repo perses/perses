@@ -16,7 +16,6 @@ package globaldatasource
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 
 	"github.com/brunoga/deep"
 	"github.com/labstack/echo/v5"
@@ -134,10 +133,7 @@ func (s *service) checkSecretPermission(ctx *echo.Context, datasource *v1.Global
 
 	hasSecret, proxyErr := datasourceV1.HasSecret(datasource.Spec.Plugin.Spec)
 	if proxyErr != nil {
-		logrus.WithError(proxyErr).WithFields(map[string]any{
-			"datasource": datasource.Metadata.Name,
-		}).Error("unable to build or find the config in the datasource spec")
-		return echo.NewHTTPError(http.StatusBadGateway, "unable to build or find the config")
+		return apiInterface.HandleBadRequestError(fmt.Sprintf("invalid proxy in the datasource spec: %s", proxyErr))
 	}
 
 	if !hasSecret {
