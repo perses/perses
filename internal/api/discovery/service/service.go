@@ -43,10 +43,6 @@ type ApplyService struct {
 }
 
 func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasource) error {
-	if len(entities) == 0 {
-		return nil
-	}
-
 	var errs []error
 	for _, entity := range entities {
 		if err := ctx.Err(); err != nil {

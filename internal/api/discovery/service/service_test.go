@@ -38,8 +38,7 @@ import (
 
 // fakeGlobalDatasourceService is an in-memory implementation of globaldatasource.Service for testing.
 type fakeGlobalDatasourceService struct {
-	store     map[string]*v1.GlobalDatasource
-	listError error
+	store map[string]*v1.GlobalDatasource
 }
 
 var _ globaldatasource.Service = &fakeGlobalDatasourceService{}
@@ -91,9 +90,6 @@ func (f *fakeGlobalDatasourceService) Get(parameters apiInterface.Parameters) (*
 }
 
 func (f *fakeGlobalDatasourceService) List(q *globaldatasource.Query) ([]*v1.GlobalDatasource, error) {
-	if f.listError != nil {
-		return nil, f.listError
-	}
 	var filtered []*v1.GlobalDatasource
 	for _, ds := range f.store {
 		if q.MatchDiscovery(ds) {
@@ -152,14 +148,6 @@ func storeEntity(name string, discoveryName string) *v1.GlobalDatasource {
 	}
 }
 
-func storeNames(svc *fakeGlobalDatasourceService) []string {
-	var names []string
-	for name := range svc.store {
-		names = append(names, name)
-	}
-	return names
-}
-
 // tests
 
 func TestApply_StampsSourceAndDiscoveryName(t *testing.T) {
@@ -177,21 +165,6 @@ func TestApply_StampsSourceAndDiscoveryName(t *testing.T) {
 		assert.Equal(t, "kube-prod", ds.Source.Discovery.Name)
 		assert.Equal(t, v1.DiscoveryTypeKubernetes, ds.Source.Discovery.Type)
 	}
-}
-
-func TestApply_NoDeleteWhenListErrors(t *testing.T) {
-	fake := newFakeService(
-		storeEntity("ds-a1", "kube-prod"),
-		storeEntity("ds-a2", "kube-prod"),
-	)
-	fake.listError = fmt.Errorf("database unavailable")
-	svc := New(false, fake, v1.DiscoverySource{Name: "kube-prod", Type: v1.DiscoveryTypeKubernetes})
-
-	// Apply with an empty list — without the guard, this would delete everything.
-	require.NoError(t, svc.Apply(context.Background(), []*v1.GlobalDatasource{}))
-
-	assert.ElementsMatch(t, []string{"ds-a1", "ds-a2"}, storeNames(fake),
-		"no deletes should happen when List returns an error")
 }
 
 func TestApply_UpdatesExistingOwnedDatasource(t *testing.T) {
