@@ -195,7 +195,7 @@ URL query parameters:
 - default = `<boolean>` : should be used to filter the list of datasource to only have the default one. You should have
   one default datasource per kind
 - name = `<string>` : should be used to filter the list of datasource based on the prefix name.
-- discovery_name = `<string>` : filter to only return datasources managed by the named discovery configuration. Datasources created through the API, provisioned, or discovered before the upgrade have no discovery name and are excluded.
+- discovery_name = `<string>` : filter to only return datasources managed by the named discovery configuration. Datasources without a `source` (see below) are excluded.
 - discovery_type = `<string>` : filter by discovery mechanism type. Accepted values: `kubernetes`, `http`.
 
 Example:
