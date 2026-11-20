@@ -361,7 +361,8 @@ func TestPluginGenerateSeveralPluginsOfTheSameType(t *testing.T) {
 
 			barrel, err := os.ReadFile(filepath.Join(dir, filepath.FromSlash(typeFolder), "index.ts")) //nolint:gosec // the file is inside t.TempDir
 			require.NoError(t, err)
-			assert.Equal(t, expectedBarrel.String(), string(barrel))
+			// The templates are checked out with CRLF line endings on Windows.
+			assert.Equal(t, expectedBarrel.String(), strings.ReplaceAll(string(barrel), "\r\n", "\n"))
 		})
 	}
 }
