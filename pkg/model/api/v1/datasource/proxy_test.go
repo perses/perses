@@ -45,6 +45,11 @@ func TestValidateAndExtract(t *testing.T) {
 		Proxy pluginWithSpec `json:"proxy"`
 	}
 
+	type pluginWithSpecPointer struct {
+		Kind string    `json:"kind"`
+		Spec *testSpec `json:"spec"`
+	}
+
 	validSpec := testSpec{URL: "https://test.com"}
 	validSQLSpec := testSQLSpec{Driver: "postgres", Host: "test.com", Database: "test", Postgres: &sql.PostgresConfig{SSLMode: "disable"}}
 	validSpecMap := map[string]any{"url": "https://test.com"}
@@ -103,6 +108,24 @@ func TestValidateAndExtract(t *testing.T) {
 			expectedKind:   "httpproxy",
 			expectedConfig: validHTTPConfig,
 		},
+		{
+			name:          "map with a null spec",
+			pluginSpec:    map[string]any{"proxy": map[string]any{"kind": "HTTPProxy", "spec": nil}},
+			expectError:   true,
+			expectedError: `the spec of the proxy "httpproxy" is missing`,
+		},
+		{
+			name:          "map without spec",
+			pluginSpec:    map[string]any{"proxy": map[string]any{"kind": "SQLProxy"}},
+			expectError:   true,
+			expectedError: `the spec of the proxy "sqlproxy" is missing`,
+		},
+		{
+			name:          "struct with a nil spec",
+			pluginSpec:    pluginWithSpecPointer{Kind: "HTTPProxy"},
+			expectError:   true,
+			expectedError: `the spec of the proxy "httpproxy" is missing`,
+		},
 	}
 
 	for _, tc := range testCases {
@@ -121,6 +144,29 @@ func TestValidateAndExtract(t *testing.T) {
 					assert.Equal(t, tc.expectedConfig, cfg)
 				}
 			}
+		})
+	}
+}
+
+func TestHasSecretWithoutProxySpec(t *testing.T) {
+	testCases := []struct {
+		name       string
+		pluginSpec any
+	}{
+		{
+			name:       "null spec",
+			pluginSpec: map[string]any{"proxy": map[string]any{"kind": "HTTPProxy", "spec": nil}},
+		},
+		{
+			name:       "missing spec",
+			pluginSpec: map[string]any{"proxy": map[string]any{"kind": "HTTPProxy"}},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			hasSecret, err := HasSecret(tc.pluginSpec)
+			assert.Error(t, err)
+			assert.False(t, hasSecret)
 		})
 	}
 }
