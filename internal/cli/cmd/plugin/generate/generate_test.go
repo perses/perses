@@ -15,6 +15,7 @@ package generate
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -315,5 +316,60 @@ func TestPluginGenerateEveryPluginType(t *testing.T) {
 			require.Len(t, npmPackage.Perses.Plugins, 1)
 			assert.Equal(t, pluginType, npmPackage.Perses.Plugins[0].Kind)
 		})
+	}
+}
+
+func TestPluginGenerateSeveralPluginsOfTheSameType(t *testing.T) {
+	for _, pluginType := range availablePluginTypes {
+		t.Run(string(pluginType), func(t *testing.T) {
+			dir := t.TempDir()
+			pluginNames := []string{"MyFirst" + string(pluginType), "MySecond" + string(pluginType)}
+
+			cmdTest.ExecuteSuiteTest(t, NewCMD, []cmdTest.Suite{
+				{
+					Title: "Build module with a first " + string(pluginType) + " plugin",
+					Args: []string{
+						"--module.name", "MyPluginModule",
+						"--module.org", "MyPluginOrg",
+						"--plugin.name", pluginNames[0],
+						"--plugin.type", string(pluginType),
+						dir,
+					},
+					ExpectedRegexMessage: `plugin ` + pluginNames[0] + ` generated successfully`,
+				},
+				{
+					Title: "Build a second " + string(pluginType) + " plugin in the module",
+					Args: []string{
+						"--plugin.name", pluginNames[1],
+						"--plugin.type", string(pluginType),
+						dir,
+					},
+					ExpectedRegexMessage: `plugin ` + pluginNames[1] + ` generated successfully`,
+				},
+			})
+
+			// The index.ts of the plugin type folder must export the folder of every plugin.
+			var expectedBarrel strings.Builder
+			var typeFolder string
+			for _, pluginName := range pluginNames {
+				pluginPath, err := getPluginPath(pluginName, pluginType)
+				require.NoError(t, err)
+				assert.DirExists(t, filepath.Join(dir, filepath.FromSlash(pluginPath)))
+				typeFolder = path.Dir(pluginPath)
+				expectedBarrel.WriteString("export * from './" + path.Base(pluginPath) + "';\n")
+			}
+
+			barrel, err := os.ReadFile(filepath.Join(dir, filepath.FromSlash(typeFolder), "index.ts")) //nolint:gosec // the file is inside t.TempDir
+			require.NoError(t, err)
+			// The templates are checked out with CRLF line endings on Windows.
+			assert.Equal(t, expectedBarrel.String(), strings.ReplaceAll(string(barrel), "\r\n", "\n"))
+		})
+	}
+}
+
+func TestPluginGenerateTypeFlagListsEveryPluginType(t *testing.T) {
+	usage := NewCMD().Flags().Lookup("plugin.type").Usage
+	for _, pluginType := range availablePluginTypes {
+		assert.Contains(t, usage, "'"+string(pluginType)+"'")
 	}
 }

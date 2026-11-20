@@ -61,12 +61,15 @@ type ExposedModule struct {
 
 type GeneratedPlugin struct {
 	module.Plugin
+	// PluginName is the kebab case name of the plugin, used as the name of its folder.
+	PluginName       string
 	PluginPascalName string
 }
 
 func toGeneratedPlugin(p module.Plugin) GeneratedPlugin {
 	return GeneratedPlugin{
 		Plugin:           p,
+		PluginName:       GetKebabCase(p.Spec.Name),
 		PluginPascalName: GetPascalCase(p.Spec.Name),
 	}
 }
@@ -469,7 +472,7 @@ A single plugin can be generated at a time.
 	cmd.Flags().StringVar(&o.pluginModuleOrg, "module.org", "", "The organization name on which the plugin module will be created, useful for publising the plugin. This is required only when the module does not exist, ignored otherwise.")
 	cmd.Flags().StringVar(&o.pluginName, "plugin.name", "", "The plugin name. A pascal case and kebab case variants will be generated inside the templates. If a plugin with the same name already exists, it will be overwritten.")
 	cmd.Flags().StringVar(&o.pluginDisplayName, "plugin.display-name", "", "The more human name of the plugin to be used in the UI. If not provided, the plugin name will be used.")
-	cmd.Flags().StringVar(&o.rawPluginType, "plugin.type", "", "The plugin type can be one of 'Datasource', 'TimeSeriesQuery', 'Variable', 'Panel', or 'Explore'.")
+	cmd.Flags().StringVar(&o.rawPluginType, "plugin.type", "", "The plugin type can be one of 'Datasource', 'TimeSeriesQuery', 'Variable', 'Annotation', 'Panel', or 'Explore'.")
 
 	return cmd
 }
