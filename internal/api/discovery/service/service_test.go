@@ -20,12 +20,18 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v5"
+	"github.com/perses/perses/internal/api/authorization"
+	databaseFile "github.com/perses/perses/internal/api/database/file"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
+	globaldatasourceImpl "github.com/perses/perses/internal/api/impl/v1/globaldatasource"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	"github.com/perses/perses/internal/api/netguard"
 	"github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceSpec "github.com/perses/spec/go/datasource"
+	"github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -46,15 +52,24 @@ func newFakeService(initial ...*v1.GlobalDatasource) *fakeGlobalDatasourceServic
 	return &fakeGlobalDatasourceService{store: store}
 }
 
+// Create mirrors the real service: the server-managed Source is stripped, so a
+// test fails loudly if Apply wrongly calls Create instead of CreateForDiscovery.
 func (f *fakeGlobalDatasourceService) Create(_ *echo.Context, entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
 	if _, exists := f.store[entity.Metadata.Name]; exists {
 		return nil, &databaseModel.Error{Code: databaseModel.ErrorCodeConflict, Key: entity.Metadata.Name}
 	}
+	entity.Source = nil
 	f.store[entity.Metadata.Name] = entity
 	return entity, nil
 }
 
+// Update mirrors the real service: the Source is preserved from the stored
+// entity, so a test fails loudly if Apply wrongly calls Update instead of
+// UpdateForDiscovery (the discovery stamp would not change).
 func (f *fakeGlobalDatasourceService) Update(_ *echo.Context, entity *v1.GlobalDatasource, _ apiInterface.Parameters) (*v1.GlobalDatasource, error) {
+	if old, exists := f.store[entity.Metadata.Name]; exists {
+		entity.Source = old.Source
+	}
 	f.store[entity.Metadata.Name] = entity
 	return entity, nil
 }
@@ -242,4 +257,68 @@ func TestApplyService_PreservesDefault(t *testing.T) {
 	assert.False(t, ds.Spec.Default, "discovered value wins; stored Default must not be preserved")
 	require.NotNil(t, ds.Source.GetDiscovery())
 	assert.Equal(t, "kube-prod", ds.Source.Discovery.Name)
+}
+
+// newRealGlobalDatasourceService wires the real globaldatasource service backed
+// by a temporary file-based database, so Apply is exercised end-to-end rather
+// than against a fake. Schema validation is skipped (nil schema) to avoid a
+// dependency on loaded plugins.
+func newRealGlobalDatasourceService(t *testing.T) globaldatasource.Service {
+	t.Helper()
+	fileDAO := &databaseFile.DAO{
+		Folder:    t.TempDir(),
+		Extension: config.JSONExtension,
+	}
+	dao := globaldatasourceImpl.NewDAO(fileDAO)
+	authz, err := authorization.New(nil, nil, nil, nil, nil, config.Config{})
+	require.NoError(t, err)
+	guard := netguard.New(config.DatasourceProxyConfig{})
+	return globaldatasourceImpl.NewService(config.DatasourceConfig{}, dao, nil, authz, guard)
+}
+
+func realEntity(name string) *v1.GlobalDatasource {
+	return &v1.GlobalDatasource{
+		Kind:     v1.KindGlobalDatasource,
+		Metadata: v1.Metadata{Name: name},
+		Spec: datasourceSpec.Spec{
+			Plugin: plugin.Plugin{Kind: "PrometheusDatasource"},
+		},
+	}
+}
+
+// TestApply_RealService_StampsSource runs Apply against the real service. If
+// Apply were to call the public Create (which strips Source) instead of
+// CreateForDiscovery, the persisted datasource would lose its discovery stamp
+// and this test would fail.
+func TestApply_RealService_StampsSource(t *testing.T) {
+	realSvc := newRealGlobalDatasourceService(t)
+	svc := New(false, realSvc, v1.DiscoverySource{Name: "kube-prod", Type: v1.DiscoveryTypeKubernetes})
+
+	require.NoError(t, svc.Apply(context.Background(), []*v1.GlobalDatasource{realEntity("ds-a1")}))
+
+	got, err := realSvc.Get(apiInterface.Parameters{Name: "ds-a1"})
+	require.NoError(t, err)
+	require.NotNil(t, got.Source.GetDiscovery(), "Apply must persist the discovery source via CreateForDiscovery")
+	assert.Equal(t, "kube-prod", got.Source.Discovery.Name)
+	assert.Equal(t, v1.DiscoveryTypeKubernetes, got.Source.Discovery.Type)
+}
+
+// TestApply_RealService_SwitchDiscoveryType runs Apply twice against the real
+// service: first a kubernetes discovery stamps the datasource, then an http
+// discovery of the same name re-applies it. The stored discovery type must
+// follow the latest owning discovery.
+func TestApply_RealService_SwitchDiscoveryType(t *testing.T) {
+	realSvc := newRealGlobalDatasourceService(t)
+
+	kubeSvc := New(false, realSvc, v1.DiscoverySource{Name: "sd", Type: v1.DiscoveryTypeKubernetes})
+	require.NoError(t, kubeSvc.Apply(context.Background(), []*v1.GlobalDatasource{realEntity("ds-a1")}))
+
+	httpSvc := New(false, realSvc, v1.DiscoverySource{Name: "sd", Type: v1.DiscoveryTypeHTTP})
+	require.NoError(t, httpSvc.Apply(context.Background(), []*v1.GlobalDatasource{realEntity("ds-a1")}))
+
+	got, err := realSvc.Get(apiInterface.Parameters{Name: "ds-a1"})
+	require.NoError(t, err)
+	require.NotNil(t, got.Source.GetDiscovery())
+	assert.Equal(t, "sd", got.Source.Discovery.Name)
+	assert.Equal(t, v1.DiscoveryTypeHTTP, got.Source.Discovery.Type, "re-apply must update the stored discovery type via UpdateForDiscovery")
 }

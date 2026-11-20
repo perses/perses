@@ -164,11 +164,10 @@ func TestUpdate_PreservesSource(t *testing.T) {
 	assert.Equal(t, "kube-prod", got.Source.Discovery.Name)
 }
 
-func newFilterDS(name string, discoveryName string, discoveryType v1.DiscoveryType) *v1.GlobalDatasource {
-	ds := &v1.GlobalDatasource{
-		Kind:     v1.KindGlobalDatasource,
-		Metadata: v1.Metadata{Name: name},
-	}
+// filterDS builds a datasource with an optional discovery source for the
+// List filtering test below.
+func filterDS(name string, discoveryName string, discoveryType v1.DiscoveryType) *v1.GlobalDatasource {
+	ds := directURLEntity(name)
 	if discoveryName != "" || discoveryType != "" {
 		ds.Source = &v1.Source{
 			Discovery: &v1.DiscoverySource{
@@ -180,14 +179,25 @@ func newFilterDS(name string, discoveryName string, discoveryType v1.DiscoveryTy
 	return ds
 }
 
-func TestFilterByDiscovery(t *testing.T) {
-	all := []*v1.GlobalDatasource{
-		newFilterDS("ds-kube-prod-1", "kube-prod", v1.DiscoveryTypeKubernetes),
-		newFilterDS("ds-kube-prod-2", "kube-prod", v1.DiscoveryTypeKubernetes),
-		newFilterDS("ds-kube-staging", "kube-staging", v1.DiscoveryTypeKubernetes),
-		newFilterDS("ds-http-prod", "http-prod", v1.DiscoveryTypeHTTP),
-		newFilterDS("ds-manual", "", ""),
+// TestList_FilterByDiscovery stores datasources through the real service and
+// exercises the discovery filters via List, so it covers the full store →
+// retrieve → filter path rather than the MatchDiscovery matcher in isolation.
+func TestList_FilterByDiscovery(t *testing.T) {
+	svc := newRealService(t)
+
+	seed := []*v1.GlobalDatasource{
+		filterDS("ds-kube-prod-1", "kube-prod", v1.DiscoveryTypeKubernetes),
+		filterDS("ds-kube-prod-2", "kube-prod", v1.DiscoveryTypeKubernetes),
+		filterDS("ds-kube-staging", "kube-staging", v1.DiscoveryTypeKubernetes),
+		filterDS("ds-http-prod", "http-prod", v1.DiscoveryTypeHTTP),
 	}
+	for _, ds := range seed {
+		_, err := svc.CreateForDiscovery(ds)
+		require.NoError(t, err)
+	}
+	// A manually-created datasource (no discovery source) via the API path.
+	_, err := svc.Create(nil, directURLEntity("ds-manual"))
+	require.NoError(t, err)
 
 	tests := []struct {
 		name          string
@@ -233,14 +243,11 @@ func TestFilterByDiscovery(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var names []string
-			for _, ds := range all {
-				if tt.query.MatchDiscovery(ds) {
-					names = append(names, ds.Metadata.Name)
-				}
-			}
-			if names == nil {
-				names = []string{}
+			list, err := svc.List(&tt.query)
+			require.NoError(t, err)
+			names := make([]string, 0, len(list))
+			for _, ds := range list {
+				names = append(names, ds.Metadata.Name)
 			}
 			assert.ElementsMatch(t, tt.expectedNames, names)
 		})
