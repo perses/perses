@@ -239,10 +239,11 @@ func TestApply_AdoptsNilSourceDatasource(t *testing.T) {
 	assert.Equal(t, "kube-prod", ds.Source.Discovery.Name)
 }
 
-func TestApplyService_PreservesDefault(t *testing.T) {
-	// Stored datasource is marked as default; the newly-discovered entity does NOT
-	// have Default set. Apply passes the discovered entity through to UpdateForDiscovery,
-	// so the discovered value wins (Default becomes false).
+func TestApply_DiscoveredDefaultWins(t *testing.T) {
+	// Update path: a stored datasource is marked as default, but the newly-discovered
+	// entity is not. Discovery owns Default (the Kubernetes discovery recomputes it from
+	// default.labels/annotations every cycle), so the discovered value must win and the
+	// stored Default=true must not be preserved.
 	existing := storeEntity("ds-a1", "kube-prod")
 	existing.Spec.Default = true
 	fake := newFakeService(existing)
@@ -257,6 +258,29 @@ func TestApplyService_PreservesDefault(t *testing.T) {
 	assert.False(t, ds.Spec.Default, "discovered value wins; stored Default must not be preserved")
 	require.NotNil(t, ds.Source.GetDiscovery())
 	assert.Equal(t, "kube-prod", ds.Source.Discovery.Name)
+}
+
+func TestApplyService_PreservesDefault(t *testing.T) {
+	// Create path: a fresh discovery cycle with three new datasources, one of which the
+	// Kubernetes discovery marked as default. Apply creates them all, and Default must
+	// survive through to the stored entity unchanged — the Kubernetes discovery relies on
+	// spec.default reaching the store intact when it creates a new default datasource.
+	fake := newFakeService()
+	svc := New(false, fake, v1.DiscoverySource{Name: "kube-prod", Type: v1.DiscoveryTypeKubernetes})
+
+	entities := []*v1.GlobalDatasource{
+		makeEntity("ds-a1"),
+		makeEntity("ds-a2"),
+		makeEntity("ds-a3"),
+	}
+	entities[1].Spec.Default = true
+	require.NoError(t, svc.Apply(context.Background(), entities))
+
+	for _, want := range entities {
+		ds := fake.store[want.Metadata.Name]
+		require.NotNil(t, ds, "datasource %q should have been created", want.Metadata.Name)
+		assert.Equal(t, want.Spec.Default, ds.Spec.Default, "Default must survive Apply unchanged for %q", want.Metadata.Name)
+	}
 }
 
 // newRealGlobalDatasourceService wires the real globaldatasource service backed
