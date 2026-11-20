@@ -27,9 +27,10 @@ import (
 
 func New(caseSensitive bool, svc globaldatasource.Service, discoverySource v1.DiscoverySource) *ApplyService {
 	return &ApplyService{
-		caseSensitive:   caseSensitive,
-		svc:             svc,
-		discoverySource: discoverySource,
+		caseSensitive:    caseSensitive,
+		svc:              svc,
+		discoverySource:  discoverySource,
+		warnedCollisions: make(map[string]struct{}),
 	}
 }
 
@@ -39,7 +40,7 @@ type ApplyService struct {
 	discoverySource v1.DiscoverySource
 	// warnedCollisions tracks datasource names for which a one-time ownership
 	// collision warning has already been logged, to avoid repeating it every cycle.
-	warnedCollisions []string
+	warnedCollisions map[string]struct{}
 }
 
 func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasource) error {
@@ -76,9 +77,9 @@ func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasourc
 		if existingDiscovery != nil {
 			// Another discovery owns this datasource — skip, and warn once.
 			if existingDiscovery.Name != a.discoverySource.Name {
-				if !containsName(a.warnedCollisions, entity.Metadata.Name) {
-					logrus.Warnf("globaldatasource %q is owned by discovery %q (%s); skipping", entity.Metadata.Name, existingDiscovery.Name, existingDiscovery.Type)
-					a.warnedCollisions = append(a.warnedCollisions, entity.Metadata.Name)
+				if _, warned := a.warnedCollisions[entity.Metadata.Name]; !warned {
+					logrus.Warnf("discovery %q: globaldatasource %q is owned by discovery %q (%s); skipping", a.discoverySource.Name, entity.Metadata.Name, existingDiscovery.Name, existingDiscovery.Type)
+					a.warnedCollisions[entity.Metadata.Name] = struct{}{}
 				}
 				continue
 			}
@@ -96,13 +97,4 @@ func (a *ApplyService) Apply(ctx context.Context, entities []*v1.GlobalDatasourc
 	}
 
 	return errors.Join(errs...)
-}
-
-func containsName(names []string, name string) bool {
-	for _, n := range names {
-		if n == name {
-			return true
-		}
-	}
-	return false
 }
