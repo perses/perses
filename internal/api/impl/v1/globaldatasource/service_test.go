@@ -14,7 +14,6 @@
 package globaldatasource_test
 
 import (
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -50,10 +49,10 @@ func newRealService(t *testing.T) globaldatasourceIface.Service {
 	return globaldatasourceImpl.NewService(config.DatasourceConfig{}, dao, nil, authz, guard)
 }
 
-// directURLEntity builds a minimal GlobalDatasource with a valid plugin kind.
+// newEntity builds a minimal GlobalDatasource with a valid plugin kind.
 // Schema validation is skipped (nil schema in newRealService), so any non-empty
 // Kind string satisfies plugin.Plugin.validate() without requiring a real plugin.
-func directURLEntity(name string) *v1.GlobalDatasource {
+func newEntity(name string) *v1.GlobalDatasource {
 	return &v1.GlobalDatasource{
 		Kind:     v1.KindGlobalDatasource,
 		Metadata: v1.Metadata{Name: name},
@@ -68,7 +67,7 @@ func directURLEntity(name string) *v1.GlobalDatasource {
 func TestCreateForDiscovery_StampsSource(t *testing.T) {
 	svc := newRealService(t)
 
-	entity := directURLEntity("ds-prod")
+	entity := newEntity("ds-prod")
 	entity.Source = &v1.Source{
 		Discovery: &v1.DiscoverySource{
 			Name: "kube-prod",
@@ -95,11 +94,11 @@ func TestUpdateForDiscovery_StampsSource(t *testing.T) {
 	svc := newRealService(t)
 
 	// Pre-create without source (simulates a manually-created datasource).
-	_, err := svc.Create(nil, directURLEntity("ds-prod"))
+	_, err := svc.Create(nil, newEntity("ds-prod"))
 	require.NoError(t, err)
 
 	// Discovery now claims it via UpdateForDiscovery.
-	updated := directURLEntity("ds-prod")
+	updated := newEntity("ds-prod")
 	updated.Source = &v1.Source{
 		Discovery: &v1.DiscoverySource{
 			Name: "kube-prod",
@@ -120,7 +119,7 @@ func TestUpdateForDiscovery_StampsSource(t *testing.T) {
 func TestCreate_StripsSource(t *testing.T) {
 	svc := newRealService(t)
 
-	entity := directURLEntity("ds-manual")
+	entity := newEntity("ds-manual")
 	entity.Source = &v1.Source{
 		Discovery: &v1.DiscoverySource{
 			Name: "kube-prod",
@@ -143,7 +142,7 @@ func TestUpdate_PreservesSource(t *testing.T) {
 	svc := newRealService(t)
 
 	// Create with a stamped source via the discovery path.
-	entity := directURLEntity("ds-prod")
+	entity := newEntity("ds-prod")
 	entity.Source = &v1.Source{
 		Discovery: &v1.DiscoverySource{
 			Name: "kube-prod",
@@ -154,7 +153,7 @@ func TestUpdate_PreservesSource(t *testing.T) {
 	require.NoError(t, err)
 
 	// Now update via the regular (API) path — Source should be copied from the stored entity.
-	patch := directURLEntity("ds-prod") // no Source field
+	patch := newEntity("ds-prod") // no Source field
 	_, err = svc.Update(nil, patch, apiInterface.Parameters{Name: "ds-prod"})
 	require.NoError(t, err)
 
@@ -167,7 +166,7 @@ func TestUpdate_PreservesSource(t *testing.T) {
 // filterDS builds a datasource with an optional discovery source for the
 // List filtering test below.
 func filterDS(name string, discoveryName string, discoveryType v1.DiscoveryType) *v1.GlobalDatasource {
-	ds := directURLEntity(name)
+	ds := newEntity(name)
 	if discoveryName != "" || discoveryType != "" {
 		ds.Source = &v1.Source{
 			Discovery: &v1.DiscoverySource{
@@ -196,7 +195,7 @@ func TestList_FilterByDiscovery(t *testing.T) {
 		require.NoError(t, err)
 	}
 	// A manually-created datasource (no discovery source) via the API path.
-	_, err := svc.Create(nil, directURLEntity("ds-manual"))
+	_, err := svc.Create(nil, newEntity("ds-manual"))
 	require.NoError(t, err)
 
 	tests := []struct {
@@ -271,9 +270,8 @@ func TestList_UnknownDiscoveryType(t *testing.T) {
 		List(*echo.Context) error
 	})
 	herr := listHandler.List(ctx)
-	require.Error(t, herr)
-	assert.True(t, errors.Is(herr, apiInterface.BadRequestError), "expected BadRequestError, got %T: %v", herr, herr)
+	require.ErrorIs(t, herr, apiInterface.BadRequestError)
 	var httpErr *echo.HTTPError
-	require.True(t, errors.As(apiInterface.HandleError(herr), &httpErr))
+	require.ErrorAs(t, apiInterface.HandleError(herr), &httpErr)
 	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
 }
