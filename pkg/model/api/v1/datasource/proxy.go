@@ -155,10 +155,7 @@ func getKindFromStruct(v reflect.Value) (string, bool) {
 		return strings.ToLower(name) == ProxyKindField
 	})
 	if field.IsValid() && field.CanInterface() && field.Kind() == reflect.String {
-		kindValue := strings.ToLower(field.String())
-		if kindValue == http.ProxyKindName || kindValue == sql.ProxyKindName {
-			return kindValue, true
-		}
+		return matchProxyKind(field.String())
 	}
 	return "", false
 }
@@ -170,14 +167,25 @@ func getKindFromMap(v reflect.Value) (string, bool) {
 			value := v.MapIndex(key)
 			value = getNextElem(value)
 			if value.Kind() == reflect.String {
-				kindValue := strings.ToLower(value.String())
-				if kindValue == http.ProxyKindName || kindValue == sql.ProxyKindName {
-					return kindValue, true
+				if kind, ok := matchProxyKind(value.String()); ok {
+					return kind, true
 				}
 			}
 		}
 	}
 	return "", false
+}
+
+// matchProxyKind returns the name of the proxy kind matching the given kind, ignoring the case.
+func matchProxyKind(kind string) (string, bool) {
+	switch {
+	case strings.EqualFold(kind, http.ProxyKindName):
+		return http.ProxyKindName, true
+	case strings.EqualFold(kind, sql.ProxyKindName):
+		return sql.ProxyKindName, true
+	default:
+		return "", false
+	}
 }
 
 // getConfigSpecInStruct extracts the 'spec' field from a struct.
