@@ -73,6 +73,9 @@ type Query struct {
 	Query   string `query:"query"`
 }
 
+// perfectMatchScore is the score of a perfect match. No other match can get a higher score.
+const perfectMatchScore uint64 = math.MaxUint64
+
 type matcher struct {
 	caseSensitive bool
 	// List of characters that should be ignored in the pattern or in the word used for matching
@@ -106,7 +109,7 @@ func (m *matcher) match(query string, txt string) (FieldMatch, bool) {
 				},
 			},
 			// A perfect match get the maximum score, so it will be the first result in the list of results.
-			Score: math.MaxUint64,
+			Score: perfectMatchScore,
 		}, true
 	}
 	if len(localQuery) == 0 {
