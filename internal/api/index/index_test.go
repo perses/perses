@@ -17,6 +17,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
+	"slices"
 	"testing"
 
 	"github.com/labstack/echo/v5"
@@ -41,12 +43,36 @@ func newDisabledAuthz(t testing.TB) authorization.Authorization {
 	return authz
 }
 
+// decodedIndex is an index with its fields decoded, to compare the indexes in the tests.
+type decodedIndex struct {
+	metadata    *v1.ProjectMetadata
+	displayName string
+	fields      []decodedField
+	matcher     *matcher
+}
+
+func decodeIndexes(c *projectIndexer) map[string]map[string]decodedIndex {
+	decoded := make(map[string]map[string]decodedIndex, len(c.idx))
+	for project, projectIdx := range c.idx {
+		decoded[project] = make(map[string]decodedIndex, len(projectIdx))
+		for name, idx := range projectIdx {
+			decoded[project][name] = decodedIndex{
+				metadata:    idx.metadata,
+				displayName: idx.displayName,
+				fields:      decodeFields(c.indexedKeys, idx.data, idx.fields),
+				matcher:     idx.matcher,
+			}
+		}
+	}
+	return decoded
+}
+
 func TestClientAdd(t *testing.T) {
 	testsCases := []struct {
 		title              string
 		raw                json.RawMessage
 		indexedKeys        []string
-		expectedProjectIdx map[string]map[string]index[*v1.ProjectMetadata]
+		expectedProjectIdx map[string]map[string]decodedIndex
 	}{
 		{
 			title: "add project resource",
@@ -59,7 +85,7 @@ func TestClientAdd(t *testing.T) {
 		"spec": {}
 	}`),
 			indexedKeys: []string{"metadata.name", "metadata.project"},
-			expectedProjectIdx: map[string]map[string]index[*v1.ProjectMetadata]{
+			expectedProjectIdx: map[string]map[string]decodedIndex{
 				"myproject": {
 					"mydashboard": {
 						metadata: &v1.ProjectMetadata{
@@ -71,9 +97,9 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "mydashboard",
-						fields: []string{
-							"mydashboard",
-							"myproject",
+						fields: []decodedField{
+							{key: "metadata.name", path: []string{"metadata", "name"}, value: "mydashboard"},
+							{key: "metadata.project", path: []string{"metadata", "project"}, value: "myproject"},
 						},
 						matcher: &matcher{},
 					},
@@ -95,7 +121,7 @@ func TestClientAdd(t *testing.T) {
 		}
 	}`),
 			indexedKeys: []string{"metadata.name", "metadata.project", "spec.display.name"},
-			expectedProjectIdx: map[string]map[string]index[*v1.ProjectMetadata]{
+			expectedProjectIdx: map[string]map[string]decodedIndex{
 				"myproject": {
 					"mydashboard": {
 						metadata: &v1.ProjectMetadata{
@@ -107,10 +133,10 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "My Fancy Dashboard",
-						fields: []string{
-							"mydashboard",
-							"myproject",
-							"My Fancy Dashboard",
+						fields: []decodedField{
+							{key: "metadata.name", path: []string{"metadata", "name"}, value: "mydashboard"},
+							{key: "metadata.project", path: []string{"metadata", "project"}, value: "myproject"},
+							{key: "spec.display.name", path: []string{"spec", "display", "name"}, value: "My Fancy Dashboard"},
 						},
 						matcher: &matcher{},
 					},
@@ -128,7 +154,7 @@ func TestClientAdd(t *testing.T) {
 		"spec": {}
 	}`),
 			indexedKeys: []string{"metadata.name", "spec.unknown.field"},
-			expectedProjectIdx: map[string]map[string]index[*v1.ProjectMetadata]{
+			expectedProjectIdx: map[string]map[string]decodedIndex{
 				"myproject": {
 					"mydashboard": {
 						metadata: &v1.ProjectMetadata{
@@ -140,8 +166,8 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "mydashboard",
-						fields: []string{
-							"mydashboard",
+						fields: []decodedField{
+							{key: "metadata.name", path: []string{"metadata", "name"}, value: "mydashboard"},
 						},
 						matcher: &matcher{},
 					},
@@ -196,7 +222,7 @@ func TestClientAdd(t *testing.T) {
         }
 	}`),
 			indexedKeys: []string{"spec.panels.@dig:display.name"},
-			expectedProjectIdx: map[string]map[string]index[*v1.ProjectMetadata]{
+			expectedProjectIdx: map[string]map[string]decodedIndex{
 				"myproject": {
 					"mydashboard": {
 						metadata: &v1.ProjectMetadata{
@@ -208,9 +234,9 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "mydashboard",
-						fields: []string{
-							"simple line chart",
-							"another line chart",
+						fields: []decodedField{
+							{key: "spec.panels.@dig:display.name", path: []string{"spec", "panels", "MyPanel", "spec", "display", "name"}, value: "simple line chart"},
+							{key: "spec.panels.@dig:display.name", path: []string{"spec", "panels", "MyOtherPanel", "spec", "display", "name"}, value: "another line chart"},
 						},
 						matcher: &matcher{},
 					},
@@ -223,9 +249,75 @@ func TestClientAdd(t *testing.T) {
 			c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: tc.indexedKeys}}, newDisabledAuthz(t), nil).(*client)
 			err := c.add(tc.raw)
 			require.NoError(t, err)
-			assert.Equal(t, tc.expectedProjectIdx, c.dashboards.idx)
+			assert.Equal(t, tc.expectedProjectIdx, decodeIndexes(c.dashboards))
 		})
 	}
+}
+
+func TestClientAdd_unsupportedKeyOnlyReturnsTheKey(t *testing.T) {
+	for _, tc := range []struct {
+		key            string
+		expectedValues []string
+	}{
+		{key: "metadata.tags|@reverse", expectedValues: []string{"kubernetes", "production"}},
+		// gjson evaluates .0 on the array of the values found by @dig, so it selects both strings.
+		{key: `@dig:"quoted".0`, expectedValues: []string{"first", "second"}},
+		{key: "metadata.tags.01", expectedValues: []string{"production"}},
+	} {
+		t.Run(tc.key, func(t *testing.T) {
+			c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{tc.key}}}, newDisabledAuthz(t), nil).(*client)
+			require.NoError(t, c.add([]byte(pathTestDocument)))
+
+			idx := c.dashboards.idx["myproject"]["mydashboard"]
+			expected := make([]decodedField, 0, len(tc.expectedValues))
+			for _, value := range tc.expectedValues {
+				expected = append(expected, decodedField{key: tc.key, value: value})
+			}
+			assert.ElementsMatch(t, expected, decodeFields(c.dashboards.indexedKeys, idx.data, idx.fields))
+		})
+	}
+}
+
+// When the indexed values of a dashboard are too large, the ones that fit are indexed, replacing the previous ones.
+func TestClientAdd_tooLargeValuesReplaceThePreviousOnes(t *testing.T) {
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"spec.display.name", "metadata.tags"}}}, newDisabledAuthz(t), nil).(*client)
+	require.NoError(t, c.add(json.RawMessage(`{
+		"kind": "Dashboard",
+		"metadata": {"name": "mydashboard", "project": "myproject", "tags": ["old"]},
+		"spec": {"display": {"name": "Old title"}}
+	}`)))
+	// The display name takes 9 bytes, and each tag 2 bytes more than its value for its index: the third tag doesn't fit.
+	setMaxDataSize(t, 30)
+	require.NoError(t, c.add(json.RawMessage(`{
+		"kind": "Dashboard",
+		"metadata": {"name": "mydashboard", "project": "myproject", "tags": ["first", "second", "third"]},
+		"spec": {"display": {"name": "New title"}}
+	}`)))
+
+	for _, tc := range []struct {
+		text             string
+		expectedOriginal string
+	}{
+		{text: "old"},
+		{text: "third"},
+		{text: "title", expectedOriginal: "New title"},
+		{text: "second", expectedOriginal: "second"},
+	} {
+		t.Run(tc.text, func(t *testing.T) {
+			results, err := c.Search(nil, v1.KindDashboard, "", tc.text)
+			require.NoError(t, err)
+			if tc.expectedOriginal == "" {
+				assert.Empty(t, results)
+				return
+			}
+			require.Len(t, results, 1)
+			assert.Equal(t, tc.expectedOriginal, results[0].Original)
+		})
+	}
+	listed, err := c.List(nil, v1.KindDashboard, "")
+	require.NoError(t, err)
+	require.Len(t, listed, 1)
+	assert.Equal(t, "New title", listed[0].DisplayName)
 }
 
 func Test_client_add_multipleProjectsAreIndexedSeparately(t *testing.T) {
@@ -355,6 +447,87 @@ func TestClientSearch_authorizationDisabled(t *testing.T) {
 			assert.ElementsMatch(t, tc.expectedNames, names)
 		})
 	}
+}
+
+func TestClientSearch_returnsKeyAndPathOfMatchingField(t *testing.T) {
+	testsCases := []struct {
+		title            string
+		text             string
+		expectedOriginal string
+		expectedKey      string
+		expectedPath     []string
+	}{
+		{
+			title:            "match on the display name",
+			text:             "fancy",
+			expectedOriginal: "My Fancy Dashboard",
+			expectedKey:      "spec.display.name",
+			expectedPath:     []string{"spec", "display", "name"},
+		},
+		{
+			title:            "match on the name",
+			text:             "mydash",
+			expectedOriginal: "mydashboard",
+			expectedKey:      "metadata.name",
+			expectedPath:     []string{"metadata", "name"},
+		},
+		{
+			title:            "match on a tag",
+			text:             "production",
+			expectedOriginal: "production",
+			expectedKey:      "metadata.tags",
+			expectedPath:     []string{"metadata", "tags", "1"},
+		},
+	}
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name", "spec.display.name", "metadata.tags"}}}, newDisabledAuthz(t), nil).(*client)
+	require.NoError(t, c.add(json.RawMessage(`{
+		"kind": "Dashboard",
+		"metadata": {"name": "mydashboard", "project": "myproject", "tags": ["kubernetes", "production"]},
+		"spec": {"display": {"name": "My Fancy Dashboard"}}
+	}`)))
+
+	for _, tc := range testsCases {
+		t.Run(tc.title, func(t *testing.T) {
+			results, err := c.Search(nil, v1.KindDashboard, "", tc.text)
+			require.NoError(t, err)
+			require.Len(t, results, 1)
+			assert.Equal(t, tc.expectedOriginal, results[0].Original)
+			assert.Equal(t, tc.expectedKey, results[0].Key)
+			assert.Equal(t, tc.expectedPath, results[0].Path)
+		})
+	}
+}
+
+// The UI reads the fields of the match at the root of each result, and they are omitted when the resources are listed.
+func TestClientSearchAndList_jsonShapeOfTheResults(t *testing.T) {
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.tags"}}}, newDisabledAuthz(t), nil).(*client)
+	require.NoError(t, c.add(json.RawMessage(`{
+		"kind": "Dashboard",
+		"metadata": {"name": "mydashboard", "project": "myproject", "tags": ["kubernetes", "production"]},
+		"spec": {"display": {"name": "My Dashboard"}}
+	}`)))
+
+	listed, err := c.List(nil, v1.KindDashboard, "")
+	require.NoError(t, err)
+	require.Len(t, listed, 1)
+	assert.Nil(t, listed[0].FieldMatch)
+	data, err := json.Marshal(listed[0])
+	require.NoError(t, err)
+	var listedJSON map[string]any
+	require.NoError(t, json.Unmarshal(data, &listedJSON))
+	assert.ElementsMatch(t, []string{"metadata", "displayName"}, slices.Collect(maps.Keys(listedJSON)))
+
+	found, err := c.Search(nil, v1.KindDashboard, "", "production")
+	require.NoError(t, err)
+	require.Len(t, found, 1)
+	data, err = json.Marshal(found[0])
+	require.NoError(t, err)
+	var foundJSON map[string]any
+	require.NoError(t, json.Unmarshal(data, &foundJSON))
+	assert.ElementsMatch(t, []string{"metadata", "displayName", "original", "key", "path", "intervals", "score"}, slices.Collect(maps.Keys(foundJSON)))
+	assert.Equal(t, "production", foundJSON["original"])
+	assert.Equal(t, "metadata.tags", foundJSON["key"])
+	assert.Equal(t, []any{"metadata", "tags", "1"}, foundJSON["path"])
 }
 
 func TestRefreshDropsDashboardsMissingFromDatabase(t *testing.T) {

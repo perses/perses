@@ -70,34 +70,132 @@ func (r rawDocument) getRawMetadata() string {
 	return gjson.GetBytes(r, "metadata").Raw
 }
 
+// indexedField is a value extracted from a document when it is indexed. To keep the index small, the value and the end
+// of the path of the field are stored in the data of the document (see fieldsBuilder), and the field only holds their
+// offsets: data[start:valueEnd] is the value, and data[valueEnd:end] the end of the path.
+type indexedField struct {
+	start, valueEnd, end uint32
+	// key is the position, in the indexed keys, of the key (as configured in the search config) the value has been
+	// extracted from, combined with pathlessField when the path of the value can't be determined.
+	key uint32
+}
+
+// pathlessField is the bit of indexedField.key set when the path of the value can't be determined.
+const pathlessField = 1 << 31
+
+// keyIndex returns the position of the key of the field in the indexed keys.
+func (f indexedField) keyIndex() uint32 {
+	return f.key &^ pathlessField
+}
+
+func (f indexedField) value(data string) string {
+	return data[f.start:f.valueEnd]
+}
+
+// path returns the location of the value in the document, e.g. ["metadata", "tags", "1"]: the prefix of its key,
+// followed by the end of the path stored in the data. The components share the memory of the data, which is never
+// modified, but the slice is new, so the caller can modify it.
+// It is nil when the path can't be determined: when the key uses an unsupported syntax, or when the value has been
+// found by gjson inside a string (see fieldsBuilder.extractFields).
+func (f indexedField) path(data string, keys []indexedKey) []string {
+	if f.key&pathlessField != 0 {
+		return nil
+	}
+	prefix := keys[f.key].prefixPath
+	names := keys[f.key].names
+	encoded := data[f.valueEnd:f.end]
+	n := len(prefix)
+	for rest := encoded; len(rest) > 0; n++ {
+		_, rest = nextPathComponent(rest, names)
+	}
+	if n == 0 {
+		return nil
+	}
+	path := make([]string, 0, n)
+	path = append(path, prefix...)
+	for rest := encoded; len(rest) > 0; {
+		var name string
+		name, rest = nextPathComponent(rest, names)
+		path = append(path, name)
+	}
+	return path
+}
+
 type index[T api.Metadata] struct {
 	metadata T
 	// displayName is the string that will be used for the search display.
 	displayName string
-	// fields is the list of string that has been collected when the index is created.
+	// data holds the values of the fields, and the end of their path.
+	data string
+	// fields is the list of values that has been collected when the index is created, with the path they come from.
 	// It is used to know which fields are available for search.
-	fields []string
+	fields []indexedField
 	// matcher is the search engine that will be used to search through the fields.
 	matcher *matcher
 }
 
-func (idx *index[T]) match(text string) *SearchResult {
+// searchHit is a search result along with its field match, to allocate both at once.
+type searchHit struct {
+	result SearchResult
+	match  FieldMatch
+}
+
+// match returns the result of the first field matching the text. keys are the indexed keys of the fields.
+func (idx *index[T]) match(text string, keys []indexedKey) *SearchResult {
 	for _, field := range idx.fields {
-		result := idx.matcher.match(text, field)
-		if result != nil {
-			result.Metadata = idx.metadata
-			result.DisplayName = idx.displayName
-			return result
+		match, ok := idx.matcher.match(text, field.value(idx.data))
+		if !ok {
+			continue
 		}
+		match.Key = keys[field.keyIndex()].key
+		match.Path = field.path(idx.data, keys)
+		hit := &searchHit{
+			result: SearchResult{Metadata: idx.metadata, DisplayName: idx.displayName},
+			match:  match,
+		}
+		hit.result.FieldMatch = &hit.match
+		return &hit.result
 	}
 	return nil
 }
 
+// indexedKey is a key to index, split into steps to determine the path of the values.
+type indexedKey struct {
+	key string
+	// steps is nil when the key uses a syntax for which the path of the values can't be determined.
+	steps []keyStep
+	// prefixPath is the beginning of the path of every value: the names of the first step when it is a field step.
+	prefixPath []string
+	// names are the distinct names of the field steps of the key, which are often the components of the paths of the
+	// values, so the paths refer to them instead of storing them (see fieldsBuilder.appendField).
+	names []string
+}
+
+func newIndexedKey(key string) (indexedKey, error) {
+	steps, err := compileKey(key)
+	if err != nil {
+		return indexedKey{key: key}, err
+	}
+	k := indexedKey{key: key, steps: steps, names: stepNames(steps, nil)}
+	if steps[0].kind == fieldStep {
+		k.prefixPath = steps[0].names
+	}
+	return k, nil
+}
+
 func newProjectIndexer(indexedKeys []string, scope role.Scope, authz authorization.Authorization, matcher *matcher) *projectIndexer {
+	keys := make([]indexedKey, 0, len(indexedKeys))
+	for _, k := range indexedKeys {
+		key, err := newIndexedKey(k)
+		if err != nil {
+			logrus.WithError(err).Warnf("the path of the values indexed with the key %q can't be determined, the search results will only contain the key", k)
+		}
+		keys = append(keys, key)
+	}
 	return &projectIndexer{
 		scope:       scope,
 		authz:       authz,
-		indexedKeys: indexedKeys,
+		indexedKeys: keys,
 		idx:         make(map[string]map[string]index[*v1.ProjectMetadata]),
 		matcher:     matcher,
 	}
@@ -114,7 +212,7 @@ type projectIndexer struct {
 	// This is used when adding a document to the index to know which fields to extract from the document.
 	// For example: if the indexedKeys is ["metadata.name", "metadata.tags"],
 	// then the index will extract the value of metadata.name and metadata.tags from the document and use them for the search.
-	indexedKeys []string
+	indexedKeys []indexedKey
 	// idx is the index used for the resources that belongs to a project.
 	// The first key is the project name, the second key is the resource name.
 	idx map[string]map[string]index[*v1.ProjectMetadata]
@@ -124,49 +222,37 @@ type projectIndexer struct {
 	mutex sync.RWMutex
 }
 
-func recursiveDeepExtractFields(fs []gjson.Result, fields *[]string) {
-	for _, f := range fs {
-		if !f.Exists() {
-			continue
-		}
-		if f.IsArray() {
-			recursiveDeepExtractFields(f.Array(), fields)
-		} else if f.IsObject() {
-			for _, v := range f.Map() {
-				recursiveDeepExtractFields([]gjson.Result{v}, fields)
-			}
-		} else {
-			*fields = append(*fields, f.String())
-		}
-	}
-}
-
 func (c *projectIndexer) add(raw json.RawMessage) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
-	return c.addTo(c.idx, raw)
+	return c.addTo(c.idx, raw, &fieldsBuilder{})
 }
 
 // add is adding a new document to the index.
 // The row will be used to find the various field to be indexed depending on the configuration.
 // We are treating the raw JSON instead of the struct because then we can index anything; and we don't need to deal with the Go struct.
-func (c *projectIndexer) addTo(dst map[string]map[string]index[*v1.ProjectMetadata], raw json.RawMessage) error {
+// The builder collects the fields of the document, it can be reused for the next document once the function returns.
+func (c *projectIndexer) addTo(dst map[string]map[string]index[*v1.ProjectMetadata], raw json.RawMessage, b *fieldsBuilder) error {
 	customRaw := rawDocument(raw)
-	var fields []string
-	for _, k := range c.indexedKeys {
-		fs := customRaw.getFields(k)
-		recursiveDeepExtractFields(fs, &fields)
-	}
-
-	displayName := customRaw.getDisplayName()
 	rawMetadata := customRaw.getRawMetadata()
 	var m *v1.ProjectMetadata
 	if err := json.Unmarshal([]byte(rawMetadata), &m); err != nil {
 		return err
 	}
+	b.reset()
+	for i, k := range c.indexedKeys {
+		b.extractKeyFields(customRaw, uint32(i), k)
+	}
+	if b.tooLarge {
+		// The document is still indexed, so that the values it had before are replaced and it stays listed.
+		logrus.Warnf("the indexed values of the dashboard %s/%s exceed %d bytes, the values that follow aren't indexed", m.Project, m.Name, maxDataSize)
+	}
+
+	displayName := customRaw.getDisplayName()
 	idx := index[*v1.ProjectMetadata]{
 		metadata:    m,
-		fields:      fields,
+		data:        string(b.data),
+		fields:      slices.Clone(b.fields),
 		displayName: displayName,
 		matcher:     c.matcher,
 	}
@@ -265,7 +351,7 @@ func (c *projectIndexer) list(ctx *echo.Context, project string) ([]*SearchResul
 
 func (c *projectIndexer) search(ctx *echo.Context, project string, text string) ([]*SearchResult, error) {
 	return c.collect(ctx, project, func(idx index[*v1.ProjectMetadata]) *SearchResult {
-		return idx.match(text)
+		return idx.match(text, c.indexedKeys)
 	})
 }
 
@@ -362,8 +448,9 @@ func (c *client) Refresh() error {
 		errc <- c.dao.StreamRaw(&dashboard.Query{}, ch)
 	}()
 	next := make(map[string]map[string]index[*v1.ProjectMetadata])
+	var b fieldsBuilder
 	for raw := range ch {
-		if addErr := c.addToNext(next, raw); addErr != nil {
+		if addErr := c.addToNext(next, raw, &b); addErr != nil {
 			logrus.WithError(addErr).Error("failed to add document to index")
 		}
 	}
@@ -374,11 +461,11 @@ func (c *client) Refresh() error {
 	return nil
 }
 
-func (c *client) addToNext(dst map[string]map[string]index[*v1.ProjectMetadata], raw json.RawMessage) error {
+func (c *client) addToNext(dst map[string]map[string]index[*v1.ProjectMetadata], raw json.RawMessage, b *fieldsBuilder) error {
 	kind := v1.Kind(gjson.GetBytes(raw, "kind").String())
 	switch kind {
 	case v1.KindDashboard:
-		return c.dashboards.addTo(dst, raw)
+		return c.dashboards.addTo(dst, raw, b)
 	default:
 		logrus.Warnf("kind %s is not supported for indexing", kind)
 		return nil
