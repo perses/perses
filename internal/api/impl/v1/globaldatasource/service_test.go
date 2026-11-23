@@ -41,6 +41,11 @@ func newRealService(t *testing.T) globaldatasourceIface.Service {
 	fileDAO := &databaseFile.DAO{
 		Folder:    t.TempDir(),
 		Extension: config.JSONExtension,
+		// CaseSensitive: true avoids a path mismatch on Linux: t.TempDir()
+		// includes the mixed-case test name, and CaseSensitive: false would
+		// lowercase only the query path, producing a different directory on a
+		// case-sensitive filesystem.
+		CaseSensitive: true,
 	}
 	dao := globaldatasourceImpl.NewDAO(fileDAO)
 	authz, err := authorization.New(nil, nil, nil, nil, nil, config.Config{})
