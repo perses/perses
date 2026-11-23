@@ -46,10 +46,11 @@ export interface EphemeralDashboardListProperties extends ListProperties {
  * @param props.ephemeralDashboardList Contains all ephemeral dashboards to display
  * @param props.hideToolbar Hide toolbar if enabled
  * @param props.initialState Provide a way to override default initialState
+ * @param props.storageKey Identifies the list to save its settings in the local storage
  * @param props.isLoading Display a loading circle if enabled
  */
 export function EphemeralDashboardList(props: EphemeralDashboardListProperties): ReactElement {
-  const { ephemeralDashboardList, hideToolbar, isLoading, initialState } = props;
+  const { ephemeralDashboardList, hideToolbar, isLoading, initialState, storageKey } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const deleteEphemeralDashboardMutation = useDeleteEphemeralDashboardMutation();
 
@@ -195,6 +196,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
         rows={rows}
         columns={columns}
         initialState={initialState}
+        storageKey={storageKey}
         hideToolbar={hideToolbar}
         isLoading={isLoading}
       />

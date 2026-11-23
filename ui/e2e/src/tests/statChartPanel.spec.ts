@@ -14,12 +14,15 @@
 import { mockTimeSeriesResponseWithStableValue } from '@perses-dev/internal-utils';
 
 import { test } from '../fixtures/dashboardTest';
-import type { DashboardPage } from '../pages';
+import type { MockQueryRangeConfig } from '../pages';
 import { waitForStableCanvas } from '../utils';
+
+const MOCK_NOW = 1674779813307;
 
 test.use({
   dashboardName: 'StatChartPanel',
-  mockNow: 1674779813307,
+  mockNow: MOCK_NOW,
+  mockQueryRangeRequests: getStatChartQueryRangeMocks(MOCK_NOW),
 });
 
 test.describe('Dashboard: Stat Chart Panel', () => {
@@ -29,8 +32,7 @@ test.describe('Dashboard: Stat Chart Panel', () => {
     'Multi-Series Stat with Sparkline',
     'Multi-Series Stat without Sparkline',
   ].forEach((panelName) => {
-    test(`displays ${panelName} as expected`, async ({ dashboardPage, mockNow }) => {
-      await mockStatChartQueryRangeRequest(dashboardPage, mockNow);
+    test(`displays ${panelName} as expected`, async ({ dashboardPage }) => {
       await dashboardPage.forEachTheme(async () => {
         const panel = dashboardPage.getPanelByName(panelName);
         await panel.isLoaded();
@@ -38,8 +40,7 @@ test.describe('Dashboard: Stat Chart Panel', () => {
     });
   });
 
-  test('should be able to add and edit threshold', async ({ page, dashboardPage, mockNow }) => {
-    await mockStatChartQueryRangeRequest(dashboardPage, mockNow);
+  test('should be able to add and edit threshold', async ({ page, dashboardPage }) => {
     await dashboardPage.startEditing();
     await dashboardPage.editPanel('Single Stat with Sparkline', async (panelEditor) => {
       await panelEditor.selectTab('Settings');
@@ -59,9 +60,9 @@ test.describe('Dashboard: Stat Chart Panel', () => {
   });
 });
 
-async function mockStatChartQueryRangeRequest(page: DashboardPage, mockNow: number): Promise<void> {
+function getStatChartQueryRangeMocks(mockNow: number): MockQueryRangeConfig {
   // Mock data response, so we can make assertions on consistent response data.
-  await page.mockQueryRangeRequests({
+  return {
     queries: [
       {
         query:
@@ -140,5 +141,5 @@ async function mockStatChartQueryRangeRequest(page: DashboardPage, mockNow: numb
         },
       },
     ],
-  });
+  };
 }

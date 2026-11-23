@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 
 	"cuelang.org/go/cue/build"
+	"github.com/perses/perses/internal/api/plugin/migrate/grafana"
 	"github.com/perses/spec/go/dashboard"
 	"github.com/perses/spec/go/dashboard/variable"
 	"github.com/perses/spec/go/plugin"
@@ -42,7 +43,16 @@ var defaultVariablePlugin = plugin.Plugin{
 	},
 }
 
-func buildDefaultVariable(v TemplateVar) dashboard.Variable {
+// grafanaHideVariable is the value of the field `hide` of a Grafana variable that hides it. The other values show it:
+// with its label (0), without its label (1), or in the controls menu of the dashboard (3).
+const grafanaHideVariable = 2
+
+// isVariableHidden tells whether the Grafana variable is hidden in the dashboard.
+func isVariableHidden(v grafana.TemplateVar) bool {
+	return v.Hide == grafanaHideVariable
+}
+
+func buildDefaultVariable(v grafana.TemplateVar) dashboard.Variable {
 	return dashboard.Variable{
 		Kind: variable.KindList,
 		Spec: &dashboard.ListVariableSpec{
@@ -51,12 +61,12 @@ func buildDefaultVariable(v TemplateVar) dashboard.Variable {
 				Display: &variable.Display{
 					Name:        v.Label,
 					Description: v.Description,
-					Hidden:      v.Hide > 0,
+					Hidden:      isVariableHidden(v),
 				},
 				AllowAllValue:  v.IncludeAll,
 				AllowMultiple:  v.Multi,
 				CustomAllValue: v.AllValue,
-				DefaultValue:   v.getDefaultValue(),
+				DefaultValue:   v.DefaultValue(),
 				Sort:           grafanaMappingSort(v.Sort),
 			},
 			Name: v.Name,
@@ -75,7 +85,7 @@ func grafanaMappingSort(sort *int) *variable.Sort {
 	return &mappingSort[i]
 }
 
-func (m *completeMigration) migrateVariables(grafanaDashboard *SimplifiedDashboard) []dashboard.Variable {
+func (m *completeMigration) migrateVariables(grafanaDashboard *grafana.Dashboard) []dashboard.Variable {
 	var result []dashboard.Variable
 	for _, v := range grafanaDashboard.Templating.List {
 		if v.Type == "constant" || v.Type == "textbox" {
@@ -92,7 +102,7 @@ func (m *completeMigration) migrateVariables(grafanaDashboard *SimplifiedDashboa
 	return result
 }
 
-func (m *completeMigration) migrateListVariable(v TemplateVar) dashboard.Variable {
+func (m *completeMigration) migrateListVariable(v grafana.TemplateVar) dashboard.Variable {
 	result := dashboard.Variable{
 		Kind: variable.KindList,
 	}
@@ -101,11 +111,11 @@ func (m *completeMigration) migrateListVariable(v TemplateVar) dashboard.Variabl
 			Display: &variable.Display{
 				Name:        v.Label,
 				Description: v.Description,
-				Hidden:      v.Hide > 0,
+				Hidden:      isVariableHidden(v),
 			},
 			AllowAllValue: v.IncludeAll,
 			AllowMultiple: v.Multi,
-			DefaultValue:  v.getDefaultValue(),
+			DefaultValue:  v.DefaultValue(),
 			Sort:          grafanaMappingSort(v.Sort),
 		},
 		Name: v.Name,
@@ -127,7 +137,7 @@ func (m *completeMigration) migrateListVariable(v TemplateVar) dashboard.Variabl
 	return result
 }
 
-func migrateListVar(varInstances map[string]*build.Instance, v TemplateVar, specResult *dashboard.ListVariableSpec) bool {
+func migrateListVar(varInstances map[string]*build.Instance, v grafana.TemplateVar, specResult *dashboard.ListVariableSpec) bool {
 	isQueryMigrationEmpty := true
 	// Dynamic variables are usually in a parameter named 'query' in the Grafana data model.
 	// Then depending on what contains the query, it will change the type of the plugin.
@@ -148,7 +158,7 @@ func migrateListVar(varInstances map[string]*build.Instance, v TemplateVar, spec
 	return isQueryMigrationEmpty
 }
 
-func migrateTextVariable(v TemplateVar) *dashboard.Variable {
+func migrateTextVariable(v grafana.TemplateVar) *dashboard.Variable {
 	var value string
 	if len(v.Query) > 0 {
 		data, err := v.Query.MarshalJSON()
@@ -166,7 +176,7 @@ func migrateTextVariable(v TemplateVar) *dashboard.Variable {
 				Display: &variable.Display{
 					Name:        v.Label,
 					Description: v.Description,
-					Hidden:      v.Hide > 0,
+					Hidden:      isVariableHidden(v),
 				},
 				Constant: v.Type == "constant",
 				Value:    value,

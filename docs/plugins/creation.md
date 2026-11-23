@@ -129,6 +129,7 @@ The implementation is mostly similar across all plugin types.
 #### Annotation plugin
 
 - Edit the CUE schema file in the `schemas/annotations/<plugin-name>` folder to define the data model of your plugin. This schema must belong to the `model` package.
+- To enable Grafana migration, create a `schemas/annotations/<plugin-name>/migrate` folder and define the migration logic as a CUE schema file. This schema must belong to the `migrate` package.
 - Implement your annotation as a React component located in the `src/annotations/<plugin-name>` folder.
 
 #### Panel plugin

@@ -293,12 +293,12 @@ func (o *generateOptions) Execute() error {
 
 	moduleTemplateFiles, err = CollectTemplatePaths(moduleDir, templateSet)
 	if err != nil {
-		log.Fatalf("error walking module template directory: %v", err)
+		return fmt.Errorf("error walking module template directory: %w", err)
 	}
 
 	blocksTemplateFiles, err := CollectTemplatePaths(blocksDir, templateSet)
 	if err != nil {
-		log.Fatalf("error walking blocks template directory: %v", err)
+		return fmt.Errorf("error walking blocks template directory: %w", err)
 	}
 
 	srcDir, err := getTemplatePath(o.pluginType)
@@ -308,7 +308,7 @@ func (o *generateOptions) Execute() error {
 
 	pluginTypeTemplateFiles, err := CollectTemplatePaths(srcDir, templateSet)
 	if err != nil {
-		log.Fatalf("error walking plugin type template directory: %v", err)
+		return fmt.Errorf("error walking plugin type template directory: %w", err)
 	}
 
 	allTemplateFiles := append(append(moduleTemplateFiles, blocksTemplateFiles...), pluginTypeTemplateFiles...)

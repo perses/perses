@@ -376,6 +376,8 @@ func (o *option) runMigrationTestsForPath(testDir string, migrateBuildInstance, 
 			resultPlugin, resultIsEmpty, err = migrate.ExecuteQueryScript(migrateBuildInstance, inputData)
 		case pluginSpec.KindPanel:
 			resultPlugin, resultIsEmpty, err = migrate.ExecutePanelScript(migrateBuildInstance, inputData)
+		case pluginSpec.KindAnnotation:
+			resultPlugin, resultIsEmpty, err = migrate.ExecuteAnnotationScript(migrateBuildInstance, inputData)
 		default:
 			return fmt.Errorf("unsupported migration schema kind: %s", pluginKind)
 		}

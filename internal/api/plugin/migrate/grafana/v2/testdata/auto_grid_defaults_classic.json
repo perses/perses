@@ -1,0 +1,87 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "panels": [
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 8,
+        "h": 14
+      },
+      "id": 1,
+      "links": [],
+      "options": {},
+      "targets": [],
+      "title": "p1",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 8,
+        "h": 14
+      },
+      "id": 2,
+      "links": [],
+      "options": {},
+      "targets": [],
+      "title": "p2",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 8,
+        "h": 14
+      },
+      "id": 3,
+      "links": [],
+      "options": {},
+      "targets": [],
+      "title": "p3",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 8,
+        "h": 14
+      },
+      "id": 4,
+      "links": [],
+      "options": {},
+      "targets": [],
+      "title": "p4",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "timezone": "",
+  "title": "Auto grid",
+  "uid": "test"
+}

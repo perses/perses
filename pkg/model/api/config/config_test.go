@@ -57,6 +57,9 @@ func TestJSONMarshalConfig(t *testing.T) {
     },
     "cors": {
       "enable": false
+    },
+    "content_security_policy": {
+      "disable": false
     }
   },
   "database": {},
@@ -99,7 +102,8 @@ func TestJSONMarshalConfig(t *testing.T) {
   },
   "search": {
     "index_keys": {}
-  }
+  },
+  "opentelemetry": {}
 }`,
 		},
 		{
@@ -125,6 +129,10 @@ func TestJSONMarshalConfig(t *testing.T) {
     },
     "cors": {
       "enable": false
+    },
+    "content_security_policy": {
+      "disable": false,
+      "policy": "script-src 'self' 'unsafe-eval'; object-src 'none'; base-uri 'self'"
     }
   },
   "database": {
@@ -200,7 +208,8 @@ func TestJSONMarshalConfig(t *testing.T) {
         "spec.display.name"
       ]
     }
-  }
+  },
+  "opentelemetry": {}
 }`,
 		},
 	}
@@ -552,6 +561,7 @@ plugin:
 						ExposeHeaders:    []string{"Content-Encoding"},
 						MaxAge:           60,
 					},
+					ContentSecurityPolicy: ContentSecurityPolicy{Policy: DefaultContentSecurityPolicy},
 				},
 				Database: Database{
 					File: &File{

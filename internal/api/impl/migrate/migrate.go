@@ -20,6 +20,7 @@ import (
 	"github.com/labstack/echo/v5"
 	"github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin/migrate"
+	"github.com/perses/perses/internal/api/plugin/migrate/grafana"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/pkg/model/api"
 )
@@ -50,8 +51,8 @@ func (e *endpoint) Migrate(ctx *echo.Context) error {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
 
-	rawGrafanaDashboard := []byte(migrate.ReplaceInputValue(body.Input, string(body.GrafanaDashboard)))
-	grafanaDashboard := &migrate.SimplifiedDashboard{}
+	rawGrafanaDashboard := []byte(grafana.ReplaceInputValue(body.Input, string(body.GrafanaDashboard)))
+	grafanaDashboard := &grafana.Dashboard{}
 	if err := json.Unmarshal(rawGrafanaDashboard, grafanaDashboard); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}

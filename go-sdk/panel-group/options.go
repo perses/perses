@@ -32,6 +32,7 @@ func PanelWidth(width int) Option {
 			return fmt.Errorf("panel width is contained to 1 and 24")
 		}
 		builder.PanelsWidth = width
+		builder.PanelsPerLine = 0
 		return nil
 	}
 }
@@ -66,6 +67,7 @@ func PanelsPerLine(panelsPerLine int) Option {
 			return fmt.Errorf("row: at least 1 panel and 24 panels max per row line")
 		}
 		builder.PanelsWidth = 24 / panelsPerLine
+		builder.PanelsPerLine = panelsPerLine
 		return nil
 	}
 }

@@ -1,0 +1,7 @@
+{
+  "kind": "MyAnnotation",
+  "spec": {
+    "expr": "changes(deployment_generation[5m]) > 0",
+    "title": "{{deployment}}"
+  }
+}

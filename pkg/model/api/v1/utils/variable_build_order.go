@@ -189,6 +189,9 @@ func findAllVariableUsedInPlugin(plugin plugin.Plugin) [][]string {
 }
 
 func findAllVariableUsed(v reflect.Value, matches *[][]string) {
+	if !v.IsValid() {
+		return
+	}
 	if len(v.Type().PkgPath()) > 0 {
 		// the field is not exported, so no need to look at it as we won't be able to set it in a later stage
 		return
