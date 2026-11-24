@@ -16,7 +16,9 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"reflect"
+	"slices"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	commonSpec "github.com/perses/spec/go/common"
@@ -74,20 +76,44 @@ func (d *Dashboard) validate() error {
 	if reflect.DeepEqual(d.Spec, dashboardSpec.Spec{}) {
 		return fmt.Errorf("spec cannot be empty")
 	}
-	return verifyAndSetJSONReferences(d.Spec.Layouts, d.Spec.Panels)
+	return validateDashboardSpec(&d.Spec)
 }
 
-// verifyAndSetJSONRef will check that each JSON Reference are pointing to an existing object and will set the related pointer in the JSONRef.Object
+// validateDashboardSpec gathers the checks that are applied on a dashboard spec at decoding time,
+// i.e. the ones that don't need the plugin schemas.
+// It rejects the null entries that would otherwise be dereferenced by the callers, and resolves
+// the JSON references of the layouts.
+func validateDashboardSpec(spec *dashboardSpec.Spec) error {
+	// The keys are sorted so the error reported for a spec with several null entries is stable.
+	for _, panelName := range slices.Sorted(maps.Keys(spec.Panels)) {
+		if spec.Panels[panelName] == nil {
+			return fmt.Errorf("panel %q cannot be null", panelName)
+		}
+	}
+	for _, dtsName := range slices.Sorted(maps.Keys(spec.Datasources)) {
+		if spec.Datasources[dtsName] == nil {
+			return fmt.Errorf("datasource %q cannot be null", dtsName)
+		}
+	}
+	return verifyAndSetJSONReferences(spec.Layouts, spec.Panels)
+}
+
+// verifyAndSetJSONReferences checks that each JSON Reference is pointing to an existing object, and sets the related pointer in the JSONRef.Object
 func verifyAndSetJSONReferences(layouts []dashboardSpec.Layout, panels map[string]*dashboardSpec.Panel) error {
-	for _, layout := range layouts {
+	for i, layout := range layouts {
 		switch spec := layout.Spec.(type) {
 		case *dashboardSpec.GridLayoutSpec:
-			for _, item := range spec.Items {
+			if spec == nil {
+				return fmt.Errorf("layout n°%d: spec cannot be null", i+1)
+			}
+			for j, item := range spec.Items {
+				if item.Content == nil {
+					return fmt.Errorf("layout n°%d, item n°%d: content cannot be empty", i+1, j+1)
+				}
 				if err := checkAndSetRef(item.Content, panels); err != nil {
-					return err
+					return fmt.Errorf("layout n°%d, item n°%d: %w", i+1, j+1, err)
 				}
 			}
-
 		}
 	}
 	return nil

@@ -93,8 +93,11 @@ func (e *endpoint) getDashboardDatasource(projectName string, dashboardName stri
 		logrus.WithError(err).Errorf("unable to find the datasource %q, something wrong with the database", name)
 		return datasource.Spec{}, apiinterface.InternalError
 	}
+	// A null entry is treated like a missing one: it holds no proxy to forward the request to.
+	// The dashboard spec validation rejects it at decoding time, so this can only come from a
+	// dashboard stored before that check existed.
 	dtsSpec, ok := db.Spec.Datasources[name]
-	if !ok {
+	if !ok || dtsSpec == nil {
 		logrus.Debugf("unable to find the Datasource %q from Dashboard %q in project %q", name, dashboardName, projectName)
 		return datasource.Spec{}, apiinterface.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
 	}

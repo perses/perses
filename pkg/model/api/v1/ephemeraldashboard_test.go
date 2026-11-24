@@ -15,7 +15,6 @@ package v1
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 	"time"
 
@@ -521,7 +520,7 @@ func TestUnmarshalEphemeralDashboardError(t *testing.T) {
 	testSuite := []struct {
 		title string
 		jason string
-		err   error
+		err   string
 	}{
 		{
 			title: "spec cannot be empty",
@@ -534,13 +533,88 @@ func TestUnmarshalEphemeralDashboardError(t *testing.T) {
   }
 }
 `,
-			err: fmt.Errorf("spec cannot be empty"),
+			err: "spec cannot be empty",
+		},
+		{
+			title: "grid item without content",
+			jason: `
+{
+  "kind": "EphemeralDashboard",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  },
+  "spec": {
+    "ttl": "1h",
+    "duration": "1h",
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 1,
+              "height": 1
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+`,
+			err: "layout n°1, item n°1: content cannot be empty",
+		},
+		{
+			title: "null panel",
+			jason: `
+{
+  "kind": "EphemeralDashboard",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  },
+  "spec": {
+    "ttl": "1h",
+    "duration": "1h",
+    "panels": {
+      "p1": null
+    },
+    "layouts": []
+  }
+}
+`,
+			err: `panel "p1" cannot be null`,
+		},
+		{
+			title: "null local datasource",
+			jason: `
+{
+  "kind": "EphemeralDashboard",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  },
+  "spec": {
+    "ttl": "1h",
+    "duration": "1h",
+    "datasources": {
+      "myDTS": null
+    },
+    "panels": {},
+    "layouts": []
+  }
+}
+`,
+			err: `datasource "myDTS" cannot be null`,
 		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			result := EphemeralDashboard{}
-			assert.Equal(t, test.err, json.Unmarshal([]byte(test.jason), &result))
+			assert.EqualError(t, json.Unmarshal([]byte(test.jason), &result), test.err)
 		})
 	}
 }

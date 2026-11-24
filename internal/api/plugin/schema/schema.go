@@ -202,6 +202,12 @@ func (s *completeSchema) ValidatePanels(panels map[string]*dashboard.Panel) erro
 	var errs []error
 	for panelName, panel := range panels {
 		logrus.Tracef("Panel to validate: %s", panelName)
+		// A panel decoded from a dashboard is never null, this is rejected upfront by the dashboard spec
+		// validation. It can still happen with a spec built programmatically, e.g. with the Go SDK.
+		if panel == nil {
+			errs = append(errs, fmt.Errorf("panel %q cannot be null", panelName))
+			continue
+		}
 		if err := s.ValidatePanel(panel.Spec.Plugin, panelName); err != nil {
 			errs = append(errs, err)
 			continue

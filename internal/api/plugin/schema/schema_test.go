@@ -419,6 +419,29 @@ func TestValidatePanelsWithAnnotations(t *testing.T) {
 	}
 }
 
+// TestValidatePanelsWithNullPanel verifies a null panel is reported as an error instead of
+// panicking. A dashboard decoded by the API never holds one, as it is rejected upfront by the
+// dashboard spec validation, but a spec built programmatically (e.g. with the Go SDK) can.
+func TestValidatePanelsWithNullPanel(t *testing.T) {
+	s := New()
+	loadPanelPlugins("testdata/schemas/panels", s, t)
+	loadQueryPlugins("testdata/schemas/queries", s, t)
+	validFirstPanel := loadPluginFromJSON("testdata/samples/panels/valid_first_panel.json", t)
+	validCustomQueries := loadQueriesFromJSON("testdata/samples/queries/valid_custom_queries.json", t)
+
+	panels := map[string]*dashboard.Panel{
+		"MyNullPanel": nil,
+		"MyValidPanel": {
+			Spec: dashboard.PanelSpec{
+				Plugin:  validFirstPanel,
+				Queries: validCustomQueries,
+			},
+		},
+	}
+
+	assert.EqualError(t, s.ValidatePanels(panels), `panel "MyNullPanel" cannot be null`)
+}
+
 func TestValidateDashboardVariables(t *testing.T) {
 	s := New()
 	loadVariablePlugins("testdata/schemas/variables", s, t)

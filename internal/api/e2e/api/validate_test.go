@@ -57,6 +57,15 @@ func setRawDashboardValue(t *testing.T, dash []byte, path string, value any) []b
 	return result
 }
 
+// deleteRawDashboardValue removes the given gjson/sjson path (e.g. "spec.layouts.0") from the raw dashboard.
+func deleteRawDashboardValue(t *testing.T, dash []byte, path string) []byte {
+	result, err := sjson.DeleteBytes(dash, path)
+	if err != nil {
+		t.Fatalf("unable to delete %q in the raw dashboard: %v", path, err)
+	}
+	return result
+}
+
 func validateDashboardPath() string {
 	return fmt.Sprintf("%s/validate/%s", utils.APIPrefix, utils.PathDashboard)
 }
@@ -119,6 +128,62 @@ func TestValidateDashboardEndpoint_InvalidVariableName(t *testing.T) {
 			JSON().Object().Value("message").String().Contains("builtin variable prefix")
 		return []modelAPI.Entity{}
 	})
+}
+
+// TestValidateDashboardEndpoint_NullEntries ensures that the null entries of a dashboard spec, and the
+// grid items without content, are reported as a bad request naming the offending entry, instead of
+// crashing the validation. These used to return an HTTP 500, after a recovered nil pointer dereference.
+func TestValidateDashboardEndpoint_NullEntries(t *testing.T) {
+	testSuite := []struct {
+		title           string
+		mutate          func(t *testing.T, dash []byte) []byte
+		expectedMessage string
+	}{
+		{
+			title: "null panel",
+			mutate: func(t *testing.T, dash []byte) []byte {
+				return setRawDashboardValue(t, dash, "spec.panels.eta", nil)
+			},
+			expectedMessage: `panel "eta" cannot be null`,
+		},
+		{
+			title: "null local datasource",
+			mutate: func(t *testing.T, dash []byte) []byte {
+				return setRawDashboardValue(t, dash, "spec.datasources.nullDTS", nil)
+			},
+			expectedMessage: `datasource "nullDTS" cannot be null`,
+		},
+		{
+			title: "grid item without content",
+			mutate: func(t *testing.T, dash []byte) []byte {
+				return deleteRawDashboardValue(t, dash, "spec.layouts.0.spec.items.0.content")
+			},
+			expectedMessage: "layout n°1, item n°1: content cannot be empty",
+		},
+		{
+			title: "grid item with a null content",
+			mutate: func(t *testing.T, dash []byte) []byte {
+				return setRawDashboardValue(t, dash, "spec.layouts.0.spec.items.0.content", nil)
+			},
+			expectedMessage: "layout n°1, item n°1: content cannot be empty",
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, _ dependency.Manager) []modelAPI.Entity {
+				dash := test.mutate(t, loadRawDashboard(t))
+
+				expect.POST(validateDashboardPath()).
+					WithBytes(dash).
+					WithHeader("Content-Type", "application/json").
+					Expect().
+					Status(http.StatusBadRequest).
+					JSON().Object().Value("message").String().Contains(test.expectedMessage)
+				return []modelAPI.Entity{}
+			})
+		})
+	}
 }
 
 // TestValidateDashboardEndpoint_PathTraversal ensures that a dashboard whose `metadata.project`

@@ -15,7 +15,6 @@ package v1
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/perses/spec/go/common"
@@ -23,6 +22,7 @@ import (
 	"github.com/perses/spec/go/dashboard/variable"
 	"github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
 )
 
 type TimeSeriesSpec struct {
@@ -508,7 +508,7 @@ func TestUnmarshalDashboardError(t *testing.T) {
 	testSuite := []struct {
 		title string
 		jason string
-		err   error
+		err   string
 	}{
 		{
 			title: "spec cannot be empty",
@@ -521,13 +521,235 @@ func TestUnmarshalDashboardError(t *testing.T) {
   }
 }
 `,
-			err: fmt.Errorf("spec cannot be empty"),
+			err: "spec cannot be empty",
+		},
+		{
+			title: "grid item without content",
+			jason: `
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  },
+  "spec": {
+    "duration": "1h",
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 1,
+              "height": 1
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+`,
+			err: "layout n°1, item n°1: content cannot be empty",
+		},
+		{
+			title: "grid item with a null content",
+			jason: `
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  },
+  "spec": {
+    "duration": "1h",
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 1,
+              "height": 1,
+              "content": null
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+`,
+			err: "layout n°1, item n°1: content cannot be empty",
+		},
+		{
+			title: "grid item pointing to a panel that doesn't exist",
+			jason: `
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  },
+  "spec": {
+    "duration": "1h",
+    "panels": {},
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 1,
+              "height": 1,
+              "content": { "$ref": "#/spec/panels/cpu" }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+`,
+			err: `layout n°1, item n°1: no panel found for ref "cpu"`,
+		},
+		{
+			title: "null panel",
+			jason: `
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  },
+  "spec": {
+    "duration": "1h",
+    "panels": {
+      "p1": null
+    },
+    "layouts": []
+  }
+}
+`,
+			err: `panel "p1" cannot be null`,
+		},
+		{
+			title: "several null panels, the first one in the lexicographic order is reported",
+			jason: `
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  },
+  "spec": {
+    "duration": "1h",
+    "panels": {
+      "zPanel": null,
+      "aPanel": null
+    },
+    "layouts": []
+  }
+}
+`,
+			err: `panel "aPanel" cannot be null`,
+		},
+		{
+			title: "null local datasource",
+			jason: `
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  },
+  "spec": {
+    "duration": "1h",
+    "datasources": {
+      "myDTS": null
+    },
+    "panels": {},
+    "layouts": []
+  }
+}
+`,
+			err: `datasource "myDTS" cannot be null`,
 		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			result := Dashboard{}
-			assert.Equal(t, test.err, json.Unmarshal([]byte(test.jason), &result))
+			assert.EqualError(t, json.Unmarshal([]byte(test.jason), &result), test.err)
 		})
 	}
+}
+
+// TestUnmarshalYAMLDashboardError verifies the YAML decoder rejects the same dashboards as the JSON one,
+// as both rely on the same validation.
+func TestUnmarshalYAMLDashboardError(t *testing.T) {
+	testSuite := []struct {
+		title    string
+		yamlDash string
+		err      string
+	}{
+		{
+			title: "grid item without content",
+			yamlDash: `
+kind: Dashboard
+metadata:
+  name: test
+  project: perses
+spec:
+  duration: 1h
+  layouts:
+    - kind: Grid
+      spec:
+        items:
+          - x: 0
+            y: 0
+            width: 1
+            height: 1
+`,
+			err: "layout n°1, item n°1: content cannot be empty",
+		},
+		{
+			title: "null panel",
+			yamlDash: `
+kind: Dashboard
+metadata:
+  name: test
+  project: perses
+spec:
+  duration: 1h
+  panels:
+    p1: null
+  layouts: []
+`,
+			err: `panel "p1" cannot be null`,
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result := Dashboard{}
+			assert.EqualError(t, yaml.Unmarshal([]byte(test.yamlDash), &result), test.err)
+		})
+	}
+}
+
+// TestVerifyAndSetJSONReferencesNilLayoutSpec covers a layout spec that is a nil pointer, which the
+// decoders never produce but a spec built programmatically (e.g. with the Go SDK) can.
+func TestVerifyAndSetJSONReferencesNilLayoutSpec(t *testing.T) {
+	layouts := []dashboard.Layout{
+		{
+			Kind: dashboard.KindGridLayout,
+			Spec: (*dashboard.GridLayoutSpec)(nil),
+		},
+	}
+	assert.EqualError(t, verifyAndSetJSONReferences(layouts, nil), "layout n°1: spec cannot be null")
 }
