@@ -1,0 +1,31 @@
+{
+  "title": "Variables",
+  "elements": {},
+  "variables": [
+    {"kind": "QueryVariable", "spec": {"name": "job", "current": {"text": "api", "value": "api"}, "label": "Job", "hide": "hideLabel", "refresh": "onTimeRangeChanged", "skipUrlSync": false,
+      "query": {"kind": "DataQuery", "group": "prometheus", "version": "v0", "datasource": {"name": "prom"}, "spec": {"query": "label_values(up, job)", "qryType": 1}},
+      "regex": "", "sort": "alphabeticalAsc", "options": [], "multi": true, "includeAll": true, "allValue": ".*", "allowCustomValue": true}},
+    {"kind": "QueryVariable", "spec": {"name": "instance", "hide": "inControlsMenu", "refresh": "never", "sort": "naturalDesc",
+      "query": {"kind": "DataQuery", "group": "prometheus", "version": "v0", "spec": {"__legacyStringValue": "label_values(instance)"}}}},
+    {"kind": "DatasourceVariable", "spec": {"name": "ds", "pluginId": "prometheus", "refresh": "onDashboardLoad", "regex": "", "current": {"text": "default", "value": "default"}, "hide": "dontHide"}},
+    {"kind": "SwitchVariable", "spec": {"name": "debug", "current": "true", "enabledValue": "true", "disabledValue": "false", "hide": "dontHide"}},
+    {"kind": "GroupByVariable", "group": "prometheus", "datasource": {"name": "prom"}, "spec": {"name": "by", "current": {"text": "", "value": ""}, "multi": true, "hide": "dontHide"}},
+    {"kind": "FancyVariable", "spec": {"name": "fancy", "hide": "unknown"}}
+  ],
+  "annotations": [
+    {"kind": "AnnotationQuery", "spec": {"query": {"kind": "DataQuery", "group": "grafana", "version": "v0", "datasource": {"name": "-- Grafana --"}, "spec": {}},
+      "enable": true, "hide": true, "iconColor": "rgba(0, 211, 255, 1)", "name": "Annotations & Alerts", "builtIn": true, "legacyOptions": {"type": "dashboard"}}},
+    {"kind": "AnnotationQuery", "spec": {"query": {"kind": "DataQuery", "group": "prometheus", "version": "v0", "datasource": {"name": "prom"}, "spec": {"expr": "ALERTS", "step": "60s"}},
+      "enable": false, "hide": false, "iconColor": "red", "name": "Alerts", "builtIn": false, "filter": {"exclude": false, "ids": [1]}, "legacyOptions": {"titleFormat": "{{alertname}}"}}}
+  ],
+  "layout": {"kind": "RowsLayout", "spec": {"rows": [
+    {"kind": "RowsLayoutRow", "spec": {"title": "Section", "collapse": false, "layout": {"kind": "GridLayout", "spec": {"items": []}},
+      "variables": [
+        {"kind": "TextVariable", "spec": {"name": "job", "query": "already defined by the dashboard", "hide": "dontHide"}},
+        {"kind": "ConstantVariable", "spec": {"name": "region", "query": "eu", "hide": "hideVariable"}}
+      ],
+      "annotations": [
+        {"kind": "AnnotationQuery", "spec": {"query": {"kind": "DataQuery", "group": "loki", "version": "v0", "spec": {"expr": "{app=\"deploy\"}"}}, "enable": true, "hide": false, "iconColor": "blue", "name": "Deploys"}}
+      ]}}
+  ]}}
+}

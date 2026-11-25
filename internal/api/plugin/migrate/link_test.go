@@ -16,13 +16,14 @@ package migrate
 import (
 	"testing"
 
+	"github.com/perses/perses/internal/api/plugin/migrate/grafana"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestMigrateDashboardTagLink(t *testing.T) {
-	got := (&completeMigration{}).migrateDashboardLinks(&SimplifiedDashboard{
-		Links: []GrafanaLink{
+	got := (&completeMigration{}).migrateDashboardLinks(&grafana.Dashboard{
+		Links: []grafana.Link{
 			{Title: " Service detail ", Type: "dashboards", Tags: []string{" traffic ", "api"}, KeepTime: true, IncludeVars: true},
 			{Title: "Docs", URL: "https://perses.dev", IncludeVars: true, TargetBlank: true},
 			{Title: "Dropped", Type: "dashboards"},
@@ -43,7 +44,7 @@ func TestMigrateDashboardTagLink(t *testing.T) {
 }
 
 func TestConvertGrafanaPanelTagLink(t *testing.T) {
-	got := convertGrafanaLinksToPerses([]GrafanaLink{
+	got := convertGrafanaLinksToPerses([]grafana.Link{
 		{Title: "Runbook", URL: "https://example.com/${region}", KeepTime: true, IncludeVars: true},
 		{Title: "Traffic", Type: "dashboards", Tags: []string{"traffic"}, KeepTime: true, IncludeVars: true},
 		{URL: ""},

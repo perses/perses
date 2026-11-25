@@ -16,11 +16,12 @@ package migrate
 import (
 	"strings"
 
+	"github.com/perses/perses/internal/api/plugin/migrate/grafana"
 	"github.com/perses/spec/go/dashboard"
 )
 
 // False when the link is not a tag menu. Empty tag menus are dropped.
-func grafanaTagLink(grafanaLink GrafanaLink) (dashboard.Link, bool) {
+func grafanaTagLink(grafanaLink grafana.Link) (dashboard.Link, bool) {
 	tags := nonEmptyTags(grafanaLink.Tags)
 	isTagMenu := grafanaLink.Type == "dashboards" || (strings.TrimSpace(grafanaLink.URL) == "" && len(tags) > 0)
 	if !isTagMenu {

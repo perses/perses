@@ -21,7 +21,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 	"sync"
 
@@ -30,6 +29,7 @@ import (
 	"cuelang.org/go/cue/cuecontext"
 	"github.com/perses/common/set"
 	apiinterface "github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/internal/api/plugin/migrate/grafana"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/spec/go/common"
@@ -49,20 +49,6 @@ var kindRegexp = regexp.MustCompile(`(?m)kind\s*:\s*"(\w+)"`)
 
 func LoadMigrateSchema(schemaPath string) (*build.Instance, error) {
 	return schema.LoadSchemaInstance(schemaPath, "migrate")
-}
-
-func ReplaceInputValue(input map[string]string, grafanaDashboard string) string {
-	result := grafanaDashboard
-	for key, value := range input {
-		// Escape special characters that may be present in the value
-		escapedValue := strconv.Quote(value)
-		// Remove the extra surrounding quotes added by strconv.Quote
-		escapedValue = escapedValue[1 : len(escapedValue)-1]
-		// Do the replacement (2 syntaxes to support)
-		result = strings.ReplaceAll(result, fmt.Sprintf("$%s", key), escapedValue)
-		result = strings.ReplaceAll(result, fmt.Sprintf("${%s}", key), escapedValue)
-	}
-	return result
 }
 
 func Load(pluginPath string, moduleSpec v1.ModuleSpec) ([]schema.LoadSchema, error) {
@@ -238,7 +224,7 @@ type Migration interface {
 	Load(pluginPath string, module v1.PluginModule) error
 	LoadDevPlugin(pluginPath string, module v1.PluginModule) error
 	UnLoadDevPlugin(module v1.PluginModule)
-	Migrate(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) (*v1.Dashboard, error)
+	Migrate(grafanaDashboard *grafana.Dashboard, useDefaultDatasource bool) (*v1.Dashboard, error)
 }
 
 func New() Migration {
@@ -285,7 +271,7 @@ func (m *completeMigration) UnLoadDevPlugin(module v1.PluginModule) {
 	}
 }
 
-func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) (*v1.Dashboard, error) {
+func (m *completeMigration) Migrate(grafanaDashboard *grafana.Dashboard, useDefaultDatasource bool) (*v1.Dashboard, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 	result := &v1.Dashboard{
@@ -318,7 +304,7 @@ func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard, useDe
 	return result, nil
 }
 
-func (m *completeMigration) migrateDashboardLinks(grafanaDashboard *SimplifiedDashboard) []dashboard.Link {
+func (m *completeMigration) migrateDashboardLinks(grafanaDashboard *grafana.Dashboard) []dashboard.Link {
 	links := []dashboard.Link{}
 	for _, l := range grafanaDashboard.Links {
 		if tagLink, ok := grafanaTagLink(l); ok {
@@ -353,7 +339,7 @@ func buildRepeatVariable(value string, direction string, maxPerRow *int) *dashbo
 	return rv
 }
 
-func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) []dashboard.Layout {
+func (m *completeMigration) migrateGrid(grafanaDashboard *grafana.Dashboard) []dashboard.Layout {
 	var result []dashboard.Layout
 	// This is not allowed in Perses to have "orphan" panels (a.k.a panels that don't belong to a group).
 	// Thus we have to create a first grid to gather the eventual orphans found at the beginning of the
@@ -371,7 +357,7 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 	result = append(result, orphansGrid)
 
 	for i, panel := range grafanaDashboard.Panels {
-		if panel.Type != grafanaPanelRowType {
+		if panel.Type != grafana.PanelRowType {
 			item := dashboard.GridItem{
 				Width:  panel.GridPosition.Width,
 				Height: panel.GridPosition.Height,
