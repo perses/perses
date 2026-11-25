@@ -1,0 +1,85 @@
+{
+  "title": "Elements",
+  "elements": {
+    "p1": {
+      "kind": "Panel",
+      "spec": {
+        "id": 1,
+        "title": "p1",
+        "links": [],
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [],
+            "transformations": [],
+            "queryOptions": {}
+          }
+        },
+        "vizConfig": {
+          "kind": "VizConfig",
+          "group": "timeseries",
+          "version": "",
+          "spec": {
+            "options": {},
+            "fieldConfig": {
+              "defaults": {},
+              "overrides": []
+            }
+          }
+        }
+      }
+    },
+    "unknown": {
+      "kind": "Widget",
+      "spec": {
+        "title": "A widget"
+      }
+    }
+  },
+  "layout": {
+    "kind": "GridLayout",
+    "spec": {
+      "items": [
+        {
+          "kind": "GridLayoutItem",
+          "spec": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 8,
+            "element": {
+              "kind": "ElementReference",
+              "name": "p1"
+            }
+          }
+        },
+        {
+          "kind": "GridLayoutItem",
+          "spec": {
+            "x": 12,
+            "y": 0,
+            "width": 12,
+            "height": 8,
+            "element": {
+              "kind": "ElementReference",
+              "name": "unknown"
+            }
+          }
+        },
+        {
+          "kind": "GridLayoutItem",
+          "spec": {
+            "x": 0,
+            "y": 8,
+            "width": 24,
+            "height": 8,
+            "element": {
+              "kind": "ElementReference",
+              "name": "missing"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

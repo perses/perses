@@ -1,0 +1,127 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [],
+      "title": "Tab 1",
+      "type": "row"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 1,
+        "w": 12,
+        "h": 8
+      },
+      "id": 1,
+      "links": [],
+      "maxPerRow": 2,
+      "options": {},
+      "repeat": "pod",
+      "repeatDirection": "h",
+      "targets": [],
+      "title": "p1",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 1,
+        "w": 12,
+        "h": 8
+      },
+      "id": 2,
+      "links": [],
+      "options": {},
+      "targets": [],
+      "title": "p2",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 9,
+        "w": 12,
+        "h": 8
+      },
+      "id": 3,
+      "links": [],
+      "options": {},
+      "targets": [],
+      "title": "p3",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 17,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [],
+      "title": "Tab 2",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 19,
+            "w": 24,
+            "h": 6
+          },
+          "id": 4,
+          "links": [],
+          "options": {},
+          "targets": [],
+          "title": "p4",
+          "type": "timeseries"
+        }
+      ],
+      "title": "Nested",
+      "type": "row"
+    }
+  ],
+  "refresh": "",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "timezone": "",
+  "title": "Tabs",
+  "uid": "test"
+}

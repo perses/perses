@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type PublicOAuth struct {
@@ -43,6 +44,27 @@ func NewPublicOAuth(oauth *OAuth) *PublicOAuth {
 		EndpointParams:   oauth.EndpointParams,
 		AuthStyle:        oauth.AuthStyle,
 	}
+}
+
+// Private returns the OAuth described by o, with the client ID and secret in clear, once verified it is valid.
+// It is used when the public struct is directly part of a plain configuration (that is never encrypted).
+func (o *PublicOAuth) Private() (*OAuth, error) {
+	if o == nil {
+		return nil, nil
+	}
+	result := &OAuth{
+		ClientID:         string(o.ClientID),
+		ClientSecret:     string(o.ClientSecret),
+		ClientSecretFile: o.ClientSecretFile,
+		TokenURL:         o.TokenURL,
+		Scopes:           o.Scopes,
+		EndpointParams:   o.EndpointParams,
+		AuthStyle:        o.AuthStyle,
+	}
+	if err := result.validate(); err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 type OAuth struct {
@@ -96,7 +118,7 @@ func (o *OAuth) GetClientSecret() (string, error) {
 		if err != nil {
 			return "", fmt.Errorf("failed to read clientSecretFile: %w", err)
 		}
-		return string(clientSecret), nil
+		return strings.TrimSpace(string(clientSecret)), nil
 	}
 
 	return o.ClientSecret, nil

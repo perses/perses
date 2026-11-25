@@ -123,11 +123,12 @@ type endpoint struct {
 	authz          authorization.Authorization
 	tokenRefresher crypto.TokenRefresher
 	transports     *httpproxy.TransportCache
+	enableTracing  bool
 }
 
 func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secret.DAO, globalSecretDAO globalsecret.DAO,
 	dtsDAO datasource.DAO, globalDtsDAO globaldatasource.DAO, crypto crypto.Crypto, fileValidator *secretfile.Validator,
-	guard *netguard.Guard, authz authorization.Authorization, tokenRefresher crypto.TokenRefresher) route.Endpoint {
+	guard *netguard.Guard, authz authorization.Authorization, tokenRefresher crypto.TokenRefresher, enableTracing bool) route.Endpoint {
 	if !authz.IsEnabled() {
 		logrus.Warning("'security.enable_auth' is false: anyone able to reach Perses can create a datasource and use the datasource proxy, " +
 			"including the unsaved proxy endpoints ('/proxy/unsaved/...') that accept any datasource spec in the request body without saving it. " +
@@ -146,6 +147,7 @@ func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secr
 		authz:          authz,
 		tokenRefresher: tokenRefresher,
 		transports:     httpproxy.NewTransportCache(),
+		enableTracing:  enableTracing,
 	}
 }
 
@@ -300,6 +302,7 @@ func (e *endpoint) newProxy(datasourceName, projectName, transportKey string, sp
 			TransportKey:               transportKey,
 			ProxyConfig:                e.cfg.Proxy.HTTP,
 			ForwardCallerAuthorization: e.forwardCallerAuthorization(),
+			EnableTracing:              e.enableTracing,
 		})
 	case datasourceSQL.ProxyKindName:
 		sqlConfig := cfg.(*datasourceSQL.Config)

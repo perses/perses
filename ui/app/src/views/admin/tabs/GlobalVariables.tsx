@@ -107,6 +107,7 @@ export function GlobalVariables(props: GlobalVariablesProps): ReactElement {
         onCreate={handleVariableCreate}
         onUpdate={handleVariableUpdate}
         onDelete={handleVariableDelete}
+        storageKey="GlobalVariable"
         initialState={{
           columns: {
             columnVisibilityModel: {

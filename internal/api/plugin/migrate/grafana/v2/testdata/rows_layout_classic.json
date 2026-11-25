@@ -1,0 +1,182 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [],
+      "repeat": "region",
+      "title": "Expanded",
+      "type": "row"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 1,
+        "w": 12,
+        "h": 8
+      },
+      "id": 1,
+      "links": [],
+      "maxPerRow": 2,
+      "options": {},
+      "repeat": "instance",
+      "repeatDirection": "v",
+      "targets": [],
+      "title": "p1",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 1,
+        "w": 12,
+        "h": 4
+      },
+      "id": 2,
+      "links": [],
+      "options": {},
+      "targets": [],
+      "title": "p2",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 9,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 10,
+            "w": 24,
+            "h": 5
+          },
+          "id": 3,
+          "links": [],
+          "options": {},
+          "targets": [],
+          "title": "p3",
+          "type": "timeseries"
+        }
+      ],
+      "title": "Collapsed",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 10,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [],
+      "title": "Hidden",
+      "type": "row"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 13,
+        "w": 6,
+        "h": 3
+      },
+      "id": 4,
+      "links": [],
+      "options": {},
+      "targets": [],
+      "title": "p4",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [],
+      "title": "Empty",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 17,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [],
+      "title": "Parent",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [],
+      "title": "Child",
+      "type": "row"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 19,
+        "w": 24,
+        "h": 4
+      },
+      "id": 5,
+      "links": [],
+      "options": {},
+      "targets": [],
+      "title": "p5",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "timezone": "",
+  "title": "Rows",
+  "uid": "test"
+}

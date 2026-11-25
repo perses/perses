@@ -142,6 +142,10 @@ func AddPanelGroup(title string, options ...panelgroup.Option) Option {
 			return err
 		}
 
+		if r.PanelsWidth < 1 || r.PanelsWidth > 24 {
+			return fmt.Errorf("panel group %q: panel width must be between 1 and 24, got %d", r.Title, r.PanelsWidth)
+		}
+
 		if builder.Dashboard.Spec.Layouts == nil {
 			builder.Dashboard.Spec.Layouts = []dashboard.Layout{}
 		}
@@ -161,10 +165,18 @@ func AddPanelGroup(title string, options ...panelgroup.Option) Option {
 		gridLayoutSpec.Display.Collapse = buildCollapsedSpec(r.IsCollapsed)
 		gridLayoutSpec.Display.Visibility = r.Visibility
 
+		// Same layout as the CUE SDK (cue/dac-utils/panelgroup): panels wrap to a new line
+		// after panelsPerLine panels, so a line never exceeds the 24 columns of the grid.
+		maxPanelsPerLine := 24 / r.PanelsWidth
+		panelsPerLine := maxPanelsPerLine
+		if r.PanelsPerLine > 0 {
+			panelsPerLine = min(r.PanelsPerLine, maxPanelsPerLine)
+		}
+
 		for i := range r.Panels {
 			panelRef := fmt.Sprintf("%d_%d", len(builder.Dashboard.Spec.Layouts), i)
-			x := (len(gridLayoutSpec.Items) * r.PanelsWidth) % 24
-			y := (len(gridLayoutSpec.Items) * r.PanelsWidth) / 24 * r.PanelsHeight
+			x := (i % panelsPerLine) * r.PanelsWidth
+			y := (i / panelsPerLine) * r.PanelsHeight
 			gridLayoutSpec.Items = append(gridLayoutSpec.Items, dashboard.GridItem{
 				X:      x,
 				Y:      y,

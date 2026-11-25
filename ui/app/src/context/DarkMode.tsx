@@ -24,6 +24,7 @@ import { useConfig } from '../model/config-client';
 // https://apache.github.io/echarts-handbook/en/concepts/style/#theme
 const ECHARTS_THEME_OVERRIDES = {};
 
+// Also read by loader-theme.js to apply the theme to the loading screen, keep them in sync.
 const DARK_MODE_PREFERENCE_KEY = 'PERSES_ENABLE_DARK_MODE';
 
 interface DarkModeContext {
