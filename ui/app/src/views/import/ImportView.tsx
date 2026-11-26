@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, Container, Divider, Stack, Typography } from '@mui/material';
+import { Alert, Button, Container, Divider, Stack, Typography } from '@mui/material';
 import { YAMLEditor } from '@perses-dev/components';
 import AutoFix from 'mdi-material-ui/AutoFix';
 import Upload from 'mdi-material-ui/Upload';
@@ -28,7 +28,7 @@ function ImportView(): ReactElement {
   const [definition, setDefinition] = useState('');
   // Bumped on file upload to remount the editor, as it only uses its value as initial content.
   const [editorKey, setEditorKey] = useState(0);
-  const dashboard = useParsedDashboard(definition);
+  const { dashboard, isPending } = useParsedDashboard(definition);
   // Project selected by default in the import step, e.g. when the import is started from a project page.
   const [projectParam] = useQueryParam('project', StringParam);
   const defaultProject = projectParam ?? undefined;
@@ -39,7 +39,11 @@ function ImportView(): ReactElement {
     if (files === null) {
       return;
     }
-    const value = await files[0]?.text();
+    // Taken from the list first, as resetting the input can also empty the list.
+    const file = files[0];
+    // Reset the input, so that picking the same file again (e.g. to discard the edits) triggers a new change event.
+    event.target.value = '';
+    const value = await file?.text();
     if (value !== undefined) {
       setDefinition(value);
       setEditorKey((key) => key + 1);
@@ -70,11 +74,16 @@ function ImportView(): ReactElement {
           width="100%"
           placeholder="Paste your Dashboard JSON or YAML here..."
         />
-        {dashboard !== undefined && dashboard.kind === 'grafana' && (
-          <GrafanaFlow dashboard={dashboard?.data} defaultProject={defaultProject} />
+        {dashboard?.kind === 'invalid' && (
+          <Alert variant="outlined" severity="error">
+            {dashboard.message}
+          </Alert>
         )}
-        {dashboard !== undefined && dashboard.kind === 'perses' && (
-          <PersesFlow dashboard={dashboard?.data} defaultProject={defaultProject} />
+        {dashboard?.kind === 'grafana' && (
+          <GrafanaFlow dashboard={dashboard.data} defaultProject={defaultProject} disabled={isPending} />
+        )}
+        {dashboard?.kind === 'perses' && (
+          <PersesFlow dashboard={dashboard.data} defaultProject={defaultProject} disabled={isPending} />
         )}
       </Stack>
     </Container>

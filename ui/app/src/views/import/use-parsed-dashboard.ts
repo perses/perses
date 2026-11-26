@@ -33,12 +33,19 @@ function useDebouncedValue<T>(value: T, delayMs: number): T {
   return debouncedValue;
 }
 
+interface ParsedDashboard {
+  dashboard: Dashboard;
+  /** True while the definition changed but isn't parsed yet: `dashboard` is the one of the previous definition. */
+  isPending: boolean;
+}
+
 /**
  * Parse the given dashboard definition (JSON or YAML) once it stopped changing for `debounceMs` milliseconds.
  */
-export function useParsedDashboard(definition: string, debounceMs = PARSE_DELAY_MS): Dashboard {
+export function useParsedDashboard(definition: string, debounceMs = PARSE_DELAY_MS): ParsedDashboard {
   const debouncedDefinition = useDebouncedValue(definition, debounceMs);
   // Explicit memoization: the component re-renders on every keystroke, and parsing must only happen
   // when the debounced definition changes, whether or not the React Compiler optimizes the caller.
-  return useMemo(() => parseDashboard(debouncedDefinition), [debouncedDefinition]);
+  const dashboard = useMemo(() => parseDashboard(debouncedDefinition), [debouncedDefinition]);
+  return { dashboard, isPending: definition !== debouncedDefinition };
 }

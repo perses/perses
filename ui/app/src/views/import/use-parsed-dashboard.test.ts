@@ -39,31 +39,35 @@ describe('useParsedDashboard', () => {
     const { result, rerender } = renderHook(({ definition }) => useParsedDashboard(definition, DEBOUNCE_MS), {
       initialProps: { definition: '' },
     });
-    expect(result.current).toBeUndefined();
+    expect(result.current).toEqual({ dashboard: undefined, isPending: false });
     expect(parseDashboardMock).toHaveBeenCalledTimes(1);
 
     // Simulate typing: each keystroke re-renders with a new definition before the delay elapses.
-    for (const definition of ['k', 'ki', 'kin', 'kind', 'kind:', 'kind: Dashboard']) {
+    for (const definition of ['p', 'pa', 'pan', 'pane', 'panel', 'panels: []']) {
       rerender({ definition });
       act(() => vi.advanceTimersByTime(DEBOUNCE_MS - 1));
+      expect(result.current).toEqual({ dashboard: undefined, isPending: true });
     }
     expect(parseDashboardMock).toHaveBeenCalledTimes(1);
 
     act(() => vi.advanceTimersByTime(1));
-    expect(result.current).toEqual({ kind: 'perses', data: { kind: 'Dashboard' } });
+    expect(result.current).toEqual({ dashboard: { kind: 'grafana', data: { panels: [] } }, isPending: false });
     expect(parseDashboardMock).toHaveBeenCalledTimes(2);
-    expect(parseDashboardMock).toHaveBeenLastCalledWith('kind: Dashboard');
+    expect(parseDashboardMock).toHaveBeenLastCalledWith('panels: []');
   });
 
   it('does not parse again on re-renders with the same definition', () => {
-    const { rerender } = renderHook(({ definition }) => useParsedDashboard(definition, DEBOUNCE_MS), {
-      initialProps: { definition: 'kind: Dashboard' },
+    const { result, rerender } = renderHook(({ definition }) => useParsedDashboard(definition, DEBOUNCE_MS), {
+      initialProps: { definition: 'panels: []' },
     });
+    const { dashboard } = result.current;
     expect(parseDashboardMock).toHaveBeenCalledTimes(1);
 
-    rerender({ definition: 'kind: Dashboard' });
-    rerender({ definition: 'kind: Dashboard' });
+    rerender({ definition: 'panels: []' });
+    rerender({ definition: 'panels: []' });
     act(() => vi.advanceTimersByTime(DEBOUNCE_MS));
     expect(parseDashboardMock).toHaveBeenCalledTimes(1);
+    // The same object is returned, so that the flows can tell whether the dashboard changed.
+    expect(result.current.dashboard).toBe(dashboard);
   });
 });

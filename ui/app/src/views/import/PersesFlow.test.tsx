@@ -117,4 +117,10 @@ describe('PersesFlow', () => {
     expect(getProjectInput().value).toBe('');
     expect(getImportButton().disabled).toBe(true);
   });
+
+  it('cannot import while disabled', () => {
+    render(<PersesFlow dashboard={dashboard} defaultProject="target" disabled />);
+
+    expect(getImportButton().disabled).toBe(true);
+  });
 });

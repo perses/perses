@@ -27,9 +27,11 @@ interface PersesFlowProps {
   dashboard: DashboardResource;
   // Project selected by default to import the dashboard into, if the user has access to it.
   defaultProject?: string;
+  // Disable the import, e.g. while the dashboard definition is being edited.
+  disabled?: boolean;
 }
 
-function PersesFlow({ dashboard, defaultProject }: PersesFlowProps): ReactElement {
+function PersesFlow({ dashboard, defaultProject, disabled = false }: PersesFlowProps): ReactElement {
   const navigate = useNavigate();
   const isReadonly = useIsReadonly();
   const { exceptionSnackbar } = useSnackbar();
@@ -74,7 +76,7 @@ function PersesFlow({ dashboard, defaultProject }: PersesFlowProps): ReactElemen
             />
             <Button
               variant="contained"
-              disabled={dashboardMutation.isPending || selectedProject === null || isReadonly}
+              disabled={disabled || dashboardMutation.isPending || selectedProject === null || isReadonly}
               startIcon={<Import />}
               onClick={importOnClick}
             >
