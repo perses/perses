@@ -215,6 +215,9 @@ func (s *service) checkSecretPermission(ctx *echo.Context, dashboard *v1.Ephemer
 		var proxyErr error
 		hasSecret, proxyErr = datasourceV1.HasSecret(dts)
 		if proxyErr != nil {
+			logrus.WithError(proxyErr).WithFields(map[string]any{
+				"datasource": name,
+			}).Debug("invalid proxy in the datasource defined in the dashboard spec")
 			return apiInterface.HandleBadRequestError(fmt.Sprintf("invalid proxy in the datasource %q: %s", name, proxyErr))
 		}
 		if hasSecret {

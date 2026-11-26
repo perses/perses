@@ -167,6 +167,10 @@ func (s *service) checkSecretPermission(ctx *echo.Context, datasource *v1.Dataso
 
 	hasSecret, proxyErr := datasourceV1.HasSecret(datasource.Spec.Plugin.Spec)
 	if proxyErr != nil {
+		logrus.WithError(proxyErr).WithFields(map[string]any{
+			"datasource": datasource.Metadata.Name,
+			"project":    datasource.Metadata.Project,
+		}).Debug("invalid proxy in the datasource spec")
 		return apiInterface.HandleBadRequestError(fmt.Sprintf("invalid proxy in the datasource spec: %s", proxyErr))
 	}
 
