@@ -19,9 +19,50 @@ import {
 import { test } from '../fixtures/dashboardTest';
 import { waitForStableCanvas } from '../utils';
 
+const MOCK_NOW = 1673805600000;
+
 test.use({
   dashboardName: 'TimeSeriesChartPanel',
-  mockNow: 1673805600000,
+  mockNow: MOCK_NOW,
+  // Mock data response, so we can make assertions on consistent response data.
+  mockQueryRangeRequests: {
+    queries: [
+      {
+        query: 'up{job="avalanche",instance="avalanche:9001"}',
+        response: {
+          status: 200,
+          body: JSON.stringify(
+            mockTimeSeriesResponseWithStableValue({
+              metrics: [
+                {
+                  metric: {
+                    __name__: 'up',
+                    instance: 'avalanche:9001',
+                    job: 'avalanche',
+                  },
+                  value: '1',
+                },
+              ],
+              startTimeMs: MOCK_NOW - 6 * 60 * 60 * 1000,
+              endTimeMs: MOCK_NOW,
+            }),
+          ),
+        },
+      },
+      {
+        query: 'fake_graphite_query_with_nulls',
+        response: {
+          status: 200,
+          body: JSON.stringify(
+            mockTimeSeriesResponseWithNullValues({
+              startTimeMs: MOCK_NOW - 6 * 60 * 60 * 1000,
+              endTimeMs: MOCK_NOW,
+            }),
+          ),
+        },
+      },
+    ],
+  },
   ignoresConsoleErrors: ['MUI: A component is changing the controlled value state of Autocomplete to be uncontrolled.'], // TODO (gladorme): find the input that causes this error
 });
 
@@ -34,47 +75,7 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
     'Legend Position Right',
     'Legend Tall Formatted',
   ].forEach((panelName) => {
-    test(`displays ${panelName} as expected`, async ({ dashboardPage, mockNow }) => {
-      // Mock data response, so we can make assertions on consistent response data.
-      await dashboardPage.mockQueryRangeRequests({
-        queries: [
-          {
-            query: 'up{job="avalanche",instance="avalanche:9001"}',
-            response: {
-              status: 200,
-              body: JSON.stringify(
-                mockTimeSeriesResponseWithStableValue({
-                  metrics: [
-                    {
-                      metric: {
-                        __name__: 'up',
-                        instance: 'avalanche:9001',
-                        job: 'avalanche',
-                      },
-                      value: '1',
-                    },
-                  ],
-                  startTimeMs: mockNow - 6 * 60 * 60 * 1000,
-                  endTimeMs: mockNow,
-                }),
-              ),
-            },
-          },
-          {
-            query: 'fake_graphite_query_with_nulls',
-            response: {
-              status: 200,
-              body: JSON.stringify(
-                mockTimeSeriesResponseWithNullValues({
-                  startTimeMs: mockNow - 6 * 60 * 60 * 1000,
-                  endTimeMs: mockNow,
-                }),
-              ),
-            },
-          },
-        ],
-      });
-
+    test(`displays ${panelName} as expected`, async ({ dashboardPage }) => {
       await dashboardPage.forEachTheme(async () => {
         const timeSeriesPanel = dashboardPage.getPanelByName(panelName);
         await timeSeriesPanel.isLoaded();
@@ -83,35 +84,7 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
     });
   });
 
-  test('should be able to add and edit thresholds', async ({ page, dashboardPage, mockNow }) => {
-    // Mock data response, so we can make assertions on consistent response data.
-    await dashboardPage.mockQueryRangeRequests({
-      queries: [
-        {
-          query: 'up{job="avalanche",instance="avalanche:9001"}',
-          response: {
-            status: 200,
-            body: JSON.stringify(
-              mockTimeSeriesResponseWithStableValue({
-                metrics: [
-                  {
-                    metric: {
-                      __name__: 'up',
-                      instance: 'avalanche:9001',
-                      job: 'avalanche',
-                    },
-                    value: '1',
-                  },
-                ],
-                startTimeMs: mockNow - 6 * 60 * 60 * 1000,
-                endTimeMs: mockNow,
-              }),
-            ),
-          },
-        },
-      ],
-    });
-
+  test('should be able to add and edit thresholds', async ({ page, dashboardPage }) => {
     await dashboardPage.startEditing();
     await dashboardPage.editPanel('Single Line', async (panelEditor) => {
       await panelEditor.selectTab('General Settings');

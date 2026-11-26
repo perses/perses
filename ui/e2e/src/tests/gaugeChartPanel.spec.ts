@@ -15,18 +15,19 @@ import { mockTimeSeriesResponseWithStableValue } from '@perses-dev/internal-util
 import { expect } from '@playwright/test';
 
 import { test } from '../fixtures/dashboardTest';
-import type { DashboardPage } from '../pages';
+import type { MockQueryRangeConfig } from '../pages';
 import { waitForStableCanvas } from '../utils';
+
+const MOCK_NOW = 1674778958245;
 
 test.use({
   dashboardName: 'GaugeChartPanel',
-  mockNow: 1674778958245,
+  mockNow: MOCK_NOW,
+  mockQueryRangeRequests: getGaugeChartQueryRangeMocks(MOCK_NOW),
 });
 
 test.describe('Dashboard: Gauge Chart Panel', () => {
-  test(`displays as expected`, async ({ dashboardPage, mockNow }) => {
-    await mockGaugeChartQueryRangeRequest(dashboardPage, mockNow);
-
+  test(`displays as expected`, async ({ dashboardPage }) => {
     await dashboardPage.forEachTheme(async () => {
       const panel = dashboardPage.getPanelByName('Single Gauge');
       await panel.isLoaded();
@@ -36,9 +37,7 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
   });
 
   test.describe('Thresholds', () => {
-    test('should be able to add absolute threshold', async ({ dashboardPage, mockNow }) => {
-      await mockGaugeChartQueryRangeRequest(dashboardPage, mockNow);
-
+    test('should be able to add absolute threshold', async ({ dashboardPage }) => {
       await dashboardPage.startEditing();
       await dashboardPage.editPanel('Single Gauge', async (panelEditor) => {
         await panelEditor.selectTab('Settings');
@@ -52,8 +51,7 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
       await waitForStableCanvas(panel.canvas);
     });
 
-    test('should be able to add percent threshold', async ({ dashboardPage, mockNow }) => {
-      await mockGaugeChartQueryRangeRequest(dashboardPage, mockNow);
+    test('should be able to add percent threshold', async ({ dashboardPage }) => {
       await dashboardPage.startEditing();
       await dashboardPage.editPanel('Single Gauge', async (panelEditor) => {
         await panelEditor.selectTab('Settings');
@@ -67,9 +65,7 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
       await waitForStableCanvas(panel.canvas);
     });
 
-    test('should be able to delete threshold', async ({ dashboardPage, mockNow }) => {
-      await mockGaugeChartQueryRangeRequest(dashboardPage, mockNow);
-
+    test('should be able to delete threshold', async ({ dashboardPage }) => {
       await dashboardPage.startEditing();
       await dashboardPage.editPanel('Single Gauge', async (panelEditor) => {
         await panelEditor.selectTab('Settings');
@@ -81,8 +77,7 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
       });
     });
 
-    test('should be able to change threshold color to purple', async ({ page, dashboardPage, mockNow }) => {
-      await mockGaugeChartQueryRangeRequest(dashboardPage, mockNow);
+    test('should be able to change threshold color to purple', async ({ page, dashboardPage }) => {
       await dashboardPage.startEditing();
       await dashboardPage.editPanel('Single Gauge', async (panelEditor) => {
         await panelEditor.selectTab('Settings');
@@ -100,8 +95,7 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
       await waitForStableCanvas(panel.canvas);
     });
 
-    test('should be able to change default threshold color', async ({ page, dashboardPage, mockNow }) => {
-      await mockGaugeChartQueryRangeRequest(dashboardPage, mockNow);
+    test('should be able to change default threshold color', async ({ page, dashboardPage }) => {
       await dashboardPage.startEditing();
       await dashboardPage.editPanel('Single Gauge', async (panelEditor) => {
         await panelEditor.selectTab('Settings');
@@ -121,9 +115,9 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
   });
 });
 
-async function mockGaugeChartQueryRangeRequest(page: DashboardPage, mockNow: number): Promise<void> {
+function getGaugeChartQueryRangeMocks(mockNow: number): MockQueryRangeConfig {
   // Mock data response, so we can make assertions on consistent response data.
-  await page.mockQueryRangeRequests({
+  return {
     queries: [
       {
         query:
@@ -149,5 +143,5 @@ async function mockGaugeChartQueryRangeRequest(page: DashboardPage, mockNow: num
         },
       },
     ],
-  });
+  };
 }

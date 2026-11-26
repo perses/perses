@@ -74,6 +74,8 @@ type Config struct {
 	Plugin Plugin `json:"plugin,omitempty" yaml:"plugin,omitempty"`
 	// Search contains the config for the search engine and the index in memory.
 	Search Search `json:"search,omitempty" yaml:"search,omitempty"`
+	// OpenTelemetry contains the config to export the traces of the Perses server with OTLP.
+	OpenTelemetry OpenTelemetry `json:"opentelemetry,omitempty" yaml:"opentelemetry,omitempty"`
 }
 
 func (c *Config) Verify() error {

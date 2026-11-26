@@ -23,6 +23,8 @@ import (
 // (or anyone controlling its response) could:
 //   - serve a page (HTML, SVG...) whose scripts run with the origin of Perses, and so use the API with the session of
 //     the user opening a link to the datasource (Cross-Site Scripting);
+//   - serve a script that a page of the UI would run with the origin of Perses: the Content-Security-Policy of the UI
+//     allows the scripts of the Perses origin ('self'), which includes the proxy;
 //   - set or clear the cookies of Perses, including the session (session fixation, logout);
 //   - redirect the user to any website (open redirect);
 //   - define security policies for the Perses domain (HSTS, alternative services, CORS...).
@@ -61,6 +63,59 @@ var removedResponseHeaders = []string{
 // other URLs (Content-Location).
 var locationHeaders = []string{"Location", "Content-Location"}
 
+// scriptDestinations are the values of the Sec-Fetch-Dest request header sent by the browsers to load a script:
+// a <script> element (classic or module), a worker or a worklet.
+var scriptDestinations = map[string]bool{
+	"script":        true,
+	"worker":        true,
+	"sharedworker":  true,
+	"serviceworker": true,
+	"audioworklet":  true,
+	"paintworklet":  true,
+}
+
+// javaScriptMIMETypes are the JavaScript MIME types (https://mimesniff.spec.whatwg.org/#javascript-mime-type).
+// With "X-Content-Type-Options: nosniff", the browsers only run a response as a script when its type is one of them.
+var javaScriptMIMETypes = map[string]bool{
+	"application/ecmascript":   true,
+	"application/javascript":   true,
+	"application/x-ecmascript": true,
+	"application/x-javascript": true,
+	"text/ecmascript":          true,
+	"text/javascript":          true,
+	"text/javascript1.0":       true,
+	"text/javascript1.1":       true,
+	"text/javascript1.2":       true,
+	"text/javascript1.3":       true,
+	"text/javascript1.4":       true,
+	"text/javascript1.5":       true,
+	"text/jscript":             true,
+	"text/livescript":          true,
+	"text/x-ecmascript":        true,
+	"text/x-javascript":        true,
+}
+
+// isScriptDestination tells if the browser sends the request to load a script (Sec-Fetch-Dest), which the proxy
+// refuses: the response of a datasource must never run as a script of the Perses origin. For the browsers that don't
+// send this header, secureResponse serves the JavaScript responses as plain text, which they refuse to run.
+func isScriptDestination(req *http.Request) bool {
+	return scriptDestinations[strings.ToLower(req.Header.Get("Sec-Fetch-Dest"))]
+}
+
+// isJavaScript tells if one of the given Content-Type values is a JavaScript MIME type. Like the browsers, which read
+// the values of the header as a comma-separated list, it ignores the case, the parameters and the whitespaces.
+func isJavaScript(contentTypes []string) bool {
+	for _, value := range contentTypes {
+		for _, mediaType := range strings.Split(value, ",") {
+			essence, _, _ := strings.Cut(mediaType, ";")
+			if javaScriptMIMETypes[strings.ToLower(strings.TrimSpace(essence))] {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // secureResponse removes or overrides the headers of the datasource response that would apply to the Perses origin.
 // It is meant to be used as the ModifyResponse function of the reverse proxy, so it only applies to the headers
 // coming from the datasource: the ones set by Perses itself (e.g. by the CORS middleware) are kept.
@@ -87,6 +142,10 @@ func secureResponse(resp *http.Response) error {
 	}
 	header.Set("Content-Security-Policy", proxiedResponseCSP)
 	header.Set("X-Content-Type-Options", "nosniff")
+	if isJavaScript(header.Values("Content-Type")) {
+		// With "nosniff", a response whose type isn't a JavaScript MIME type can't run as a script.
+		header.Set("Content-Type", "text/plain")
+	}
 	return nil
 }
 

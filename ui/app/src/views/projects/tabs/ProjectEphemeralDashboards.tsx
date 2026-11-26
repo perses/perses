@@ -36,6 +36,7 @@ export function ProjectEphemeralDashboards({
         ephemeralDashboardList={data ?? []}
         hideToolbar={hideToolbar}
         isLoading={isPending}
+        storageKey="EphemeralDashboard"
         initialState={{
           columns: {
             columnVisibilityModel: {

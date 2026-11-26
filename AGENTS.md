@@ -83,11 +83,17 @@ Follow the "Native authorization changes" section of `CONTRIBUTING.md`, paste th
 request, and justify every regression. Don't shorten the final comparison (fewer runs, shorter benchmark time, or a
 subset of benchmarks). If you cannot run it, say so in the pull request instead of claiming there is no regression.
 
+Changes that can affect the performance of the search index (`internal/api/index/`, the default search configuration
+in `pkg/model/api/config/search.go`, or the code updating or rebuilding the index: the dashboard service of
+`internal/api/impl/v1/` and the refresh of the search index in `internal/api/core/core.go`) need the same benchmark
+comparison, with the same rules. Follow the "Search index changes" section of `CONTRIBUTING.md`.
+
 ## Completion checklist
 
 - The change is in the correct repository and architectural layer.
 - Public contracts and generated counterparts remain aligned.
 - New behavior and important failures are covered by focused tests.
 - Relevant lint, format, type, test, schema, and documentation checks pass.
-- Native authorization changes include the base versus branch `benchstat` comparison in the pull request.
+- Native authorization and search index changes include the base versus branch `benchstat` comparison in the pull
+  request.
 - The final diff contains no generated artifacts, credentials, warning-ceiling increases, or unrelated edits.

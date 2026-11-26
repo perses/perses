@@ -117,7 +117,7 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 		proxyEndpoint: proxy.New(cfg.Datasource, persistenceManager.GetDashboard(), persistenceManager.GetSecret(), persistenceManager.GetGlobalSecret(),
 			persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto(),
 			secretfile.New(cfg.Security.SecretFileAllowedDirectories), serviceManager.GetProxyGuard(), serviceManager.GetAuthorization(),
-			tokenRefresher),
+			tokenRefresher, cfg.OpenTelemetry.Enable),
 		authorizationMiddlware: serviceManager.GetAuthorization().Middleware(func(_ *echo.Context) bool {
 			return !cfg.Security.EnableAuth
 		}),

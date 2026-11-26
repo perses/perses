@@ -1,0 +1,424 @@
+{
+  "title": "Hidden header rows",
+  "elements": {
+    "p0": {
+      "kind": "Panel",
+      "spec": {
+        "id": 1,
+        "title": "p0",
+        "links": [],
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [],
+            "transformations": [],
+            "queryOptions": {}
+          }
+        },
+        "vizConfig": {
+          "kind": "VizConfig",
+          "group": "timeseries",
+          "version": "",
+          "spec": {
+            "options": {},
+            "fieldConfig": {
+              "defaults": {},
+              "overrides": []
+            }
+          }
+        }
+      }
+    },
+    "p1": {
+      "kind": "Panel",
+      "spec": {
+        "id": 2,
+        "title": "p1",
+        "links": [],
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [],
+            "transformations": [],
+            "queryOptions": {}
+          }
+        },
+        "vizConfig": {
+          "kind": "VizConfig",
+          "group": "timeseries",
+          "version": "",
+          "spec": {
+            "options": {},
+            "fieldConfig": {
+              "defaults": {},
+              "overrides": []
+            }
+          }
+        }
+      }
+    },
+    "p2": {
+      "kind": "Panel",
+      "spec": {
+        "id": 3,
+        "title": "p2",
+        "links": [],
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [],
+            "transformations": [],
+            "queryOptions": {}
+          }
+        },
+        "vizConfig": {
+          "kind": "VizConfig",
+          "group": "timeseries",
+          "version": "",
+          "spec": {
+            "options": {},
+            "fieldConfig": {
+              "defaults": {},
+              "overrides": []
+            }
+          }
+        }
+      }
+    },
+    "p3": {
+      "kind": "Panel",
+      "spec": {
+        "id": 4,
+        "title": "p3",
+        "links": [],
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [],
+            "transformations": [],
+            "queryOptions": {}
+          }
+        },
+        "vizConfig": {
+          "kind": "VizConfig",
+          "group": "timeseries",
+          "version": "",
+          "spec": {
+            "options": {},
+            "fieldConfig": {
+              "defaults": {},
+              "overrides": []
+            }
+          }
+        }
+      }
+    },
+    "p4": {
+      "kind": "Panel",
+      "spec": {
+        "id": 5,
+        "title": "p4",
+        "links": [],
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [],
+            "transformations": [],
+            "queryOptions": {}
+          }
+        },
+        "vizConfig": {
+          "kind": "VizConfig",
+          "group": "timeseries",
+          "version": "",
+          "spec": {
+            "options": {},
+            "fieldConfig": {
+              "defaults": {},
+              "overrides": []
+            }
+          }
+        }
+      }
+    },
+    "p5": {
+      "kind": "Panel",
+      "spec": {
+        "id": 6,
+        "title": "p5",
+        "links": [],
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [],
+            "transformations": [],
+            "queryOptions": {}
+          }
+        },
+        "vizConfig": {
+          "kind": "VizConfig",
+          "group": "timeseries",
+          "version": "",
+          "spec": {
+            "options": {},
+            "fieldConfig": {
+              "defaults": {},
+              "overrides": []
+            }
+          }
+        }
+      }
+    },
+    "p6": {
+      "kind": "Panel",
+      "spec": {
+        "id": 7,
+        "title": "p6",
+        "links": [],
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [],
+            "transformations": [],
+            "queryOptions": {}
+          }
+        },
+        "vizConfig": {
+          "kind": "VizConfig",
+          "group": "timeseries",
+          "version": "",
+          "spec": {
+            "options": {},
+            "fieldConfig": {
+              "defaults": {},
+              "overrides": []
+            }
+          }
+        }
+      }
+    }
+  },
+  "layout": {
+    "kind": "RowsLayout",
+    "spec": {
+      "rows": [
+        {
+          "kind": "RowsLayoutRow",
+          "spec": {
+            "title": "First",
+            "layout": {
+              "kind": "GridLayout",
+              "spec": {
+                "items": [
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 24,
+                      "height": 4,
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "p0"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "hideHeader": true
+          }
+        },
+        {
+          "kind": "RowsLayoutRow",
+          "spec": {
+            "title": "A",
+            "layout": {
+              "kind": "RowsLayout",
+              "spec": {
+                "rows": [
+                  {
+                    "kind": "RowsLayoutRow",
+                    "spec": {
+                      "title": "Nested hidden",
+                      "layout": {
+                        "kind": "GridLayout",
+                        "spec": {
+                          "items": [
+                            {
+                              "kind": "GridLayoutItem",
+                              "spec": {
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 4,
+                                "element": {
+                                  "kind": "ElementReference",
+                                  "name": "p1"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "hideHeader": true
+                    }
+                  },
+                  {
+                    "kind": "RowsLayoutRow",
+                    "spec": {
+                      "title": "Child",
+                      "layout": {
+                        "kind": "GridLayout",
+                        "spec": {
+                          "items": [
+                            {
+                              "kind": "GridLayoutItem",
+                              "spec": {
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 4,
+                                "element": {
+                                  "kind": "ElementReference",
+                                  "name": "p2"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "RowsLayoutRow",
+                    "spec": {
+                      "title": "Child hidden",
+                      "layout": {
+                        "kind": "GridLayout",
+                        "spec": {
+                          "items": [
+                            {
+                              "kind": "GridLayoutItem",
+                              "spec": {
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 4,
+                                "element": {
+                                  "kind": "ElementReference",
+                                  "name": "p3"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "hideHeader": true
+                    }
+                  }
+                ]
+              }
+            },
+            "collapse": false
+          }
+        },
+        {
+          "kind": "RowsLayoutRow",
+          "spec": {
+            "title": "B",
+            "layout": {
+              "kind": "GridLayout",
+              "spec": {
+                "items": [
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 24,
+                      "height": 4,
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "p4"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "collapse": true
+          }
+        },
+        {
+          "kind": "RowsLayoutRow",
+          "spec": {
+            "title": "Hidden after collapsed",
+            "layout": {
+              "kind": "GridLayout",
+              "spec": {
+                "items": [
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 24,
+                      "height": 4,
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "p5"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "hideHeader": true
+          }
+        },
+        {
+          "kind": "RowsLayoutRow",
+          "spec": {
+            "title": "C",
+            "layout": {
+              "kind": "RowsLayout",
+              "spec": {
+                "rows": [
+                  {
+                    "kind": "RowsLayoutRow",
+                    "spec": {
+                      "title": "Hidden in collapsed",
+                      "layout": {
+                        "kind": "GridLayout",
+                        "spec": {
+                          "items": [
+                            {
+                              "kind": "GridLayoutItem",
+                              "spec": {
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 4,
+                                "element": {
+                                  "kind": "ElementReference",
+                                  "name": "p6"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "hideHeader": true
+                    }
+                  }
+                ]
+              }
+            },
+            "collapse": true
+          }
+        }
+      ]
+    }
+  }
+}
