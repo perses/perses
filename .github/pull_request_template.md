@@ -13,7 +13,7 @@
 
 # Benchmarks
 
-<!-- If there are native authorization or search index changes, paste the benchstat output comparing the base and this branch -->
+<!-- If there are native authorization, search index or Grafana migration changes, paste the benchstat output comparing the base and this branch -->
 
 # Checklist
 
@@ -43,3 +43,9 @@
 - [ ] Changes that can affect the search index performance include the `benchstat` comparison between the base and
   this branch, and every regression is justified.
   See [Search index changes](https://github.com/perses/perses/blob/main/CONTRIBUTING.md#search-index-changes).
+
+## Grafana Migration Changes
+
+- [ ] Changes that can affect the Grafana migration performance include the `benchstat` comparison between the base
+  and this branch, and every regression is justified.
+  See [Grafana migration changes](https://github.com/perses/perses/blob/main/CONTRIBUTING.md#grafana-migration-changes).

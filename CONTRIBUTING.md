@@ -136,6 +136,40 @@ In the PR description:
   required, as the comparison with the base would no longer be possible. New benchmarks have no base value: mention
   them.
 
+### Grafana migration changes
+
+The migration of Grafana dashboards (`/api/migrate` and `percli migrate`) runs the CUE migration scripts of the
+plugins for every panel, query and variable. Its performance has already degraded twice after a release without
+anyone noticing before production use ([#2039](https://github.com/perses/perses/issues/2039),
+[#3962](https://github.com/perses/perses/issues/3962)). A PR that can affect it should include a benchmark comparison
+showing it does not decrease the performance. It concerns changes to:
+
+- `internal/api/plugin/migrate/` and the loading of the migration schemas in `internal/api/plugin/`,
+- upgrades of the `cuelang.org/go` dependency.
+
+The benchmarks are in [migrate_bench_test.go](internal/api/plugin/migrate_bench_test.go). They call `Migrate` directly
+on dashboards of `internal/api/plugin/migrate/testdata/dashboards`, with the test plugins of
+`internal/api/plugin/migrate/testdata/plugins`. Compare the base of your branch with your branch using
+[benchstat](https://pkg.go.dev/golang.org/x/perf/cmd/benchstat), on the same idle machine, in the same way as above:
+
+```bash
+BENCH_DIR=$(mktemp -d)
+git worktree add --detach "$BENCH_DIR/base" "$(git merge-base origin/main HEAD)"
+(cd "$BENCH_DIR/base" && go test -c -o "$BENCH_DIR/base.test" ./internal/api/plugin/)
+git worktree remove "$BENCH_DIR/base"
+go test -c -o "$BENCH_DIR/pr.test" ./internal/api/plugin/
+for i in 1 2 3 4 5 6; do
+  (cd internal/api/plugin && "$BENCH_DIR/base.test" -test.run '^$' -test.bench Migrate -test.benchmem >> "$BENCH_DIR/base.txt")
+  (cd internal/api/plugin && "$BENCH_DIR/pr.test" -test.run '^$' -test.bench Migrate -test.benchmem >> "$BENCH_DIR/pr.txt")
+done
+go run golang.org/x/perf/cmd/benchstat@latest base="$BENCH_DIR/base.txt" pr="$BENCH_DIR/pr.txt"
+```
+
+The test binaries read the dashboards and plugins through relative paths, so they must run from
+`internal/api/plugin`. It takes about 3 minutes. In the PR description, paste the full `benchstat` output and explain
+every regression it reports (in `sec/op`, `B/op` or `allocs/op`). Don't modify the benchmarks or their list of
+dashboards unless it is required, as the comparison with the base would no longer be possible.
+
 ## Documentation
 
 Documentation is written in Markdown. To ensure some quality on our documentation, we are running
