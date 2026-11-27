@@ -15,12 +15,9 @@ export function {{ .PluginPascalName }}Editor(props: {{ .PluginPascalName }}Edit
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
     (newDatasourceSelection) => {
-      if (!isVariableDatasource(newDatasourceSelection) && newDatasourceSelection.kind === DATASOURCE_KIND) {
+      if (isVariableDatasource(newDatasourceSelection) || newDatasourceSelection.kind === DATASOURCE_KIND) {
         onChange({ ...value, datasource: newDatasourceSelection });
-        return;
       }
-
-      throw new Error('Got unexpected non {{ .PluginPascalName }} datasource selection');
     },
     [onChange, value],
   );

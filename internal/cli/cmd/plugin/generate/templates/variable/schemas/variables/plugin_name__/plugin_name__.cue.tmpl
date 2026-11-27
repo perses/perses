@@ -8,9 +8,9 @@ import (
 
 kind: "{{ .PluginPascalName }}"
 spec: close({
-	datasource?: =~common.#variableSyntaxRegex | {
+	datasource?: =~common.#variableSyntaxRegex | close({
 		kind:  "YourDatasourceKind"
 		name?: string
-	}
+	})
 	query: strings.MinRunes(1)
 })
