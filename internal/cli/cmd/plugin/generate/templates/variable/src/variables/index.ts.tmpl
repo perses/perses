@@ -1,2 +1,2 @@
-{{ range $index, $item := .PersesVariablePlugins }}export * from './{{ $item.Spec.Name }}';
+{{ range $index, $item := .PersesVariablePlugins }}export * from './{{ $item.PluginName }}';
 {{ end }}
