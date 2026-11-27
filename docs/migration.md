@@ -63,7 +63,7 @@ issue: https://github.com/perses/perses/issues/4307
   `Import Dashboard` button of the `Dashboards` tab of a project: this project is then selected by default when
   importing the migrated dashboard.
 
-- Then, you can either paste the JSON of your Grafana dashboard or upload the JSON file.
+- Then, you can either paste the JSON or YAML of your Grafana dashboard or upload the JSON or YAML file.
 !!! tip
     If you want the migrated dashboard to use the default Perses datasource, check the
     `Use default datasource in Perses` checkbox. This will remove any reference to a specific

@@ -31,6 +31,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useIsReadonly } from '../../context/Config';
 import { useCreateDashboardMutation } from '../../model/dashboard-client';
+import type { MigrateBodyRequest } from '../../model/migrate-client';
 import { useMigrate } from '../../model/migrate-client';
 import { useProjectList } from '../../model/project-client';
 
@@ -52,18 +53,32 @@ interface GrafanaFlowProps {
   dashboard: GrafanaLightDashboard;
   // Project selected by default to import the migrated dashboard into, if the user has access to it.
   defaultProject?: string;
+  // Disable the migration and the import, e.g. while the dashboard definition is being edited.
+  disabled?: boolean;
 }
 
-function GrafanaFlow({ dashboard, defaultProject }: GrafanaFlowProps): ReactElement {
+function GrafanaFlow({ dashboard, defaultProject, disabled = false }: GrafanaFlowProps): ReactElement {
   const migrateMutation = useMigrate();
   const navigate = useNavigate();
   const isReadonly = useIsReadonly();
   const { exceptionSnackbar } = useSnackbar();
   const [projectName, setProjectName] = useState<string | null>(defaultProject ?? null);
-  const [grafanaInput, setGrafanaInput] = useState<Record<string, string>>(() =>
-    Object.fromEntries(dashboard.__inputs?.map((input) => [input.name, input.value ?? '']) ?? []),
-  );
+  // Values typed by the user, by input name. The other inputs keep the value of the dashboard.
+  const [inputValues, setInputValues] = useState<Record<string, string>>({});
   const [useDefaultDatasource, setUseDefaultDatasource] = useState(false);
+  // Derived from the current dashboard, as it can change while this component stays mounted (e.g. edited definition).
+  const migrateRequest = useMemo<MigrateBodyRequest>(
+    () => ({
+      input: Object.fromEntries(
+        dashboard.__inputs?.map((input) => [input.name, inputValues[input.name] ?? input.value ?? '']) ?? [],
+      ),
+      grafanaDashboard: dashboard,
+      useDefaultDatasource,
+    }),
+    [dashboard, inputValues, useDefaultDatasource],
+  );
+  // The migration output is only relevant while the request it was made with is the current one.
+  const isMigrationUpToDate = migrateMutation.variables === migrateRequest;
   const { data, isPending, error } = useProjectList();
   const projectNames = useMemo(() => (data ?? []).map((project) => project.metadata.name), [data]);
   // A project that isn't one of the user's projects, like an unknown default project, is ignored.
@@ -73,12 +88,15 @@ function GrafanaFlow({ dashboard, defaultProject }: GrafanaFlowProps): ReactElem
   });
 
   const setInput = (key: string, value: string): void => {
-    setGrafanaInput((currentInput) => ({ ...currentInput, [key]: value }));
+    // Keep the same object when nothing changed, so that the migration output stays up to date.
+    setInputValues((currentValues) =>
+      currentValues[key] === value ? currentValues : { ...currentValues, [key]: value },
+    );
   };
 
   const importOnClick = (): void => {
     const migratedDashboard = migrateMutation.data;
-    if (migratedDashboard === undefined || selectedProject === null) {
+    if (!isMigrationUpToDate || migratedDashboard === undefined || selectedProject === null) {
       return;
     }
     const dashboardToCreate = structuredClone(migratedDashboard);
@@ -99,9 +117,10 @@ function GrafanaFlow({ dashboard, defaultProject }: GrafanaFlowProps): ReactElem
         dashboard?.__inputs?.map((input, index) => {
           return (
             <TextField
-              key={`input-${index}`}
+              // Remounted when the dashboard gives another default value, as the field is uncontrolled.
+              key={`input-${index}-${input.name}-${input.value ?? ''}`}
               label={input.name}
-              defaultValue={input.value ?? ''}
+              defaultValue={migrateRequest.input?.[input.name] ?? ''}
               variant="outlined"
               onBlur={(e) => setInput(input.name, e.target.value)}
             />
@@ -130,26 +149,20 @@ function GrafanaFlow({ dashboard, defaultProject }: GrafanaFlowProps): ReactElem
         <Button
           fullWidth
           variant="contained"
-          disabled={migrateMutation.isPending}
+          disabled={disabled || migrateMutation.isPending}
           startIcon={<AutoFix />}
-          onClick={() => {
-            migrateMutation.mutate({
-              input: grafanaInput,
-              grafanaDashboard: dashboard ?? {},
-              useDefaultDatasource: useDefaultDatasource,
-            });
-          }}
+          onClick={() => migrateMutation.mutate(migrateRequest)}
         >
           Migrate
         </Button>
       </Stack>
       {migrateMutation.isPending && <CircularProgress sx={{ alignSelf: 'center' }} />}
-      {migrateMutation.isError && (
+      {isMigrationUpToDate && migrateMutation.isError && (
         <Alert variant="outlined" severity="error">
           {migrateMutation.error.message}
         </Alert>
       )}
-      {!isPending && data !== undefined && data !== null && migrateMutation.isSuccess && (
+      {!isPending && data !== undefined && data !== null && isMigrationUpToDate && migrateMutation.isSuccess && (
         <Stack direction="column">
           <Typography variant="h2" sx={{ paddingTop: 2, paddingBottom: 1 }}>
             2. Migration output
@@ -171,7 +184,7 @@ function GrafanaFlow({ dashboard, defaultProject }: GrafanaFlowProps): ReactElem
             <Button
               fullWidth
               variant="contained"
-              disabled={dashboardMutation.isPending || selectedProject === null || isReadonly}
+              disabled={disabled || dashboardMutation.isPending || selectedProject === null || isReadonly}
               startIcon={<Import />}
               onClick={importOnClick}
               sx={{ alignSelf: 'stretch' }}
