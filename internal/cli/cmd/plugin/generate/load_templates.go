@@ -114,6 +114,16 @@ func GetKebabCase(name string) string {
 	return processedName
 }
 
+// GetGoPackageName returns a Go package name for the plugin name: lowercase letters and digits only.
+func GetGoPackageName(name string) string {
+	return strings.Map(func(r rune) rune {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			return unicode.ToLower(r)
+		}
+		return -1
+	}, GetPascalCase(name))
+}
+
 func GetPascalCase(name string) string {
 	if name == "" {
 		return ""
