@@ -965,7 +965,12 @@ max_timeout: <duration> | default = default_timeout # Optional
 #### GlobalDatasourceDiscovery config
 
 ```yaml
-# The name of the discovery config. It is used for logging purposes only
+# The name of the discovery config. It uniquely identifies this discovery configuration and is used as the ownership key for datasources managed by it. Must be unique across all discovery entries.
+# WARNING: renaming a discovery entry does not migrate its datasources. The renamed entry owns a new set of datasources
+# and recreates them on its next refresh; it never touches the ones owned by the old name. Those old datasources are not
+# deleted automatically, so you must remove them by hand (GET /api/v1/globaldatasources?discovery_name=<old name> lists
+# them, then DELETE each one). Wait until every Perses instance runs with the new name before deleting: any instance
+# still running the old config keeps reconciling the old datasources and would recreate them.
 name: <string>
 
 # Refresh interval to run the discovery

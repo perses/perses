@@ -28,6 +28,10 @@ type Query struct {
 	Kind string `query:"kind"`
 	// Default will filter the list of datasource and return only the default datasource, whatever the kind of the datasource is.
 	Default *bool `query:"default"`
+	// DiscoveryName filters by the name of the discovery configuration (source.discovery.name).
+	DiscoveryName string `query:"discovery_name"`
+	// DiscoveryType filters by the type of the discovery configuration (source.discovery.type).
+	DiscoveryType v1.DiscoveryType `query:"discovery_type"`
 }
 
 func (q *Query) GetMetadataOnlyQueryParam() bool {
@@ -49,6 +53,22 @@ func (q *Query) GetProjectQueryParam() string {
 func (q *Query) SetProjectQueryParam(_ string) {
 }
 
+// MatchDiscovery reports whether ds matches the discovery filters in q.
+// Returns true when neither DiscoveryName nor DiscoveryType is set.
+func (q *Query) MatchDiscovery(ds *v1.GlobalDatasource) bool {
+	if q.DiscoveryName == "" && q.DiscoveryType == "" {
+		return true
+	}
+	disc := ds.Source.GetDiscovery()
+	if q.DiscoveryName != "" && (disc == nil || disc.Name != q.DiscoveryName) {
+		return false
+	}
+	if q.DiscoveryType != "" && (disc == nil || disc.Type != q.DiscoveryType) {
+		return false
+	}
+	return true
+}
+
 type DAO interface {
 	Create(entity *v1.GlobalDatasource) error
 	Update(entity *v1.GlobalDatasource) error
@@ -59,4 +79,11 @@ type DAO interface {
 
 type Service interface {
 	apiInterface.Service[*v1.GlobalDatasource, *v1.GlobalDatasource, *Query]
+	// CreateForDiscovery persists a new GlobalDatasource from a discovery cycle.
+	// Unlike Create, it preserves the Source field set by the caller.
+	CreateForDiscovery(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error)
+	// UpdateForDiscovery updates an existing GlobalDatasource from a discovery cycle.
+	// Unlike Update, it preserves the Source field set by the caller rather than
+	// copying it from the stored entity.
+	UpdateForDiscovery(entity *v1.GlobalDatasource, parameters apiInterface.Parameters) (*v1.GlobalDatasource, error)
 }

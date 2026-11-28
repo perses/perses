@@ -96,7 +96,7 @@ func (d *KubernetesDiscovery) Verify() error {
 }
 
 type GlobalDatasourceDiscovery struct {
-	// The name of the discovery config. It is used for logging purposes only
+	// The name of the discovery config. It uniquely identifies this discovery configuration and is used as the ownership key for datasources managed by it.
 	Name string `json:"name" yaml:"name"`
 	// Refresh interval to re-query the endpoint.
 	RefreshInterval common.Duration `json:"refresh_interval,omitempty" yaml:"refresh_interval,omitempty"`

@@ -62,14 +62,24 @@ func (s *service) Create(ctx *echo.Context, entity *v1.GlobalDatasource) (*v1.Gl
 	if errPerm := s.checkSecretPermission(ctx, copyEntity); errPerm != nil {
 		return nil, errPerm
 	}
+	// The source field is server-managed. Ignore any value sent by the client.
+	copyEntity.Source = nil
 	return s.create(copyEntity)
 }
 
+// CreateForDiscovery persists a new GlobalDatasource from a discovery cycle,
+// preserving the Source stamped by the caller (unlike Create, which clears it).
+func (s *service) CreateForDiscovery(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
+	return s.create(entity)
+}
+
+// create persists entity as-is. Source policy is the caller's responsibility:
+// the API entry point clears it, the discovery entry point preserves it.
 func (s *service) create(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
 	if err := s.validate(entity); err != nil {
 		return nil, apiInterface.HandleBadRequestError(err.Error())
 	}
-	// Update the time contains in the entity
+	// Update the time contained in the entity.
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
@@ -85,10 +95,20 @@ func (s *service) Update(ctx *echo.Context, entity *v1.GlobalDatasource, paramet
 	if errPerm := s.checkSecretPermission(ctx, copyEntity); errPerm != nil {
 		return nil, errPerm
 	}
-	return s.update(copyEntity, parameters)
+	return s.update(copyEntity, parameters, false)
 }
 
-func (s *service) update(entity *v1.GlobalDatasource, parameters apiInterface.Parameters) (*v1.GlobalDatasource, error) {
+// UpdateForDiscovery updates an existing GlobalDatasource from a discovery cycle,
+// preserving the Source stamped by the caller (unlike Update, which keeps the
+// stored Source so that editing via API/UI/DaC does not drop the discovery stamp).
+func (s *service) UpdateForDiscovery(entity *v1.GlobalDatasource, parameters apiInterface.Parameters) (*v1.GlobalDatasource, error) {
+	return s.update(entity, parameters, true)
+}
+
+// update persists entity after merging the stored metadata. When keepSource is
+// false (API/UI/DaC path) the server-managed Source is preserved from the stored
+// entity; when true (discovery path) the caller's Source is kept as-is.
+func (s *service) update(entity *v1.GlobalDatasource, parameters apiInterface.Parameters, keepSource bool) (*v1.GlobalDatasource, error) {
 	if err := s.validate(entity); err != nil {
 		return nil, apiInterface.HandleBadRequestError(err.Error())
 	}
@@ -102,6 +122,9 @@ func (s *service) update(entity *v1.GlobalDatasource, parameters apiInterface.Pa
 		return nil, err
 	}
 	entity.Metadata.Update(oldEntity.Metadata)
+	if !keepSource {
+		entity.Source = oldEntity.Source
+	}
 	if updateErr := s.dao.Update(entity); updateErr != nil {
 		logrus.WithError(updateErr).Errorf("unable to perform the update of the GlobalDatasource %q, something wrong with the database", entity.Metadata.Name)
 		return nil, updateErr
@@ -122,7 +145,23 @@ func (s *service) List(q *globaldatasource.Query) ([]*v1.GlobalDatasource, error
 	if err != nil {
 		return nil, err
 	}
-	return v1.FilterDatasource(q.Kind, q.Default, dtsList), nil
+	result := v1.FilterDatasource(q.Kind, q.Default, dtsList)
+	result = filterByDiscovery(result, q)
+	return result, nil
+}
+
+// filterByDiscovery filters datasources by discovery name and/or type when set in the query.
+func filterByDiscovery(list []*v1.GlobalDatasource, q *globaldatasource.Query) []*v1.GlobalDatasource {
+	if q.DiscoveryName == "" && q.DiscoveryType == "" {
+		return list
+	}
+	result := make([]*v1.GlobalDatasource, 0)
+	for _, ds := range list {
+		if q.MatchDiscovery(ds) {
+			result = append(result, ds)
+		}
+	}
+	return result
 }
 
 // checkSecretPermission ensures that the user that creates/updates a datasource with a secret actually has the secret
