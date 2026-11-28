@@ -1,0 +1,5 @@
+[
+  {"kind": "Folder", "metadata": {"name": "valid"}, "spec": {"items": []}},
+  {"kind": "Dashboard", "metadata": {"name": "empty", "project": "perses"}},
+  {"metadata": {"name": "no-kind"}}
+]

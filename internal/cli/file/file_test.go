@@ -14,8 +14,10 @@
 package file
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -154,5 +156,67 @@ error-message-testing
 				}
 			}
 		})
+	}
+}
+
+func TestUnmarshalResourcesFromData(t *testing.T) {
+	yamlContent := `kind: Project
+metadata:
+  name: first-project
+---
+metadata:
+  name: no-kind
+---
+---
+kind: Dashboard
+metadata:
+  name: empty
+  project: first-project
+---
+- 42
+- kind: Project
+  metadata:
+    name: second-project
+`
+	jsonContent := `[{"kind":"Project","metadata":{"name":"first-project"}},{"metadata":{"name":"no-kind"}},{"kind":"Dashboard","metadata":{"name":"empty","project":"first-project"}},42,{"kind":"Project","metadata":{"name":"second-project"}}]`
+	for _, test := range []struct {
+		title   string
+		content string
+		isJSON  bool
+	}{
+		{title: "yaml", content: yamlContent},
+		{title: "json", content: jsonContent, isJSON: true},
+	} {
+		t.Run(test.title, func(t *testing.T) {
+			resources, err := UnmarshalResourcesFromData("resources", []byte(test.content), test.isJSON)
+			if err != nil {
+				t.Fatalf("unexpected file error: %v", err)
+			}
+			if len(resources) != 5 {
+				t.Fatalf("expected 5 resources, got %d", len(resources))
+			}
+			for i, resource := range resources {
+				if resource.Index != i {
+					t.Errorf("resources[%d]: expected index %d, got %d", i, i, resource.Index)
+				}
+			}
+			for i, name := range map[int]string{0: "first-project", 4: "second-project"} {
+				if resources[i].Err != nil || resources[i].Entity.GetMetadata().GetName() != name {
+					t.Errorf("resources[%d]: expected %q, got %v (%v)", i, name, resources[i].Entity, resources[i].Err)
+				}
+			}
+			for _, i := range []int{1, 2, 3} {
+				index := fmt.Sprintf("objects[%d]", i)
+				if resources[i].Err == nil || !strings.Contains(resources[i].Err.Error(), index) {
+					t.Errorf("resources[%d]: expected an error containing %q, got %v", i, index, resources[i].Err)
+				}
+			}
+		})
+	}
+	if _, fileErr := UnmarshalResourcesFromData("broken.json", []byte(`{not json`), true); fileErr == nil {
+		t.Error("expected a file error for invalid JSON")
+	}
+	if _, fileErr := UnmarshalResourcesFromData("empty.yaml", []byte("---\n"), false); fileErr == nil {
+		t.Error("expected a file error for an empty file")
 	}
 }
