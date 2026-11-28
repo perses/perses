@@ -70,7 +70,7 @@ func TestValidateAndExtract(t *testing.T) {
 		{
 			name:           "get kind only",
 			pluginSpec:     pluginWithSpec{Kind: "HTTPProxy", Spec: validSpec},
-			expectedKind:   "httpproxy",
+			expectedKind:   http.ProxyKindName,
 			expectedConfig: nil,
 		},
 		{
@@ -81,7 +81,7 @@ func TestValidateAndExtract(t *testing.T) {
 		{
 			name:         "simple map",
 			pluginSpec:   map[string]any{"kind": "SQLProxy", "spec": validSQLSpec},
-			expectedKind: "sqlproxy",
+			expectedKind: sql.ProxyKindName,
 			expectedConfig: &sql.Config{
 				Driver:   "postgres",
 				Host:     "test.com",
@@ -94,13 +94,19 @@ func TestValidateAndExtract(t *testing.T) {
 		{
 			name:           "nested struct",
 			pluginSpec:     nestedPlugin{Proxy: pluginWithSpec{Kind: "HTTPProxy", Spec: validSpec}},
-			expectedKind:   "httpproxy",
+			expectedKind:   http.ProxyKindName,
 			expectedConfig: validHTTPConfig,
 		},
 		{
 			name:           "nested map",
 			pluginSpec:     map[string]any{"proxy": map[string]any{"kind": "HTTPProxy", "spec": validSpecMap}},
-			expectedKind:   "httpproxy",
+			expectedKind:   http.ProxyKindName,
+			expectedConfig: validHTTPConfig,
+		},
+		{
+			name:           "kind matched case-insensitively",
+			pluginSpec:     map[string]any{"kind": "httpproxy", "spec": validSpecMap},
+			expectedKind:   http.ProxyKindName,
 			expectedConfig: validHTTPConfig,
 		},
 	}
@@ -121,6 +127,44 @@ func TestValidateAndExtract(t *testing.T) {
 					assert.Equal(t, tc.expectedConfig, cfg)
 				}
 			}
+		})
+	}
+}
+
+// TestHasSecret tests the HasSecret function.
+func TestHasSecret(t *testing.T) {
+	testCases := []struct {
+		name       string
+		pluginSpec any
+		expected   bool
+	}{
+		{
+			name:       "HTTP proxy with a secret",
+			pluginSpec: map[string]any{"proxy": map[string]any{"kind": "HTTPProxy", "spec": map[string]any{"url": "https://test.com", "secret": "my-secret"}}},
+			expected:   true,
+		},
+		{
+			name:       "SQL proxy with a secret",
+			pluginSpec: map[string]any{"proxy": map[string]any{"kind": "SQLProxy", "spec": map[string]any{"driver": "postgres", "host": "test.com", "database": "test", "secret": "my-secret"}}},
+			expected:   true,
+		},
+		{
+			name:       "proxy without secret",
+			pluginSpec: map[string]any{"proxy": map[string]any{"kind": "HTTPProxy", "spec": map[string]any{"url": "https://test.com"}}},
+			expected:   false,
+		},
+		{
+			name:       "no proxy",
+			pluginSpec: map[string]any{"directUrl": "https://test.com"},
+			expected:   false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			hasSecret, err := HasSecret(tc.pluginSpec)
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expected, hasSecret)
 		})
 	}
 }
