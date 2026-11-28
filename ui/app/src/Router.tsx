@@ -52,6 +52,7 @@ import {
 import DelegatedAuthnErrorView from './views/auth/DelegatedAuthnErrorView';
 import SignInView from './views/auth/SignInView';
 import SignUpView from './views/auth/SignUpView';
+import type FolderView from './views/folder/FolderView';
 import HomeView from './views/home/HomeView';
 
 // Other routes are lazy-loaded for code-splitting
@@ -174,6 +175,34 @@ const router = createBrowserRouter(
                       } satisfies PageTitleHandle,
                       element: <RequireEphemeralDashboardEnabled />,
                       children: [{ index: true, Component: EphemeralDashboardView }],
+                    },
+                    {
+                      path: 'folders',
+                      element: <Navigate to=".." replace />,
+                    },
+                    {
+                      path: 'folders/:rootFolder/*',
+                      lazy: async (): Promise<{ Component: typeof FolderView }> => ({
+                        Component: (await import('./views/folder/FolderView')).default,
+                      }),
+                      handle: {
+                        title: ({ rootFolder }): string | undefined => {
+                          /**
+                           * React Router decodes route parameters,
+                           * making slashes inside folder names indistinguishable from path separators.
+                           * Read the encoded pathname to extract and decode the complete folder name.
+                           * Example: SRE / Ops
+                           */
+                          const encodedName = window.location.pathname.split('/').findLast(Boolean);
+                          if (!encodedName) return rootFolder;
+
+                          try {
+                            return decodeURIComponent(encodedName);
+                          } catch {
+                            return rootFolder;
+                          }
+                        },
+                      } satisfies PageTitleHandle,
                     },
                     { path: ':tab', Component: ProjectView },
                   ],
