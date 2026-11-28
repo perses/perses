@@ -18,7 +18,7 @@ export function subjectsSummary(subjects: Subject[], max: number): string {
   if (subjects.length === 0) {
     return 'No subjects';
   }
-  if (subjects.length < max) {
+  if (subjects.length <= max) {
     return subjects.map((subject) => subject.name).join(', ');
   }
   let result = '';

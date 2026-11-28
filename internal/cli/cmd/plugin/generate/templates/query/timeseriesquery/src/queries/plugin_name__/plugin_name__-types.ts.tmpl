@@ -1,8 +1,9 @@
-import type { DatasourceSelector, TimeSeries } from '@perses-dev/spec';
+import type { DatasourceSelectValue } from '@perses-dev/plugin-system';
+import type { TimeSeries } from '@perses-dev/spec';
 
 export interface {{ .PluginPascalName }}Spec {
   query: string;
-  datasource?: DatasourceSelector;
+  datasource?: DatasourceSelectValue;
 }
 
 // TODO: import this type from your datasource or an existing datasource plugin
