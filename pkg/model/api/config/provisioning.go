@@ -24,6 +24,10 @@ type ProvisioningConfig struct {
 	// EnableWatch can be used to update provisioning on change instead of waiting for the configured interval.
 	// Interval is still used to reconcile the state.
 	EnableWatch bool `json:"enable_watch,omitempty" yaml:"enable_watch,omitempty"`
+	// EnablePrune removes provisioned resources from the database when their
+	// source file is deleted from the provisioning folder. Opt-in because
+	// accidental deletion of files would otherwise silently remove resources.
+	EnablePrune bool `json:"enable_prune,omitempty" yaml:"enable_prune,omitempty"`
 }
 
 func (p *ProvisioningConfig) Verify() error {

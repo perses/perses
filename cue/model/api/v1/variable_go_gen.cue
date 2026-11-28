@@ -10,9 +10,10 @@ package v1
 
 // GlobalVariable is a global variable that be used everywhere regardless the project.
 #GlobalVariable: {
-	kind:     #Kind         @go(Kind)
-	metadata: #Metadata     @go(Metadata)
-	spec:     #VariableSpec @go(Spec)
+	kind:     #Kind          @go(Kind)
+	metadata: #Metadata      @go(Metadata)
+	spec:     #VariableSpec  @go(Spec)
+	source?:  null | #Source @go(Source,*Source)
 }
 
 // Variable relates to variables defined at project level.
@@ -21,4 +22,5 @@ package v1
 	kind:     #Kind            @go(Kind)
 	metadata: #ProjectMetadata @go(Metadata)
 	spec:     #VariableSpec    @go(Spec)
+	source?:  null | #Source   @go(Source,*Source)
 }

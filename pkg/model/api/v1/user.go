@@ -51,6 +51,7 @@ type User struct {
 	Kind     Kind     `json:"kind"`
 	Metadata Metadata `json:"metadata"`
 	Spec     UserSpec `json:"spec"`
+	Source   *Source  `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 func (u *User) GetMetadata() modelAPI.Metadata {
@@ -63,6 +64,14 @@ func (u *User) GetKind() string {
 
 func (u *User) GetSpec() any {
 	return u.Spec
+}
+
+func (u *User) GetSource() *Source {
+	return u.Source
+}
+
+func (u *User) SetSource(s *Source) {
+	u.Source = s
 }
 
 func (u *User) UnmarshalJSON(data []byte) error {
