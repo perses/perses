@@ -307,15 +307,21 @@ func (m *completeMigration) Migrate(grafanaDashboard *grafana.Dashboard, useDefa
 func (m *completeMigration) migrateDashboardLinks(grafanaDashboard *grafana.Dashboard) []dashboard.Link {
 	links := []dashboard.Link{}
 	for _, l := range grafanaDashboard.Links {
+		if tagLink, ok := grafanaTagLink(l); ok {
+			links = append(links, tagLink)
+			continue
+		}
 		if len(l.URL) == 0 {
 			continue
 		}
 		link := dashboard.Link{
-			URL:             l.URL,
-			Name:            l.Title,
-			RenderVariables: l.IncludeVars,
-			Tooltip:         l.Tooltip,
-			TargetBlank:     l.TargetBlank,
+			URL:              l.URL,
+			Name:             l.Title,
+			RenderVariables:  hasGrafanaVariables(l.URL),
+			Tooltip:          l.Tooltip,
+			TargetBlank:      l.TargetBlank,
+			KeepTime:         l.KeepTime,
+			IncludeVariables: l.IncludeVars,
 		}
 		links = append(links, link)
 	}
